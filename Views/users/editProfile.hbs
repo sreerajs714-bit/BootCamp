@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile | BOOT CAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+    <!-- ✅ SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f9f9f9', 100: '#e7e7e7', 200: '#d1d1d1', 300: '#b0b0b0',
+                            400: '#888888', 500: '#6d6d6d', 600: '#5d5d5d', 700: '#4f4f4f',
+                            800: '#454545', 900: '#3d3d3d', 950: '#000000',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #fbfbfb; color: #000000; }
+        .nav-link { position: relative; padding-bottom: 4px; transition: color 0.3s ease; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 50%; background-color: #000000; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(-50%); }
+        .nav-link:hover::after { width: 100%; }
+        .icon-btn { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s ease; }
+        .icon-btn:hover { transform: scale(1.15); color: #5d5d5d; }
+        .sidebar-link { transition: all 0.2s ease; }
+        .sidebar-link:hover { color: #000000; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-brand-950 selection:text-white">
+
+    <!-- Navigation -->
+    <header class="w-full bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+            <div class="flex-shrink-0 cursor-pointer group">
+                <h1 class="font-display font-black text-3xl tracking-tighter uppercase transition-transform duration-500 group-hover:scale-105">
+                    BOOT<span class="text-brand-400 font-light">CAMP</span>
+                </h1>
+            </div>
+            <nav class="hidden lg:flex items-center space-x-12 font-medium text-[15px] text-brand-500 tracking-wide">
+                <a href="#" class="nav-link text-black font-semibold">Home</a>
+                <a href="#" class="nav-link hover:text-black">Categories</a>
+                <a href="#" class="nav-link hover:text-black">Brand</a>
+                <a href="#" class="nav-link hover:text-black">New Arrivals</a>
+                <a href="#" class="nav-link text-red-600 hover:text-red-700">Limited Edition</a>
+            </nav>
+            <div class="flex items-center space-x-7 text-brand-900">
+                <button class="icon-btn" aria-label="Search"><span class="material-symbols-outlined font-light text-[28px]">search</span></button>
+                <button class="icon-btn" aria-label="Wishlist"><span class="material-symbols-outlined font-light text-[28px]">favorite</span></button>
+                <button class="icon-btn relative" aria-label="Cart">
+                    <span class="material-symbols-outlined font-light text-[28px]">shopping_bag</span>
+                    <span class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold w-4.5 h-4.5 p-1 rounded-full flex items-center justify-center border-2 border-white box-content">2</span>
+                </button>
+                <button class="icon-btn" aria-label="Profile">
+                    <a href="/users/profile"><span class="material-symbols-outlined font-light text-[28px]">person</span></a>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-16 flex flex-col lg:block relative">
+
+        <!-- Sidebar -->
+        <aside class="w-full lg:w-48 lg:fixed lg:top-32 h-fit mb-10 lg:mb-0">
+            <h3 class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-8">Account</h3>
+            <nav class="flex flex-col space-y-6">
+                <a href="/users/profile" class="sidebar-link flex items-center text-[13px] font-bold text-black tracking-widest uppercase">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">person</span>Profile
+                </a>
+                <a href="/users/address" class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">location_on</span>Address
+                </a>
+                <a href="#" class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">inventory_2</span>My Orders
+                </a>
+                <a href="#" class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">favorite_border</span>Wishlist
+                </a>
+                <a href="#" class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">account_balance_wallet</span>Wallet
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Right Content Area -->
+        <div class="w-full lg:pl-[16rem]">
+
+            <!-- Header -->
+            <div class="mb-14">
+                <h3 class="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase mb-4">Account Overview</h3>
+                <h1 class="text-5xl font-serif text-black">Edit Profile</h1>
+            </div>
+
+            <!-- Profile Portrait Section -->
+            <div class="mb-16 flex flex-col sm:flex-row items-start gap-8">
+
+                <!-- ✅ Avatar with correct id -->
+                <div id="photoContainer" class="w-40 h-40 flex-shrink-0 overflow-hidden shadow-sm flex items-center justify-center">
+                    {{#if user.profilePhoto}}
+                        <img src="{{user.profilePhoto}}" alt="Profile" class="w-full h-full object-cover grayscale">
+                    {{else}}
+                        <div class="w-full h-full bg-black text-white flex items-center justify-center text-6xl font-serif font-light">
+                            {{slice user.username 0 1}}
+                        </div>
+                    {{/if}}
+                </div>
+
+                <!-- Controls -->
+                <div class="mt-2">
+                    <h2 class="text-[13px] font-bold text-gray-800 mb-4">Profile Portrait</h2>
+
+                    <!-- Upload -->
+                    <label class="text-[10px] font-bold tracking-[0.1em] text-black underline uppercase hover:text-gray-600 cursor-pointer">
+                        Upload New
+                        <input type="file" id="profilePhotoInput" name="profilePhoto" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
+                    </label>
+
+                    <!-- ✅ Remove button — always rendered, shown/hidden via JS -->
+                    <button type="button" id="removePhotoBtn"
+                        class="ml-6 text-[10px] font-bold tracking-[0.1em] text-red-500 underline uppercase hover:text-red-700 transition-colors {{#unless user.profilePhoto}}hidden{{/unless}}">
+                        Remove
+                    </button>
+
+                    <p id="uploadStatus" class="text-[11px] mt-3 hidden"></p>
+
+                    <p class="text-[11px] text-gray-400 leading-relaxed max-w-[200px] mt-4">
+                        Recommended format:<br>
+                        Square JPG or PNG.<br>
+                        Minimum 800×800px.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Edit Form -->
+            <form action="/users/editProfile" method="POST" enctype="multipart/form-data">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12 mb-12">
+                    <div>
+                        <label for="full_name" class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2 block">Full Name</label>
+                        <!-- ✅ correct id for JS to read username -->
+                        <input type="text" id="usernameInput" name="username" value="{{user.username}}" class="w-full border-b border-gray-200 bg-transparent py-3 focus:outline-none focus:border-black text-[15px] font-medium text-gray-700 transition-colors">
+                    </div>
+                    <div>
+                        <label for="email" class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2 block">Email Address</label>
+                        <input type="email" id="email" name="email" value="{{user.email}}" disabled class="w-full border-b border-gray-200 bg-transparent py-3 focus:outline-none text-[15px] font-medium text-gray-400 transition-colors cursor-not-allowed">
+                    </div>
+                    <div class="md:col-span-1">
+                        <label for="phone" class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2 block">Phone Number</label>
+                        <input type="tel" id="phone" name="phoneNO" value="{{user.phoneNO}}" class="w-full border-b border-gray-200 bg-transparent py-3 focus:outline-none focus:border-black text-[15px] font-medium text-gray-700 transition-colors">
+                    </div>
+                </div>
+
+                <div class="mt-20 flex items-center space-x-8">
+                    <button type="submit" class="px-10 py-4 bg-black text-white text-[11px] font-bold tracking-[0.15em] uppercase hover:bg-gray-800 transition-colors">
+                        Save Changes
+                    </button>
+                    <a href="/users/profile" class="text-[11px] font-bold tracking-[0.15em] text-gray-400 uppercase hover:text-black transition-colors">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+
+        </div>
+    </main>
+
+    <script>
+
+        /* =======================
+           UPLOAD PHOTO PREVIEW
+        ======================== */
+        document.getElementById('profilePhotoInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                Swal.fire({ icon: 'error', title: 'Invalid File', text: 'Only JPG, PNG, or WEBP allowed.' });
+                return;
+            }
+            if (file.size > 2 * 1024 * 1024) {
+                Swal.fire({ icon: 'error', title: 'Too Large', text: 'Image must be under 2MB.' });
+                return;
+            }
+
+            // Live preview
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                document.getElementById('photoContainer').innerHTML =
+                    `<img src="${ev.target.result}" alt="Profile" class="w-full h-full object-cover grayscale">`;
+            };
+            reader.readAsDataURL(file);
+
+            // Upload
+            const statusEl = document.getElementById('uploadStatus');
+            statusEl.textContent = 'Uploading...';
+            statusEl.className = 'text-[11px] mt-3 text-gray-500';
+            statusEl.classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('profilePhoto', file);
+
+            try {
+                const res = await fetch('/users/uploadProfilePhoto', {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    statusEl.textContent = 'Photo updated ✓';
+                    statusEl.className = 'text-[11px] mt-3 text-green-600';
+                    // Show remove button after upload
+                    document.getElementById('removePhotoBtn').classList.remove('hidden');
+                    setTimeout(() => statusEl.classList.add('hidden'), 3000);
+                } else {
+                    statusEl.textContent = data.message || 'Upload failed';
+                    statusEl.className = 'text-[11px] mt-3 text-red-500';
+                }
+            } catch (err) {
+                statusEl.textContent = 'Upload failed. Try again.';
+                statusEl.className = 'text-[11px] mt-3 text-red-500';
+            }
+        });
+
+
+        /* =======================
+           ✅ REMOVE PHOTO
+        ======================== */
+        document.getElementById('removePhotoBtn').addEventListener('click', async () => {
+            const result = await Swal.fire({
+                title: 'Remove photo?',
+                text: 'Your profile photo will be deleted.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#000',
+                cancelButtonColor: '#aaa',
+                confirmButtonText: 'Yes, remove it'
+            });
+
+            if (!result.isConfirmed) return;
+
+            try {
+                const res = await fetch('/users/removeProfilePhoto', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    // ✅ Show first letter of username
+                    const username = document.getElementById('usernameInput').value || 'U';
+                    document.getElementById('photoContainer').innerHTML = `
+                        <div class="w-full h-full bg-black text-white flex items-center justify-center text-6xl font-serif font-light">
+                            ${username.charAt(0).toUpperCase()}
+                        </div>
+                    `;
+
+                    // ✅ Hide remove button
+                    document.getElementById('removePhotoBtn').classList.add('hidden');
+
+                    Swal.fire({ icon: 'success', title: 'Photo Removed', timer: 1500, showConfirmButton: false });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Failed', text: data.message });
+                }
+
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong' });
+            }
+        });
+
+    </script>
+</body>
+</html>

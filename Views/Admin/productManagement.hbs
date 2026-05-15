@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management | Admin | BOOTCAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { background-color: #fcfcfc; color: #111827; overflow: hidden; }
+        .sidebar-item { transition: all 0.18s ease; }
+        .sidebar-item:hover:not(.active) { background-color: #f9fafb; }
+        .sidebar-item.active { background-color: #000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .sidebar-item.active .material-symbols-outlined { color: #fff; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        .product-row { transition: background 0.12s; border-bottom: 1px solid #f3f4f6; }
+        .product-row:hover { background: rgba(249,250,251,0.8); }
+        .page-btn { transition: all 0.12s; }
+        .page-btn:hover { background: #f3f4f6; }
+        .page-btn.current { background: #000; color: #fff; border-color: #000; }
+        .select-filter { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px !important; cursor: pointer; }
+        .status-badge.active { background: #1a1a1a; color: #fff; }
+        .status-badge.inactive { background: #e5e7eb; color: #4b5563; }
+        @keyframes slideUp { from { opacity:0; transform: translateY(12px) scale(0.98); } to { opacity:1; transform: translateY(0) scale(1); } }
+        .modal-box { animation: slideUp 0.2s ease; }
+        
+        /* Layout overrides to match the exact image */
+        .main-bg { background-color: #f8f9fa; }
+    </style>
+</head>
+
+<body class="font-sans antialiased h-screen flex">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="w-64 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+    <div class="h-24 flex flex-col justify-center px-8">
+        <h1 class="font-sans font-black text-2xl tracking-tight uppercase text-black mt-2">BOOTCAMP</h1>
+        <span class="text-[9px] font-bold tracking-[0.2em] text-emerald-500 mt-1">SYSTEM ADMIN</span>
+    </div>
+    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+        <a href="/admin/dashboard" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard
+        </a>
+        <a href="/admin/products" class="sidebar-item active flex items-center px-4 py-3 text-[11px] font-bold uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">sports_soccer</span>Products
+        </a>
+        <a href="/admin/categories" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">category</span>Categories
+        </a>
+        <a href="/admin/orders" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">shopping_bag</span>Orders
+        </a>
+        <a href="/admin/offers" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">local_offer</span>Offers
+        </a>
+        <a href="/admin/coupons" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">confirmation_number</span>Coupons
+        </a>
+        <a href="/admin/usermanagement" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">group</span>Users
+        </a>
+        <a href="/admin/returns" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">assignment_return</span>Returns
+        </a>
+        <a href="/admin/reviews" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">reviews</span>Review
+        </a>
+        <a href="/admin/brand" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">sell</span>Brand
+        </a>
+    </nav>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<main class="flex-1 flex flex-col h-full overflow-hidden main-bg">
+    
+    <!-- Header -->
+    <header class="h-[88px] bg-white border-b border-gray-200 flex items-center justify-between px-10 flex-shrink-0 z-10">
+        <div>
+            <h2 class="font-sans font-black text-[17px] tracking-tight uppercase text-black">PRODUCT MANAGEMENT</h2>
+            <p class="text-[11px] text-gray-400 font-medium mt-0.5">Curate and monitor the performance of elite footwear in the global warehouse.</p>
+        </div>
+        <div class="relative w-[360px]">
+            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[19px] pointer-events-none">search</span>
+            <input
+                type="text"
+                placeholder="Search by name or sku..."
+                class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-11 pr-10 text-[13px] font-medium text-gray-700 outline-none placeholder-gray-400 focus:bg-white focus:border-gray-300 transition-colors"
+            >
+        </div>
+    </header>
+
+    <!-- Body -->
+    <div class="flex-1 overflow-y-auto px-10 pb-10">
+        
+        <!-- Action -->
+        <div class="flex justify-end mb-8 mt-2">
+            <a href="/Admin/addProduct" class="px-6 py-3.5 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded flex items-center gap-2 hover:bg-gray-800 transition-colors shadow-lg shadow-black/10">
+                <span class="material-symbols-outlined text-[16px] font-bold">add</span>
+                ADD PRODUCT
+            </a>
+        </div>
+
+        <!-- Filters -->
+        <div class="flex items-center gap-3 mb-4 bg-gray-100/50 p-2 rounded-lg inline-flex">
+            <select class="select-filter bg-white border border-gray-200 rounded py-2.5 pl-4 text-[11px] font-bold tracking-wider text-black uppercase outline-none shadow-sm min-w-[160px]">
+                <option value="all">ALL CATEGORIES</option>
+                <option value="men">MEN</option>
+                <option value="women">WOMEN</option>
+                <option value="kids">KIDS</option>
+            </select>
+
+            <select class="select-filter bg-white border border-gray-200 rounded py-2.5 pl-4 text-[11px] font-bold tracking-wider text-black uppercase outline-none shadow-sm min-w-[140px]">
+                <option value="all">ALL BRANDS</option>
+                <option value="nike">NIKE</option>
+                <option value="adidas">ADIDAS</option>
+                <option value="puma">PUMA</option>
+                <option value="mizuno">MIZUNO</option>
+            </select>
+            
+            <select class="select-filter bg-white border border-gray-200 rounded py-2.5 pl-4 text-[11px] font-bold tracking-wider text-black uppercase outline-none shadow-sm min-w-[120px]">
+                <option value="all">STATUS</option>
+                <option value="active">ACTIVE</option>
+                <option value="inactive">INACTIVE</option>
+            </select>
+        </div>
+
+        <!-- Table Card -->
+        <div class="bg-white shadow-sm border border-gray-100 overflow-hidden flex flex-col rounded-sm">
+            
+            <!-- Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[1000px]">
+                    <thead>
+                        <tr class="bg-[#1a1a1a]">
+                            <th class="py-4 px-6 text-[9px] font-bold tracking-[0.15em] text-white/80 uppercase w-16">SL NO</th>
+                            <th class="py-4 px-4 text-[9px] font-bold tracking-[0.15em] text-white/80 uppercase w-24">PDT IMAGE</th>
+                            <th class="py-4 px-6 text-[9px] font-bold tracking-[0.15em] text-white/80 uppercase">PDT NAME & SKU</th>
+                            <th class="py-4 px-6 text-[9px] font-bold tracking-[0.15em] text-white/80 uppercase">CATEGORY</th>
+                            <th class="py-4 px-6 text-[9px] font-bold tracking-[0.15em] text-white/80 uppercase">PRICE</th>
+                            <th class="py-4 px-6 text-[9px] font-bold tracking-[0.15em] text-white/80 uppercase">STOCK</th>
+                            <th class="py-4 px-6 text-[9px] font-bold tracking-[0.15em] text-white/80 uppercase">STATUS</th>
+                            <th class="py-4 px-6 text-[9px] font-bold tracking-[0.15em] text-white/80 uppercase text-right w-48">ACTIONS</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white">
+                        <!-- Product 1 -->
+                        <tr class="product-row group">
+                            <td class="py-4 px-6 text-[12px] font-bold text-black">01</td>
+                            <td class="py-4 px-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-1 border border-gray-200">
+                                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&q=80&auto=format&fit=crop" alt="Mercurial Vapor" class="max-w-full max-h-full object-contain drop-shadow-md rounded-[2px]" />
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-[13px] font-bold text-black leading-tight">Mercurial<br>Vapor 15<br>Elite</div>
+                                <div class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">NK-MV15-2024</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-[12px] font-black text-black uppercase">MEN</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-[13px] font-black text-black">$274.99</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-6 h-1 bg-black rounded-full"></div>
+                                    <span class="text-[13px] font-bold text-black">142</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="status-badge active inline-flex px-3 py-1 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm">ACTIVE</span>
+                            </td>
+                            <td class="py-4 px-6 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="View">
+                                        <span class="material-symbols-outlined text-[15px]">visibility</span>
+                                    </button>
+                                    <a href="#" class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="Edit">
+                                        <span class="material-symbols-outlined text-[15px]">edit</span>
+                                        <span class="text-[10px] font-bold tracking-widest uppercase">EDIT</span>
+                                    </a>
+                                    <button class="text-gray-400 hover:text-red-500 transition-colors px-2 py-1 flex items-center gap-1.5" title="Delete">
+                                        <span class="material-symbols-outlined text-[15px]">delete</span>
+                                        <span class="text-[10px] font-bold tracking-widest uppercase">DELETE</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Product 2 -->
+                        <tr class="product-row group">
+                            <td class="py-4 px-6 text-[12px] font-bold text-black">02</td>
+                            <td class="py-4 px-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-1 border border-gray-200">
+                                    <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=150&q=80&auto=format&fit=crop" alt="Predator Elite" class="max-w-full max-h-full object-contain drop-shadow-md rounded-[2px]" />
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-[13px] font-bold text-black leading-tight">Predator<br>Elite FT<br>FG</div>
+                                <div class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">AD-PR24-X99</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-[12px] font-black text-black uppercase">WOMEN</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-[13px] font-black text-black">$259.00</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-2 h-1 bg-red-500 rounded-full"></div>
+                                    <span class="text-[13px] font-bold text-red-500">12</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="status-badge active inline-flex px-3 py-1 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm">ACTIVE</span>
+                            </td>
+                            <td class="py-4 px-6 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="View">
+                                        <span class="material-symbols-outlined text-[15px]">visibility</span>
+                                    </button>
+                                    <a href="#" class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="Edit">
+                                        <span class="material-symbols-outlined text-[15px]">edit</span>
+                                        <span class="text-[10px] font-bold tracking-widest uppercase">EDIT</span>
+                                    </a>
+                                    <button class="text-gray-400 hover:text-red-500 transition-colors px-2 py-1 flex items-center gap-1.5" title="Delete">
+                                        <span class="material-symbols-outlined text-[15px]">delete</span>
+                                        <span class="text-[10px] font-bold tracking-widest uppercase">DELETE</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Product 3 -->
+                        <tr class="product-row group">
+                            <td class="py-4 px-6 text-[12px] font-bold text-black">03</td>
+                            <td class="py-4 px-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-1 border border-gray-200">
+                                    <img src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=150&q=80&auto=format&fit=crop" alt="Puma Future 7" class="max-w-full max-h-full object-contain drop-shadow-md rounded-[2px]" />
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-[13px] font-bold text-black leading-tight">Puma<br>Future 7<br>Ultimate</div>
+                                <div class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">PM-F7-ULT-G</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-[12px] font-black text-black uppercase">MEN</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-[13px] font-black text-black">$229.50</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-4 h-1 bg-black rounded-full"></div>
+                                    <span class="text-[13px] font-bold text-black">56</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="status-badge inactive inline-flex px-3 py-1 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm">INACTIVE</span>
+                            </td>
+                            <td class="py-4 px-6 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="View">
+                                        <span class="material-symbols-outlined text-[15px]">visibility</span>
+                                    </button>
+                                    <a href="#" class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="Edit">
+                                        <span class="material-symbols-outlined text-[15px]">edit</span>
+                                        <span class="text-[10px] font-bold tracking-widest uppercase">EDIT</span>
+                                    </a>
+                                    <button class="text-gray-400 hover:text-red-500 transition-colors px-2 py-1 flex items-center gap-1.5" title="Delete">
+                                        <span class="material-symbols-outlined text-[15px]">delete</span>
+                                        <span class="text-[10px] font-bold tracking-widest uppercase">DELETE</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- Product 4 -->
+                        <tr class="product-row group border-b-0">
+                            <td class="py-4 px-6 text-[12px] font-bold text-black">04</td>
+                            <td class="py-4 px-4">
+                                <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-1 border border-gray-200">
+                                    <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=150&q=80&auto=format&fit=crop" alt="Mizuno Morelia" class="max-w-full max-h-full object-contain drop-shadow-md rounded-[2px]" />
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-[13px] font-bold text-black leading-tight">Mizuno<br>Morelia<br>Neo IV Beta</div>
+                                <div class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">MZ-MN4-MIJ</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-[12px] font-black text-black uppercase">MEN</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="text-[13px] font-black text-black">$310.00</div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-3 h-1 bg-black rounded-full"></div>
+                                    <span class="text-[13px] font-bold text-black">18</span>
+                                </div>
+                            </td>
+                            <td class="py-4 px-6">
+                                <span class="status-badge active inline-flex px-3 py-1 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm">ACTIVE</span>
+                            </td>
+                            <td class="py-4 px-6 text-right">
+                                <div class="flex items-center justify-end gap-2">
+                                    <button class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="View">
+                                        <span class="material-symbols-outlined text-[15px]">visibility</span>
+                                    </button>
+                                    <a href="#" class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="Edit">
+                                        <span class="material-symbols-outlined text-[15px]">edit</span>
+                                        <span class="text-[10px] font-bold tracking-widest uppercase">EDIT</span>
+                                    </a>
+                                    <button onclick="openDeleteModal()" class="text-gray-400 hover:text-red-500 transition-colors px-2 py-1 flex items-center gap-1.5" title="Delete">
+                                        <span class="material-symbols-outlined text-[15px]">delete</span>
+                                        <span class="text-[10px] font-bold tracking-widest uppercase">DELETE</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="px-6 py-5 border-t border-gray-100 flex items-center justify-between bg-white mt-auto">
+                <div class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+                    Showing <span class="text-black">4</span> of <span class="text-black">84</span> products
+                </div>
+                <div class="flex items-center gap-1">
+                    <button class="page-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-black">
+                        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                    </button>
+                    <button class="page-btn w-8 h-8 rounded border border-transparent flex items-center justify-center text-[11px] font-bold current">01</button>
+                    <button class="page-btn w-8 h-8 rounded border border-transparent flex items-center justify-center text-[11px] font-bold text-gray-600">02</button>
+                    <button class="page-btn w-8 h-8 rounded border border-transparent flex items-center justify-center text-[11px] font-bold text-gray-600">03</button>
+                    <button class="page-btn w-8 h-8 rounded border border-transparent flex items-center justify-center text-[11px] font-bold text-gray-600">04</button>
+                    <span class="text-gray-400 mx-1 text-[12px] font-bold tracking-widest">...</span>
+                    <button class="page-btn w-8 h-8 rounded border border-transparent flex items-center justify-center text-[11px] font-bold text-gray-600">21</button>
+                    <button class="page-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-black">
+                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- ===== MODAL OVERLAY ===== -->
+<div id="modalOverlay" class="fixed inset-0 z-50 hidden items-center justify-center" style="background:rgba(0,0,0,0.6); backdrop-filter: blur(4px);" onclick="handleModalBackdropClick(event)">
+    
+    <!-- DELETE PRODUCT MODAL -->
+    <div id="deleteModal" class="modal-box bg-white shadow-2xl w-[800px] max-w-[95vw] flex overflow-hidden relative">
+        
+        <!-- Left Pane -->
+        <div class="w-[360px] bg-[#f4f5f7] p-8 flex flex-col justify-between">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="material-symbols-outlined text-[14px] text-black">inventory_2</span>
+                <span class="text-[9px] font-bold tracking-[0.15em] uppercase text-gray-500">SYSTEM NOTIFICATION</span>
+            </div>
+            
+            <div class="flex-1 flex items-center justify-center my-4">
+                <div class="w-full aspect-square bg-[#111] flex items-center justify-center overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80&auto=format&fit=crop" alt="Mercurial Vapor" class="max-w-full max-h-full object-cover scale-110" style="mix-blend-mode: luminosity; filter: contrast(1.2) brightness(0.8);" />
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <span class="text-[8px] font-bold tracking-[0.15em] uppercase text-gray-400">REFERENCE ID: MVC-15-ELITE-BLK</span>
+            </div>
+        </div>
+
+        <!-- Right Pane -->
+        <div class="flex-1 p-10 flex flex-col relative bg-white">
+            <button onclick="closeModals()" class="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+
+            <div class="mt-4 mb-auto">
+                <h3 class="text-[32px] font-black tracking-tight text-black uppercase leading-[1.05] mb-6">DELETE<br>PRODUCT</h3>
+                
+                <p class="text-[13px] font-bold text-black mb-4 pr-4">
+                    Are you sure you want to delete the <span class="border-b-2 border-black pb-[2px]">Mercurial Vapor 15 Elite</span>?
+                </p>
+                
+                <p class="text-[12px] text-gray-500 leading-[1.6] mb-10 pr-6">
+                    This action cannot be undone and will remove all associated variant data from the inventory system including stock levels, SKU mappings, and sales history.
+                </p>
+
+                <div class="space-y-3 mt-4">
+                    <button class="w-full bg-black text-white py-4 px-6 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-gray-800 transition-colors flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-[16px]">delete</span>
+                        DELETE
+                    </button>
+                    <button onclick="closeModals()" class="w-full bg-white border border-gray-200 text-black py-4 px-6 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-gray-50 transition-colors">
+                        CANCEL
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-center mt-8 pt-6">
+                <span class="text-[8px] font-bold tracking-[0.15em] uppercase text-gray-300">CONFIRMING REMOVAL FROM ADMIN PORTAL</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openDeleteModal() {
+        document.getElementById('modalOverlay').style.display = 'flex';
+        document.getElementById('modalOverlay').classList.remove('hidden');
+    }
+
+    function closeModals() {
+        document.getElementById('modalOverlay').style.display = 'none';
+        document.getElementById('modalOverlay').classList.add('hidden');
+    }
+
+    function handleModalBackdropClick(e) {
+        if (e.target === document.getElementById('modalOverlay')) {
+            closeModals();
+        }
+    }
+    
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+</script>
+
+</body>
+</html>

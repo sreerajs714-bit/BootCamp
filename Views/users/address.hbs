@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Addresses | BOOT CAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f9f9f9',
+                            100: '#e7e7e7',
+                            200: '#d1d1d1',
+                            300: '#b0b0b0',
+                            400: '#888888',
+                            500: '#6d6d6d',
+                            600: '#5d5d5d',
+                            700: '#4f4f4f',
+                            800: '#454545',
+                            900: '#3d3d3d',
+                            950: '#000000',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #fbfbfb; color: #000000; }
+        .nav-link { position: relative; padding-bottom: 4px; transition: color 0.3s ease; }
+        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 50%; background-color: #000000; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(-50%); }
+        .nav-link:hover::after { width: 100%; }
+        .icon-btn { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s ease; }
+        .icon-btn:hover { transform: scale(1.15); color: #5d5d5d; }
+        .sidebar-link { transition: all 0.2s ease; }
+        .sidebar-link:hover { color: #000000; background-color: #f6f6f6; }
+        .sidebar-link.active { color: #000000; background-color: #e5e5e5; font-weight: bold; }
+        .address-type-btn { transition: all 0.2s ease; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans selection:bg-brand-950 selection:text-white">
+
+    <!-- Navigation -->
+    <header class="w-full bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+            <div class="flex-shrink-0 cursor-pointer group">
+                <h1 class="font-display font-black text-3xl tracking-tighter uppercase transition-transform duration-500 group-hover:scale-105">
+                    BOOT<span class="text-brand-400 font-light">CAMP</span>
+                </h1>
+            </div>
+            <nav class="hidden lg:flex items-center space-x-12 font-medium text-[15px] text-brand-500 tracking-wide">
+                <a href="/users/home" class="nav-link text-black font-semibold">Home</a>
+                <a href="#" class="nav-link hover:text-black">Categories</a>
+                <a href="#" class="nav-link hover:text-black">Brand</a>
+                <a href="#" class="nav-link hover:text-black">New Arrivals</a>
+                <a href="#" class="nav-link text-red-600 hover:text-red-700">Limited Edition</a>
+            </nav>
+            <div class="flex items-center space-x-7 text-brand-900">
+                <button class="icon-btn" aria-label="Search">
+                    <span class="material-symbols-outlined font-light text-[28px]">search</span>
+                </button>
+                <button class="icon-btn" aria-label="Wishlist">
+                    <span class="material-symbols-outlined font-light text-[28px]">favorite</span>
+                </button>
+                <button class="icon-btn relative" aria-label="Cart">
+                    <span class="material-symbols-outlined font-light text-[28px]">shopping_bag</span>
+                    <span class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold w-4.5 h-4.5 p-1 rounded-full flex items-center justify-center border-2 border-white box-content">2</span>
+                </button>
+                <button class="icon-btn" aria-label="Profile">
+                    <a href="/users/profile">
+                        <span class="material-symbols-outlined font-light text-[28px]">person</span>
+                    </a>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-16 flex flex-col lg:block relative">
+
+        <!-- Sidebar -->
+        <aside class="w-full lg:w-48 lg:fixed lg:top-32 h-fit mb-10 lg:mb-0 border-r border-gray-100 min-h-[500px] lg:pr-6">
+            <h3 class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-8 ml-4">Account</h3>
+            <nav class="flex flex-col space-y-1">
+                <a href="/users/profile" class="sidebar-link flex items-center px-4 py-3 text-[13px] font-medium text-gray-400 tracking-widest uppercase rounded-sm">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">person</span>Profile
+                </a>
+                <a href="/users/address" class="sidebar-link active flex items-center px-4 py-3 text-[13px] tracking-widest uppercase rounded-sm">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">location_on</span>Addresses
+                </a>
+                <a href="#" class="sidebar-link flex items-center px-4 py-3 text-[13px] font-medium text-gray-400 tracking-widest uppercase rounded-sm">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">inventory_2</span>My Orders
+                </a>
+                <a href="#" class="sidebar-link flex items-center px-4 py-3 text-[13px] font-medium text-gray-400 tracking-widest uppercase rounded-sm">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">favorite_border</span>Wishlist
+                </a>
+                <a href="#" class="sidebar-link flex items-center px-4 py-3 text-[13px] font-medium text-gray-400 tracking-widest uppercase rounded-sm">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">account_balance_wallet</span>Wallet
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Right Content Area -->
+        <div class="w-full lg:pl-[16rem]">
+
+            <!-- Header -->
+            <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <h1 class="text-5xl font-serif text-black">My Addresses</h1>
+            </div>
+
+            <!-- Empty State -->
+            {{#unless hasAddresses}}
+            <div class="bg-white py-24 px-6 flex flex-col items-center justify-center text-center shadow-[0_0_20px_rgba(0,0,0,0.03)] border border-gray-50/50">
+                <div class="w-16 h-16 rounded-full border border-gray-200 flex items-center justify-center mb-8 bg-gray-50/50">
+                    <span class="material-symbols-outlined text-gray-300 text-3xl">location_on</span>
+                </div>
+                <h2 class="text-2xl font-serif text-black mb-4">No Addresses Found</h2>
+                <p class="text-[13px] text-gray-500 max-w-sm mb-10 leading-relaxed">
+                    You haven't added any shipping addresses yet. Add one to speed up your checkout process.
+                </p>
+                <button onclick="openModal('addAddressModal')" class="px-8 py-4 bg-black text-white text-[11px] font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors flex items-center">
+                    <span class="mr-2">+</span> Add New Address
+                </button>
+            </div>
+            {{/unless}}
+
+            <!-- Address List -->
+            {{#if hasAddresses}}
+            <div class="mt-4">
+                <div class="flex justify-between items-end mb-6">
+                    <h2 class="text-xl font-serif text-black">Saved Addresses</h2>
+                    <button onclick="openModal('addAddressModal')" class="text-[10px] font-bold tracking-[0.15em] text-black border-b border-black uppercase hover:text-gray-600 transition-colors pb-1">
+                        + Add New Address
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {{#each addresses}}
+                    <div class="bg-white p-8 border border-gray-100 relative group transition-all hover:shadow-md">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-black"></div>
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-black text-white text-[10px] px-3 py-1 font-bold uppercase tracking-widest">{{this.addressType}}</span>
+                                {{#if this.isDefault}}
+                                <span class="bg-gray-100 text-gray-700 text-[10px] px-3 py-1 font-bold uppercase tracking-widest">Default</span>
+                                {{/if}}
+                            </div>
+                            <div class="flex space-x-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button 
+                                    onclick="openEditModal('{{this._id}}','{{this.fullName}}','{{this.phoneNO}}','{{this.addressLine1}}','{{this.addressLine2}}','{{this.city}}','{{this.pincode}}','{{this.state}}','{{this.addressType}}')" 
+                                    class="hover:text-black transition-colors" title="Edit">
+                                    <span class="material-symbols-outlined text-[20px]">edit</span>
+                                </button>
+                                <button 
+                                    onclick="openDeleteModal('{{this._id}}')" 
+                                    class="hover:text-red-600 transition-colors" title="Delete">
+                                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                                </button>
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-serif text-black mb-3">{{this.fullName}}</h3>
+                        <p class="text-[14px] text-gray-500 mb-1 leading-relaxed">{{this.addressLine1}}</p>
+                        {{#if this.addressLine2}}
+                        <p class="text-[14px] text-gray-500 mb-1 leading-relaxed">{{this.addressLine2}}</p>
+                        {{/if}}
+                        <p class="text-[14px] text-gray-500 mb-4 leading-relaxed">{{this.city}}, {{this.state}} — {{this.pincode}}</p>
+                        <p class="text-[14px] text-black font-medium mt-6 pt-4 border-t border-gray-100">{{this.phoneNO}}</p>
+                    </div>
+                    {{/each}}
+                </div>
+            </div>
+            {{/if}}
+
+        </div>
+    </main>
+
+    <!-- Modal Backdrop -->
+    <div id="modalBackdrop" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden opacity-0 transition-opacity duration-300" onclick="closeAllModals()"></div>
+
+    <!-- Add Address Modal -->
+    <div id="addAddressModal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-3xl bg-white z-[70] hidden opacity-0 scale-95 transition-all duration-300 shadow-2xl overflow-y-auto max-h-[90vh]">
+        <div class="p-10">
+            <h2 class="text-4xl font-serif text-black mb-8">Add New Address</h2>
+            <form id="addAddressForm" class="space-y-6">
+                <input type="hidden" name="addressType" id="addAddressType" value="Home">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Full Name</label>
+                        <input type="text" name="fullName" placeholder="Enter full name" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Phone Number</label>
+                        <input type="tel" name="phoneNO" placeholder="+91 00000 00000" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Address Line 1</label>
+                    <input type="text" name="addressLine1" placeholder="Street address, P.O. box" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow" required>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Address Line 2 (Optional)</label>
+                    <input type="text" name="addressLine2" placeholder="Apartment, suite, unit, building, floor" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">City</label>
+                        <input type="text" name="city" placeholder="City" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Pincode</label>
+                        <input type="text" name="pincode" placeholder="Postal Code" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">State</label>
+                    <input type="text" name="state" placeholder="State" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow" required>
+                </div>
+                <div class="pt-2">
+                    <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Address Type</label>
+                    <div class="flex gap-4" id="addTypeBtns">
+                        <button type="button" data-type="Home" class="address-type-btn flex-1 py-4 text-[11px] font-bold tracking-widest uppercase bg-[#3d3d3d] text-white">Home</button>
+                        <button type="button" data-type="Work" class="address-type-btn flex-1 py-4 text-[11px] font-bold tracking-widest uppercase bg-[#f9f9f9] text-gray-500">Work</button>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6 mt-10 pt-4">
+                    <button type="submit" class="px-8 py-4 bg-black text-white text-[11px] font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors flex items-center">
+                        Save Address <span class="material-symbols-outlined text-[16px] ml-2">arrow_forward</span>
+                    </button>
+                    <button type="button" onclick="closeModal('addAddressModal')" class="text-[11px] font-bold tracking-[0.15em] text-gray-400 uppercase hover:text-black border-b border-transparent hover:border-black pb-1 transition-all">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Address Modal -->
+    <div id="editAddressModal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[95%] max-w-3xl bg-white z-[70] hidden opacity-0 scale-95 transition-all duration-300 shadow-2xl overflow-y-auto max-h-[90vh]">
+        <div class="p-10">
+            <h2 class="text-4xl font-serif text-black mb-8">Edit Address</h2>
+            <form id="editAddressForm" class="space-y-6">
+                <input type="hidden" name="addressId" id="editAddressId">
+                <input type="hidden" name="addressType" id="editAddressType" value="Home">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Full Name</label>
+                        <input type="text" name="fullName" id="editFullName" placeholder="Enter full name" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Phone Number</label>
+                        <input type="tel" name="phoneNO" id="editPhoneNO" placeholder="+91 00000 00000" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Address Line 1</label>
+                    <input type="text" name="addressLine1" id="editAddressLine1" placeholder="Street address, P.O. box" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow" required>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Address Line 2 (Optional)</label>
+                    <input type="text" name="addressLine2" id="editAddressLine2" placeholder="Apartment, suite, unit, building, floor" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow">
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">City</label>
+                        <input type="text" name="city" id="editCity" placeholder="City" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow" required>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Pincode</label>
+                        <input type="text" name="pincode" id="editPincode" placeholder="Postal Code" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">State</label>
+                    <input type="text" name="state" id="editState" placeholder="State" class="w-full bg-[#f9f9f9] border-none py-4 px-5 text-[14px] focus:outline-none focus:ring-1 focus:ring-black transition-shadow" required>
+                </div>
+                <div class="pt-2">
+                    <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Address Type</label>
+                    <div class="flex gap-4" id="editTypeBtns">
+                        <button type="button" data-type="Home" class="address-type-btn flex-1 py-4 text-[11px] font-bold tracking-widest uppercase bg-[#f9f9f9] text-gray-500">Home</button>
+                        <button type="button" data-type="Work" class="address-type-btn flex-1 py-4 text-[11px] font-bold tracking-widest uppercase bg-[#f9f9f9] text-gray-500">Work</button>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6 mt-10 pt-4">
+                    <button type="submit" class="px-8 py-4 bg-black text-white text-[11px] font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors flex items-center">
+                        Update Address <span class="material-symbols-outlined text-[16px] ml-2">arrow_forward</span>
+                    </button>
+                    <button type="button" onclick="closeModal('editAddressModal')" class="text-[11px] font-bold tracking-[0.15em] text-gray-400 uppercase hover:text-black border-b border-transparent hover:border-black pb-1 transition-all">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Modal -->
+    <div id="deleteModal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white z-[70] hidden opacity-0 scale-95 transition-all duration-300 shadow-2xl">
+        <div class="p-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-3xl font-serif text-black">Delete Address</h2>
+                <button type="button" onclick="closeModal('deleteModal')" class="text-gray-400 hover:text-black transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+            <p class="text-[15px] text-gray-600 mb-8 leading-relaxed">Are you sure you want to delete this address? This action cannot be undone.</p>
+            <input type="hidden" id="deleteAddressId">
+            <div class="flex gap-4">
+                <button type="button" onclick="confirmDelete()" class="flex-1 py-4 bg-red-600 text-white text-[11px] font-bold tracking-widest uppercase hover:bg-red-700 transition-colors">
+                    Delete
+                </button>
+                <button type="button" onclick="closeModal('deleteModal')" class="flex-1 py-4 bg-transparent border border-gray-300 text-black text-[11px] font-bold tracking-widest uppercase hover:border-black transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ─── Modal Helpers ───────────────────────────────────────
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const backdrop = document.getElementById('modalBackdrop');
+            backdrop.classList.remove('hidden');
+            setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0', 'scale-95');
+                modal.classList.add('opacity-100', 'scale-100');
+            }, 10);
+            const firstInput = modal.querySelector('input:not([type="hidden"])');
+            if (firstInput) setTimeout(() => firstInput.focus(), 300);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const backdrop = document.getElementById('modalBackdrop');
+            modal.classList.remove('opacity-100', 'scale-100');
+            modal.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                const openModals = document.querySelectorAll('[id$="Modal"]:not(.hidden)');
+                if (openModals.length === 0) {
+                    backdrop.classList.add('opacity-0');
+                    setTimeout(() => backdrop.classList.add('hidden'), 300);
+                }
+            }, 300);
+        }
+
+        function closeAllModals() {
+            closeModal('addAddressModal');
+            closeModal('editAddressModal');
+            closeModal('deleteModal');
+        }
+
+        // ─── Address Type Buttons ────────────────────────────────
+        function setupTypeBtns(containerId, hiddenInputId) {
+            const container = document.getElementById(containerId);
+            const hiddenInput = document.getElementById(hiddenInputId);
+            container.querySelectorAll('.address-type-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    container.querySelectorAll('.address-type-btn').forEach(s => {
+                        s.classList.remove('bg-[#3d3d3d]', 'text-white');
+                        s.classList.add('bg-[#f9f9f9]', 'text-gray-500');
+                    });
+                    this.classList.remove('bg-[#f9f9f9]', 'text-gray-500');
+                    this.classList.add('bg-[#3d3d3d]', 'text-white');
+                    hiddenInput.value = this.dataset.type;
+                });
+            });
+        }
+
+        setupTypeBtns('addTypeBtns', 'addAddressType');
+        setupTypeBtns('editTypeBtns', 'editAddressType');
+
+      //add address 
+
+     const addAddressForm = document.getElementById('addAddressForm');
+
+if (addAddressForm) {
+    addAddressForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData(addAddressForm);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const res = await fetch('/users/address', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify(data),
+            });
+
+            const result = await res.json();
+
+            if (result.success) {
+                closeModal('addAddressModal');
+                window.location.reload();
+            } else {
+                alert(result.message || 'Failed to add address');
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert('Something went wrong');
+        }
+    });
+}
+
+        // ─── Edit Address ────────────────────────────────────────
+        function openEditModal(id, fullName, phoneNO, addressLine1, addressLine2, city, pincode, state, addressType) {
+            document.getElementById('editAddressId').value = id;
+            document.getElementById('editFullName').value = fullName;
+            document.getElementById('editPhoneNO').value = phoneNO;
+            document.getElementById('editAddressLine1').value = addressLine1;
+            document.getElementById('editAddressLine2').value = addressLine2;
+            document.getElementById('editCity').value = city;
+            document.getElementById('editPincode').value = pincode;
+            document.getElementById('editState').value = state;
+            document.getElementById('editAddressType').value = addressType;
+
+            // Highlight correct type button
+            document.getElementById('editTypeBtns').querySelectorAll('.address-type-btn').forEach(btn => {
+                if (btn.dataset.type === addressType) {
+                    btn.classList.add('bg-[#3d3d3d]', 'text-white');
+                    btn.classList.remove('bg-[#f9f9f9]', 'text-gray-500');
+                } else {
+                    btn.classList.remove('bg-[#3d3d3d]', 'text-white');
+                    btn.classList.add('bg-[#f9f9f9]', 'text-gray-500');
+                }
+            });
+
+            openModal('editAddressModal');
+        }
+
+        document.getElementById('editAddressForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            const addressId = data.addressId;
+
+            const res = await fetch(`/users/address/${addressId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify(data),
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                closeModal('editAddressModal');
+                window.location.reload();
+            } else {
+                alert(result.message || 'Failed to update address');
+            }
+        });
+
+        // ─── Delete Address ──────────────────────────────────────
+        function openDeleteModal(id) {
+            document.getElementById('deleteAddressId').value = id;
+            openModal('deleteModal');
+        }
+
+        async function confirmDelete() {
+            const addressId = document.getElementById('deleteAddressId').value;
+
+            const res = await fetch(`/users/address/${addressId}`, {
+                method: 'DELETE',
+                credentials: 'include',
+            });
+
+            const result = await res.json();
+            if (result.success) {
+                closeModal('deleteModal');
+                window.location.reload();
+            } else {
+                alert(result.message || 'Failed to delete address');
+            }
+        }
+    </script>
+</body>
+</html>

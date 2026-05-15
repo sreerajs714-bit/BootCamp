@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BOOT CAMP | DASHBOARD</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        fontFamily: {
+          headline: ['Space Grotesk', 'sans-serif'],
+          body: ['Inter', 'sans-serif'],
+        }
+      }
+    }
+  }
+</script>
+<style>
+  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  .anim-1 { animation: fadeUp 0.7s 0s    cubic-bezier(0.25,1,0.5,1) both; }
+  .anim-2 { animation: fadeUp 0.7s 0.15s cubic-bezier(0.25,1,0.5,1) both; }
+  .anim-3 { animation: fadeIn 0.5s 0.3s  both; }
+  .anim-4 { animation: fadeUp 0.7s 0.3s  cubic-bezier(0.25,1,0.5,1) both; }
+</style>
+</head>
+<body class="bg-gray-100 font-body">
+
+<div class="flex h-screen overflow-hidden">
+
+  <!-- ───── SIDEBAR ───── -->
+  <aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+
+    <!-- Logo -->
+    <div class="h-24 flex flex-col justify-center px-8 border-b border-gray-100">
+      <h1 class="font-headline font-black text-2xl tracking-tight uppercase text-black">BOOTCAMP</h1>
+      <span class="text-[10px] font-bold tracking-widest text-[#10b981] mt-1">SYSTEM ADMIN</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+      <a href="/admin/dashboard" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">dashboard</span>Dashboard
+      </a>
+      <a href="#" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">sports_soccer</span>Products
+      </a>
+      <a href="#" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">category</span>Categories
+      </a>
+      <a href="#" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">shopping_bag</span>Orders
+      </a>
+      <a href="#" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">local_offer</span>Offers
+      </a>
+      <a href="#" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">confirmation_number</span>Coupons
+      </a>
+      <a href="/admin/userManagement" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">group</span>Users
+      </a>
+      <a href="#" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">assignment_return</span>Returns
+      </a>
+      <a href="#" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">reviews</span>Review
+      </a>
+      <a href="#" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">sell</span>Brand
+      </a>
+    </nav>
+
+    <!-- Logout -->
+<div class="px-4 py-4 border-t border-gray-100">
+  <a href="#"
+   id="logoutBtn"
+   class="flex items-center px-4 py-3 text-[13px] font-bold text-red-500 uppercase tracking-wide rounded-md hover:bg-red-50 transition-all">
+
+  <span class="material-symbols-outlined mr-4 text-[20px]">logout</span>
+  Logout
+
+</a>
+</div>
+  </aside>
+
+  <!-- ───── MAIN ───── -->
+  <div class="flex flex-col flex-1 overflow-hidden">
+
+    <!-- TOPBAR -->
+    <header class="bg-white border-b border-gray-200 flex items-center justify-between px-7 py-4 sticky top-0 z-40">
+      <div class="flex items-center gap-2 bg-gray-100 rounded-lg px-4 py-2 w-72">
+        <span class="material-symbols-outlined text-[18px] text-gray-400">search</span>
+        <input type="text" placeholder="Search anything..."
+          class="bg-transparent border-none outline-none text-[13px] text-gray-800 placeholder-gray-400 w-full font-body"/>
+      </div>
+      <div class="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg hover:bg-gray-100 transition-all">
+        <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-[13px] font-bold font-headline">A</div>
+        <span class="text-[12px] font-semibold tracking-widest uppercase text-gray-800">Admin Root</span>
+        <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+      </div>
+    </header>
+
+    <!-- PAGE CONTENT -->
+    <main class="flex-1 overflow-y-auto flex items-center justify-center px-12 py-16">
+      <div class="text-center max-w-xl w-full">
+
+        <div class="anim-1 w-[72px] h-[72px] bg-black rounded-2xl flex items-center justify-center mx-auto mb-7">
+          <span class="material-symbols-outlined text-white text-[36px]">sports_soccer</span>
+        </div>
+
+        <div class="anim-1">
+          <h1 class="font-headline font-black text-5xl text-black tracking-tight uppercase leading-tight">
+            Welcome Back,<br/>Admin
+          </h1>
+        </div>
+
+        <div class="anim-2">
+          <p class="mt-4 text-sm text-gray-400 tracking-wide leading-relaxed">
+            You're logged in to the BootCamp admin panel.<br/>
+            Manage your store from the sidebar.
+          </p>
+        </div>
+
+        <div class="anim-3 w-14 h-[3px] bg-black mx-auto my-8"></div>
+
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 py-4 text-center">
+      <p class="text-[10px] tracking-widest text-gray-300 uppercase">
+        BootCamp Analytics Engine V1.0 · Authorized Personnel Only
+      </p>
+    </footer>
+
+  </div>
+</div>
+
+<!-- LOGOUT MODAL -->
+<div id="logoutModal"
+     class="fixed inset-0 hidden bg-black/50 z-[9999] items-center justify-center">
+
+  <div class="bg-white w-[400px] rounded-2xl shadow-2xl overflow-hidden">
+
+    <div class="h-1.5 bg-red-500"></div>
+
+    <div class="p-8">
+
+      <div class="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-5">
+        <span class="material-symbols-outlined text-red-500 text-[30px]">
+          logout
+        </span>
+      </div>
+
+      <h2 class="text-2xl font-black uppercase tracking-tight">
+        Confirm Logout
+      </h2>
+
+      <p class="mt-3 text-sm text-gray-500 leading-relaxed">
+        Are you sure you want to logout from the admin dashboard?
+      </p>
+
+      <div class="flex justify-end gap-3 mt-8">
+
+        <button id="cancelLogout"
+          class="px-5 py-3 rounded-xl border border-gray-200 bg-gray-100 hover:bg-gray-200 text-[12px] font-bold uppercase tracking-widest">
+          Cancel
+        </button>
+
+        <a href="/admin/logout"
+          class="px-5 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-[12px] font-bold uppercase tracking-widest">
+          Logout
+        </a>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+
+  // ACTIVE SIDEBAR
+  const path = window.location.pathname;
+
+  document.querySelectorAll('.sidebar-item').forEach(link => {
+
+    if (link.getAttribute('href') === path) {
+
+      link.classList.add('bg-black', 'text-white');
+
+      link.classList.remove(
+        'text-gray-500',
+        'hover:bg-gray-100'
+      );
+    }
+  });
+
+  // MODAL ELEMENTS
+  const logoutBtn = document.getElementById('logoutBtn');
+
+  const logoutModal = document.getElementById('logoutModal');
+
+  const cancelLogout = document.getElementById('cancelLogout');
+
+  // OPEN MODAL
+  logoutBtn.addEventListener('click', function(e) {
+
+    e.preventDefault();
+
+    logoutModal.classList.remove('hidden');
+
+    logoutModal.classList.add('flex');
+  });
+
+  // CLOSE MODAL
+  cancelLogout.addEventListener('click', function() {
+
+    logoutModal.classList.add('hidden');
+
+    logoutModal.classList.remove('flex');
+  });
+
+  // BACKDROP CLOSE
+  logoutModal.addEventListener('click', function(e) {
+
+    if (e.target === logoutModal) {
+
+      logoutModal.classList.add('hidden');
+
+      logoutModal.classList.remove('flex');
+    }
+  });
+
+  // ESC CLOSE
+  document.addEventListener('keydown', function(e) {
+
+    if (e.key === 'Escape') {
+
+      logoutModal.classList.add('hidden');
+
+      logoutModal.classList.remove('flex');
+    }
+  });
+
+</script>
+
+</body>
+</html>

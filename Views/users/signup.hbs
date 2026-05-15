@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>BOOT CAMP | JOIN THE ELITE</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-variant": "#e2e2e2",
+            "error": "#ba1a1a",
+            "primary-container": "#3b3b3b",
+            "on-tertiary-container": "#ffffff",
+            "on-tertiary": "#e2e2e2",
+            "on-primary": "#e2e2e2",
+            "surface-tint": "#5e5e5e",
+            "surface-container-low": "#f3f3f3",
+            "outline-variant": "#c6c6c6",
+            "inverse-on-surface": "#f1f1f1",
+            "secondary-fixed-dim": "#acabab",
+            "surface-bright": "#f9f9f9",
+            "on-tertiary-fixed-variant": "#e2e2e2",
+            "outline": "#777777",
+            "tertiary-fixed-dim": "#474747",
+            "on-secondary-container": "#1b1c1c",
+            "surface-container": "#eeeeee",
+            "on-tertiary-fixed": "#ffffff",
+            "secondary": "#5f5e5e",
+            "on-secondary": "#ffffff",
+            "on-error-container": "#410002",
+            "background": "#f9f9f9",
+            "on-primary-fixed-variant": "#e2e2e2",
+            "surface-container-high": "#e8e8e8",
+            "tertiary-container": "#747474",
+            "on-primary-fixed": "#ffffff",
+            "surface-dim": "#dadada",
+            "surface": "#f9f9f9",
+            "primary": "#000000",
+            "tertiary-fixed": "#5e5e5e",
+            "inverse-primary": "#c6c6c6",
+            "surface-container-highest": "#e2e2e2",
+            "secondary-container": "#d6d4d3",
+            "on-surface-variant": "#474747",
+            "primary-fixed": "#5e5e5e",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-fixed": "#1b1c1c",
+            "on-secondary-fixed-variant": "#3b3b3b",
+            "error-container": "#ffdad6",
+            "primary-fixed-dim": "#474747",
+            "on-error": "#ffffff",
+            "on-primary-container": "#ffffff",
+            "on-surface": "#1a1c1c",
+            "tertiary": "#3b3b3b",
+            "secondary-fixed": "#c8c6c6",
+            "inverse-surface": "#2f3131",
+            "on-background": "#1a1c1c"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.125rem",
+            "lg": "0.25rem",
+            "xl": "0.5rem",
+            "full": "0.75rem"
+          },
+          "fontFamily": {
+            "headline": ["Space Grotesk"],
+            "body": ["Inter"],
+            "label": ["Inter"]
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f9f9f9;
+    }
+    .headline-font {
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    @keyframes slideInFromLeft {
+      0% { transform: translateX(-150%); opacity: 0; }
+      80% { transform: translateX(10%); opacity: 1; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+    .subtitle-anim {
+      opacity: 0;
+      animation: slideInFromLeft 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+    }
+    @keyframes dropInFromTop {
+      0% { opacity: 0; transform: translateY(-80px); }
+      60% { opacity: 1; transform: translateY(10px); }
+      80% { transform: translateY(-5px); }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+    .letter {
+      display: inline-block;
+      opacity: 0;
+      animation: dropInFromTop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+  </style>
+</head>
+<body class="antialiased text-on-background selection:bg-primary selection:text-on-primary">
+
+<main class="min-h-screen flex flex-col md:flex-row overflow-hidden">
+
+  <!-- Left Side: Split-Screen Visual -->
+  <section class="relative w-full md:w-1/2 h-64 md:h-screen flex items-center justify-start px-8 md:px-20 overflow-hidden">
+    <div class="absolute inset-0 z-0">
+      <img alt="Premium football boot"
+           class="w-full h-full object-cover"
+           src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9n3A2ZpSNDOlohdhchiJZ3rY1_hHXMDomRez18rjdaKS5MbZC-jS2R3wiH-8NIbejKlhHzGPGQUavQJ3kT-ADx47Y1lFNuSv6cL7218dGRtvjdW2Oklw0CufompIZLq9WcQPlfjCes2-0xUmokq5UycYHlcpcp8l4ZutWXxJJq238t_EnIaZ3XFKiEolsQPCer8uPPGukEGeM9k_QhCZ-7UIgKyNA9BpkZY9LNX6vjNu9EKMEHWVuTeelnrkqnwpGNPkrGBm5YzA"/>
+      <div class="absolute inset-0 bg-gradient-to-r from-black via-black/60 to-transparent"></div>
+    </div>
+    <div class="relative z-10 max-w-lg">
+      <h1 class="headline-font text-6xl md:text-8xl font-black text-white tracking-tighter leading-none mb-4">
+        <span class="letter">B</span><span class="letter">O</span><span class="letter">O</span><span class="letter">T</span>&nbsp;<span class="letter">C</span><span class="letter">A</span><span class="letter">M</span><span class="letter">P</span>
+      </h1>
+      <p class="subtitle-anim font-headline font-bold text-xl tracking-[0.4em] text-on-primary uppercase">
+        STEP INTO PERFORMANCE
+      </p>
+    </div>
+  </section>
+
+  <!-- Right Side: Signup Form -->
+  <section class="w-full md:w-1/2 bg-surface-container-lowest flex items-center justify-center p-5 md:p-12 lg:p-24 overflow-y-auto max-h-screen">
+    <div class="w-full max-w-md my-auto">
+
+      <header class="mb-12">
+        <h2 class="headline-font text-3xl font-bold text-primary tracking-tight mb-2">CREATE ACCOUNT</h2>
+        <p class="text-on-surface-variant text-sm">Join the elite community of performance athletes.</p>
+      </header>
+
+      <form class="space-y-8" action="/users/signup" method="post">
+
+        <!-- Full Name -->
+        <div class="group">
+          <input class="w-full text-[14px] bg-transparent border-0 border-b-2 border-outline-variant py-0 px-0 text-primary placeholder:text-outline focus:ring-0 focus:border-primary transition-all duration-300 font-body"
+                 id="username" name="username" placeholder="FULL NAME" type="text"/>
+        </div>
+
+        <!-- Email -->
+        <div class="group">
+          <input class="w-full text-[14px] bg-transparent border-0 border-b-2 border-outline-variant py-0 px-0 text-primary placeholder:text-outline focus:ring-0 focus:border-primary transition-all duration-300 font-body"
+                 id="email" name="email" placeholder="EMAIL" type="text"/>
+        </div>
+
+        <!-- Password -->
+        <div class="group">
+          <div class="relative">
+            <input class="w-full text-[14px] bg-transparent border-0 border-b-2 border-outline-variant py-0 px-0 text-primary placeholder:text-outline focus:ring-0 focus:border-primary transition-all duration-300 font-body"
+                   id="password" name="password" placeholder="PASSWORD" type="password"/>
+            <button class="absolute right-0 top-1/2 -translate-y-1/2 text-outline hover:text-primary" type="button" onclick="togglePassword()">
+              <span class="material-symbols-outlined" style="font-size: 20px">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="group">
+          <div class="relative">
+            <input class="w-full text-[14px] bg-transparent border-0 border-b-2 border-outline-variant py-0 px-0 text-primary placeholder:text-outline focus:ring-0 focus:border-primary transition-all duration-300 font-body"
+                   id="cfmpassword" name="cfmpassword" placeholder="CONFIRM PASSWORD" type="password"/>
+            <button class="absolute right-0 top-1/2 -translate-y-1/2 text-outline hover:text-primary" type="button" onclick="toggle_cfmPassword()">
+              <span class="material-symbols-outlined" style="font-size: 20px">visibility</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Create Account Button -->
+        <div class="pt-6">
+          <button class="w-full bg-primary text-on-primary font-headline font-bold text-sm tracking-widest uppercase py-5 px-8 rounded-lg hover:bg-primary-container transition-all active:scale-95"
+                  type="submit">
+            Create Account
+          </button>
+        </div>
+
+        <!-- Divider -->
+        <div class="flex items-center gap-4 my-6">
+          <div class="flex-grow h-px bg-outline-variant"></div>
+          <span class="text-outline text-[10px] font-bold tracking-widest uppercase">OR</span>
+          <div class="flex-grow h-px bg-outline-variant"></div>
+        </div>
+
+        <!-- ✅ Google Button — fixed href -->
+        <div class="mt-4">
+          <a href="/users/auth/google"
+             class="w-full bg-white text-primary border border-outline-variant font-headline font-bold text-sm tracking-widest uppercase py-5 px-8 rounded-lg hover:bg-surface-container transition-all active:scale-95 flex items-center justify-center gap-3">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"></path>
+              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"></path>
+              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"></path>
+              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"></path>
+            </svg>
+            GOOGLE
+          </a>
+        </div>
+
+      </form>
+
+      <!-- Footer -->
+      <div class="mt-10 text-center">
+        <p class="text-on-surface-variant text-xs tracking-wide">
+          Already have an account?
+          <a class="text-primary font-bold ml-1 hover:underline underline-offset-4 decoration-2" href="/users/login">Sign in</a>
+        </p>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const letters = document.querySelectorAll('.letter');
+    const subtitleDuration = 1000;
+    const delayBetweenLetters = 100;
+    letters.forEach((span, index) => {
+      span.style.animationDelay = `${subtitleDuration + (index * delayBetweenLetters)}ms`;
+    });
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelector("form").addEventListener("submit", formValidate);
+  });
+
+  function formValidate(e) {
+    e.preventDefault();
+    const username = document.getElementById("username").value;
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const cfmpassword = document.getElementById("cfmpassword").value;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const usernameRegex = /^[a-zA-Z0-9_]{3,16}$/;
+
+    if (username === "" || email === "" || password === "" || cfmpassword === "") {
+      Swal.fire({ icon: "warning", text: "Fill All The Fields" });
+      return false;
+    } else if (password != cfmpassword) {
+      Swal.fire({ icon: "error", text: "Password Must Match" });
+      return false;
+    } else if (!emailRegex.test(email)) {
+      Swal.fire({ icon: "error", title: "Invalid Email", text: "Please enter a valid email address!" });
+      return false;
+    } else if (!usernameRegex.test(username)) {
+      Swal.fire({ icon: "error", title: "Invalid Username", text: "Username must be 3-16 characters and contain only letters, numbers, or _" });
+      return false;
+    } else if (!email.includes("@gmail.com")) {
+      Swal.fire({ icon: "warning", title: "Oops...", text: "Email Must Contain @gmail.com" });
+      return false;
+    } else if (password.length < 4) {
+      Swal.fire({ icon: "warning", title: "Oops...", text: "Password must be at least 4 characters" });
+      return false;
+    }
+    e.target.submit();
+    return true;
+  }
+
+  {{#if message}}
+    Swal.fire("{{message}}");
+  {{/if}}
+
+  function togglePassword() {
+    const password = document.getElementById("password");
+    password.type = password.type === "password" ? "text" : "password";
+  }
+
+  function toggle_cfmPassword() {
+    const password = document.getElementById("cfmpassword");
+    password.type = password.type === "password" ? "text" : "password";
+  }
+</script>
+
+</body>
+</html>
