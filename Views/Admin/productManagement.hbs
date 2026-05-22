@@ -23,12 +23,10 @@
         .page-btn:hover { background: #f3f4f6; }
         .page-btn.current { background: #000; color: #fff; border-color: #000; }
         .select-filter { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px !important; cursor: pointer; }
-        .status-badge.active { background: #1a1a1a; color: #fff; }
-        .status-badge.inactive { background: #e5e7eb; color: #4b5563; }
+        .status-badge-active  { background: #1a1a1a; color: #fff; }
+        .status-badge-inactive { background: #e5e7eb; color: #4b5563; }
         @keyframes slideUp { from { opacity:0; transform: translateY(12px) scale(0.98); } to { opacity:1; transform: translateY(0) scale(1); } }
         .modal-box { animation: slideUp 0.2s ease; }
-        
-        /* Layout overrides to match the exact image */
         .main-bg { background-color: #f8f9fa; }
     </style>
 </head>
@@ -45,10 +43,10 @@
         <a href="/admin/dashboard" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
             <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard
         </a>
-        <a href="/admin/products" class="sidebar-item active flex items-center px-4 py-3 text-[11px] font-bold uppercase tracking-wide rounded-lg">
+        <a href="/admin/productManagement" class="sidebar-item active flex items-center px-4 py-3 text-[11px] font-bold uppercase tracking-wide rounded-lg">
             <span class="material-symbols-outlined mr-3.5 text-[19px]">sports_soccer</span>Products
         </a>
-        <a href="/admin/categories" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+        <a href="/admin/category" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
             <span class="material-symbols-outlined mr-3.5 text-[19px]">category</span>Categories
         </a>
         <a href="/admin/orders" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
@@ -60,7 +58,7 @@
         <a href="/admin/coupons" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
             <span class="material-symbols-outlined mr-3.5 text-[19px]">confirmation_number</span>Coupons
         </a>
-        <a href="/admin/usermanagement" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+        <a href="/admin/userManagement" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
             <span class="material-symbols-outlined mr-3.5 text-[19px]">group</span>Users
         </a>
         <a href="/admin/returns" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
@@ -77,7 +75,7 @@
 
 <!-- ===== MAIN ===== -->
 <main class="flex-1 flex flex-col h-full overflow-hidden main-bg">
-    
+
     <!-- Header -->
     <header class="h-[88px] bg-white border-b border-gray-200 flex items-center justify-between px-10 flex-shrink-0 z-10">
         <div>
@@ -87,8 +85,10 @@
         <div class="relative w-[360px]">
             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[19px] pointer-events-none">search</span>
             <input
+                id="searchInput"
                 type="text"
                 placeholder="Search by name or sku..."
+                value="{{search}}"
                 class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-11 pr-10 text-[13px] font-medium text-gray-700 outline-none placeholder-gray-400 focus:bg-white focus:border-gray-300 transition-colors"
             >
         </div>
@@ -96,42 +96,47 @@
 
     <!-- Body -->
     <div class="flex-1 overflow-y-auto px-10 pb-10">
-        
+
         <!-- Action -->
-        <div class="flex justify-end mb-8 mt-2">
-            <a href="/Admin/addProduct" class="px-6 py-3.5 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded flex items-center gap-2 hover:bg-gray-800 transition-colors shadow-lg shadow-black/10">
+        <div class="flex justify-end mb-6 mt-6">
+            <a href="/admin/addProduct" class="px-6 py-3.5 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded flex items-center gap-2 hover:bg-gray-800 transition-colors shadow-lg shadow-black/10">
                 <span class="material-symbols-outlined text-[16px] font-bold">add</span>
                 ADD PRODUCT
             </a>
         </div>
 
         <!-- Filters -->
-        <div class="flex items-center gap-3 mb-4 bg-gray-100/50 p-2 rounded-lg inline-flex">
-            <select class="select-filter bg-white border border-gray-200 rounded py-2.5 pl-4 text-[11px] font-bold tracking-wider text-black uppercase outline-none shadow-sm min-w-[160px]">
-                <option value="all">ALL CATEGORIES</option>
-                <option value="men">MEN</option>
-                <option value="women">WOMEN</option>
-                <option value="kids">KIDS</option>
+        <div class="flex items-center gap-3 mb-4 bg-gray-100/50 p-2 rounded-lg flex-wrap">
+
+            <!-- Category -->
+            <select id="categoryFilter" onchange="applyFilters()" class="select-filter bg-white border border-gray-200 rounded py-2.5 pl-4 text-[11px] font-bold tracking-wider text-black uppercase outline-none shadow-sm min-w-[160px]">
+                <option value="all" {{selected category 'all'}}>ALL CATEGORIES</option>
+                {{#each categories}}
+                <option value="{{this._id}}" {{selected this._id ../category}}>{{this.name}}</option>
+                {{/each}}
             </select>
 
-            <select class="select-filter bg-white border border-gray-200 rounded py-2.5 pl-4 text-[11px] font-bold tracking-wider text-black uppercase outline-none shadow-sm min-w-[140px]">
-                <option value="all">ALL BRANDS</option>
-                <option value="nike">NIKE</option>
-                <option value="adidas">ADIDAS</option>
-                <option value="puma">PUMA</option>
-                <option value="mizuno">MIZUNO</option>
+            <!-- Brand -->
+            <select id="brandFilter" onchange="applyFilters()" class="select-filter bg-white border border-gray-200 rounded py-2.5 pl-4 text-[11px] font-bold tracking-wider text-black uppercase outline-none shadow-sm min-w-[140px]">
+                <option value="all" {{selected brand 'all'}}>ALL BRANDS</option>
+                {{#each brands}}
+                <option value="{{this._id}}" {{selected this._id ../brand}}>{{this.name}}</option>
+                {{/each}}
             </select>
-            
-            <select class="select-filter bg-white border border-gray-200 rounded py-2.5 pl-4 text-[11px] font-bold tracking-wider text-black uppercase outline-none shadow-sm min-w-[120px]">
-                <option value="all">STATUS</option>
-                <option value="active">ACTIVE</option>
-                <option value="inactive">INACTIVE</option>
+
+            <!-- Status -->
+            <select id="statusFilter" onchange="applyFilters()" class="select-filter bg-white border border-gray-200 rounded py-2.5 pl-4 text-[11px] font-bold tracking-wider text-black uppercase outline-none shadow-sm min-w-[120px]">
+                <option value="all"      {{selected status 'all'}}>STATUS</option>
+                <option value="active"   {{selected status 'active'}}>ACTIVE</option>
+                <option value="inactive" {{selected status 'inactive'}}>INACTIVE</option>
+                <option value="deleted"  {{selected status 'deleted'}}>DELETED</option>
             </select>
+
         </div>
 
         <!-- Table Card -->
         <div class="bg-white shadow-sm border border-gray-100 overflow-hidden flex flex-col rounded-sm">
-            
+
             <!-- Table -->
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[1000px]">
@@ -148,181 +153,116 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white">
-                        <!-- Product 1 -->
+
+                        {{#each products}}
                         <tr class="product-row group">
-                            <td class="py-4 px-6 text-[12px] font-bold text-black">01</td>
+
+                            <!-- SL No -->
+                            <td class="py-4 px-6 text-[12px] font-bold text-black">
+                                {{addIndex @index ../currentPage 10}}
+                            </td>
+
+                            <!-- Image -->
                             <td class="py-4 px-4">
                                 <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-1 border border-gray-200">
-                                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&q=80&auto=format&fit=crop" alt="Mercurial Vapor" class="max-w-full max-h-full object-contain drop-shadow-md rounded-[2px]" />
+                                    {{#if defaultVariant.images}}
+                                        <img src="{{defaultVariant.images.[0]}}" alt="{{this.productName}}" class="max-w-full max-h-full object-contain drop-shadow-md rounded-[2px]" />
+                                    {{else}}
+                                        <span class="material-symbols-outlined text-gray-400 text-[22px]">image_not_supported</span>
+                                    {{/if}}
                                 </div>
                             </td>
+
+                            <!-- Name & SKU -->
                             <td class="py-4 px-6">
-                                <div class="text-[13px] font-bold text-black leading-tight">Mercurial<br>Vapor 15<br>Elite</div>
-                                <div class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">NK-MV15-2024</div>
+                                <div class="text-[13px] font-bold text-black leading-tight">{{this.productName}}</div>
+                                <div class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">{{defaultVariant.sku}}</div>
                             </td>
+
+                            <!-- Category -->
                             <td class="py-4 px-6">
-                                <div class="text-[12px] font-black text-black uppercase">MEN</div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="text-[13px] font-black text-black">$274.99</div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-6 h-1 bg-black rounded-full"></div>
-                                    <span class="text-[13px] font-bold text-black">142</span>
+                                <div class="text-[12px] font-black text-black uppercase">
+                                    {{this.category.name}}
                                 </div>
                             </td>
+
+                            <!-- Price -->
                             <td class="py-4 px-6">
-                                <span class="status-badge active inline-flex px-3 py-1 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm">ACTIVE</span>
+                                <div class="text-[13px] font-black text-black">₹{{defaultVariant.price}}</div>
                             </td>
-                            <td class="py-4 px-6 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <button class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="View">
-                                        <span class="material-symbols-outlined text-[15px]">visibility</span>
-                                    </button>
-                                    <a href="#" class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="Edit">
-                                        <span class="material-symbols-outlined text-[15px]">edit</span>
-                                        <span class="text-[10px] font-bold tracking-widest uppercase">EDIT</span>
-                                    </a>
-                                    <button class="text-gray-400 hover:text-red-500 transition-colors px-2 py-1 flex items-center gap-1.5" title="Delete">
-                                        <span class="material-symbols-outlined text-[15px]">delete</span>
-                                        <span class="text-[10px] font-bold tracking-widest uppercase">DELETE</span>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                        
-                        <!-- Product 2 -->
-                        <tr class="product-row group">
-                            <td class="py-4 px-6 text-[12px] font-bold text-black">02</td>
-                            <td class="py-4 px-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-1 border border-gray-200">
-                                    <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=150&q=80&auto=format&fit=crop" alt="Predator Elite" class="max-w-full max-h-full object-contain drop-shadow-md rounded-[2px]" />
-                                </div>
-                            </td>
+
+                            <!-- Stock -->
                             <td class="py-4 px-6">
-                                <div class="text-[13px] font-bold text-black leading-tight">Predator<br>Elite FT<br>FG</div>
-                                <div class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">AD-PR24-X99</div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="text-[12px] font-black text-black uppercase">WOMEN</div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="text-[13px] font-black text-black">$259.00</div>
-                            </td>
-                            <td class="py-4 px-6">
+                                {{#if (lte defaultVariant.stock 10)}}
                                 <div class="flex items-center gap-3">
                                     <div class="w-2 h-1 bg-red-500 rounded-full"></div>
-                                    <span class="text-[13px] font-bold text-red-500">12</span>
+                                    <span class="text-[13px] font-bold text-red-500">{{defaultVariant.stock}}</span>
                                 </div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <span class="status-badge active inline-flex px-3 py-1 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm">ACTIVE</span>
-                            </td>
-                            <td class="py-4 px-6 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <button class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="View">
-                                        <span class="material-symbols-outlined text-[15px]">visibility</span>
-                                    </button>
-                                    <a href="#" class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="Edit">
-                                        <span class="material-symbols-outlined text-[15px]">edit</span>
-                                        <span class="text-[10px] font-bold tracking-widest uppercase">EDIT</span>
-                                    </a>
-                                    <button class="text-gray-400 hover:text-red-500 transition-colors px-2 py-1 flex items-center gap-1.5" title="Delete">
-                                        <span class="material-symbols-outlined text-[15px]">delete</span>
-                                        <span class="text-[10px] font-bold tracking-widest uppercase">DELETE</span>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <!-- Product 3 -->
-                        <tr class="product-row group">
-                            <td class="py-4 px-6 text-[12px] font-bold text-black">03</td>
-                            <td class="py-4 px-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-1 border border-gray-200">
-                                    <img src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=150&q=80&auto=format&fit=crop" alt="Puma Future 7" class="max-w-full max-h-full object-contain drop-shadow-md rounded-[2px]" />
-                                </div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="text-[13px] font-bold text-black leading-tight">Puma<br>Future 7<br>Ultimate</div>
-                                <div class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">PM-F7-ULT-G</div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="text-[12px] font-black text-black uppercase">MEN</div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="text-[13px] font-black text-black">$229.50</div>
-                            </td>
-                            <td class="py-4 px-6">
+                                {{else}}
                                 <div class="flex items-center gap-3">
-                                    <div class="w-4 h-1 bg-black rounded-full"></div>
-                                    <span class="text-[13px] font-bold text-black">56</span>
+                                    <div class="w-6 h-1 bg-black rounded-full"></div>
+                                    <span class="text-[13px] font-bold text-black">{{defaultVariant.stock}}</span>
                                 </div>
+                                {{/if}}
                             </td>
-                            <td class="py-4 px-6">
-                                <span class="status-badge inactive inline-flex px-3 py-1 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm">INACTIVE</span>
-                            </td>
-                            <td class="py-4 px-6 text-right">
-                                <div class="flex items-center justify-end gap-2">
-                                    <button class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="View">
-                                        <span class="material-symbols-outlined text-[15px]">visibility</span>
-                                    </button>
-                                    <a href="#" class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="Edit">
-                                        <span class="material-symbols-outlined text-[15px]">edit</span>
-                                        <span class="text-[10px] font-bold tracking-widest uppercase">EDIT</span>
-                                    </a>
-                                    <button class="text-gray-400 hover:text-red-500 transition-colors px-2 py-1 flex items-center gap-1.5" title="Delete">
-                                        <span class="material-symbols-outlined text-[15px]">delete</span>
-                                        <span class="text-[10px] font-bold tracking-widest uppercase">DELETE</span>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
 
-                        <!-- Product 4 -->
-                        <tr class="product-row group border-b-0">
-                            <td class="py-4 px-6 text-[12px] font-bold text-black">04</td>
-                            <td class="py-4 px-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center p-1 border border-gray-200">
-                                    <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=150&q=80&auto=format&fit=crop" alt="Mizuno Morelia" class="max-w-full max-h-full object-contain drop-shadow-md rounded-[2px]" />
-                                </div>
-                            </td>
+                            <!-- Status -->
                             <td class="py-4 px-6">
-                                <div class="text-[13px] font-bold text-black leading-tight">Mizuno<br>Morelia<br>Neo IV Beta</div>
-                                <div class="text-[10px] font-medium text-gray-400 mt-1 uppercase tracking-wider">MZ-MN4-MIJ</div>
+                                {{#if this.isDeleted}}
+                                    <span class="inline-flex px-3 py-1 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm bg-red-50 text-red-600">DELETED</span>
+                                {{else}}
+                                    {{#if (eq this.status "deleted")}}
+                                        <span class="inline-flex px-3 py-1 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm bg-red-50 text-red-600">DELETED</span>
+                                    {{else}}
+                                        {{#if (eq this.status "active")}}
+                                            <span class="status-badge-active inline-flex px-3 py-1 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm">ACTIVE</span>
+                                        {{else}}
+                                            <span class="status-badge-inactive inline-flex px-3 py-1 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm">INACTIVE</span>
+                                        {{/if}}
+                                    {{/if}}
+                                {{/if}}
                             </td>
-                            <td class="py-4 px-6">
-                                <div class="text-[12px] font-black text-black uppercase">MEN</div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="text-[13px] font-black text-black">$310.00</div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-3 h-1 bg-black rounded-full"></div>
-                                    <span class="text-[13px] font-bold text-black">18</span>
-                                </div>
-                            </td>
-                            <td class="py-4 px-6">
-                                <span class="status-badge active inline-flex px-3 py-1 text-[9px] font-bold tracking-[0.15em] uppercase rounded-sm">ACTIVE</span>
-                            </td>
+
+                            <!-- Actions -->
                             <td class="py-4 px-6 text-right">
                                 <div class="flex items-center justify-end gap-2">
-                                    <button class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="View">
-                                        <span class="material-symbols-outlined text-[15px]">visibility</span>
-                                    </button>
-                                    <a href="#" class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="Edit">
-                                        <span class="material-symbols-outlined text-[15px]">edit</span>
-                                        <span class="text-[10px] font-bold tracking-widest uppercase">EDIT</span>
-                                    </a>
-                                    <button onclick="openDeleteModal()" class="text-gray-400 hover:text-red-500 transition-colors px-2 py-1 flex items-center gap-1.5" title="Delete">
-                                        <span class="material-symbols-outlined text-[15px]">delete</span>
-                                        <span class="text-[10px] font-bold tracking-widest uppercase">DELETE</span>
-                                    </button>
+                                    {{#if this.isDeleted}}
+                                        <button onclick="openRestoreModal('{{this.productName}}', '{{this._id}}', '{{defaultVariant.images.[0]}}')" class="text-emerald-500 hover:text-emerald-600 transition-colors px-2 py-1 flex items-center gap-1.5" title="Restore">
+                                            <span class="material-symbols-outlined text-[15px]">settings_backup_restore</span>
+                                            <span class="text-[10px] font-bold tracking-widest uppercase">RESTORE</span>
+                                        </button>
+                                    {{else}}
+                                        {{#if (eq this.status "deleted")}}
+                                            <button onclick="openRestoreModal('{{this.productName}}', '{{this._id}}', '{{defaultVariant.images.[0]}}')" class="text-emerald-500 hover:text-emerald-600 transition-colors px-2 py-1 flex items-center gap-1.5" title="Restore">
+                                                <span class="material-symbols-outlined text-[15px]">settings_backup_restore</span>
+                                                <span class="text-[10px] font-bold tracking-widest uppercase">RESTORE</span>
+                                            </button>
+                                        {{else}}
+                                            <a href="/admin/productView/{{this._id}}" class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="View">
+                                                <span class="material-symbols-outlined text-[15px]">visibility</span>
+                                            </a>
+                                            <a href="/admin/editProduct/{{this._id}}" class="text-gray-400 hover:text-black transition-colors px-2 py-1 flex items-center gap-1.5" title="Edit">
+                                                <span class="material-symbols-outlined text-[15px]">edit</span>
+                                                <span class="text-[10px] font-bold tracking-widest uppercase">EDIT</span>
+                                            </a>
+                                            <button onclick="openDeleteModal('{{this.productName}}', '{{this._id}}', '{{defaultVariant.images.[0]}}')" class="text-gray-400 hover:text-red-500 transition-colors px-2 py-1 flex items-center gap-1.5" title="Delete">
+                                                <span class="material-symbols-outlined text-[15px]">delete</span>
+                                                <span class="text-[10px] font-bold tracking-widest uppercase">DELETE</span>
+                                            </button>
+                                        {{/if}}
+                                    {{/if}}
                                 </div>
                             </td>
+
                         </tr>
+                        {{else}}
+                        <tr>
+                            <td colspan="8" class="py-16 text-center text-[13px] font-medium text-gray-400">
+                                No products found
+                            </td>
+                        </tr>
+                        {{/each}}
+
                     </tbody>
                 </table>
             </div>
@@ -330,21 +270,36 @@
             <!-- Pagination -->
             <div class="px-6 py-5 border-t border-gray-100 flex items-center justify-between bg-white mt-auto">
                 <div class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
-                    Showing <span class="text-black">4</span> of <span class="text-black">84</span> products
+                    Showing <span class="text-black">{{products.length}}</span> of <span class="text-black">{{totalProducts}}</span> products
                 </div>
                 <div class="flex items-center gap-1">
-                    <button class="page-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-black">
+
+                    {{#if hasPrevPage}}
+                    <button onclick="changePage({{prevPage}})" class="page-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-black">
                         <span class="material-symbols-outlined text-[18px]">chevron_left</span>
                     </button>
-                    <button class="page-btn w-8 h-8 rounded border border-transparent flex items-center justify-center text-[11px] font-bold current">01</button>
-                    <button class="page-btn w-8 h-8 rounded border border-transparent flex items-center justify-center text-[11px] font-bold text-gray-600">02</button>
-                    <button class="page-btn w-8 h-8 rounded border border-transparent flex items-center justify-center text-[11px] font-bold text-gray-600">03</button>
-                    <button class="page-btn w-8 h-8 rounded border border-transparent flex items-center justify-center text-[11px] font-bold text-gray-600">04</button>
-                    <span class="text-gray-400 mx-1 text-[12px] font-bold tracking-widest">...</span>
-                    <button class="page-btn w-8 h-8 rounded border border-transparent flex items-center justify-center text-[11px] font-bold text-gray-600">21</button>
-                    <button class="page-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-black">
+                    {{else}}
+                    <button disabled class="page-btn w-8 h-8 rounded flex items-center justify-center text-gray-200 cursor-not-allowed">
+                        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                    </button>
+                    {{/if}}
+
+                    {{#each pageNumbers}}
+                    <button onclick="changePage({{this}})" class="page-btn w-8 h-8 rounded border border-transparent flex items-center justify-center text-[11px] font-bold {{#if (eq this ../currentPage)}}current{{else}}text-gray-600{{/if}}">
+                        {{this}}
+                    </button>
+                    {{/each}}
+
+                    {{#if hasNextPage}}
+                    <button onclick="changePage({{nextPage}})" class="page-btn w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-black">
                         <span class="material-symbols-outlined text-[18px]">chevron_right</span>
                     </button>
+                    {{else}}
+                    <button disabled class="page-btn w-8 h-8 rounded flex items-center justify-center text-gray-200 cursor-not-allowed">
+                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                    </button>
+                    {{/if}}
+
                 </div>
             </div>
 
@@ -354,25 +309,23 @@
 
 <!-- ===== MODAL OVERLAY ===== -->
 <div id="modalOverlay" class="fixed inset-0 z-50 hidden items-center justify-center" style="background:rgba(0,0,0,0.6); backdrop-filter: blur(4px);" onclick="handleModalBackdropClick(event)">
-    
+
     <!-- DELETE PRODUCT MODAL -->
     <div id="deleteModal" class="modal-box bg-white shadow-2xl w-[800px] max-w-[95vw] flex overflow-hidden relative">
-        
+
         <!-- Left Pane -->
-        <div class="w-[360px] bg-[#f4f5f7] p-8 flex flex-col justify-between">
+        <div class="w-[320px] bg-[#f4f5f7] p-8 flex flex-col justify-between flex-shrink-0">
             <div class="flex items-center gap-2 mb-6">
                 <span class="material-symbols-outlined text-[14px] text-black">inventory_2</span>
                 <span class="text-[9px] font-bold tracking-[0.15em] uppercase text-gray-500">SYSTEM NOTIFICATION</span>
             </div>
-            
             <div class="flex-1 flex items-center justify-center my-4">
                 <div class="w-full aspect-square bg-[#111] flex items-center justify-center overflow-hidden">
-                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80&auto=format&fit=crop" alt="Mercurial Vapor" class="max-w-full max-h-full object-cover scale-110" style="mix-blend-mode: luminosity; filter: contrast(1.2) brightness(0.8);" />
+                    <img id="deleteProductImage" src="" alt="" class="max-w-full max-h-full object-cover scale-110" style="mix-blend-mode: luminosity; filter: contrast(1.2) brightness(0.8);" />
                 </div>
             </div>
-
             <div class="mt-6">
-                <span class="text-[8px] font-bold tracking-[0.15em] uppercase text-gray-400">REFERENCE ID: MVC-15-ELITE-BLK</span>
+                <span id="deleteProductSku" class="text-[8px] font-bold tracking-[0.15em] uppercase text-gray-400"></span>
             </div>
         </div>
 
@@ -384,17 +337,15 @@
 
             <div class="mt-4 mb-auto">
                 <h3 class="text-[32px] font-black tracking-tight text-black uppercase leading-[1.05] mb-6">DELETE<br>PRODUCT</h3>
-                
                 <p class="text-[13px] font-bold text-black mb-4 pr-4">
-                    Are you sure you want to delete the <span class="border-b-2 border-black pb-[2px]">Mercurial Vapor 15 Elite</span>?
+                    Are you sure you want to delete <span id="deleteProductName" class="border-b-2 border-black pb-[2px]"></span>?
                 </p>
-                
                 <p class="text-[12px] text-gray-500 leading-[1.6] mb-10 pr-6">
                     This action cannot be undone and will remove all associated variant data from the inventory system including stock levels, SKU mappings, and sales history.
                 </p>
-
+                <input type="hidden" id="deleteProductId">
                 <div class="space-y-3 mt-4">
-                    <button class="w-full bg-black text-white py-4 px-6 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-gray-800 transition-colors flex items-center justify-center gap-3">
+                    <button id="confirmDeleteBtn" class="w-full bg-black text-white py-4 px-6 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-gray-800 transition-colors flex items-center justify-center gap-3">
                         <span class="material-symbols-outlined text-[16px]">delete</span>
                         DELETE
                     </button>
@@ -409,26 +360,181 @@
             </div>
         </div>
     </div>
-</div>
 
+    <!-- RESTORE PRODUCT MODAL -->
+    <div id="restoreModal" class="modal-box bg-white shadow-2xl w-[800px] max-w-[95vw] flex overflow-hidden relative hidden">
+
+        <!-- Left Pane -->
+        <div class="w-[320px] bg-[#e6f4ea] p-8 flex flex-col justify-between flex-shrink-0">
+            <div class="flex items-center gap-2 mb-6">
+                <span class="material-symbols-outlined text-[14px] text-emerald-600">inventory_2</span>
+                <span class="text-[9px] font-bold tracking-[0.15em] uppercase text-emerald-600">SYSTEM NOTIFICATION</span>
+            </div>
+            <div class="flex-1 flex items-center justify-center my-4">
+                <div class="w-full aspect-square bg-[#111] flex items-center justify-center overflow-hidden">
+                    <img id="restoreProductImage" src="" alt="" class="max-w-full max-h-full object-cover scale-110" style="mix-blend-mode: luminosity; filter: contrast(1.2) brightness(0.8);" />
+                </div>
+            </div>
+            <div class="mt-6">
+                <span id="restoreProductSku" class="text-[8px] font-bold tracking-[0.15em] uppercase text-emerald-600"></span>
+            </div>
+        </div>
+
+        <!-- Right Pane -->
+        <div class="flex-1 p-10 flex flex-col relative bg-white">
+            <button onclick="closeModals()" class="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+
+            <div class="mt-4 mb-auto">
+                <h3 class="text-[32px] font-black tracking-tight text-emerald-600 uppercase leading-[1.05] mb-6">RESTORE<br>PRODUCT</h3>
+                <p class="text-[13px] font-bold text-black mb-4 pr-4">
+                    Are you sure you want to restore <span id="restoreProductName" class="border-b-2 border-black pb-[2px]"></span>?
+                </p>
+                <p class="text-[12px] text-gray-500 leading-[1.6] mb-10 pr-6">
+                    This action will restore the product and all associated variant data back into the inventory system.
+                </p>
+                <input type="hidden" id="restoreProductId">
+                <div class="space-y-3 mt-4">
+                    <button id="confirmRestoreBtn" class="w-full bg-emerald-600 text-white py-4 px-6 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-emerald-700 transition-colors flex items-center justify-center gap-3">
+                        <span class="material-symbols-outlined text-[16px]">settings_backup_restore</span>
+                        RESTORE
+                    </button>
+                    <button onclick="closeModals()" class="w-full bg-white border border-gray-200 text-black py-4 px-6 text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-gray-50 transition-colors">
+                        CANCEL
+                    </button>
+                </div>
+            </div>
+
+            <div class="text-center mt-8 pt-6">
+                <span class="text-[8px] font-bold tracking-[0.15em] uppercase text-gray-300">CONFIRMING RESTORATION IN ADMIN PORTAL</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="/toast/toast.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function openDeleteModal() {
+    // ─── MODAL ───────────────────────────────────────────────────
+    function openDeleteModal(name, id, image) {
+        document.getElementById('deleteProductName').textContent = name;
+        document.getElementById('deleteProductId').value = id;
+        document.getElementById('deleteProductImage').src = image || '';
         document.getElementById('modalOverlay').style.display = 'flex';
         document.getElementById('modalOverlay').classList.remove('hidden');
+        document.getElementById('deleteModal').classList.remove('hidden');
+        document.getElementById('restoreModal').classList.add('hidden');
+    }
+
+    function openRestoreModal(name, id, image) {
+        document.getElementById('restoreProductName').textContent = name;
+        document.getElementById('restoreProductId').value = id;
+        document.getElementById('restoreProductImage').src = image || '';
+        document.getElementById('modalOverlay').style.display = 'flex';
+        document.getElementById('modalOverlay').classList.remove('hidden');
+        document.getElementById('restoreModal').classList.remove('hidden');
+        document.getElementById('deleteModal').classList.add('hidden');
     }
 
     function closeModals() {
         document.getElementById('modalOverlay').style.display = 'none';
         document.getElementById('modalOverlay').classList.add('hidden');
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.getElementById('restoreModal').classList.add('hidden');
     }
 
     function handleModalBackdropClick(e) {
-        if (e.target === document.getElementById('modalOverlay')) {
-            closeModals();
-        }
+        if (e.target === document.getElementById('modalOverlay')) closeModals();
     }
-    
+
     document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+
+    // ─── DELETE CONFIRM ──────────────────────────────────────────
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+        const id = document.getElementById('deleteProductId').value;
+        try {
+            const res  = await axios.delete(`/admin/deleteProduct/${id}`);
+            const data = await res.data;
+            if (data.success) {
+
+            showToast('success', data.message || 'Product deleted successfully');
+
+            setTimeout(() => {
+                closeModals();
+                location.reload();
+            }, 500);
+
+        } else {
+            showToast('error', data.message || 'Failed to delete product.');
+        }
+        } catch (err) {
+            console.error('deleteProduct error:', err);
+            showToast(
+            'error',
+            err.response?.data?.message || 'Something went wrong. Try again.'
+        );
+        }
+    });
+
+    // ─── RESTORE CONFIRM ──────────────────────────────────────────
+    document.getElementById('confirmRestoreBtn').addEventListener('click', async () => {
+        const id = document.getElementById('restoreProductId').value;
+        try {
+            const res  = await axios.put(`/admin/restoreProduct/${id}`);
+            const data = await res.data;
+             if (data.success) {
+
+            showToast('success', data.message || 'Product restored successfully');
+
+            setTimeout(() => {
+                closeModals();
+                location.reload();
+            }, 500);
+
+        } else {
+            showToast('error', data.message || 'Failed to restore product.');
+        }
+        } catch (err) {
+            console.error('restoreProduct error:', err);
+            showToast(
+            'error',
+            err.response?.data?.message || 'Something went wrong. Try again.'
+        );
+        }
+    });
+
+    // ─── FILTERS ────────────────────────────────────────────────
+    function applyFilters() {
+        const search   = document.getElementById('searchInput').value.trim();
+        const category = document.getElementById('categoryFilter').value;
+        const brand    = document.getElementById('brandFilter').value;
+        const status   = document.getElementById('statusFilter').value;
+        window.location.href = `/admin/productManagement?page=1&search=${encodeURIComponent(search)}&category=${category}&brand=${brand}&status=${status}`;
+    }
+
+    document.getElementById('searchInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') applyFilters();
+    });
+
+    // ─── PAGINATION ──────────────────────────────────────────────
+    function changePage(page) {
+        const search   = document.getElementById('searchInput').value.trim();
+        const category = document.getElementById('categoryFilter').value;
+        const brand    = document.getElementById('brandFilter').value;
+        const status   = document.getElementById('statusFilter').value;
+        window.location.href = `/admin/productManagement?page=${page}&search=${encodeURIComponent(search)}&category=${category}&brand=${brand}&status=${status}`;
+    }
+
+      //page reload
+    window.addEventListener("pageshow", function (event) {
+    const navType = performance.getEntriesByType("navigation")[0]?.type;
+
+    if (event.persisted || navType === "back_forward") {
+        window.location.reload();
+    }
+});
 </script>
 
 </body>

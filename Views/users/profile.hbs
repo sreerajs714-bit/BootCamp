@@ -129,11 +129,11 @@
                         Edit Profile
                     </a>
                     <form action="/users/logout" method="post" id="logoutForm">
-    <button type="button" onclick="confirmLogout()"
-        class="px-6 py-3 bg-transparent border border-gray-300 text-black text-[11px] font-bold tracking-widest uppercase hover:border-black transition-colors">
-        Logout
-    </button>
-</form>
+                        <button type="button" onclick="confirmLogout()"
+                            class="px-6 py-3 bg-transparent border border-gray-300 text-black text-[11px] font-bold tracking-widest uppercase hover:border-black transition-colors">
+                            Logout
+                        </button>
+                    </form>
                 </div>
             </div>
 
@@ -186,9 +186,14 @@
                         <div class="flex items-end justify-between mb-3">
                             <span class="text-2xl font-serif">Password</span>
                             {{#if isGoogleUser}}
-                                <button type="button" onclick="openModal('passwordModal')" class="text-[10px] font-bold tracking-[0.1em] text-black underline uppercase hover:text-gray-600 mb-1 cursor-pointer">Set</button>
+                                <!-- ✅ Disabled for Google users -->
+                                <span class="text-[10px] font-bold tracking-[0.1em] text-gray-300 uppercase cursor-not-allowed mb-1"
+                                      title="Managed by Google">Unavailable</span>
                             {{else}}
-                                <button type="button" onclick="openModal('passwordModal')" class="text-[10px] font-bold tracking-[0.1em] text-black underline uppercase hover:text-gray-600 mb-1 cursor-pointer">Change</button>
+                                <button type="button" onclick="openModal('passwordModal')"
+                                    class="text-[10px] font-bold tracking-[0.1em] text-black underline uppercase hover:text-gray-600 mb-1 cursor-pointer">
+                                    Change
+                                </button>
                             {{/if}}
                         </div>
                     </div>
@@ -198,7 +203,16 @@
                         <h3 class="text-[10px] font-bold tracking-[0.15em] text-white uppercase mb-5">Email Management</h3>
                         <div class="flex items-center justify-between">
                             <span class="text-2xl font-serif">Email</span>
-                            <button type="button" onclick="openModal('emailModal')" class="text-[10px] font-bold tracking-[0.1em] text-white underline uppercase hover:text-gray-300 mb-1 cursor-pointer">Change</button>
+                            {{#if isGoogleUser}}
+                                <!-- ✅ Disabled for Google users -->
+                                <span class="text-[10px] font-bold tracking-[0.1em] text-gray-500 uppercase cursor-not-allowed mb-1"
+                                      title="Managed by Google">Unavailable</span>
+                            {{else}}
+                                <button type="button" onclick="openModal('emailModal')"
+                                    class="text-[10px] font-bold tracking-[0.1em] text-white underline uppercase hover:text-gray-300 mb-1 cursor-pointer">
+                                    Change
+                                </button>
+                            {{/if}}
                         </div>
                     </div>
 
@@ -233,62 +247,40 @@
     <!-- Modal Backdrop -->
     <div id="modalBackdrop" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] hidden opacity-0 transition-opacity duration-300" onclick="closeAllModals()"></div>
 
-    <!-- ✅ Password Modal -->
+    <!-- Password Modal -->
     <div id="passwordModal" class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white z-[70] hidden opacity-0 scale-95 transition-all duration-300 shadow-2xl">
         <div class="p-8">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-3xl font-serif text-black">
-                    {{#if isGoogleUser}}Set Password{{else}}Change Password{{/if}}
-                </h2>
+                <h2 class="text-3xl font-serif text-black">Change Password</h2>
                 <button type="button" onclick="closeModal('passwordModal')" class="text-gray-400 hover:text-black transition-colors">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
 
-            {{#if isGoogleUser}}
-            <div class="flex items-center gap-2 mb-6 p-3 bg-gray-50 border border-gray-200">
-                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"></path>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"></path>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"></path>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"></path>
-                </svg>
-                <p class="text-[11px] text-gray-500 tracking-wide">You signed in with Google. Set a password to also enable email login.</p>
-            </div>
-            {{/if}}
-
             <p id="passwordError" class="text-[14px] text-red-500 text-center mb-3"></p>
 
             <form id="passwordForm" novalidate class="space-y-5">
-
-                {{!-- ✅ Current Password — only for non-Google users --}}
-                {{#unless isGoogleUser}}
                 <div>
                     <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Current Password</label>
                     <input id="currentPassword" type="password" name="currentPassword"
                         placeholder="Enter current password"
                         class="w-full border-b-2 border-gray-200 py-2 text-[15px] focus:outline-none focus:border-black transition-colors bg-transparent">
                 </div>
-                {{/unless}}
-
                 <div>
                     <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">New Password</label>
                     <input id="newPassword" type="password" name="newPassword"
                         placeholder="Enter new password"
                         class="w-full border-b-2 border-gray-200 py-2 text-[15px] focus:outline-none focus:border-black transition-colors bg-transparent">
                 </div>
-
                 <div>
                     <label class="block text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Confirm Password</label>
                     <input id="confirmPassword" type="password" name="confirmPassword"
                         placeholder="Confirm new password"
                         class="w-full border-b-2 border-gray-200 py-2 text-[15px] focus:outline-none focus:border-black transition-colors bg-transparent">
                 </div>
-
                 <button type="submit" class="w-full mt-6 px-6 py-4 bg-black text-white text-[11px] font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors">
-                    {{#if isGoogleUser}}Set Password{{else}}Update Password{{/if}}
+                    Update Password
                 </button>
-
             </form>
         </div>
     </div>
@@ -355,11 +347,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
 
-        // ✅ Inject isGoogleUser from HBS into JS
         const isGoogleUser = {{#if isGoogleUser}}true{{else}}false{{/if}};
 
-           //MODAL LOGIC
-
+        // MODAL LOGIC
         function openModal(modalId) {
             const modal = document.getElementById(modalId);
             const backdrop = document.getElementById('modalBackdrop');
@@ -418,8 +408,7 @@
             });
         });
 
-          // PROFILE PHOTO UPLOAD
-
+        // PROFILE PHOTO UPLOAD
         document.getElementById('profilePhotoInput').addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (!file) return;
@@ -467,8 +456,7 @@
             }
         });
 
-          // EMAIL FORM
-
+        // EMAIL FORM
         document.addEventListener("DOMContentLoaded", function () {
             document.getElementById("emailForm").addEventListener("submit", formValidate);
         });
@@ -482,7 +470,6 @@
             errorText.textContent = "";
             if (Email === "") { errorText.textContent = "Email is required"; return; }
             if (!emailRegex.test(Email)) { errorText.textContent = "Enter a valid email address"; return; }
-            if (!Email.endsWith("@gmail.com")) { errorText.textContent = "Email must end with @gmail.com"; return; }
             try {
                 const res = await fetch("/users/changeEmail", {
                     method: "POST",
@@ -501,43 +488,23 @@
             }
         }
 
-        //PASSWORD FORM
-  
+        // PASSWORD FORM
         document.getElementById("passwordForm").addEventListener("submit", validatePassword);
 
         async function validatePassword(e) {
             e.preventDefault();
-
             const currentPasswordEl = document.getElementById("currentPassword");
             const currentPassword = currentPasswordEl ? currentPasswordEl.value.trim() : null;
             const newPassword = document.getElementById("newPassword").value.trim();
             const confirmPassword = document.getElementById("confirmPassword").value.trim();
             const errorText = document.getElementById("passwordError");
-
             errorText.textContent = "";
             errorText.className = "text-[14px] text-red-500 text-center mb-3";
-
-            if (!isGoogleUser && !currentPassword) {
-                errorText.textContent = "Current password is required";
-                return;
-            }
-            if (!newPassword) {
-                errorText.textContent = "New password is required";
-                return;
-            }
-            if (newPassword.length < 4) {
-                errorText.textContent = "Password must be at least 4 characters";
-                return;
-            }
-            if (!confirmPassword) {
-                errorText.textContent = "Please confirm your password";
-                return;
-            }
-            if (newPassword !== confirmPassword) {
-                errorText.textContent = "Passwords do not match";
-                return;
-            }
-
+            if (!currentPassword) { errorText.textContent = "Current password is required"; return; }
+            if (!newPassword) { errorText.textContent = "New password is required"; return; }
+            if (newPassword.length < 4) { errorText.textContent = "Password must be at least 4 characters"; return; }
+            if (!confirmPassword) { errorText.textContent = "Please confirm your password"; return; }
+            if (newPassword !== confirmPassword) { errorText.textContent = "Passwords do not match"; return; }
             try {
                 const res = await fetch("/users/changePassword", {
                     method: "POST",
@@ -559,7 +526,7 @@
             }
         }
 
-           //OTP TIMER
+        // OTP TIMER
         let otpTimerInterval = null;
 
         function startOtpTimer(seconds = 60) {
@@ -607,8 +574,8 @@
                 resendBtn.disabled = false;
             }
         }
-    
-          // OTP VERIFY FORM
+
+        // OTP VERIFY FORM
         document.getElementById("otpVerifyForm").addEventListener("submit", verifyOtp);
 
         async function verifyOtp(e) {
@@ -635,39 +602,35 @@
             }
         }
 
-
-
-         //  BACK BUTTON GUARD
-
+        // BACK BUTTON GUARD
         window.addEventListener("pageshow", (e) => {
             if (e.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
                 window.location.reload();
             }
         });
 
-//logout modal
-
-     function confirmLogout() {
-    Swal.fire({
-        title: 'Leaving so soon?',
-        text: 'Are you sure you want to logout?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonColor: '#000000',
-        cancelButtonColor: '#e5e7eb',
-        confirmButtonText: 'YES, LOGOUT',
-        cancelButtonText: 'CANCEL',
-        customClass: {
-            cancelButton: '!text-black',
-            title: 'font-serif',
-            popup: 'font-sans'
+        // LOGOUT MODAL
+        function confirmLogout() {
+            Swal.fire({
+                title: 'Leaving so soon?',
+                text: 'Are you sure you want to logout?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#000000',
+                cancelButtonColor: '#e5e7eb',
+                confirmButtonText: 'YES, LOGOUT',
+                cancelButtonText: 'CANCEL',
+                customClass: {
+                    cancelButton: '!text-black',
+                    title: 'font-serif',
+                    popup: 'font-sans'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logoutForm').submit();
+                }
+            });
         }
-    }).then((result) => {
-        if (result.isConfirmed) {
-            document.getElementById('logoutForm').submit();
-        }
-    });
-}
 
     </script>
 </body>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MERCURIAL ELITE - BOOT CAMP</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <!-- Material Symbols -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        /* Material Icons filled trick */
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+
+        /* Zoom specific styles */
+        #main-image {
+            transition: transform 0.1s linear, opacity 0.3s ease;
+        }
+
+        .thumbnail {
+            transition: border-color 0.2s ease, opacity 0.2s ease;
+        }
+
+        .thumbnail.active {
+            border-color: #000000;
+            opacity: 1;
+        }
+
+        .thumbnail:not(.active) {
+            border-color: transparent;
+            opacity: 0.6;
+        }
+
+        .thumbnail:hover:not(.active) {
+            opacity: 0.9;
+            border-color: #d1d5db;
+        }
+
+        /* Prevent layout shifts */
+        .product-grid-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-grid-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-black selection:text-white">
+
+    <!-- Navbar -->
+    {{>navbar}}
+
+    <!-- Main Content -->
+    <main class="max-w-[1500px] mx-auto px-6 py-24 lg:py-40">
+
+        <!-- Product Hero Section -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 mb-32">
+
+            <!-- Images Area (Left) -->
+            <div class="lg:col-span-5 flex flex-col-reverse lg:flex-row gap-6 lg:pl-12">
+                <!-- Thumbnails (Vertical on Desktop, Horizontal on Mobile) -->
+                <div
+                    class="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 hide-scrollbar w-full lg:w-24 flex-shrink-0">
+                    <button type="button"
+                        class="thumbnail active w-20 h-24 lg:w-full lg:h-28 border-2 rounded-lg overflow-hidden flex-shrink-0 bg-[#f4f4f5]"
+                        onclick="changeImage(0, this)">
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop"
+                            class="w-full h-full object-contain mix-blend-multiply" alt="Thumb 1">
+                    </button>
+                    <button type="button"
+                        class="thumbnail w-20 h-24 lg:w-full lg:h-28 border-2 rounded-lg overflow-hidden flex-shrink-0 bg-[#f4f4f5]"
+                        onclick="changeImage(1, this)">
+                        <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=600&auto=format&fit=crop"
+                            class="w-full h-full object-contain mix-blend-multiply" alt="Thumb 2">
+                    </button>
+                    <button type="button"
+                        class="thumbnail w-20 h-24 lg:w-full lg:h-28 border-2 rounded-lg overflow-hidden flex-shrink-0 bg-[#f4f4f5]"
+                        onclick="changeImage(2, this)">
+                        <img src="https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=600&auto=format&fit=crop"
+                            class="w-full h-full object-contain mix-blend-multiply" alt="Thumb 3">
+                    </button>
+                </div>
+
+                <!-- Main Image -->
+                <div class="flex-1 bg-[#f4f4f5] rounded-xl relative overflow-hidden cursor-crosshair h-[500px] flex items-center justify-center p-8 lg:p-12 group"
+                    onmousemove="zoomImage(event)" onmouseleave="resetZoom(event)">
+                    <!-- Hint Text -->
+                    <div
+                        class="absolute  left-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-none shadow-sm">
+                        <span class="material-symbols-outlined text-[14px]">zoom_in</span>
+                    </div>
+                    <!-- The Image -->
+                    <img id="main-image"
+                        src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop"
+                        class="max-w-[120%] max-h-[120%] object-contain mix-blend-multiply filter drop-shadow-2xl"
+                        alt="MERCURIAL ELITE">
+                </div>
+            </div>
+
+            <!-- Details Area (Right) -->
+            <div class="lg:col-span-7 flex flex-col justify-center lg:pr-12 lg:pl-8">
+
+                <!-- Title -->
+                <h1 class="text-4xl lg:text-[56px] font-black uppercase tracking-tighter leading-[0.95] mb-6">MERCURIAL
+                    <br> ELITE</h1>
+
+                <!-- Price -->
+                <p class="text-[22px] font-black mb-10">$249.00</p>
+
+                <!-- Size Selector -->
+                <div class="mb-8">
+                    <p class="text-[10px] font-bold uppercase tracking-widest mb-4">SELECT SIZE (US)</p>
+                    <div class="grid grid-cols-3 sm:grid-cols-9 gap-3">
+                        <button
+                            class="w-full py-3.5 border border-gray-200 text-sm font-semibold hover:border-black transition-colors rounded-md">7</button>
+                        <button
+                            class="w-full py-3.5 border border-gray-200 text-sm font-semibold hover:border-black transition-colors rounded-md">8</button>
+                        <button
+                            class="w-full py-3.5 border-2 border-black bg-black text-white text-sm font-semibold rounded-md">9</button>
+                        <button
+                            class="w-full py-3.5 border border-gray-200 text-sm font-semibold hover:border-black transition-colors rounded-md">10</button>
+                        <button
+                            class="w-full py-3.5 border border-gray-200 text-sm font-semibold hover:border-black transition-colors rounded-md text-gray-400 decoration-line-through">11</button>
+                    </div>
+                </div>
+
+                <!-- Color Selector -->
+                <div class="mb-10">
+                    <p class="text-[10px] font-bold uppercase tracking-widest mb-4">SELECT COLOR</p>
+                    <div class="flex gap-4 px-1">
+                        <button
+                            class="color-selector-btn active w-[30px] h-[30px] rounded-full bg-[#d7323b] ring-1 ring-offset-4 ring-black border border-transparent transition-all outline-none"
+                            title="Red" onclick="selectColor(this)"></button>
+                        <button
+                            class="color-selector-btn w-[30px] h-[30px] rounded-full bg-[#1a1a1a] ring-1 ring-offset-4 ring-transparent hover:ring-gray-300 border border-gray-200 transition-all outline-none"
+                            title="Black" onclick="selectColor(this)"></button>
+                        <button
+                            class="color-selector-btn w-[30px] h-[30px] rounded-full bg-[#f4f4f5] ring-1 ring-offset-4 ring-transparent hover:ring-gray-300 border border-gray-300 transition-all outline-none"
+                            title="Silver" onclick="selectColor(this)"></button>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex flex-col gap-3 mb-10">
+                    <div class="flex gap-3">
+                        <button
+                            class="flex-1 bg-white border border-gray-300 text-black py-4 uppercase font-bold text-[11px] tracking-[0.2em] hover:border-black transition-colors rounded-md flex items-center justify-center gap-2">
+                            <span>ADD TO BAG</span>
+                        </button>
+                        <button
+                            class="w-[60px] bg-[#f4f4f5] flex items-center justify-center rounded-md hover:bg-gray-200 transition-colors text-gray-600">
+                            <span class="material-symbols-outlined text-[20px]">favorite</span>
+                        </button>
+                    </div>
+                    <button
+                        class="w-full bg-black text-white py-4 uppercase font-bold text-[11px] tracking-[0.2em] hover:bg-gray-800 transition-colors rounded-md">
+                        BUY NOW
+                    </button>
+                </div>
+
+                <!-- Description -->
+                <p class="text-[13px] text-gray-500 font-medium leading-relaxed">
+                    Engineered for explosive speed and precision. The Mercurial Elite features a 360-degree Flyknit
+                    construction that wraps your foot for a second-skin fit, paired with a specialized plate for
+                    ultimate traction.
+                </p>
+            </div>
+        </div>
+
+        <!-- Similar Products Section -->
+        <section class="mb-32 pt-12 border-t border-gray-100">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-[22px] font-black uppercase tracking-tighter">SIMILAR PRODUCTS</h2>
+                <!-- Arrows -->
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 px-4 xl:px-0">
+
+                <!-- Card 1 -->
+                <div class="product-grid-card group border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white">
+                    <div
+                        class="relative bg-[#f6f6f6] rounded-[16px] aspect-square flex items-center justify-center mb-5 overflow-hidden">
+                        <button
+                            class="absolute top-3 right-3 bg-white w-[34px] h-[34px] rounded-full flex items-center justify-center shadow-sm text-gray-400 hover:text-red-500 transition-all z-10 hover:shadow">
+                            <span class="material-symbols-outlined text-[18px]">favorite</span>
+                        </button>
+                        <div
+                            class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-[8px] flex items-center gap-1 z-10 shadow-sm border border-gray-100/50">
+                            <span class="material-symbols-outlined text-[14px] text-gray-400">schedule</span>
+                            <span class="text-[11px] font-bold text-gray-700">Only 7 left</span>
+                        </div>
+                        <div
+                            class="carousel-container relative w-[85%] h-[85%] flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
+                            <img src="https://images.unsplash.com/photo-1605348532723-67c12f70f209?q=80&w=600&auto=format&fit=crop"
+                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-100" />
+                            <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=600&auto=format&fit=crop"
+                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
+                            <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=600&auto=format&fit=crop"
+                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
+                        </div>
+                    </div>
+                    <div class="px-1 flex-1 flex flex-col">
+                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">PREMIUM</div>
+                        <h3 class="text-[15px] font-extrabold text-gray-900 mb-1.5">boldfit</h3>
+                        <div class="text-[19px] font-extrabold text-gray-900 mb-6 leading-none">₹3,000</div>
+
+                        <div class="mt-auto flex flex-col gap-2">
+                            <button
+                                class="w-full bg-black text-white text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-800 transition-colors">Add
+                                to Cart</button>
+                            <button
+                                class="w-full bg-[#f4f4f5] text-black text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-200 transition-colors">Buy
+                                Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="product-grid-card group border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white">
+                    <div
+                        class="relative bg-[#f6f6f6] rounded-[16px] aspect-square flex items-center justify-center mb-5 overflow-hidden">
+                        <button
+                            class="absolute top-3 right-3 bg-white w-[34px] h-[34px] rounded-full flex items-center justify-center shadow-sm text-gray-400 hover:text-red-500 transition-all z-10 hover:shadow">
+                            <span class="material-symbols-outlined text-[18px]">favorite</span>
+                        </button>
+                        <div
+                            class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-[8px] flex items-center gap-1 z-10 shadow-sm border border-gray-100/50">
+                            <span class="material-symbols-outlined text-[14px] text-gray-400">check_circle</span>
+                            <span class="text-[11px] font-bold text-gray-700">In Stock</span>
+                        </div>
+                        <div
+                            class="carousel-container relative w-[85%] h-[85%] flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
+                            <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=600&auto=format&fit=crop"
+                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-100" />
+                            <img src="https://images.unsplash.com/photo-1514989940723-e8e51635b782?q=80&w=600&auto=format&fit=crop"
+                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
+                            <img src="https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=600&auto=format&fit=crop"
+                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
+                        </div>
+                    </div>
+                    <div class="px-1 flex-1 flex flex-col">
+                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">PREMIUM</div>
+                        <h3 class="text-[15px] font-extrabold text-gray-900 mb-1.5">reebok</h3>
+                        <div class="text-[19px] font-extrabold text-gray-900 mb-6 leading-none">₹8,000</div>
+
+                        <div class="mt-auto flex flex-col gap-2">
+                            <button
+                                class="w-full bg-black text-white text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-800 transition-colors">Add
+                                to Cart</button>
+                            <button
+                                class="w-full bg-[#f4f4f5] text-black text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-200 transition-colors">Buy
+                                Now</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="product-grid-card group border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white">
+                    <div
+                        class="relative bg-[#f6f6f6] rounded-[16px] aspect-square flex items-center justify-center mb-5 overflow-hidden">
+                        <button
+                            class="absolute top-3 right-3 bg-white w-[34px] h-[34px] rounded-full flex items-center justify-center shadow-sm text-gray-400 hover:text-red-500 transition-all z-10 hover:shadow">
+                            <span class="material-symbols-outlined text-[18px]">favorite</span>
+                        </button>
+                        <div
+                            class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-[8px] flex items-center gap-1 z-10 shadow-sm border border-gray-100/50">
+                            <span class="material-symbols-outlined text-[14px] text-gray-400">check_circle</span>
+                            <span class="text-[11px] font-bold text-gray-700">In Stock</span>
+                        </div>
+                        <div
+                            class="carousel-container relative w-[85%] h-[85%] flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
+                            <img src="https://images.unsplash.com/photo-1582236940866-23b08e7ff2b3?q=80&w=600&auto=format&fit=crop"
+                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-100" />
+                            <img src="https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=600&auto=format&fit=crop"
+                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
+                            <img src="https://images.unsplash.com/photo-1508243529287-e21914733111?q=80&w=600&auto=format&fit=crop"
+                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
+                        </div>
+                    </div>
+                    <div class="px-1 flex-1 flex flex-col">
+                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">RAPIDO</div>
+                        <h3 class="text-[15px] font-extrabold text-gray-900 mb-1.5">New balance</h3>
+                        <div class="text-[19px] font-extrabold text-gray-900 mb-6 leading-none">₹72,000</div>
+
+                        <div class="mt-auto flex flex-col gap-2">
+                            <button
+                                class="w-full bg-black text-white text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-800 transition-colors">Add
+                                to Cart</button>
+                            <button
+                                class="w-full bg-[#f4f4f5] text-black text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-200 transition-colors">Buy
+                                Now</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Customer Reviews -->
+        <section class="mb-32">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
+
+                <!-- Left: Overall Rating -->
+                <div class="lg:col-span-4">
+                    <h2 class="text-2xl font-black uppercase tracking-tighter mb-6">CUSTOMER REVIEWS</h2>
+                    <div class="flex items-baseline gap-2 mb-3">
+                        <span class="text-6xl font-black tracking-tighter">4.8</span>
+                        <span class="text-xl font-bold text-gray-400">/ 5.0</span>
+                    </div>
+                    <div class="flex text-black mb-4">
+                        <span class="material-symbols-outlined icon-fill">star</span>
+                        <span class="material-symbols-outlined icon-fill">star</span>
+                        <span class="material-symbols-outlined icon-fill">star</span>
+                        <span class="material-symbols-outlined icon-fill">star</span>
+                        <span class="material-symbols-outlined icon-fill text-gray-200">star</span>
+                    </div>
+                    <p class="text-xs text-gray-500 font-medium tracking-wide">Based on 1,428 verified guest reviews.
+                    </p>
+                </div>
+
+                <!-- Right: Review List -->
+                <div class="lg:col-span-8 flex flex-col gap-10">
+
+                    <!-- Review Item 1 -->
+                    <div class="border-l-[3px] border-black pl-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="text-sm font-black uppercase tracking-tight mb-1">INCREDIBLE RESPONSIVENESS
+                                </h4>
+                                <div class="flex text-black text-[12px]">
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">MARCUS J. — 3
+                                DAYS AGO</span>
+                        </div>
+                        <p class="text-[13px] text-gray-600 font-medium leading-relaxed mt-3">
+                            The plate is snappy and the lockdown is the best I've ever felt in a Mercurial. Definitely
+                            see a noticeable pro tag to my sprint time play.
+                        </p>
+                    </div>
+
+                    <!-- Review Item 2 -->
+                    <div class="border-l-[3px] border-gray-200 hover:border-black transition-colors pl-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="text-sm font-black uppercase tracking-tight mb-1">GREAT TOUCH, NARROW FIT
+                                </h4>
+                                <div class="flex text-black text-[12px]">
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                    <span class="material-symbols-outlined text-[14px]">star</span>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">DANNIL T. — 1
+                                WEEK AGO</span>
+                        </div>
+                        <p class="text-[13px] text-gray-600 font-medium leading-relaxed mt-3">
+                            Touch on the ball is sublime. Be warned : they are very narrow, so I'd recommend sizing up
+                            by half if you have wide feet.
+                        </p>
+                    </div>
+
+                    <!-- Review Item 3 -->
+                    <div class="border-l-[3px] border-gray-200 hover:border-black transition-colors pl-6">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="text-sm font-black uppercase tracking-tight mb-1">PURE SPEED</h4>
+                                <div class="flex text-black text-[12px]">
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
+                                </div>
+                            </div>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">LEO G. — 2 WEEKS
+                                AGO</span>
+                        </div>
+                        <p class="text-[13px] text-gray-600 font-medium leading-relaxed mt-3">
+                            Translates force down directly into forward trajectory. The traction is simply on another
+                            level right out the box. The aggression level is elite.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    {{>footer}}
+
+
+    <!-- Interaction Script -->
+    <script>
+        const imageSources = [
+            'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=1200&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=1200&auto=format&fit=crop'
+        ];
+
+        // Changing the main image from thumbnail
+        function changeImage(index, element) {
+            const mainImg = document.getElementById('main-image');
+
+            // Fade out
+            mainImg.style.opacity = '0.3';
+
+            setTimeout(() => {
+                mainImg.src = imageSources[index];
+                // Fade back in
+                requestAnimationFrame(() => {
+                    mainImg.style.opacity = '1';
+                });
+            }, 200); // 200ms matches approx transition
+
+            // Update active state on thumbnails
+            document.querySelectorAll('.thumbnail').forEach(th => {
+                th.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+
+        // Image Zoom Logic
+        function zoomImage(event) {
+            const container = event.currentTarget;
+            const img = document.getElementById('main-image');
+
+            // Get boundaries of the container
+            const rect = container.getBoundingClientRect();
+
+            // Calculate mouse position relative to container
+            let x = event.clientX - rect.left;
+            let y = event.clientY - rect.top;
+
+            // Cap the values to stay safely inside bounds
+            x = Math.max(0, Math.min(x, rect.width));
+            y = Math.max(0, Math.min(y, rect.height));
+
+            // Convert to percentage
+            const xPercent = (x / rect.width) * 100;
+            const yPercent = (y / rect.height) * 100;
+
+            // Move origin dynamically as user moves mouse
+            img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+
+            // Scale up if not already scaled
+            if (!container.dataset.zooming) {
+                img.style.transform = 'scale(2.4)';
+                container.dataset.zooming = "true";
+            }
+        }
+
+        function resetZoom(event) {
+            const container = event.currentTarget;
+            const img = document.getElementById('main-image');
+
+            // Revert scale
+            img.style.transform = 'scale(1)';
+            container.dataset.zooming = "";
+
+            // Reset origin smoothly after scale finishes
+            setTimeout(() => {
+                if (!container.dataset.zooming) {
+                    img.style.transformOrigin = 'center center';
+                }
+            }, 300);
+        }
+
+        // Color selector logic
+        function selectColor(btn) {
+            document.querySelectorAll('.color-selector-btn').forEach(b => {
+                b.classList.remove('ring-black');
+                b.classList.add('ring-transparent');
+            });
+            btn.classList.add('ring-black');
+            btn.classList.remove('ring-transparent', 'hover:ring-gray-300');
+        }
+
+        // Product Carousel logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.product-grid-card');
+
+            cards.forEach(card => {
+                const images = card.querySelectorAll('.carousel-img');
+                if (images.length <= 1) return;
+
+                let intervalId;
+                let currentIndex = 0;
+
+                card.addEventListener('mouseenter', () => {
+                    intervalId = setInterval(() => {
+                        images[currentIndex].classList.remove('opacity-100');
+                        images[currentIndex].classList.add('opacity-0');
+                        currentIndex = (currentIndex + 1) % images.length;
+                        images[currentIndex].classList.remove('opacity-0');
+                        images[currentIndex].classList.add('opacity-100');
+                    }, 1000);
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    clearInterval(intervalId);
+                    images.forEach((img, idx) => {
+                        if (idx === 0) {
+                            img.classList.remove('opacity-0');
+                            img.classList.add('opacity-100');
+                        } else {
+                            img.classList.remove('opacity-100');
+                            img.classList.add('opacity-0');
+                        }
+                    });
+                    currentIndex = 0;
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

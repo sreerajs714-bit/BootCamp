@@ -20,22 +20,40 @@ export const Adminlogin = async (req, res) => {
     const { email, password } = req.body;
 
     const admin = await Admin.findOne({ email });
-   
+
     if (!admin) {
-      return res.render('admin/login', { message: 'Invalid email or password' });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email or password"
+      });
     }
 
     const isMatch = await bcrypt.compare(password, admin.password);
+
     if (!isMatch) {
-      return res.render('admin/login', { message: 'Invalid email or password' });
+      return res.status(400).json({
+        success: false,
+        message: "Invalid email or password"
+      });
     }
 
-    req.session.admin = { id: admin._id, email: admin.email };
-    return res.redirect('/admin/dashboard');
+    req.session.admin = {
+      id: admin._id,
+      email: admin.email
+    };
+
+    return res.json({
+      success: true,
+      message: "Login successful"
+    });
 
   } catch (error) {
-    console.error('login error:', error);
-    res.status(500).send('Server Error');
+    console.error("login error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
 };
 

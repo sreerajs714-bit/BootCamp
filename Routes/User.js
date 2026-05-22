@@ -9,6 +9,9 @@ import { changeEmail, changePassword, editProfile, loadEditProfile, loadProfile,
 import { uploadProfile } from "../Middleware/multer.js";
 import passport from "../Config/passport.js";
 import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controller/User/addressController.js";
+import { loadMens, loadProductDetail } from "../Controller/User/productController.js";
+import { loadWishlist } from "../Controller/User/wishlistController.js";
+import { loadCart } from "../Controller/User/cartController.js";
 
 
 route.get("/auth/google",
@@ -57,6 +60,10 @@ route.get("/address",checkSession,loadAddress);
 route.post("/address",checkSession,addAddress)
 route.put("/address/:id", checkSession,editAddress);
 route.delete("/address/:id", checkSession,deleteAddress);
+route.get("/mens",loadMens);
+route.get("/productDetail",loadProductDetail);
+route.get("/wishlist",loadWishlist);
+route.get("/cart",loadCart);
 
 
 export default route;

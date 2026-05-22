@@ -256,9 +256,6 @@
     } else if (!usernameRegex.test(username)) {
       Swal.fire({ icon: "error", title: "Invalid Username", text: "Username must be 3-16 characters and contain only letters, numbers, or _" });
       return false;
-    } else if (!email.includes("@gmail.com")) {
-      Swal.fire({ icon: "warning", title: "Oops...", text: "Email Must Contain @gmail.com" });
-      return false;
     } else if (password.length < 4) {
       Swal.fire({ icon: "warning", title: "Oops...", text: "Password must be at least 4 characters" });
       return false;

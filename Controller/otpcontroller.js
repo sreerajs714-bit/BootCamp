@@ -9,7 +9,6 @@ export const verifyOTP = async (req, res) => {
     try {
 
         let { email, otp } = req.body;
-        console.log("otp",req.body);
 
         email = email.trim().toLowerCase();
         otp = otp.trim();
@@ -154,6 +153,8 @@ export const verifyOTP = async (req, res) => {
 export const resendOTP = async (req, res) => {
 
   try {
+    console.log("Session ID:", req.sessionID);
+console.log("Session data:", req.session);
 
     const email = req.session.otpEmail;
     const purpose = req.session.otpPurpose;

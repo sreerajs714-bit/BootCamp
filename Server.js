@@ -4,6 +4,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import passport from "./config/passport.js";
+import { fileURLToPath } from "url";
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+import path from "path";
 import hbs from "hbs"
 import {connectDB} from "./MongoDb/ConnectDB.js";
 import UserRoute from "./Routes/User.js";
@@ -19,6 +23,18 @@ hbs.registerHelper("slice", function (text, start, end) {
     return text.toString().slice(start, end);
 });
 
+hbs.registerHelper("addIndex", (index, currentPage, limit) => {
+    return (currentPage - 1) * limit + index + 1;
+});
+
+hbs.registerHelper('substring', (str, start, end) => {
+    if (!str) return '';
+    return str.toString().substring(start, end);
+});
+
+hbs.registerPartials(path.join(__dirname, "views/partials"));
+
+
 app.use(nocache());
 app.use(session({
     secret:process.env.SESSION_SECRET,
@@ -30,13 +46,20 @@ app.use(session({
   maxAge: 24 * 60 * 60 * 1000
 }            
 }));
+hbs.registerHelper('gt', (a, b) => a > b);
 hbs.registerHelper("add", (a, b) => a + b);
 hbs.registerHelper("eq", function (a, b) {
     return a === b;
 });
 
+hbs.registerHelper("lte", (a, b) => a <= b);
+hbs.registerHelper('json', (context) => JSON.stringify(context));
+hbs.registerHelper('selected', (a, b) => a && b && a.toString() === b.toString() ? 'selected' : '');
+
+
 app.use(passport.initialize());
 app.use(passport.session());
+
 
 app.use((req, res, next) => {
   res.locals.user = req.session.user || null;

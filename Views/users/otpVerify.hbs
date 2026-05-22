@@ -183,7 +183,7 @@
         <!-- OTP Boxes -->
         <div>
           <div id="otp-container" aria-label="6-digit verification code" class="flex justify-between gap-3">
-            <input class="otp-input w-12 h-16 text-center text-2xl font-headline font-bold bg-surface-container-low border-b-2 border-outline-variant focus:outline-none transition-all duration-200 rounded-sm" maxlength="1" inputmode="numeric" type="text" autocomplete="one-time-code">
+            <input class="otp-input w-12 h-16 text-center text-2xl font-headline font-bold bg-surface-container-low border-b-2 border-outline-variant focus:outline-none transition-all duration-200 rounded-sm" maxlength="6" inputmode="numeric" type="text" autocomplete="one-time-code">
             <input class="otp-input w-12 h-16 text-center text-2xl font-headline font-bold bg-surface-container-low border-b-2 border-outline-variant focus:outline-none transition-all duration-200 rounded-sm" maxlength="1" inputmode="numeric" type="text">
             <input class="otp-input w-12 h-16 text-center text-2xl font-headline font-bold bg-surface-container-low border-b-2 border-outline-variant focus:outline-none transition-all duration-200 rounded-sm" maxlength="1" inputmode="numeric" type="text">
             <input class="otp-input w-12 h-16 text-center text-2xl font-headline font-bold bg-surface-container-low border-b-2 border-outline-variant focus:outline-none transition-all duration-200 rounded-sm" maxlength="1" inputmode="numeric" type="text">
@@ -246,17 +246,17 @@ document.addEventListener("DOMContentLoaded", () => {
   /* =======================
      🔢 OTP INPUT LOGIC
   ======================== */
-  const otpInputs   = Array.from(document.querySelectorAll('.otp-input'));
-  const errorMsg    = document.getElementById('error-msg');
-  const submitBtn   = document.getElementById('submit-btn');
-  const btnText     = document.getElementById('btn-text');
-  const btnIcon     = document.getElementById('btn-icon');
+  const otpInputs = Array.from(document.querySelectorAll('.otp-input'));
+  const errorMsg  = document.getElementById('error-msg');
+  const submitBtn = document.getElementById('submit-btn');
+  const btnText   = document.getElementById('btn-text');
+  const btnIcon   = document.getElementById('btn-icon');
 
   // Focus first box on load
   otpInputs[0].focus();
 
   function setActive(index) {
-    otpInputs.forEach((inp, i) => {
+    otpInputs.forEach((inp) => {
       inp.classList.remove('active');
       if (inp.value) inp.classList.add('filled');
       else inp.classList.remove('filled');
@@ -280,6 +280,20 @@ document.addEventListener("DOMContentLoaded", () => {
     errorMsg.textContent = '';
   }
 
+  // ✅ Shared paste distributor — fills all boxes from index 0
+  function distributePaste(text) {
+    const digits = text.replace(/\D/g, '').slice(0, 6);
+    if (!digits) return;
+    otpInputs.forEach((inp, i) => {
+      inp.value = digits[i] || '';
+      if (digits[i]) inp.classList.add('filled');
+      else inp.classList.remove('filled');
+    });
+    const focusIdx = Math.min(digits.length, otpInputs.length - 1);
+    otpInputs[focusIdx].focus();
+    setActive(focusIdx);
+  }
+
   otpInputs.forEach((input, index) => {
 
     input.addEventListener('focus', () => setActive(index));
@@ -290,11 +304,9 @@ document.addEventListener("DOMContentLoaded", () => {
       if (e.key === 'Backspace') {
         e.preventDefault();
         if (input.value) {
-          // Clear current box
           input.value = '';
           setActive(index);
         } else if (index > 0) {
-          // Move to previous and clear it
           otpInputs[index - 1].value = '';
           otpInputs[index - 1].focus();
           setActive(index - 1);
@@ -314,6 +326,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      // ✅ Allow Ctrl+V / Cmd+V so paste event can fire
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') return;
+
       // Allow only digits
       if (!/^\d$/.test(e.key) && !['Tab', 'Enter'].includes(e.key)) {
         e.preventDefault();
@@ -321,6 +336,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     input.addEventListener('input', (e) => {
+      // ✅ Skip if triggered by paste — already handled by paste event
+      if (e.inputType === 'insertFromPaste') return;
+
       const val = e.target.value.replace(/\D/g, '');
 
       if (val.length === 0) {
@@ -329,15 +347,9 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Handle paste into a single box (browser fills it as multi-char)
+      // Handle multi-char input (e.g. autofill)
       if (val.length > 1) {
-        // distribute across boxes
-        val.split('').forEach((ch, i) => {
-          if (otpInputs[index + i]) otpInputs[index + i].value = ch;
-        });
-        const next = Math.min(index + val.length, otpInputs.length - 1);
-        otpInputs[next].focus();
-        setActive(next);
+        distributePaste(val);
         return;
       }
 
@@ -348,20 +360,17 @@ document.addEventListener("DOMContentLoaded", () => {
         otpInputs[index + 1].focus();
         setActive(index + 1);
       } else {
-        setActive(index); // stay on last
+        setActive(index);
       }
     });
 
+    // ✅ Fixed paste handler
     input.addEventListener('paste', (e) => {
       e.preventDefault();
-      const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
-      pasted.split('').forEach((ch, i) => {
-        if (otpInputs[i]) otpInputs[i].value = ch;
-      });
-      const focusIdx = Math.min(pasted.length, otpInputs.length - 1);
-      otpInputs[focusIdx].focus();
-      setActive(focusIdx);
+      const pasted = e.clipboardData.getData('text');
+      distributePaste(pasted);
     });
+
   });
 
   setActive(0);
@@ -388,6 +397,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const res  = await fetch("/users/otpVerify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ otp, email, purpose })
       });
 
@@ -400,11 +410,9 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => { window.location.href = data.redirectUrl; }, 300);
       } else {
         showError(data.message || 'Incorrect OTP. Please try again.');
-        // Reset boxes
         otpInputs.forEach(i => i.value = '');
         otpInputs[0].focus();
         setActive(0);
-        // Reset button
         submitBtn.disabled = false;
         btnText.textContent = 'VERIFY & CONTINUE';
         btnIcon.textContent = 'arrow_forward';
@@ -423,7 +431,7 @@ document.addEventListener("DOMContentLoaded", () => {
      ⏱️ TIMER + RESEND
   ======================== */
   let timeLeft = 60;
-  const timerEl  = document.getElementById('countdown-timer');
+  const timerEl   = document.getElementById('countdown-timer');
   const resendBtn = document.getElementById('resendBtn');
   let timerInterval;
 
@@ -434,7 +442,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if (timeLeft <= 0) {
         clearInterval(timerInterval);
         timerEl.textContent = '00:00';
-        // Enable resend
         resendBtn.classList.remove('opacity-50', 'pointer-events-none', 'text-outline');
         resendBtn.classList.add('text-primary', 'border-primary');
         return;
@@ -458,7 +465,10 @@ document.addEventListener("DOMContentLoaded", () => {
     clearError();
 
     try {
-      const res  = await fetch("/resendOtp", { method: "POST" });
+      const res  = await fetch("/users/resendOtp", {
+        method: "POST",
+        credentials: "include"
+      });
       const data = await res.json();
       if (!data.success) showError(data.message || 'Failed to resend OTP');
     } catch (err) {
@@ -467,8 +477,8 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
-
 </script>
+
 {{#if message}}
 <script>
   document.addEventListener("DOMContentLoaded", function () {
@@ -479,5 +489,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 </script>
 {{/if}}
+
 </body>
 </html>

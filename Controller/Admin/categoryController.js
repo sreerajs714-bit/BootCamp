@@ -1,4 +1,5 @@
 import Category from "../../Model/categoryModel.js";
+import Product from "../../Model/productModel.js";
 
 export const loadCategory = async (req, res) => {
   try {
@@ -6,23 +7,49 @@ export const loadCategory = async (req, res) => {
     const limit = 5;
     const skip = (page - 1) * limit;
     const search = req.query.search || "";
+    const filterParam = req.query.filter || "all";
+    const sort = req.query.sort || "default";
 
-    // Search filter
-    const filter = {
-      isDeleted: false,
-      ...(search && { name: { $regex: search, $options: "i" } }),
-    };
+    // ── Build the query filter ──────────────────────────────────
+    let dbFilter = {};
 
-    // Fetch categories + total count in parallel
+    if (filterParam === "deleted") {
+      dbFilter.isDeleted = true;
+    } else if (filterParam === "active") {
+      dbFilter.isDeleted = false;
+      dbFilter.isActive = true;
+    } else if (filterParam === "inactive") {
+      dbFilter.isDeleted = false;
+      dbFilter.isActive = false;
+    } else {
+      // "all" → show everything including deleted
+    }
+
+    if (search) {
+      dbFilter.name = { $regex: search, $options: "i" };
+    }
+
+    // ── Build the sort order ────────────────────────────────────
+    let sortOrder = { createdAt: -1 };
+    if (sort === "name-asc")  sortOrder = { createdAt: -1 };
+    if (sort === "name-desc") sortOrder = { createdAt: 1 };
+
+    // ── Fetch paginated categories ──────────────────────────────
     const [categories, totalCategories] = await Promise.all([
-      Category.find(filter)
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit),
-      Category.countDocuments(filter),
+      Category.find(dbFilter).sort(sortOrder).skip(skip).limit(limit).lean(),
+      Category.countDocuments(dbFilter),
     ]);
 
-    // Stats for the 3 cards
+    // ── Attach product count to each category ───────────────────
+for (let category of categories) {
+  const count = await Product.countDocuments({
+    category: category._id,
+    isDeleted: false,
+  });
+  category.productCount = count;
+}
+
+    // ── Stats cards ─────────────────────────────────────────────
     const [totalCount, activeCount, inactiveCount] = await Promise.all([
       Category.countDocuments({ isDeleted: false }),
       Category.countDocuments({ isDeleted: false, isActive: true }),
@@ -31,21 +58,23 @@ export const loadCategory = async (req, res) => {
 
     const totalPages = Math.ceil(totalCategories / limit);
 
-  res.render("Admin/category", {
-  categories,
-  currentPage: page,
-  totalPages,
-  totalCount,
-  activeCount,
-  inactiveCount,
-  totalCategories,
-  search,
-  hasPrevPage: page > 1,
-  hasNextPage: page < totalPages,
-  prevPage: page - 1,
-  nextPage: page + 1,
-  pageNumbers: Array.from({ length: totalPages }, (_, i) => i + 1),
-});
+    res.render("Admin/category", {
+      categories,
+      currentPage: page,
+      totalPages,
+      totalCount,
+      activeCount,
+      inactiveCount,
+      totalCategories,
+      search,
+      filter: filterParam,
+      sort,
+      hasPrevPage: page > 1,
+      hasNextPage: page < totalPages,
+      prevPage: page - 1,
+      nextPage: page + 1,
+      pageNumbers: Array.from({ length: totalPages }, (_, i) => i + 1),
+    });
 
   } catch (error) {
     console.error("loadCategory error:", error);
@@ -135,14 +164,17 @@ export const editCategory = async (req, res) => {
     }
 
     // 3. Update
-    const updated = await Category.findByIdAndUpdate(
-      id,
-      {
-        name: name.trim(),
-        isActive: isActive ?? true,
-      },
-      { new: true }
-    );
+   const updated = await Category.findByIdAndUpdate(
+    id,
+    {
+      name: name.trim(),
+      isActive,
+    },
+    {
+      returnDocument: "after",
+      runValidators: true,
+    }
+   );
 
     if (!updated) {
       return res.status(404).json({
@@ -193,5 +225,27 @@ export const deleteCategory = async (req, res) => {
       success: false,
       message: "Internal server error",
     });
+  }
+};
+
+export const restoreCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const category = await Category.findByIdAndUpdate(
+      id,
+      { isDeleted: false, isActive: true },
+      {returnDocument: "after"}
+    );
+
+    if (!category) {
+      return res.status(404).json({ success: false, message: "Category not found" });
+    }
+
+    res.json({ success: true, message: "Category restored successfully" });
+
+  } catch (error) {
+    console.error("restoreCategory error:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };

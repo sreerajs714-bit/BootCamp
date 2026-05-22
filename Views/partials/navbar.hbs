@@ -1,0 +1,47 @@
+<!-- Navigation -->
+<header id="main-navbar"
+    class="w-full bg-white fixed top-0 z-50 border-b border-gray-200 shadow-sm transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+
+        <!-- Logo -->
+        <div class="flex-shrink-0 cursor-pointer group">
+            <h1 class="font-display font-black text-3xl tracking-tighter uppercase text-black transition-all duration-300 group-hover:scale-105">
+                BOOT<span class="font-light">CAMP</span>
+            </h1>
+        </div>
+
+        <!-- Menu Items (Desktop) -->
+        <nav class="hidden lg:flex items-center space-x-12 font-medium text-[15px] tracking-wide">
+            <a href="#" class="text-gray-700 hover:text-black font-semibold transition-colors duration-300">Home</a>
+            <a href="/users/mens" class="text-gray-700 hover:text-black transition-colors duration-300">Men</a>
+            <a href="#" class="text-gray-700 hover:text-black transition-colors duration-300">Women</a>
+        </nav>
+
+        <!-- Icons -->
+        <div class="flex items-center space-x-7">
+            <button class="icon-btn" aria-label="Search">
+                <span class="material-symbols-outlined font-light text-[28px] text-gray-700 hover:text-black transition-colors duration-300">search</span>
+            </button>
+            <button class="icon-btn" aria-label="Wishlist">
+                <span class="material-symbols-outlined font-light text-[28px] text-gray-700 hover:text-black transition-colors duration-300">favorite</span>
+            </button>
+            <button class="icon-btn relative" aria-label="Cart">
+                <span class="material-symbols-outlined font-light text-[28px] text-gray-700 hover:text-black transition-colors duration-300">shopping_bag</span>
+                <!-- Cart Badge -->
+                <span class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold w-4.5 h-4.5 p-1 rounded-full flex items-center justify-center border-2 border-white box-content">2</span>
+            </button>
+            {{#if user}}
+            <button class="icon-btn" aria-label="Profile">
+                <a href="/users/profile">
+                    <span class="material-symbols-outlined font-light text-[28px] text-gray-700 hover:text-black transition-colors duration-300">person</span>
+                </a>
+            </button>
+            {{else}}
+            <a href="/users/login"
+                class="px-6 py-2.5 text-[15px] font-medium rounded-full bg-black text-white hover:bg-gray-800 transition-all duration-300">
+                Login
+            </a>
+            {{/if}}
+        </div>
+    </div>
+</header>

@@ -266,9 +266,6 @@ function formValidate(e){
             text:"Fill All The Fields"
         });
         return false
-    }else if (!email.includes("@gmail.com")) {
-      Swal.fire({ icon: "warning", title: "Oops...", text: "Email Must Contain @gmail.com" });
-      return false;
     }
     e.target.submit();
     return true;
@@ -284,7 +281,6 @@ password.type = "password";
 }
 
 }
-
   window.addEventListener("pageshow", (e) => {
     if (e.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
       window.location.reload();
