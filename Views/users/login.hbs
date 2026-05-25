@@ -206,7 +206,9 @@
 </footer>
 </section>
 </main>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+     <script src="/toast/toast.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const titleElement = document.getElementById('main-title');
@@ -251,25 +253,45 @@
     });
 
 
-document.addEventListener("DOMContentLoaded",function(){
-document.querySelector("form").addEventListener("submit",formValidate);
-});
+ // ─── Form Submission via Axios ────────────────────────────────────────────
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelector("form").addEventListener("submit", formValidate);
+    });
 
-function formValidate(e){
-    e.preventDefault();
-    const email=document.getElementById("email").value;
-    const password=document.getElementById("password").value;
+    async function formValidate(e) {
+        e.preventDefault();
 
-    if(email===""||password===""){
-        Swal.fire({
-            icon: "warning",
-            text:"Fill All The Fields"
-        });
-        return false
+        const email    = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        if (!email || !password) {
+            showToast("warning","Fill All The Fields");
+            return;
+        }
+
+        const form = e.target;
+
+        try {
+            const response = await axios.post(form.action || window.location.href, {
+                email,
+                password,
+            });
+
+            showToast("success","Login successful!");
+
+            if (response.data?.redirect) {
+                window.location.href = response.data.redirect;
+            }
+
+        } catch (error) {
+            const message =
+                error.response?.data?.message ||
+                error.response?.data?.error   ||
+                "Something went wrong. Please try again.";
+
+            showToast( "error",message);
+        }
     }
-    e.target.submit();
-    return true;
-}
 function togglePassword(){
 
 const password = document.getElementById("password");

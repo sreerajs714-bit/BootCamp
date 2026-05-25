@@ -46,24 +46,24 @@
 
             <!-- Header Row -->
             <div class="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
-                <span class="text-[12px] font-bold uppercase tracking-[0.2em]">3 ITEMS SAVED</span>
+                <span class="items-saved text-[12px] font-bold uppercase tracking-[0.2em]">{{wishlistItems.length}} ITEMS SAVED</span>
             </div>
             
             <!-- Items Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 xl:gap-8">
                 
-                <!-- Card 1 (Out of Stock Example, matching provided image) -->
-                <div class="wishlist-card relative rounded-[16px] overflow-hidden group">
+                {{#each wishlistItems}}
+                <div class="wishlist-card relative rounded-[16px] overflow-hidden group" data-id="{{this.productId._id}}">
                     <div class="aspect-[3/4] bg-[#f4f4f5] relative">
                         <!-- Image Carousel -->
-                        <div class="carousel-container absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105 z-0">
-                            <img src="https://images.unsplash.com/photo-1596755094514-f87e32f6b717?q=80&w=800&auto=format&fit=crop" class="carousel-img absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-100 transition-opacity duration-300" alt="Oxford Shirt">
-                            <img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?q=80&w=800&auto=format&fit=crop" class="carousel-img absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-300" alt="Oxford Shirt Alt 1">
-                            <img src="https://images.unsplash.com/photo-1588359348347-9bc6cbea68cb?q=80&w=800&auto=format&fit=crop" class="carousel-img absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-300" alt="Oxford Shirt Alt 2">
-                        </div>
+                       <div class="carousel-container absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105 z-0">
+                       {{#each this.images}}
+                         <img src="{{this}}" class="carousel-img absolute inset-0 w-full h-full object-cover transition-opacity duration-300 {{#if @first}}opacity-100{{else}}opacity-0{{/if}}" alt="Product Image">
+                         {{/each}}
+                     </div>
                         
                         <!-- Top Right Remove button -->
-                        <button class="absolute top-4 right-4 w-[34px] h-[34px] bg-white/70 backdrop-blur-md rounded-full flex items-center justify-center text-gray-800 hover:bg-white hover:shadow-md transition-all z-20">
+                        <button onclick="removeFromWishlist('{{this.id}}', this.closest('.wishlist-card'))" class="absolute top-4 right-4 w-[34px] h-[34px] bg-white/70 backdrop-blur-md rounded-full flex items-center justify-center text-gray-800 hover:bg-white hover:shadow-md transition-all z-20">
                             <span class="material-symbols-outlined text-[16px]">close</span>
                         </button>
 
@@ -72,87 +72,54 @@
                         
                         <!-- Bottom Content Area -->
                         <div class="absolute bottom-0 left-0 right-0 p-5 flex flex-col justify-end z-10">
-                            <!-- Out of stock badge floating right -->
+                            <!-- Badges -->
+                            {{#if (eq this.productId.stock 0)}}
                             <div class="absolute right-0 bottom-[75px] bg-[#f26363] text-white text-[9px] font-black uppercase tracking-[0.1em] px-2.5 py-1 rounded-l shadow-sm flex items-center">
                                 OUT OF STOCK
                             </div>
+                            {{else if this.productId.old_price}}
+                            <div class="absolute right-0 bottom-[75px] bg-black text-white text-[9px] font-black uppercase tracking-[0.1em] px-2.5 py-1 rounded-l shadow-sm flex items-center">
+                                SALE
+                            </div>
+                            {{/if}}
                             
                             <!-- Product Info -->
                             <div class="flex justify-between items-end mb-4 pr-1 gap-2">
-                                <h3 class="text-white text-[12px] font-bold uppercase tracking-widest leading-tight">RELAXED FIT<br>OXFORD SHIRT</h3>
-                                <span class="text-white text-[13px] font-black">£19.99</span>
-                            </div>
-                            
-                            <!-- Action Button -->
-                            <button class="w-full border border-white/40 bg-gray-500/30 backdrop-blur-sm text-white/90 hover:text-white hover:bg-white/20 text-[11px] font-bold uppercase tracking-[0.2em] py-3.5 rounded-lg transition-all text-center">
-                                OUT OF STOCK
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                              <h3 class="text-white text-[12px] font-bold uppercase tracking-widest leading-tight">{{this.productName}}</h3>                                <div class="flex flex-col items-end">
+                                    {{#if this.productId.regularPrice}}
+                                    <span class="text-white/60 text-[10px] font-bold line-through"> {{this.price}}</span>
 
-                <!-- Card 2 (In Stock Example) -->
-                <div class="wishlist-card relative rounded-[16px] overflow-hidden group">
-                    <div class="aspect-[3/4] bg-[#f4f4f5] relative">
-                        <div class="carousel-container absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105 z-0">
-                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800&auto=format&fit=crop" class="carousel-img absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-100 transition-opacity duration-300" alt="Mercurial Elite">
-                            <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=800&auto=format&fit=crop" class="carousel-img absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-300" alt="Mercurial Elite Alt 1">
-                            <img src="https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=800&auto=format&fit=crop" class="carousel-img absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-300" alt="Mercurial Elite Alt 2">
-                        </div>
-                        
-                        <button class="absolute top-4 right-4 w-[34px] h-[34px] bg-white/70 backdrop-blur-md rounded-full flex items-center justify-center text-gray-800 hover:bg-white hover:shadow-md transition-all z-20">
-                            <span class="material-symbols-outlined text-[16px]">close</span>
-                        </button>
+                                    <span class="text-white text-[13px] font-black text-[#f26363]">{{this.price}}</span>
+                                     {{else}}
 
-                        <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-gray-900/80 via-gray-900/40 to-transparent pointer-events-none z-0"></div>
-                        
-                        <div class="absolute bottom-0 left-0 right-0 p-5 flex flex-col justify-end z-10">
-                            <div class="flex justify-between items-end mb-4 pr-1 gap-2">
-                                <h3 class="text-white text-[12px] font-bold uppercase tracking-widest leading-tight">MERCURIAL<br>ELITE</h3>
-                                <span class="text-white text-[13px] font-black">$249.00</span>
-                            </div>
-                            
-                            <button class="w-full bg-white text-black hover:bg-gray-100 text-[11px] font-bold uppercase tracking-[0.2em] py-3.5 border border-white rounded-lg transition-all text-center shadow-lg">
-                                MOVE TO BAG
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                                      <span class="text-white text-[13px] font-black">{{this.price}}</span>
 
-                <!-- Card 3 (Sale Example) -->
-                <div class="wishlist-card relative rounded-[16px] overflow-hidden group">
-                    <div class="aspect-[3/4] bg-[#f4f4f5] relative">
-                        <div class="carousel-container absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105 z-0">
-                            <img src="https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=800&auto=format&fit=crop" class="carousel-img absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-100 transition-opacity duration-300" alt="Trainer">
-                            <img src="https://images.unsplash.com/photo-1605348532723-67c12f70f209?q=80&w=800&auto=format&fit=crop" class="carousel-img absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-300" alt="Trainer Alt 1">
-                            <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=800&auto=format&fit=crop" class="carousel-img absolute inset-0 w-full h-full object-cover mix-blend-multiply opacity-0 transition-opacity duration-300" alt="Trainer Alt 2">
-                        </div>
-                        
-                        <button class="absolute top-4 right-4 w-[34px] h-[34px] bg-white/70 backdrop-blur-md rounded-full flex items-center justify-center text-gray-800 hover:bg-white hover:shadow-md transition-all z-20">
-                            <span class="material-symbols-outlined text-[16px]">close</span>
-                        </button>
-
-                        <div class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-gray-900/80 via-gray-900/40 to-transparent pointer-events-none z-0"></div>
-                        
-                        <div class="absolute bottom-0 left-0 right-0 p-5 flex flex-col justify-end z-10">
-                            <div class="absolute right-0 bottom-[75px] bg-black text-white text-[9px] font-black uppercase tracking-[0.1em] px-2.5 py-1 rounded-l shadow-sm flex items-center">
-                                -20% SALE
-                            </div>
-                            
-                            <div class="flex justify-between items-end mb-4 pr-1 gap-2">
-                                <h3 class="text-white text-[12px] font-bold uppercase tracking-widest leading-tight">RAPIDO<br>TRAINER</h3>
-                                <div class="flex flex-col items-end">
-                                    <span class="text-white/60 text-[10px] font-bold line-through">$110.00</span>
-                                    <span class="text-white text-[13px] font-black text-[#f26363]">$88.00</span>
+                                       {{/if}}
                                 </div>
                             </div>
                             
-                            <button class="w-full bg-white text-black hover:bg-gray-100 text-[11px] font-bold uppercase tracking-[0.2em] py-3.5 border border-white rounded-lg transition-all text-center shadow-lg">
-                                MOVE TO BAG
-                            </button>
+                            <!-- Action Button -->
+                           {{#if (eq this.stock 0)}}
+                        <button disabled class="w-full border border-white/40 bg-gray-500/30 backdrop-blur-sm text-white/90 text-[11px] font-bold uppercase tracking-[0.2em] py-3.5 rounded-lg transition-all text-center cursor-not-allowed">
+                         OUT OF STOCK
+                         </button>
+                         {{else}}
+                           <button onclick="moveToBag('{{this.id}}', '{{this.variantId}}')" class="w-full bg-white text-black hover:bg-gray-100 text-[11px] font-bold uppercase tracking-[0.2em] py-3.5 border border-white rounded-lg transition-all text-center shadow-lg">
+                           MOVE TO BAG
+                           </button>
+                              {{/if}}
                         </div>
                     </div>
                 </div>
+                {{else}}
+                <!-- Empty State -->
+                <div class="col-span-full py-20 text-center bg-white border border-dashed border-gray-200 rounded-[32px]">
+                    <span class="material-symbols-outlined text-[48px] text-gray-200 mb-4">heart_broken</span>
+                    <h2 class="text-xl font-bold mb-2">Your wishlist is empty</h2>
+                    <p class="text-gray-400 mb-8">Save items you love to find them easily later.</p>
+                    <a href="/" class="inline-block bg-black text-white px-8 py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest hover:bg-black/90 transition-all">Start Exploring</a>
+                </div>
+                {{/each}}
 
             </div>
         </div>
@@ -160,7 +127,11 @@
 
     <!-- Footer -->
     {{>footer}}
-    <!-- Product Carousel logic -->
+  
+     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+     <script src="/toast/toast.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+      <!-- Product Carousel logic -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const cards = document.querySelectorAll('.wishlist-card');
@@ -179,7 +150,7 @@
                         currentIndex = (currentIndex + 1) % images.length;
                         images[currentIndex].classList.remove('opacity-0');
                         images[currentIndex].classList.add('opacity-100');
-                    }, 1000);
+                    }, 1500);
                 });
 
                 card.addEventListener('mouseleave', () => {
@@ -197,6 +168,40 @@
                 });
             });
         });
+
+        //remove logic
+
+        async function removeFromWishlist(productId, cardElement) {
+    try {
+        const response = await axios.delete("/users/removeFromWishlist", {
+            data: { productId }
+        });
+
+        if (response.data.success) {
+            // Animate and remove card
+            cardElement.style.transition = "all 0.3s ease";
+            cardElement.style.opacity = "0";
+            cardElement.style.transform = "scale(0.95)";
+            setTimeout(() => {
+                cardElement.remove();
+                showToast("success","Removed from wishlist"); 
+                // Update count
+                const remaining = document.querySelectorAll('.wishlist-card').length;
+                const countEl = document.getElementById('wishlist-count');
+                if (countEl) countEl.textContent = remaining;
+                if (remaining === 0) {
+                setTimeout(() => window.location.reload(), 500);  // ← reload when empty
+                }
+            }, 300);
+        } else {
+            showToast(response.data.message ||  "error","Failed to remove");
+        }
+
+    } catch (err) {
+        console.error("Remove wishlist error:", err);
+        showToast("error","Something went wrong");
+    }
+}
     </script>
 </body>
 </html>

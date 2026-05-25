@@ -36,10 +36,22 @@ const variantSchema = new mongoose.Schema({
     images: [{
         type: String
     }],
+    
+    brand: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Brand"
+    },
+
+    category: {
+     type: mongoose.Schema.Types.ObjectId,
+     ref: "Category"
+    },
+
     isActive: { 
         type: Boolean, 
         default: true 
     },
+
     isDefault: {
           type: Boolean,
          default: false 

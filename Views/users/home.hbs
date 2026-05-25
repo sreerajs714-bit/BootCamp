@@ -65,38 +65,70 @@
         }
 
         /* ── Navbar colour states ───────────────────────────── */
-        /* Transparent (at top) → white text & icons */
-        #main-navbar.nav-transparent .nav-logo,
-        #main-navbar.nav-transparent .nav-link,
-        #main-navbar.nav-transparent .nav-icons,
-        #main-navbar.nav-transparent .nav-icons .material-symbols-outlined {
-            color: #ffffff;
-        }
-        #main-navbar.nav-transparent .nav-login {
-            background: #ffffff;
-            color: #000000;
-        }
-        #main-navbar.nav-transparent .nav-login:hover {
-            background: #e5e5e5;
-        }
-        /* Cart badge border matches background */
-        #main-navbar.nav-transparent .cart-badge {
+        #main-navbar.nav-transparent {
+            background-color: transparent;
             border-color: transparent;
+            box-shadow: none;
         }
 
-        /* Scrolled (white bg) → black text & icons */
-        #main-navbar.nav-scrolled .nav-logo,
-        #main-navbar.nav-scrolled .nav-link,
-        #main-navbar.nav-scrolled .nav-icons,
-        #main-navbar.nav-scrolled .nav-icons .material-symbols-outlined {
-            color: #000000;
-        }
-        #main-navbar.nav-scrolled .nav-login {
-            background: #000000;
+        #main-navbar.nav-transparent .nav-logo,
+        #main-navbar.nav-transparent nav a,
+        #main-navbar.nav-transparent .icon-btn .material-symbols-outlined {
             color: #ffffff;
         }
-        #main-navbar.nav-scrolled .nav-login:hover {
-            background: #333333;
+
+        #main-navbar.nav-transparent .nav-login-btn {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        #main-navbar.nav-scrolled {
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e5e5e5;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        #main-navbar.nav-scrolled .nav-logo,
+        #main-navbar.nav-scrolled nav a,
+        #main-navbar.nav-scrolled .icon-btn .material-symbols-outlined {
+            color: #000000;
+        }
+
+        #main-navbar.nav-scrolled .nav-login-btn {
+            background-color: #000000;
+            color: #ffffff;
+        }
+
+        /* Search Bar Glass Effect & Animation */
+        #search-container {
+            backdrop-filter: blur(12px);
+            background-color: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #main-navbar.nav-scrolled #search-container {
+            background-color: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        #search-container.search-active {
+            width: 380px;
+            opacity: 1;
+            padding-left: 1.25rem;
+            padding-right: 0.75rem;
+            margin-right: -4px;
+        }
+
+        /* Hide trigger icon when search is open */
+        .search-open-state #search-trigger {
+            display: none;
+        }
+
+        .badge {
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .hero-title {
@@ -161,49 +193,76 @@
 <body>
 
     <!-- Navigation -->
-    <header id="main-navbar"
-        class="nav-transparent w-full bg-transparent fixed top-0 z-50 border-b border-transparent transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
+    <header id="main-navbar" class="w-full bg-white fixed top-0 z-50 transition-all duration-300">
 
-            <!-- Logo -->
-            <div class="flex-shrink-0 cursor-pointer group">
-                <h1 class="nav-logo font-display font-black text-3xl tracking-tighter uppercase transition-all duration-300 group-hover:scale-105">
+        <div class="w-full px-8 md:px-12 lg:px-16 h-20 flex items-center justify-between">
+
+            <!-- Logo (Left) -->
+            <a href="/" class="flex-shrink-0 group">
+                <h1
+                    class="nav-logo font-display font-black text-2xl tracking-tighter uppercase transition-all duration-300 group-hover:scale-105">
                     BOOT<span class="font-light">CAMP</span>
                 </h1>
-            </div>
+            </a>
 
-            <!-- Menu Items (Desktop) -->
-            <nav class="hidden lg:flex items-center space-x-12 font-medium text-[15px] tracking-wide">
-                <a href="#" class="nav-link font-semibold transition-colors duration-300">Home</a>
-                <a href="/users/mens" class="nav-link transition-colors duration-300">Men</a>
-                <a href="#" class="nav-link transition-colors duration-300">Women</a>
+            <!-- Menu Items (Center) -->
+            <nav class="hidden lg:flex items-center space-x-10 font-bold text-[11px] tracking-[0.4em] uppercase">
+                <a href="/" class="transition-colors duration-300">Home</a>
+                <a href="/users/mens" class="transition-colors duration-300">Men</a>
+                <a href="/users/womens" class="transition-colors duration-300">Women</a>
             </nav>
 
-            <!-- Icons -->
-            <div class="nav-icons flex items-center space-x-7 transition-colors duration-300">
-                <button class="icon-btn" aria-label="Search">
-                    <span class="material-symbols-outlined font-light text-[28px] transition-colors duration-300">search</span>
+            <!-- Icons Container (Right) -->
+            <div class="flex items-center space-x-6">
+
+                <!-- EXPANDABLE SEARCH BAR -->
+                <div id="search-container"
+                    class="flex items-center overflow-hidden w-0 opacity-0 rounded-full h-10 px-0">
+                    <input type="text" id="search-input" placeholder="SEARCH PRODUCT..."
+                        class="bg-transparent border-none outline-none text-[10px] font-black tracking-widest pl-2 w-72 placeholder:text-gray-400">
+                    <button onclick="toggleSearch()" class="pr-1 text-gray-400 hover:text-black transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">close</span>
+                    </button>
+                </div>
+
+                <!-- Search Toggle -->
+                <button id="search-trigger" onclick="toggleSearch()" class="icon-btn group" aria-label="Search">
+                    <span
+                        class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">search</span>
                 </button>
-                <button class="icon-btn" aria-label="Wishlist">
-                    <span class="material-symbols-outlined font-light text-[28px] transition-colors duration-300">favorite</span>
-                </button>
-                <button class="icon-btn relative" aria-label="Cart">
-                    <span class="material-symbols-outlined font-light text-[28px] transition-colors duration-300">shopping_bag</span>
-                    <!-- Cart Badge -->
-                    <span class="cart-badge absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold w-4.5 h-4.5 p-1 rounded-full flex items-center justify-center border-2 border-white box-content">2</span>
-                </button>
+
+                <!-- Wishlist -->
+                <a href="/users/wishlist" class="icon-btn relative group" aria-label="Wishlist">
+                    <span
+                        class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">favorite</span>
+                    <span id="wishlist-badge"
+                        class="badge absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all {{#unless wishlistCount}}opacity-0 scale-0{{/unless}}">
+                        {{wishlistCount}}
+                    </span>
+                </a>
+
+                <!-- Cart -->
+                <a href="/users/cart" class="icon-btn relative group" aria-label="Cart">
+                    <span
+                        class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">shopping_bag</span>
+                    <span id="cart-badge"
+                        class="badge absolute -top-1 -right-1 bg-black text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all {{#unless cartCount}}opacity-0 scale-0{{/unless}}">
+                        {{cartCount}}
+                    </span>
+                </a>
+
                 {{#if user}}
-                <button class="icon-btn" aria-label="Profile">
-                    <a href="/users/profile">
-                        <span class="material-symbols-outlined font-light text-[28px] transition-colors duration-300">person</span>
-                    </a>
-                </button>
+                <a href="/users/profile" id="profile-icon" class="icon-btn group" aria-label="Profile">
+                    <span
+                        class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">person</span>
+                </a>
                 {{else}}
-                <a href="/users/login"
-                    class="nav-login px-6 py-2.5 text-[15px] font-medium rounded-full transition-all duration-300">
+                <a href="/users/login" id="login-btn"
+                    class="nav-login-btn px-5 py-2 text-[11px] font-black tracking-widest uppercase rounded-full bg-black text-white hover:bg-gray-800 transition-all duration-300">
                     Login
                 </a>
                 {{/if}}
+
             </div>
         </div>
     </header>
@@ -236,8 +295,8 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-16">
             <!-- Men Category -->
-            <div
-                class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5]  overflow-hidden cursor-pointer transition-all duration-500">
+            <a href="/users/mens"
+                class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5] overflow-hidden cursor-pointer transition-all duration-500">
                 <img src="https://i.pinimg.com/736x/33/e8/8b/33e88b8a41302cc44adba3b6023a3843.jpg"
                     alt="Men's Collection"
                     class="w-[75%] h-[75%] object-contain transition-all duration-700 group-hover:scale-110 group-hover:blur-[4px]">
@@ -246,11 +305,11 @@
                     <span
                         class="text-white font-sans font-black text-3xl lg:text-4xl tracking-[0.2em] uppercase drop-shadow-2xl">MEN</span>
                 </div>
-            </div>
+            </a>
 
             <!-- Women Category -->
-            <div
-                class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5]  overflow-hidden cursor-pointer transition-all duration-500">
+            <a href="#"
+                class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5] overflow-hidden cursor-pointer transition-all duration-500">
                 <img src="https://i.pinimg.com/1200x/df/b0/f1/dfb0f1cf2d6ca98cb481b96093227546.jpg"
                     alt="Women's Collection"
                     class="w-[75%] h-[75%] object-contain transition-all duration-700 group-hover:scale-110 group-hover:blur-[4px]">
@@ -259,7 +318,7 @@
                     <span
                         class="text-white font-sans font-black text-3xl lg:text-4xl tracking-[0.2em] uppercase drop-shadow-2xl">WOMEN</span>
                 </div>
-            </div>
+            </a>
         </div>
     </section>
 
@@ -271,8 +330,8 @@
 
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                 <!-- Nike -->
-                <div
-                    class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5]  overflow-hidden cursor-pointer transition-all duration-500">
+                <a href="#"
+                    class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5] overflow-hidden cursor-pointer transition-all duration-500">
                     <img src="https://i.pinimg.com/736x/3c/d0/78/3cd0789a53745584b9d603eca446305e.jpg" alt="Nike Boot"
                         class="w-[75%] h-[75%] object-contain transition-all duration-700 group-hover:scale-110 group-hover:blur-[4px]">
                     <div
@@ -280,10 +339,10 @@
                         <span
                             class="text-white font-sans font-black text-2xl lg:text-3xl tracking-[0.2em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">NIKE</span>
                     </div>
-                </div>
+                </a>
                 <!-- Adidas -->
-                <div
-                    class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5]  overflow-hidden cursor-pointer transition-all duration-500">
+                <a href="#"
+                    class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5] overflow-hidden cursor-pointer transition-all duration-500">
                     <img src="https://i.pinimg.com/1200x/91/41/ae/9141ae5ccfa0ea4ff7b9e9f6afd4305e.jpg"
                         alt="Adidas Boot"
                         class="w-[75%] h-[75%] object-contain filter hue-rotate-[90deg] transition-all duration-700 group-hover:scale-110 group-hover:blur-[4px]">
@@ -292,10 +351,10 @@
                         <span
                             class="text-white font-sans font-black text-2xl lg:text-3xl tracking-[0.2em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">ADIDAS</span>
                     </div>
-                </div>
+                </a>
                 <!-- Puma -->
-                <div
-                    class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5]  overflow-hidden cursor-pointer transition-all duration-500">
+                <a href="#"
+                    class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5] overflow-hidden cursor-pointer transition-all duration-500">
                     <img src="https://i.pinimg.com/736x/f9/4b/5b/f94b5bd712f3c3590f0dd52bf1c39840.jpg" alt="Puma Boot"
                         class="w-[75%] h-[75%] object-contain filter hue-rotate-[180deg] transition-all duration-700 group-hover:scale-110 group-hover:blur-[4px]">
                     <div
@@ -303,10 +362,10 @@
                         <span
                             class="text-white font-sans font-black text-2xl lg:text-3xl tracking-[0.2em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">PUMA</span>
                     </div>
-                </div>
+                </a>
                 <!-- NB -->
-                <div
-                    class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5]  overflow-hidden cursor-pointer transition-all duration-500">
+                <a href="#"
+                    class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5] overflow-hidden cursor-pointer transition-all duration-500">
                     <img src="https://i.pinimg.com/736x/85/59/cb/8559cbec29cae2e8d7267a07cbc6f366.jpg" alt="NB Boot"
                         class="w-[75%] h-[75%] object-contain filter hue-rotate-[270deg] transition-all duration-700 group-hover:scale-110 group-hover:blur-[4px]">
                     <div
@@ -315,7 +374,7 @@
                             class="text-white font-sans font-black text-2xl lg:text-3xl tracking-[0.2em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">NEW
                             BALANCE</span>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </section>
@@ -334,7 +393,7 @@
 
         <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
             <!-- Product 1 -->
-            <div class="group cursor-pointer">
+            <a href="#" class="group cursor-pointer">
                 <div class="bg-black aspect-square flex items-center justify-center mb-6 relative overflow-hidden">
                     <img src="images/boot_arrival_1.png" alt="Product"
                         class="w-48 h-48 object-contain transition-transform group-hover:scale-110">
@@ -348,9 +407,9 @@
                     <p class="text-xs text-gray-500">$250.00</p>
                     <span class="material-symbols-outlined text-sm text-gray-300">favorite</span>
                 </div>
-            </div>
+            </a>
             <!-- Product 2 -->
-            <div class="group cursor-pointer">
+            <a href="#" class="group cursor-pointer">
                 <div class="bg-black aspect-square flex items-center justify-center mb-6 relative overflow-hidden">
                     <img src="images/boot_arrival_1.png" alt="Product"
                         class="w-48 h-48 object-contain filter hue-rotate-[60deg] transition-transform group-hover:scale-110">
@@ -364,9 +423,9 @@
                     <p class="text-xs text-gray-500">$275.00</p>
                     <span class="material-symbols-outlined text-sm text-gray-300">favorite</span>
                 </div>
-            </div>
+            </a>
             <!-- Product 3 -->
-            <div class="group cursor-pointer">
+            <a href="#" class="group cursor-pointer">
                 <div class="bg-black aspect-square flex items-center justify-center mb-6 relative overflow-hidden">
                     <img src="images/boot_arrival_1.png" alt="Product"
                         class="w-48 h-48 object-contain filter hue-rotate-[120deg] transition-transform group-hover:scale-110">
@@ -380,9 +439,9 @@
                     <p class="text-xs text-gray-500">$260.00</p>
                     <span class="material-symbols-outlined text-sm text-gray-300">favorite</span>
                 </div>
-            </div>
+            </a>
             <!-- Product 4 -->
-            <div class="group cursor-pointer">
+            <a href="#" class="group cursor-pointer">
                 <div class="bg-black aspect-square flex items-center justify-center mb-6 relative overflow-hidden">
                     <img src="images/boot_arrival_1.png" alt="Product"
                         class="w-48 h-48 object-contain filter hue-rotate-[240deg] transition-transform group-hover:scale-110">
@@ -396,7 +455,7 @@
                     <p class="text-xs text-gray-500">$240.00</p>
                     <span class="material-symbols-outlined text-sm text-gray-300">favorite</span>
                 </div>
-            </div>
+            </a>
         </div>
     </section>
 
@@ -428,7 +487,7 @@
             <!-- Grid Scroll -->
             <div class="lg:w-2/3 grid grid-cols-2 md:grid-cols-3 gap-6">
                 <!-- Product 1 -->
-                <div
+                <a href="#"
                     class="bg-[#f6f6f6] p-8 flex flex-col justify-between group cursor-pointer hover:bg-gray-100 transition-colors">
                     <div class="flex-grow flex items-center justify-center">
                         <img src="images/boot_arrival_1.png" alt="Boot"
@@ -438,9 +497,9 @@
                         <h4 class="text-[10px] font-bold uppercase mb-1">LEGEND 10 ELITE</h4>
                         <p class="text-[10px] text-gray-500">$290.00</p>
                     </div>
-                </div>
+                </a>
                 <!-- Product 2 -->
-                <div
+                <a href="#"
                     class="bg-[#f6f6f6] p-8 flex flex-col justify-between group cursor-pointer hover:bg-gray-100 transition-colors">
                     <div class="flex-grow flex items-center justify-center">
                         <img src="images/hero_boot.png" alt="Boot"
@@ -450,9 +509,9 @@
                         <h4 class="text-[10px] font-bold uppercase mb-1">COPA PURE 2 ELITE</h4>
                         <p class="text-[10px] text-gray-500">$280.00</p>
                     </div>
-                </div>
+                </a>
                 <!-- Product 3 -->
-                <div
+                <a href="#"
                     class="bg-[#f6f6f6] p-8 flex flex-col justify-between group cursor-pointer hover:bg-gray-100 transition-colors">
                     <div class="flex-grow flex items-center justify-center">
                         <img src="images/boot_arrival_1.png" alt="Boot"
@@ -462,7 +521,7 @@
                         <h4 class="text-[10px] font-bold uppercase mb-1">MERCURIAL VAPOR</h4>
                         <p class="text-[10px] text-gray-500">$265.00</p>
                     </div>
-                </div>
+                </a>
             </div>
         </div>
     </section>
@@ -556,28 +615,31 @@
             function updateNavbar() {
                 const scrolled = window.scrollY > 50;
                 if (scrolled) {
-                    // White background → black text & icons
-                    navbar.classList.remove("nav-transparent", "bg-transparent", "border-transparent");
-                    navbar.classList.add("nav-scrolled", "bg-white", "border-gray-100");
+                    navbar.classList.remove("nav-transparent");
+                    navbar.classList.add("nav-scrolled");
                 } else {
-                    // Transparent background → white text & icons
-                    navbar.classList.remove("nav-scrolled", "bg-white", "border-gray-100");
-                    navbar.classList.add("nav-transparent", "bg-transparent", "border-transparent");
+                    navbar.classList.remove("nav-scrolled");
+                    navbar.classList.add("nav-transparent");
                 }
             }
 
             window.addEventListener("scroll", updateNavbar);
-            updateNavbar(); // apply correct state on page load
+            updateNavbar();
 
-            const loginBtn = document.getElementById("login-btn");
-            const profileIcon = document.getElementById("profile-icon");
+            // Search functionality
+            window.toggleSearch = function () {
+                const container = document.getElementById('search-container');
+                const header = document.getElementById('main-navbar');
+                const input = document.getElementById('search-input');
 
-            if (isLoggedIn) {
-                loginBtn.classList.add("hidden");
-                profileIcon.classList.remove("hidden");
-            } else {
-                loginBtn.classList.remove("hidden");
-                profileIcon.classList.add("hidden");
+                container.classList.toggle('search-active');
+                header.classList.toggle('search-open-state');
+
+                if (container.classList.contains('search-active')) {
+                    setTimeout(() => input.focus(), 300);
+                } else {
+                    input.value = '';
+                }
             }
 
             // Simple scroll reveal

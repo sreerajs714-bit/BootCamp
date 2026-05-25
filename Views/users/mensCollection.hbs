@@ -4,237 +4,653 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Men's Collection | Rapido</title>
-    <!-- Tailwind CSS -->
+    <title>Men's Collection | Boot Camp</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Toastify -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Material Symbols -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #ffffff;
-            color: #000000;
+        body { font-family: 'Inter', sans-serif; background: #fff; }
+
+        .product-card { transition: all 0.3s ease; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 16px 32px -12px rgba(0,0,0,0.1); }
+
+        img { -webkit-user-drag: none; }
+
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; }
+        .icon-fill { font-variation-settings: 'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24; }
+
+        #filter-sidebar { transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+        #filter-overlay { transition: opacity 0.4s ease; pointer-events: none; }
+        body.sidebar-open { overflow: hidden; }
+        body.sidebar-open #filter-overlay { opacity: 1; pointer-events: auto; }
+
+        .filter-chip {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            border: 1px solid #f3f4f6;
+            font-size: 11px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 0.2em;
+            transition: all 0.3s; cursor: pointer; background: white;
+        }
+        .filter-chip.active {
+            background-color: #000; color: #fff; border-color: #000;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transform: scale(1.05);
+        }
+        .filter-chip:not(.active):hover { border-color: #d1d5db; background-color: #f9fafb; }
+
+        .refine-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            background-color: #fff; border: 1px solid #f3f4f6; border-radius: 9999px;
+            padding: 0.6rem 1.75rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); transition: all 0.3s;
+        }
+        .refine-bar:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-color: #e5e7eb; }
+
+        .refine-search-container { width: 0; overflow: hidden; transition: all 0.4s cubic-bezier(0.16,1,0.3,1); opacity: 0; }
+        .refine-bar.search-active .refine-search-container { width: 250px; opacity: 1; margin-right: 1.5rem; }
+
+        .sort-dropdown {
+            opacity: 0; transform: translateY(10px); pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        .sort-dropdown.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+        .range-wrapper { position: relative; height: 20px; margin: 20px 0; }
+        .range-track { position: absolute; top: 50%; transform: translateY(-50%); height: 4px; width: 100%; background: #f1f1f1; z-index: 1; }
+        .range-fill { position: absolute; top: 50%; transform: translateY(-50%); height: 4px; background: #000; z-index: 2; }
+        .dual-range {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 100%; pointer-events: none; appearance: none;
+            background: transparent; z-index: 3; margin: 0;
+        }
+        .dual-range::-webkit-slider-thumb {
+            pointer-events: auto; appearance: none;
+            width: 18px; height: 18px; background: #000;
+            border: 2px solid #fff; border-radius: 50%;
+            cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
 
-        .product-card {
-            transition: all 0.3s ease;
-        }
+        /* Empty state for no results */
+        #no-results { display: none; }
 
-        .product-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Prevent image dragging for better UX */
-        img {
-            -webkit-user-drag: none;
+        /* Pagination */
+        #pagination-container button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
         }
     </style>
 </head>
 
-<body class="antialiased selection:bg-black selection:text-white pb-20">
-    <!-- Navbar -->
+<body>
+
     {{>navbar}}
 
-    <!-- Header / Title Region -->
-    <header class="max-w-[1400px] mx-auto px-6 pt-40 pb-12 flex flex-col items-center text-center">
-        <!-- Tag -->
-        <div class="inline-flex items-center justify-center gap-1.5 bg-[#f4f4f5] rounded-full px-4 py-1.5 mb-6">
-            <span class="material-symbols-outlined text-[16px] text-gray-600">male</span>
-            <span class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-700">MEN'S STYLE</span>
+    <!-- HEADER -->
+    <header class="max-w-[1400px] mx-auto px-6 pt-32 pb-8 text-center">
+        <div class="inline-flex items-center gap-2 bg-[#f4f4f5] px-4 py-1 rounded-full mb-6">
+            <span class="material-symbols-outlined text-[16px]">male</span>
+            <span class="text-[10px] font-bold tracking-[0.2em]">MEN'S STYLE</span>
         </div>
-        
-        <!-- Main Title -->
-        <h1 class="text-4xl md:text-[52px] font-black tracking-tight mb-5 leading-tight">Men's Collection</h1>
-        
-        <!-- Subtitle -->
-        <p class="text-gray-500 font-medium text-[15px] mb-6 max-w-md mx-auto leading-relaxed">
-            Discover premium men collection crafted with exceptional quality.
-        </p>
-        
-        <!-- Product Count -->
-        <div class="flex flex-col items-center gap-2">
-            <div class="text-[13px] font-semibold flex items-center gap-1.5 text-gray-400">
-                <span class="material-symbols-outlined text-[16px]">sell</span>
-                11 Products Available
-            </div>
+        <h1 class="text-4xl md:text-[52px] font-black mb-4">Men's Collection</h1>
+        <p class="text-gray-500 mb-6">Discover premium men collection crafted with exceptional quality.</p>
+        <div class="text-gray-400 text-sm">
+            <span id="result-count">{{count}}</span> Products Available
         </div>
     </header>
 
-    <!-- Product Grid -->
-    <main class="max-w-[1400px] mx-auto px-6 pb-20">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            
-            <!-- Card 1 -->
-            <div class="product-card group border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white">
-                <!-- Image Box -->
-                <div class="relative bg-[#f6f6f6] rounded-[16px] aspect-square lg:aspect-[4/5] flex items-center justify-center mb-5 overflow-hidden">
-                    <button class="absolute top-3 right-3 bg-white w-[34px] h-[34px] rounded-full flex items-center justify-center shadow-sm text-gray-400 hover:text-red-500 transition-all z-10 hover:shadow">
-                        <span class="material-symbols-outlined text-[18px]">favorite</span>
-                    </button>
-                    <!-- Status -->
-                    <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-[8px] flex items-center gap-1.5 z-10 shadow-sm border border-gray-100/50">
-                        <span class="material-symbols-outlined text-[14px] text-gray-500">schedule</span>
-                        <span class="text-[11px] font-bold text-gray-700">Only 7 left</span>
-                    </div>
-                    <div class="carousel-container relative w-[85%] h-[85%] flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
-                        <img src="https://images.unsplash.com/photo-1605348532723-67c12f70f209?q=80&w=600&auto=format&fit=crop" alt="boldfit 1" class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-100" />
-                        <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=600&auto=format&fit=crop" alt="boldfit 2" class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                        <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=600&auto=format&fit=crop" alt="boldfit 3" class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                    </div>
+    <!-- FILTER & CATEGORY SECTION -->
+    <section class="max-w-[1400px] mx-auto px-6 mb-12">
+        <div class="refine-bar relative" id="refine-bar">
+
+            <!-- Left: Refine Trigger -->
+            <button onclick="openSidebar()" class="flex items-center space-x-3 group shrink-0">
+                <span class="material-symbols-outlined text-[20px] text-gray-400 group-hover:text-black transition-colors">tune</span>
+                <span class="text-[11px] font-black tracking-[0.2em] uppercase">Refine</span>
+            </button>
+
+            <!-- Active filter tags -->
+            <div id="active-filter-tags" class="flex items-center gap-2 flex-1 px-4 flex-wrap"></div>
+
+            <!-- Right: Search & Sort -->
+            <div class="flex items-center justify-end pl-4">
+                <div class="refine-search-container">
+                    <input type="text" id="bar-search-input" placeholder="SEARCH PRODUCT..."
+                        oninput="applyFilters()"
+                        onkeyup="if(event.key==='Escape') toggleBarSearch()"
+                        class="w-full bg-transparent border-none outline-none text-[10px] font-black tracking-widest text-right placeholder:text-gray-300">
                 </div>
-                <!-- Details -->
-                <div class="px-1 flex-1 flex flex-col">
-                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">PREMIUM</div>
-                    <h3 class="text-[15px] font-extrabold text-gray-900 mb-1.5">boldfit</h3>
-                    <div class="text-[19px] font-extrabold text-gray-900 mb-6 leading-none">₹3,000</div>
-                    
-                    <div class="mt-auto flex flex-col gap-2">
-                        <button class="w-full bg-black text-white text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-800 transition-colors">Add to Cart</button>
-                        <button class="w-full bg-[#f4f4f5] text-black text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-200 transition-colors">Buy Now</button>
+
+                <div class="flex items-center space-x-6">
+                    <button onclick="toggleBarSearch()" class="icon-btn">
+                        <span class="material-symbols-outlined text-[20px] text-gray-400 hover:text-black transition-colors">search</span>
+                    </button>
+                    <div class="h-4 w-[1px] bg-gray-200"></div>
+
+                    <!-- Sort By -->
+                    <div class="relative">
+                        <button onclick="toggleSortDropdown()" class="flex items-center space-x-2 group h-full">
+                            <span id="active-sort-label" class="text-[11px] font-black tracking-[0.2em] uppercase">Sort By</span>
+                            <span class="material-symbols-outlined text-[18px] text-gray-400 group-hover:text-black transition-colors">expand_more</span>
+                        </button>
+                        <div id="sort-dropdown" class="sort-dropdown absolute top-full right-0 mt-4 w-56 bg-white border border-gray-100 rounded-2xl shadow-2xl z-[80] overflow-hidden">
+                            <div class="py-2">
+                                <button onclick="selectSort('Latest Drop')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Latest Drop</button>
+                                <button onclick="selectSort('Price Low - High')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Price Low - High</button>
+                                <button onclick="selectSort('Price High - Low')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Price High - Low</button>
+                                <button onclick="selectSort('Name A - Z')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Name A - Z</button>
+                                <button onclick="selectSort('Name Z - A')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Name Z - A</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </section>
 
-            <!-- Card 2 -->
-            <div class="product-card group border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white">
-                <div class="relative bg-[#f6f6f6] rounded-[16px] aspect-square lg:aspect-[4/5] flex items-center justify-center mb-5 overflow-hidden">
-                    <button class="absolute top-3 right-3 bg-white w-[34px] h-[34px] rounded-full flex items-center justify-center shadow-sm text-gray-400 hover:text-red-500 transition-all z-10 hover:shadow">
-                        <span class="material-symbols-outlined text-[18px]">favorite</span>
-                    </button>
-                    <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-[8px] flex items-center gap-1.5 z-10 shadow-sm border border-gray-100/50">
-                        <span class="material-symbols-outlined text-[14px] text-gray-500">check_circle</span>
-                        <span class="text-[11px] font-bold text-gray-700">In Stock</span>
-                    </div>
-                    <div class="carousel-container relative w-[85%] h-[85%] flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
-                        <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=600&auto=format&fit=crop" alt="reebok 1" class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-100" />
-                        <img src="https://images.unsplash.com/photo-1514989940723-e8e51635b782?q=80&w=600&auto=format&fit=crop" alt="reebok 2" class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                        <img src="https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=600&auto=format&fit=crop" alt="reebok 3" class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                    </div>
-                </div>
-                <div class="px-1 flex-1 flex flex-col">
-                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">PREMIUM</div>
-                    <h3 class="text-[15px] font-extrabold text-gray-900 mb-1.5">reebok</h3>
-                    <div class="text-[19px] font-extrabold text-gray-900 mb-6 leading-none">₹8,000</div>
-                    
-                    <div class="mt-auto flex flex-col gap-2">
-                        <button class="w-full bg-black text-white text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-800 transition-colors">Add to Cart</button>
-                        <button class="w-full bg-[#f4f4f5] text-black text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-200 transition-colors">Buy Now</button>
-                    </div>
+    <!-- FILTER SIDEBAR DRAWER -->
+    <div id="filter-overlay" onclick="closeSidebar()" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] opacity-0 pointer-events-none transition-all duration-300"></div>
+
+    <aside id="filter-sidebar" class="fixed top-0 right-0 h-full w-full max-w-[450px] bg-white z-[70] translate-x-full shadow-2xl flex flex-col">
+        <div class="p-8 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="text-xl font-black uppercase tracking-tighter">Filters</h2>
+            <button onclick="closeSidebar()" class="icon-btn hover:scale-110 transition-transform">
+                <span class="material-symbols-outlined text-gray-400 hover:text-black">close</span>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-8 space-y-12">
+
+            <!-- Search -->
+            <div class="space-y-4">
+                <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Search Product</label>
+                <input type="text" id="filter-search" placeholder="Enter keywords..."
+                    oninput="syncSearchAndFilter()"
+                    class="w-full bg-[#f8f9fc] border-none outline-none rounded-2xl py-5 px-6 text-[14px] font-medium transition-all focus:ring-2 focus:ring-black/5">
+            </div>
+
+            <!-- Sort Options -->
+            <div class="space-y-6">
+                <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Sort Options</label>
+                <div class="flex flex-wrap gap-3" id="sort-chips">
+                    <button class="filter-chip sort-chip active" data-sort="Latest Drop">Latest Drop</button>
+                    <button class="filter-chip sort-chip" data-sort="Price Low - High">Price Low - High</button>
+                    <button class="filter-chip sort-chip" data-sort="Price High - Low">Price High - Low</button>
+                    <button class="filter-chip sort-chip" data-sort="Name A - Z">Name A - Z</button>
+                    <button class="filter-chip sort-chip" data-sort="Name Z - A">Name Z - A</button>
                 </div>
             </div>
 
-            <!-- Card 3 -->
-            <div class="product-card group border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white">
-                <div class="relative bg-[#f6f6f6] rounded-[16px] aspect-square lg:aspect-[4/5] flex items-center justify-center mb-5 overflow-hidden">
-                    <button class="absolute top-3 right-3 bg-white w-[34px] h-[34px] rounded-full flex items-center justify-center shadow-sm text-gray-400 hover:text-red-500 transition-all z-10 hover:shadow">
-                        <span class="material-symbols-outlined text-[18px]">favorite</span>
-                    </button>
-                    <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-[8px] flex items-center gap-1.5 z-10 shadow-sm border border-gray-100/50">
-                        <span class="material-symbols-outlined text-[14px] text-gray-500">check_circle</span>
-                        <span class="text-[11px] font-bold text-gray-700">In Stock</span>
-                    </div>
-                    <div class="carousel-container relative w-[85%] h-[85%] flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
-                        <img src="https://images.unsplash.com/photo-1582236940866-23b08e7ff2b3?q=80&w=600&auto=format&fit=crop" alt="New balance 1" class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-100" />
-                        <img src="https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=600&auto=format&fit=crop" alt="New balance 2" class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                        <img src="https://images.unsplash.com/photo-1508243529287-e21914733111?q=80&w=600&auto=format&fit=crop" alt="New balance 3" class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                    </div>
+            <!-- Price Range -->
+            <div class="space-y-8">
+                <div class="flex items-center justify-between">
+                    <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Price Range</label>
+                    <span id="price-display" class="text-[12px] font-bold">₹0 - ₹10,000</span>
                 </div>
-                <div class="px-1 flex-1 flex flex-col">
-                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">RAPIDO</div>
-                    <h3 class="text-[15px] font-extrabold text-gray-900 mb-1.5">New balance</h3>
-                    <div class="text-[19px] font-extrabold text-gray-900 mb-6 leading-none">₹72,000</div>
-                    
-                    <div class="mt-auto flex flex-col gap-2">
-                        <button class="w-full bg-black text-white text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-800 transition-colors">Add to Cart</button>
-                        <button class="w-full bg-[#f4f4f5] text-black text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-200 transition-colors">Buy Now</button>
-                    </div>
+                <div class="range-wrapper">
+                    <div class="range-track"></div>
+                    <div class="range-fill" id="range-fill"></div>
+                    <input type="range" min="0" max="10000" value="0" class="dual-range" id="price-min">
+                    <input type="range" min="0" max="10000" value="10000" class="dual-range" id="price-max">
                 </div>
-            </div>
-
-            <!-- Card 4 -->
-            <div class="product-card group border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white">
-                <div class="relative bg-[#f6f6f6] rounded-[16px] aspect-square lg:aspect-[4/5] flex items-center justify-center mb-5 overflow-hidden">
-                    <button class="absolute top-3 right-3 bg-white w-[34px] h-[34px] rounded-full flex items-center justify-center shadow-sm text-gray-400 hover:text-red-500 transition-all z-10 hover:shadow">
-                        <span class="material-symbols-outlined text-[18px]">favorite</span>
-                    </button>
-                    <div class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-[8px] flex items-center gap-1.5 z-10 shadow-sm border border-gray-100/50">
-                        <span class="material-symbols-outlined text-[14px] text-gray-500">check_circle</span>
-                        <span class="text-[11px] font-bold text-gray-700">In Stock</span>
-                    </div>
-                    <div class="carousel-container relative w-[85%] h-[85%] flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
-                        <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=600&auto=format&fit=crop" alt="rapid AIR 1" class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-100" />
-                        <img src="https://images.unsplash.com/photo-1491553895911-0055eca6402d?q=80&w=600&auto=format&fit=crop" alt="rapid AIR 2" class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                        <img src="https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?q=80&w=600&auto=format&fit=crop" alt="rapid AIR 3" class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                    </div>
-                </div>
-                <div class="px-1 flex-1 flex flex-col">
-                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">PREMIUM</div>
-                    <h3 class="text-[15px] font-extrabold text-gray-900 mb-1.5">rapid AIR</h3>
-                    <div class="text-[19px] font-extrabold text-gray-900 mb-6 leading-none">₹9,888.98</div>
-                    
-                    <div class="mt-auto flex flex-col gap-2">
-                        <button class="w-full bg-black text-white text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-800 transition-colors">Add to Cart</button>
-                        <button class="w-full bg-[#f4f4f5] text-black text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-200 transition-colors">Buy Now</button>
-                    </div>
+                <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase">
+                    <span>₹0</span><span>₹10,000+</span>
                 </div>
             </div>
 
         </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-8 border-t border-gray-100 grid grid-cols-2 gap-4">
+            <button id="clear-btn" class="px-6 py-5 rounded-2xl border border-gray-100 text-[11px] font-black uppercase tracking-widest hover:bg-gray-50 transition-colors">
+                Clear All
+            </button>
+            <button id="apply-btn" class="px-6 py-5 rounded-2xl bg-black text-white text-[11px] font-black uppercase tracking-widest hover:bg-black/90 shadow-lg shadow-black/10 transition-all">
+                Apply Filters
+            </button>
+        </div>
+    </aside>
+
+    <!-- GRID -->
+    <main class="max-w-[1400px] mx-auto px-6 pb-20">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="product-grid">
+
+            {{#each products}}
+            <a href="/users/productDetail/{{this.id}}"
+                class="product-card block border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white hover:no-underline text-inherit"
+                data-brand="{{this.brand}}"
+                data-price="{{this.rawPrice}}"
+                data-category="{{this.badge}}"
+                data-name="{{this.productName}}"
+                data-variant="{{this.variantId}}">
+
+                <!-- IMAGE -->
+                <div class="relative bg-gray-100 rounded-[16px] aspect-square overflow-hidden mb-5">
+                    <button onclick="toggleWishlist(event, '{{this.id}}', this)"
+                        class="absolute top-3 right-3 z-20 bg-white w-[38px] h-[38px] rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition">
+                        <span class="material-symbols-outlined text-[20px] text-gray-600 hover:text-red-500 {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
+                    </button>
+                    <div class="absolute bottom-3 left-3 z-20 bg-white px-2 py-1 text-[11px] rounded flex items-center gap-1 shadow-sm">
+                        <span class="material-symbols-outlined text-[14px]">{{this.stock_icon}}</span>
+                        {{this.stock_label}}
+                    </div>
+                    <div class="carousel-container relative w-full h-full flex items-center justify-center">
+                        {{#each this.images}}
+                        <img src="{{this}}" class="carousel-img absolute w-full h-full object-contain transition-opacity duration-300 {{#if @first}}opacity-100{{else}}opacity-0{{/if}}">
+                        {{/each}}
+                    </div>
+                </div>
+
+                <!-- DETAILS -->
+                <div class="flex flex-col flex-1">
+                    <div class="text-[10px] text-gray-400 uppercase">{{this.badge}}</div>
+                    <h3 class="font-bold text-[15px] mb-1">{{this.productName}}</h3>
+                    <p class="text-[12px] text-gray-500 mb-4 line-clamp-1 font-bold">{{this.brand}}</p>
+                    <div class="text-[18px] font-black mb-4">₹{{this.rawPrice}}</div>
+                    <div class="mt-auto flex flex-col gap-2">
+                        <button onclick="addToCart(event, '{{this.id}}')"
+                            class="w-full bg-black text-white py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-gray-800 transition-all">
+                            Add to Cart
+                        </button>
+                        <button onclick="buyNow(event, '{{this.id}}')"
+                            class="w-full bg-gray-100 text-black py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-gray-200 transition-all">
+                            Buy Now
+                        </button>
+                    </div>
+                </div>
+            </a>
+            {{/each}}
+
+        </div>
+
+        <!-- No Results State -->
+        <div id="no-results" class="py-24 text-center">
+            <span class="material-symbols-outlined text-[48px] text-gray-200 mb-4 block">search_off</span>
+            <h2 class="text-xl font-bold mb-2">No products found</h2>
+            <p class="text-gray-400 mb-6">Try adjusting your filters or search term.</p>
+            <button onclick="clearAll()" class="bg-black text-white px-8 py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest">Clear Filters</button>
+        </div>
+
+        <!-- PAGINATION -->
+        <div id="pagination-container" class="flex items-center justify-center gap-2 mt-12 mb-4">
+            <button id="prev-btn" onclick="changePage(currentPage - 1)"
+                class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition-all">
+                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+            </button>
+            <div id="page-numbers" class="flex items-center gap-2"></div>
+            <button id="next-btn" onclick="changePage(currentPage + 1)"
+                class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition-all">
+                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+            </button>
+        </div>
     </main>
-    <!-- footer -->
+
     {{>footer}}
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const cards = document.querySelectorAll('.product-card');
+        const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
 
-            cards.forEach(card => {
-                const images = card.querySelectorAll('.carousel-img');
-                if (images.length <= 1) return;
+        // ── Cart ─────────────────────────────────────────────
+        async function addToCart(e, productId) {
+            e.preventDefault(); e.stopPropagation();
+            if (!isLoggedIn) { showToast("error","Please login to continue"); return; }
 
-                let intervalId;
-                let currentIndex = 0;
+            const productCard = e.currentTarget.closest('.product-card');
+            const variantId = productCard?.dataset?.variant;
 
-                card.addEventListener('mouseenter', () => {
-                    // Start cycling images with 2 sec gap
-                    intervalId = setInterval(() => {
-                        // Hide current
-                        images[currentIndex].classList.remove('opacity-100');
-                        images[currentIndex].classList.add('opacity-0');
+            if (!variantId) { showToast("error","Variant missing for this product"); return; }
 
-                        // Move to next
-                        currentIndex = (currentIndex + 1) % images.length;
-
-                        // Show next
-                        images[currentIndex].classList.remove('opacity-0');
-                        images[currentIndex].classList.add('opacity-100');
-                    }, 1000);
+            try {
+                const response = await axios.post("/users/addCart", { productId, variantId, quantity: 1 }, {
+                    validateStatus: (status) => status < 500
                 });
 
-                card.addEventListener('mouseleave', () => {
-                    // Stop cycling
-                    clearInterval(intervalId);
+                if (response.data.alreadyInCart) {
+                    showToast("error","Already in your cart");
+                } else if (response.data.success) {
+                    showToast("success","Added to cart");
+                } else if (response.data.outOfStock) {
+                    showToast("warning","This product is out of stock");
+                } else {
+                    showToast(response.data.message || "error","Failed to add to cart");
+                }
+            } catch (err) {
+                showToast(err?.response?.data?.message || "error","Something went wrong");
+            }
+        }
 
-                    // Reset to first image
-                    images.forEach((img, idx) => {
-                        if (idx === 0) {
-                            img.classList.remove('opacity-0');
-                            img.classList.add('opacity-100');
-                        } else {
-                            img.classList.remove('opacity-100');
-                            img.classList.add('opacity-0');
-                        }
-                    });
-                    currentIndex = 0;
-                });
+        async function buyNow(e, productId) {
+            e.preventDefault(); e.stopPropagation();
+            if (!isLoggedIn) { showToast("error","Please login to continue"); return; }
+            try {
+                const productCard = e.currentTarget.closest('.product-card');
+                const variantId = productCard?.dataset?.variant;
+                await axios.post('/users/addCart', { productId, variantId, quantity: 1 });
+                window.location.href = "/users/cart";
+            } catch (err) {
+                showToast(err?.response?.data?.message || "error","Failed to process request");
+            }
+        }
+
+        async function toggleWishlist(e, id, btn) {
+            e.preventDefault(); e.stopPropagation();
+            if (!isLoggedIn) { showToast("error","Please login to continue"); return; }
+            try {
+                const response = await axios.post('/users/toggleWishlist', { productId: id });
+                if (response.data.success) {
+                    const icon = btn.querySelector('.material-symbols-outlined');
+                    if (response.data.isWishlisted) {
+                        icon.classList.add('icon-fill', 'text-red-500');
+                        showToast("success","Added to wishlist");
+                    } else {
+                        icon.classList.remove('icon-fill', 'text-red-500');
+                        showToast("success","Removed from wishlist");
+                    }
+                }
+            } catch (err) {
+                showToast("error","Failed to update wishlist");
+            }
+        }
+
+        // ── Sidebar ───────────────────────────────────────────
+        function openSidebar() {
+            document.body.classList.add('sidebar-open');
+            document.getElementById('filter-sidebar').classList.replace('translate-x-full', 'translate-x-0');
+        }
+        function closeSidebar() {
+            document.body.classList.remove('sidebar-open');
+            document.getElementById('filter-sidebar').classList.replace('translate-x-0', 'translate-x-full');
+        }
+
+        // ── Search bar ────────────────────────────────────────
+        function toggleBarSearch() {
+            const bar = document.getElementById('refine-bar');
+            const input = document.getElementById('bar-search-input');
+            bar.classList.toggle('search-active');
+            if (bar.classList.contains('search-active')) {
+                setTimeout(() => input.focus(), 300);
+            } else {
+                input.value = '';
+                applyFilters();
+            }
+        }
+
+        function syncSearchAndFilter() {
+            document.getElementById('bar-search-input').value = document.getElementById('filter-search').value;
+            applyFilters();
+        }
+
+        // ── Sort dropdown ─────────────────────────────────────
+        function toggleSortDropdown() {
+            document.getElementById('sort-dropdown').classList.toggle('active');
+        }
+
+        function selectSort(sortType) {
+            document.getElementById('active-sort-label').innerText = sortType;
+            document.getElementById('sort-dropdown').classList.remove('active');
+            document.querySelectorAll('.sort-chip').forEach(c => {
+                c.classList.toggle('active', c.dataset.sort === sortType);
+            });
+            applyFilters();
+        }
+
+        document.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('sort-dropdown');
+            const btn = dropdown.previousElementSibling;
+            if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+                dropdown.classList.remove('active');
+            }
+        });
+
+        document.querySelectorAll('.sort-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                document.getElementById('active-sort-label').innerText = chip.dataset.sort;
             });
         });
-    </script>
-</body>
 
+        // ── Price slider ──────────────────────────────────────
+        const minRange = document.getElementById('price-min');
+        const maxRange = document.getElementById('price-max');
+        const rangeFill = document.getElementById('range-fill');
+        const priceDisplay = document.getElementById('price-display');
+
+        function updateDualSlider() {
+            let minVal = parseInt(minRange.value);
+            let maxVal = parseInt(maxRange.value);
+            if (minVal > maxVal) [minVal, maxVal] = [maxVal, minVal];
+            const minPct = (minVal / 10000) * 100;
+            const maxPct = (maxVal / 10000) * 100;
+            rangeFill.style.left = minPct + '%';
+            rangeFill.style.width = (maxPct - minPct) + '%';
+            priceDisplay.innerText = `₹${minVal.toLocaleString('en-IN')} - ₹${maxVal.toLocaleString('en-IN')}`;
+        }
+
+        minRange.addEventListener('input', updateDualSlider);
+        maxRange.addEventListener('input', updateDualSlider);
+        updateDualSlider();
+
+        // ── Pagination State ──────────────────────────────────
+        const ITEMS_PER_PAGE = 8;
+        let currentPage = 1;
+        let filteredCards = [];
+        let originalCards = [];
+
+        // ── Core filter + sort + pagination engine ────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            originalCards = [...document.querySelectorAll('.product-card')];
+
+            // Carousel logic
+            originalCards.forEach(card => {
+                const images = card.querySelectorAll('.carousel-img');
+                if (images.length <= 1) return;
+                let i = 0, interval;
+                card.addEventListener('mouseenter', () => {
+                    interval = setInterval(() => {
+                        images[i].classList.replace('opacity-100', 'opacity-0');
+                        i = (i + 1) % images.length;
+                        images[i].classList.replace('opacity-0', 'opacity-100');
+                    }, 1000);
+                });
+                card.addEventListener('mouseleave', () => {
+                    clearInterval(interval);
+                    images.forEach((img, idx) => {
+                        img.classList.toggle('opacity-100', idx === 0);
+                        img.classList.toggle('opacity-0', idx !== 0);
+                    });
+                    i = 0;
+                });
+            });
+
+            // Initial render
+            applyFilters();
+        });
+
+        function applyFilters() {
+            const searchQuery = (
+                document.getElementById('bar-search-input').value ||
+                document.getElementById('filter-search').value
+            ).toLowerCase().trim();
+
+            const activeSort = document.getElementById('active-sort-label').innerText;
+
+            let minPrice = parseInt(minRange.value);
+            let maxPrice = parseInt(maxRange.value);
+            if (minPrice > maxPrice) [minPrice, maxPrice] = [maxPrice, minPrice];
+
+            // ── 1. Filter ─────────────────────────────────────
+            filteredCards = originalCards.filter(card => {
+                const name  = (card.dataset.name  || '').toLowerCase();
+                const brand = (card.dataset.brand || '').toLowerCase();
+                const price = parseFloat(card.dataset.price) || 0;
+
+                if (searchQuery && !name.includes(searchQuery) && !brand.includes(searchQuery)) return false;
+                if (price < minPrice || price > maxPrice) return false;
+                return true;
+            });
+
+            // ── 2. Sort ───────────────────────────────────────
+            if (activeSort === 'PRICE LOW - HIGH' || activeSort === 'Price Low - High') {
+                filteredCards.sort((a, b) => parseFloat(a.dataset.price) - parseFloat(b.dataset.price));
+            } else if (activeSort === 'PRICE HIGH - LOW' || activeSort === 'Price High - Low') {
+                filteredCards.sort((a, b) => parseFloat(b.dataset.price) - parseFloat(a.dataset.price));
+            } else if (activeSort === 'NAME A - Z' || activeSort === 'Name A - Z') {
+                filteredCards.sort((a, b) => (a.dataset.name || '').localeCompare(b.dataset.name || ''));
+            } else if (activeSort === 'NAME Z - A' || activeSort === 'Name Z - A') {
+                filteredCards.sort((a, b) => (b.dataset.name || '').localeCompare(a.dataset.name || ''));
+            }
+
+            // ── 3. Reset to page 1 on new filter ─────────────
+            currentPage = 1;
+            renderPage();
+
+            renderFilterTags(searchQuery, activeSort, minPrice, maxPrice);
+        }
+
+        function renderPage() {
+            const grid = document.getElementById('product-grid');
+            const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const end   = start + ITEMS_PER_PAGE;
+            const pageCards = filteredCards.slice(start, end);
+
+            // Hide all
+            originalCards.forEach(card => card.style.display = 'none');
+
+            // Show only current page cards
+            pageCards.forEach(card => {
+                card.style.display = 'flex';
+                grid.appendChild(card);
+            });
+
+            // Update count & visibility
+            document.getElementById('result-count').textContent = filteredCards.length;
+            document.getElementById('no-results').style.display = filteredCards.length === 0 ? 'block' : 'none';
+            document.getElementById('pagination-container').style.display = filteredCards.length === 0 ? 'none' : 'flex';
+
+            renderPaginationButtons(totalPages);
+        }
+
+        function renderPaginationButtons(totalPages) {
+            const container = document.getElementById('page-numbers');
+            const prevBtn   = document.getElementById('prev-btn');
+            const nextBtn   = document.getElementById('next-btn');
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+
+            container.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            // Smart page number list with ellipsis
+            const pages = [];
+            if (totalPages <= 5) {
+                for (let i = 1; i <= totalPages; i++) pages.push(i);
+            } else {
+                if (currentPage <= 3) {
+                    pages.push(1, 2, 3, 4, '...', totalPages);
+                } else if (currentPage >= totalPages - 2) {
+                    pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+                } else {
+                    pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+                }
+            }
+
+            pages.forEach(p => {
+                if (p === '...') {
+                    const dots = document.createElement('span');
+                    dots.className = 'text-gray-400 text-[12px] font-bold px-1';
+                    dots.textContent = '...';
+                    container.appendChild(dots);
+                } else {
+                    const btn = document.createElement('button');
+                    btn.textContent = p;
+                    btn.className = `w-10 h-10 rounded-full text-[11px] font-black transition-all ${
+                        p === currentPage
+                            ? 'bg-black text-white shadow-lg shadow-black/20'
+                            : 'border border-gray-200 hover:bg-black hover:text-white hover:border-black'
+                    }`;
+                    btn.onclick = () => changePage(p);
+                    container.appendChild(btn);
+                }
+            });
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderPage();
+            document.getElementById('product-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // ── Active filter tags ────────────────────────────────
+        function renderFilterTags(search, sort, minP, maxP) {
+            const container = document.getElementById('active-filter-tags');
+            container.innerHTML = '';
+
+            function makeTag(label, onRemove) {
+                const tag = document.createElement('span');
+                tag.className = 'inline-flex items-center gap-1 bg-black text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full';
+                tag.innerHTML = `${label} <button onclick="(${onRemove.toString()})()" class="ml-1 hover:text-gray-300">✕</button>`;
+                container.appendChild(tag);
+            }
+
+            if (search) {
+                makeTag(`"${search}"`, () => {
+                    document.getElementById('bar-search-input').value = '';
+                    document.getElementById('filter-search').value = '';
+                    applyFilters();
+                });
+            }
+            if (sort && sort !== 'Sort By' && sort !== 'Latest Drop') {
+                makeTag(sort, () => {
+                    selectSort('Latest Drop');
+                });
+            }
+            if (minP > 0 || maxP < 10000) {
+                makeTag(`₹${minP.toLocaleString('en-IN')} - ₹${maxP.toLocaleString('en-IN')}`, () => {
+                    minRange.value = 0;
+                    maxRange.value = 10000;
+                    updateDualSlider();
+                    applyFilters();
+                });
+            }
+        }
+
+        // ── Clear all ─────────────────────────────────────────
+        function clearAll() {
+            document.getElementById('filter-search').value = '';
+            document.getElementById('bar-search-input').value = '';
+            minRange.value = 0;
+            maxRange.value = 10000;
+            updateDualSlider();
+            document.querySelectorAll('.sort-chip').forEach(c => {
+                c.classList.toggle('active', c.dataset.sort === 'Latest Drop');
+            });
+            document.getElementById('active-sort-label').innerText = 'Sort By';
+            applyFilters();
+            closeSidebar();
+        }
+
+        // ── Sidebar buttons ───────────────────────────────────
+        document.getElementById('clear-btn').onclick = clearAll;
+        document.getElementById('apply-btn').onclick = () => { applyFilters(); closeSidebar(); showToast("success","Filters Applied"); };
+    </script>
+
+</body>
 </html>

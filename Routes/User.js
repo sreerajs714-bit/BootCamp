@@ -10,8 +10,8 @@ import { uploadProfile } from "../Middleware/multer.js";
 import passport from "../Config/passport.js";
 import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controller/User/addressController.js";
 import { loadMens, loadProductDetail } from "../Controller/User/productController.js";
-import { loadWishlist } from "../Controller/User/wishlistController.js";
-import { loadCart } from "../Controller/User/cartController.js";
+import { loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
+import { addToCart, loadCart, removeFromCart } from "../Controller/User/cartController.js";
 
 
 route.get("/auth/google",
@@ -32,7 +32,6 @@ route.get("/auth/google/callback",
     });
   }
 );
-
 
 route.get("/",loadHome)
 route.get("/signup",islogin,loadRegister)
@@ -61,9 +60,13 @@ route.post("/address",checkSession,addAddress)
 route.put("/address/:id", checkSession,editAddress);
 route.delete("/address/:id", checkSession,deleteAddress);
 route.get("/mens",loadMens);
-route.get("/productDetail",loadProductDetail);
+route.get("/productDetail/:id",loadProductDetail);
 route.get("/wishlist",loadWishlist);
+route.post("/toggleWishlist",toggleWishlist);
+route.delete("/removeFromWishlist",removeFromWishlist);
 route.get("/cart",loadCart);
+route.post("/addCart",addToCart);
+route.delete("/removeFromCart",removeFromCart);
 
 
 export default route;

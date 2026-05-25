@@ -72,7 +72,7 @@ app.use(express.json());
 app.use(express.static("public"));
 
 app.use("/admin",AdminRoute)
-app.use("/users",checkUserBlocked,UserRoute)
+app.use("/users",UserRoute)
 app.get("/", (req, res) => {
   res.redirect("/users/home");
 });

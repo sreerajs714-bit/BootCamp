@@ -25,6 +25,14 @@
         .section-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background-color: #000; margin-right: 10px; }
         .size-btn.selected { background: #000; color: #fff; border-color: #000; }
         .error-msg { color: #ef4444; font-size: 11px; font-weight: 600; margin-top: 4px; display: none; }
+        @keyframes spin {
+        from { transform: rotate(0deg); }
+         to { transform: rotate(360deg); }
+        }
+          .spin-active {
+          display: inline-block;
+          animation: spin 0.7s linear infinite;
+        }
     </style>
 </head>
 
@@ -109,12 +117,12 @@
                     </div>
 
                     <!-- ✅ Real file input multer reads — name="images" -->
-                    <input type="file" id="imageInput" name="images" accept="image/*" multiple class="hidden">
+                    <input type="file" id="imageInput" name="images" accept="image/*" class="hidden">
 
-                    <div id="uploadZone" onclick="document.getElementById('imageInput').click()" class="border border-dashed border-gray-300 bg-[#f8f9fa] rounded-lg p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-black transition-colors min-h-[240px] mb-4">
+                    <div id="uploadZone" onclick="handleUploadClick()" class="border border-dashed border-gray-300 bg-[#f8f9fa] rounded-lg p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-black transition-colors min-h-[240px] mb-4">
                         <span class="material-symbols-outlined text-gray-300 text-[36px] mb-3">image</span>
-                        <p class="text-[11px] font-bold text-black uppercase tracking-widest">Upload Images</p>
-                        <p class="text-[10px] text-gray-400 mt-1">Click to select — each image opens the crop tool</p>
+                        <p id="uploadZoneLabel" class="text-[11px] font-bold text-black uppercase tracking-widest">Upload Images</p>
+                        <p id="uploadZoneSublabel" class="text-[10px] text-gray-400 mt-1">Click to select — each image opens the crop tool</p>
                     </div>
 
                     <div class="flex items-center justify-between">
@@ -122,7 +130,9 @@
                             <span id="uploadCount">0</span> / 3 Images Uploaded
                         </p>
                     </div>
-                    <p class="error-msg" id="imagesError">Minimum 3 images are required.</p>
+                    <div id="imagesError" class="hidden mt-2 bg-red-50 border border-red-200 text-red-700 text-[11px] font-semibold px-4 py-2 rounded-lg">
+                       Minimum 3 images are required.
+                     </div>
 
                     <!-- Thumbnails -->
                     <div id="thumbnailsContainer" class="grid grid-cols-3 gap-3 mt-4 hidden">
@@ -310,9 +320,10 @@
     <!-- Fixed Footer -->
     <div class="fixed bottom-0 right-0 w-[calc(100%-256px)] bg-white border-t border-gray-200 px-12 py-5 flex items-center justify-end gap-4 z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
         <a href="/admin/productManagement" class="px-8 py-3.5 bg-white border border-gray-200 text-black text-[11px] font-bold tracking-widest uppercase rounded hover:bg-gray-50 transition-colors">Discard</a>
-        <button type="button" id="submitBtn" class="px-8 py-3.5 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded shadow-lg shadow-black/10 hover:bg-gray-800 transition-colors">
-            Add Product
-        </button>
+        <button type="button" id="submitBtn" class="px-8 py-3.5 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded shadow-lg shadow-black/10 hover:bg-gray-800 transition-colors flex items-center gap-2">
+    <span id="submitBtnLabel">Add Product</span>
+    <span id="submitSpinner" class="material-symbols-outlined text-[16px]" style="display:none;">progress_activity</span>
+     </button>
     </div>
 
     </form><!-- end form -->
@@ -353,11 +364,42 @@ const cropImageEl        = document.getElementById('cropImage');
 const thumbnailsContainer = document.getElementById('thumbnailsContainer');
 const uploadCount        = document.getElementById('uploadCount');
 const thumbnailSlots     = document.querySelectorAll('.thumbnail-slot');
+const uploadZone         = document.getElementById('uploadZone');
+const uploadZoneLabel    = document.getElementById('uploadZoneLabel');
+const uploadZoneSublabel = document.getElementById('uploadZoneSublabel');
+
+// ─── HELPER: UPDATE UPLOAD ZONE UI ──────────────────────────
+function updateUploadZoneUI() {
+    if (uploadedFiles.length >= MAX_IMAGES) {
+        uploadZone.classList.add('opacity-50', 'bg-gray-100');
+        uploadZoneLabel.textContent = 'MAX IMAGES REACHED';
+        uploadZoneSublabel.textContent = 'Remove an image to upload another';
+    } else {
+        uploadZone.classList.remove('opacity-50', 'bg-gray-100');
+        uploadZoneLabel.textContent = 'UPLOAD IMAGES';
+        uploadZoneSublabel.textContent = 'Click to select — each image opens the crop tool';
+    }
+}
+
+// ─── CLICK HANDLER: CHECK LIMIT ──────────────────────────────
+function handleUploadClick() {
+    if (uploadedFiles.length >= MAX_IMAGES) {
+        showToast("error", "Maximum 3 images allowed.");
+        return;
+    }
+    imageInput.click();
+}
 
 // ─── IMAGE UPLOAD → CROP ─────────────────────────────────────
 imageInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    if (uploadedFiles.length >= MAX_IMAGES) {
+        showToast("error", "Maximum 3 images allowed.");
+        imageInput.value = '';
+        return;
+    }
 
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
@@ -416,6 +458,7 @@ const closeCropModal = () => {
     cropModal.classList.add('hidden');
     cropModal.classList.remove('flex');
     if (cropper) { cropper.destroy(); cropper = null; }
+    imageInput.value = ''; // Clear for next selection
 };
 
 document.getElementById('cancelCrop').addEventListener('click', closeCropModal);
@@ -454,6 +497,7 @@ document.getElementById('saveCropBtn').addEventListener('click', () => {
         }
 
         uploadCount.textContent = uploadedFiles.length;
+        updateUploadZoneUI();
         closeCropModal();
     }, 'image/jpeg', 0.9);
 });
@@ -483,6 +527,7 @@ function removeImage(index) {
     });
 
     uploadCount.textContent = uploadedFiles.length;
+    updateUploadZoneUI();
     if (uploadedFiles.length === 0) thumbnailsContainer.classList.add('hidden');
 }
 
@@ -504,12 +549,21 @@ document.querySelectorAll('.size-btn').forEach(btn => {
 document.getElementById('submitBtn').addEventListener('click', async () => {
     let valid = true;
 
-    // Helper to show/hide error
     const showError = (id, show) => {
-        const el = document.getElementById(id);
+    const el = document.getElementById(id);
+    if (!el) return;
+    
+    if (el.classList.contains('error-msg')) {
         el.style.display = show ? 'block' : 'none';
-        if (show) valid = false;
-    };
+    } else {
+        if (show) {
+            el.classList.remove('hidden');
+        } else {
+            el.classList.add('hidden');
+        }
+    }
+    if (show) valid = false;
+};
 
     showError('productNameError', !document.getElementById('productName').value.trim());
     showError('descriptionError', !document.getElementById('description').value.trim());
@@ -519,7 +573,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
     showError('skuError',         !document.getElementById('sku').value.trim());
     showError('priceError',       !document.getElementById('price').value);
     showError('stockError',       !document.getElementById('stock').value);
-    showError('imagesError',      uploadedFiles.length < 3);
+    showError('imagesError', uploadedFiles.length < MAX_IMAGES);
     showError('sizesError',       selectedSizes.size === 0);
 
     if (!valid) return;
@@ -535,34 +589,43 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
         sizeInputs.appendChild(input);
     });
 
-    // Submit the form
+    // ✅ Show loading spinner
+    const submitBtn     = document.getElementById('submitBtn');
+    const submitLabel   = document.getElementById('submitBtnLabel');
+    const submitSpinner = document.getElementById('submitSpinner');
+    submitBtn.disabled = true;
+    submitLabel.textContent = 'Saving…';
+    submitSpinner.classList.add('spin-active');   
+    submitSpinner.style.display = 'inline-block';
     const form = document.getElementById('productForm');
-const formData = new FormData(form);
+    const formData = new FormData(form);
 
-try {
-
-    const res = await axios.post('/admin/addProduct', formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
+    formData.delete('images');
+    uploadedFiles.forEach(file => {
+    formData.append('images', file);
     });
 
-    if (res.data.success) {
+    try {
+        const res = await axios.post('/admin/addProduct', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
 
-        showToast("success", res.data.message);
-
-        setTimeout(() => {
-            window.location.href = "/admin/productManagement";
-        }, 1000);
+        if (res.data.success) {
+            showToast("success", res.data.message);
+            setTimeout(() => {
+                window.location.href = "/admin/productManagement";
+            }, 1000);
+        }
+    } catch (err) {
+        console.log(err);
+        showToast("error", err.response?.data?.message || "Something went wrong");
+    } finally {
+        // ✅ Reset button state
+        submitBtn.disabled = false;
+        submitLabel.textContent = 'Add Product';
+        submitSpinner.classList.remove('spin-active');
+        submitSpinner.style.display = 'none';
     }
-
-} catch (err) {
-console.log(err)
-    showToast(
-        "error",
-        err.response?.data?.message || "Something went wrong"
-    );
-}
 });
 </script>
 

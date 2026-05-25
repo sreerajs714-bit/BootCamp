@@ -1,3 +1,225 @@
-export const loadWishlist =(req,res)=>{
-    res.render("users/wishlist");
-}
+import Product from "../../Model/productModel.js";
+import Wishlist from "../../Model/wishlistModel.js";
+
+
+export const loadWishlist = async (req, res) => {
+    try {
+
+        const isLoggedIn = !!req.session?.user;
+
+        if (!isLoggedIn) {
+            return res.render("users/wishlist", {
+                wishlistItems: [],
+                count: 0,
+                isLoggedIn: false
+            });
+        }
+
+        const userId = req.session.user.id;
+
+        const wishlist = await Wishlist.findOne({ userId })
+            .populate({
+                path: "products.productId",
+                populate: {
+                    path: "brand",
+                    model: "Brand"
+                }
+            })
+            .lean();
+
+        if (!wishlist || wishlist.products.length === 0) {
+            return res.render("users/wishlist", {
+                wishlistItems: [],
+                count: 0,
+                isLoggedIn: true
+            });
+        }
+
+        const wishlistItems = wishlist.products
+            .filter(item => {
+                const p = item.productId;
+                return p && !p.isDeleted && p.status === "active";
+            })
+            .map(item => {
+                const product = item.productId;
+
+                const variant = product.variants?.find(
+                    v => v._id.toString() === item.variantId?.toString()
+                ) || product.variants?.[0];
+
+
+                // Safe image extraction
+                const rawImages = variant?.images || [];
+                const images = rawImages.map(img => {
+                    if (typeof img === "string") return img;
+                    return img.url || img.path || img.src || "";
+                }).filter(Boolean);
+
+                return {
+                    id: product._id,
+                    productName: product.productName,
+                    brand: product.brand?.name || product.brand?.brandName || "Brand",
+                    rawPrice: variant?.price || 0,
+                    price: `₹${(variant?.price || 0).toLocaleString("en-IN")}`,
+                    variantId: variant?._id,
+                    images,
+                    color: variant?.color || "",
+                    badge: product.category || "",
+                    isLimitedEdition: product.isLimitedEdition || false,
+                    stock: variant?.stock || 0,
+                    stock_label: variant?.stock > 0 ? "In Stock" : "Out of Stock",
+                    stock_icon: variant?.stock > 0 ? "check_circle" : "cancel",
+                };
+            });
+
+        return res.render("users/wishlist", {
+            wishlistItems,
+            count: wishlistItems.length,
+            isLoggedIn: true
+        });
+
+    } catch (error) {
+        console.error("loadWishlist error:", error);
+        return res.render("users/wishlist", {
+            wishlistItems: [],
+            count: 0,
+            isLoggedIn: false
+        });
+    }
+};
+
+export const toggleWishlist = async (req, res) => {
+    try {
+
+        const userId = req.session?.user?.id;
+        const { productId } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please login to continue"
+            });
+        }
+
+        if (!productId) {
+            return res.status(400).json({
+                success: false,
+                message: "productId is required"
+            });
+        }
+
+        // Check product exists and is active
+        const product = await Product.findById(productId).lean();
+
+        if (!product || product.isDeleted || product.status !== 'active') {
+            return res.status(404).json({
+                success: false,
+                message: "Product not available"
+            });
+        }
+
+        let wishlist = await Wishlist.findOne({ userId });
+
+        if (!wishlist) {
+            wishlist = new Wishlist({ userId, products: [] });
+        }
+
+        const existingIndex = wishlist.products.findIndex(
+            p => p.productId.toString() === productId
+        );
+
+        if (existingIndex > -1) {
+            // Already wishlisted — remove it
+            wishlist.products.splice(existingIndex, 1);
+            await wishlist.save();
+
+            return res.status(200).json({
+                success: true,
+                isWishlisted: false,
+                message: "Removed from wishlist"
+            });
+
+        } else {
+            // Not wishlisted — add it
+            const variant = product.variants?.[0];
+
+            wishlist.products.push({
+                productId,
+                variantId: variant?._id || null
+            });
+
+            await wishlist.save();
+
+            return res.status(200).json({
+                success: true,
+                isWishlisted: true,
+                message: "Added to wishlist"
+            });
+        }
+
+    } catch (err) {
+        console.error('toggleWishlist error:', err);
+        return res.status(500).json({
+            success: false,
+            message: err.message
+        });
+    }
+};
+
+export const removeFromWishlist = async (req, res) => {
+    try {
+
+        const userId = req.session?.user?.id;
+        const { productId } = req.body;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please login to continue"
+            });
+        }
+
+        if (!productId) {
+            return res.status(400).json({
+                success: false,
+                message: "productId is required"
+            });
+        }
+
+        const wishlist = await Wishlist.findOne({ userId });
+
+        if (!wishlist) {
+            return res.status(404).json({
+                success: false,
+                message: "Wishlist not found"
+            });
+        }
+
+        const beforeLength = wishlist.products.length;
+
+        wishlist.products = wishlist.products.filter(
+            item => item.productId.toString() !== productId
+        );
+
+        if (wishlist.products.length === beforeLength) {
+            return res.status(404).json({
+                success: false,
+                message: "Item not found in wishlist"
+            });
+        }
+
+        await wishlist.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Removed from wishlist"
+        });
+
+    } catch (error) {
+        console.error("removeFromWishlist error:", error);
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};

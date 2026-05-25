@@ -4,17 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MERCURIAL ELITE - BOOT CAMP</title>
-    <!-- Tailwind CSS -->
+    <title>{{product.productName}} - BOOT CAMP</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <!-- Toastify -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
-    <!-- Material Symbols -->
-    <link rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -28,12 +33,28 @@
         }
 
         /* Zoom specific styles */
+        .zoom-container {
+            position: relative;
+            overflow: hidden;
+            background-color: #f4f4f5;
+            border-radius: 0.75rem;
+            cursor: zoom-in;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            height: 500px;
+        }
+
         #main-image {
-            transition: transform 0.1s linear, opacity 0.3s ease;
+            transition: transform 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            transform-origin: center center;
+            user-select: none;
+            pointer-events: none;
         }
 
         .thumbnail {
-            transition: border-color 0.2s ease, opacity 0.2s ease;
+            transition: all 0.2s ease;
         }
 
         .thumbnail.active {
@@ -51,462 +72,275 @@
             border-color: #d1d5db;
         }
 
-        /* Prevent layout shifts */
-        .product-grid-card {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        /* Similar Product Card Animations */
+        .product-card-similar {
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        .product-card-similar:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.08);
+            border-color: #f4f4f5;
         }
 
-        .product-grid-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.1);
+        /* Button styles */
+        .btn-action {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-action:active {
+            transform: scale(0.98);
         }
     </style>
 </head>
 
-<body class="antialiased selection:bg-black selection:text-white">
+<body>
 
-    <!-- Navbar -->
     {{>navbar}}
 
-    <!-- Main Content -->
     <main class="max-w-[1500px] mx-auto px-6 py-24 lg:py-40">
 
-        <!-- Product Hero Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 mb-32">
+        <!-- PRODUCT GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
 
-            <!-- Images Area (Left) -->
-            <div class="lg:col-span-5 flex flex-col-reverse lg:flex-row gap-6 lg:pl-12">
-                <!-- Thumbnails (Vertical on Desktop, Horizontal on Mobile) -->
-                <div
-                    class="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0 hide-scrollbar w-full lg:w-24 flex-shrink-0">
-                    <button type="button"
-                        class="thumbnail active w-20 h-24 lg:w-full lg:h-28 border-2 rounded-lg overflow-hidden flex-shrink-0 bg-[#f4f4f5]"
-                        onclick="changeImage(0, this)">
-                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=600&auto=format&fit=crop"
-                            class="w-full h-full object-contain mix-blend-multiply" alt="Thumb 1">
+            <!-- IMAGES -->
+            <div class="lg:col-span-5 flex flex-col-reverse lg:flex-row gap-6">
+
+                <!-- THUMBNAILS -->
+                <div id="thumbnail-container" class="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+                    {{#each product.images}}
+                    <button type="button" class="thumbnail {{#if @first}}active{{/if}} w-20 h-24 border-2 rounded-lg overflow-hidden flex-shrink-0"
+                        onclick="changeImage({{@index}}, this)">
+                        <img src="{{this}}" class="w-full h-full object-contain mix-blend-multiply">
                     </button>
-                    <button type="button"
-                        class="thumbnail w-20 h-24 lg:w-full lg:h-28 border-2 rounded-lg overflow-hidden flex-shrink-0 bg-[#f4f4f5]"
-                        onclick="changeImage(1, this)">
-                        <img src="https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=600&auto=format&fit=crop"
-                            class="w-full h-full object-contain mix-blend-multiply" alt="Thumb 2">
-                    </button>
-                    <button type="button"
-                        class="thumbnail w-20 h-24 lg:w-full lg:h-28 border-2 rounded-lg overflow-hidden flex-shrink-0 bg-[#f4f4f5]"
-                        onclick="changeImage(2, this)">
-                        <img src="https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=600&auto=format&fit=crop"
-                            class="w-full h-full object-contain mix-blend-multiply" alt="Thumb 3">
-                    </button>
+                    {{/each}}
                 </div>
 
-                <!-- Main Image -->
-                <div class="flex-1 bg-[#f4f4f5] rounded-xl relative overflow-hidden cursor-crosshair h-[500px] flex items-center justify-center p-8 lg:p-12 group"
-                    onmousemove="zoomImage(event)" onmouseleave="resetZoom(event)">
-                    <!-- Hint Text -->
-                    <div
-                        class="absolute  left-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 pointer-events-none shadow-sm">
+                <!-- MAIN IMAGE -->
+                <div class="flex-1 zoom-container group" onmousemove="zoomImage(event)" onmouseleave="resetZoom(event)">
+                    <img id="main-image" src="{{product.images.[0]}}" class="max-h-full object-contain mix-blend-multiply filter drop-shadow-2xl">
+                    
+                    <!-- Zoom Hint -->
+                    <div class="absolute bottom-4 left-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-2 pointer-events-none shadow-sm border border-gray-200/50">
                         <span class="material-symbols-outlined text-[14px]">zoom_in</span>
                     </div>
-                    <!-- The Image -->
-                    <img id="main-image"
-                        src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop"
-                        class="max-w-[120%] max-h-[120%] object-contain mix-blend-multiply filter drop-shadow-2xl"
-                        alt="MERCURIAL ELITE">
                 </div>
             </div>
 
-            <!-- Details Area (Right) -->
-            <div class="lg:col-span-7 flex flex-col justify-center lg:pr-12 lg:pl-8">
+            <!-- DETAILS -->
+            <div class="lg:col-span-7 flex flex-col justify-center">
 
-                <!-- Title -->
-                <h1 class="text-4xl lg:text-[56px] font-black uppercase tracking-tighter leading-[0.95] mb-6">MERCURIAL
-                    <br> ELITE</h1>
+                <h1 id="product-name" class="text-4xl lg:text-5xl font-black uppercase tracking-tighter mb-4 leading-tight">
+                    {{product.productName}}
+                </h1>
 
-                <!-- Price -->
-                <p class="text-[22px] font-black mb-10">$249.00</p>
+                <div class="flex items-baseline gap-3 mb-6">
+                    <span id="product-price" class="text-2xl font-black">₹{{product.price}}</span>
+                    {{#if product.oldPrice}}
+                    <span class="text-sm text-gray-400 line-through">₹{{product.oldPrice}}</span>
+                    {{/if}}
+                </div>
 
-                <!-- Size Selector -->
+                <div class="inline-flex bg-gray-100 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest mb-8 self-start">
+                    {{product.badge}}
+                </div>
+
+                <!-- COLORS -->
                 <div class="mb-8">
-                    <p class="text-[10px] font-bold uppercase tracking-widest mb-4">SELECT SIZE (US)</p>
-                    <div class="grid grid-cols-3 sm:grid-cols-9 gap-3">
-                        <button
-                            class="w-full py-3.5 border border-gray-200 text-sm font-semibold hover:border-black transition-colors rounded-md">7</button>
-                        <button
-                            class="w-full py-3.5 border border-gray-200 text-sm font-semibold hover:border-black transition-colors rounded-md">8</button>
-                        <button
-                            class="w-full py-3.5 border-2 border-black bg-black text-white text-sm font-semibold rounded-md">9</button>
-                        <button
-                            class="w-full py-3.5 border border-gray-200 text-sm font-semibold hover:border-black transition-colors rounded-md">10</button>
-                        <button
-                            class="w-full py-3.5 border border-gray-200 text-sm font-semibold hover:border-black transition-colors rounded-md text-gray-400 decoration-line-through">11</button>
+                    <p class="text-[10px] font-black uppercase tracking-widest mb-3 text-gray-500">Select Color</p>
+                    <div id="color-container" class="flex gap-2.5">
+                        {{#each product.variants}}
+                        <button 
+                            data-variant-id="{{this.id}}"
+                            class="variant-clr-btn w-7 h-7 rounded-full border-2 border-white ring-2 {{#if @first}}ring-black{{else}}{{#if this.isDefault}}ring-black{{else}}ring-transparent{{/if}}{{/if}} hover:ring-gray-300 transition-all focus:ring-black outline-none" 
+                            style="background-color: {{this.color}};"
+                            title="{{this.color}}"
+                            onclick="selectVariant('{{this.id}}', this)">
+                        </button>
+                        {{/each}}
                     </div>
                 </div>
 
-                <!-- Color Selector -->
+                <!-- SIZE -->
                 <div class="mb-10">
-                    <p class="text-[10px] font-bold uppercase tracking-widest mb-4">SELECT COLOR</p>
-                    <div class="flex gap-4 px-1">
-                        <button
-                            class="color-selector-btn active w-[30px] h-[30px] rounded-full bg-[#d7323b] ring-1 ring-offset-4 ring-black border border-transparent transition-all outline-none"
-                            title="Red" onclick="selectColor(this)"></button>
-                        <button
-                            class="color-selector-btn w-[30px] h-[30px] rounded-full bg-[#1a1a1a] ring-1 ring-offset-4 ring-transparent hover:ring-gray-300 border border-gray-200 transition-all outline-none"
-                            title="Black" onclick="selectColor(this)"></button>
-                        <button
-                            class="color-selector-btn w-[30px] h-[30px] rounded-full bg-[#f4f4f5] ring-1 ring-offset-4 ring-transparent hover:ring-gray-300 border border-gray-300 transition-all outline-none"
-                            title="Silver" onclick="selectColor(this)"></button>
+                    <div class="flex justify-between items-center mb-3">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-gray-500">Select Size</p>
+                    </div>
+
+                    <div id="size-container" class="flex flex-wrap gap-2">
+                        {{#each product.sizes}}
+                        <button onclick="selectSize(this)" 
+                            class="size-btn w-12 h-10 border border-gray-200 rounded-lg text-[11px] font-bold hover:border-black transition-all flex items-center justify-center">
+                            {{this}}
+                        </button>
+                        {{/each}}
                     </div>
                 </div>
 
-                <!-- Actions -->
-                <div class="flex flex-col gap-3 mb-10">
-                    <div class="flex gap-3">
-                        <button
-                            class="flex-1 bg-white border border-gray-300 text-black py-4 uppercase font-bold text-[11px] tracking-[0.2em] hover:border-black transition-colors rounded-md flex items-center justify-center gap-2">
-                            <span>ADD TO BAG</span>
-                        </button>
-                        <button
-                            class="w-[60px] bg-[#f4f4f5] flex items-center justify-center rounded-md hover:bg-gray-200 transition-colors text-gray-600">
-                            <span class="material-symbols-outlined text-[20px]">favorite</span>
-                        </button>
-                    </div>
-                    <button
-                        class="w-full bg-black text-white py-4 uppercase font-bold text-[11px] tracking-[0.2em] hover:bg-gray-800 transition-colors rounded-md">
-                        BUY NOW
+                <!-- ACTIONS -->
+                <div class="flex flex-col gap-3 max-w-md">
+                    <button onclick="addToCart('{{product.id}}')"
+                        class="btn-action w-full bg-black text-white py-4 rounded-2xl text-[13px] hover:bg-gray-800 shadow-lg shadow-black/10">
+                        Add to Cart
+                    </button>
+
+                    <button onclick="buyNow('{{product.id}}')" 
+                        class="btn-action w-full bg-[#f4f4f5] text-black py-4 rounded-2xl text-[13px] hover:bg-gray-200">
+                        Buy Now
+                    </button>
+
+                    <button onclick="toggleWishlist('{{product.id}}', this)"
+                        class="btn-action w-full mt-2 flex items-center justify-center gap-2 text-gray-500 hover:text-red-500 transition-colors">
+                        <span class="material-symbols-outlined text-[20px] {{#if product.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
+                        <span class="text-[10px] font-bold uppercase tracking-widest">Add to Wishlist</span>
                     </button>
                 </div>
 
-                <!-- Description -->
-                <p class="text-[13px] text-gray-500 font-medium leading-relaxed">
-                    Engineered for explosive speed and precision. The Mercurial Elite features a 360-degree Flyknit
-                    construction that wraps your foot for a second-skin fit, paired with a specialized plate for
-                    ultimate traction.
+                <p id="product-description" class="mt-8 text-[13px] text-gray-500 leading-relaxed font-medium">
+                    {{product.description}}
                 </p>
+
             </div>
+
         </div>
 
-        <!-- Similar Products Section -->
-        <section class="mb-32 pt-12 border-t border-gray-100">
-            <div class="flex justify-between items-center mb-10">
-                <h2 class="text-[22px] font-black uppercase tracking-tighter">SIMILAR PRODUCTS</h2>
-                <!-- Arrows -->
+        <!-- SIMILAR PRODUCTS SECTION -->
+        <section class="mt-32 pt-20 border-t border-gray-100">
+            <div class="flex justify-between items-end mb-12">
+                <div>
+                    <h2 class="text-[28px] font-black uppercase tracking-tighter mb-2">Similar Products</h2>
+                    <p class="text-gray-400 text-xs font-bold uppercase tracking-widest">Recommended for you</p>
+                </div>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 px-4 xl:px-0">
-
-                <!-- Card 1 -->
-                <div class="product-grid-card group border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white">
-                    <div
-                        class="relative bg-[#f6f6f6] rounded-[16px] aspect-square flex items-center justify-center mb-5 overflow-hidden">
-                        <button
-                            class="absolute top-3 right-3 bg-white w-[34px] h-[34px] rounded-full flex items-center justify-center shadow-sm text-gray-400 hover:text-red-500 transition-all z-10 hover:shadow">
-                            <span class="material-symbols-outlined text-[18px]">favorite</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                {{#each similarProducts}}
+                <a href="/user/product-details/{{this.id}}" class="product-card-similar block group flex flex-col bg-white rounded-3xl p-3 border border-gray-50 transition-all cursor-pointer hover:no-underline text-inherit">
+                    
+                    <!-- Card Top (Image + Icons) -->
+                    <div class="relative aspect-square bg-[#f8f8f8] rounded-2xl overflow-hidden mb-5">
+                        
+                        <button onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('{{this.id}}', this)" 
+                            class="absolute top-3 right-3 z-20 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-all shadow-sm">
+                            <span class="material-symbols-outlined text-[18px] {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
                         </button>
-                        <div
-                            class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-[8px] flex items-center gap-1 z-10 shadow-sm border border-gray-100/50">
-                            <span class="material-symbols-outlined text-[14px] text-gray-400">schedule</span>
-                            <span class="text-[11px] font-bold text-gray-700">Only 7 left</span>
-                        </div>
-                        <div
-                            class="carousel-container relative w-[85%] h-[85%] flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
-                            <img src="https://images.unsplash.com/photo-1605348532723-67c12f70f209?q=80&w=600&auto=format&fit=crop"
-                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-100" />
-                            <img src="https://images.unsplash.com/photo-1549298916-b41d501d3772?q=80&w=600&auto=format&fit=crop"
-                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                            <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=600&auto=format&fit=crop"
-                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                        </div>
-                    </div>
-                    <div class="px-1 flex-1 flex flex-col">
-                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">PREMIUM</div>
-                        <h3 class="text-[15px] font-extrabold text-gray-900 mb-1.5">boldfit</h3>
-                        <div class="text-[19px] font-extrabold text-gray-900 mb-6 leading-none">₹3,000</div>
 
-                        <div class="mt-auto flex flex-col gap-2">
-                            <button
-                                class="w-full bg-black text-white text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-800 transition-colors">Add
-                                to Cart</button>
-                            <button
-                                class="w-full bg-[#f4f4f5] text-black text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-200 transition-colors">Buy
-                                Now</button>
+                        <div class="carousel-container relative w-full h-full flex items-center justify-center p-6">
+                            {{#each this.images}}
+                            <img src="{{this}}" 
+                                class="carousel-img absolute max-w-[85%] max-h-[85%] object-contain mix-blend-multiply transition-opacity duration-500 {{#if @first}}opacity-100{{else}}opacity-0{{/if}}">
+                            {{/each}}
                         </div>
-                    </div>
-                </div>
 
-                <!-- Card 2 -->
-                <div class="product-grid-card group border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white">
-                    <div
-                        class="relative bg-[#f6f6f6] rounded-[16px] aspect-square flex items-center justify-center mb-5 overflow-hidden">
-                        <button
-                            class="absolute top-3 right-3 bg-white w-[34px] h-[34px] rounded-full flex items-center justify-center shadow-sm text-gray-400 hover:text-red-500 transition-all z-10 hover:shadow">
-                            <span class="material-symbols-outlined text-[18px]">favorite</span>
-                        </button>
-                        <div
-                            class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-[8px] flex items-center gap-1 z-10 shadow-sm border border-gray-100/50">
+                        <div class="absolute bottom-3 left-3 z-20 bg-white px-2 py-1 rounded-lg shadow-sm border border-gray-100 flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[14px] text-gray-400">check_circle</span>
-                            <span class="text-[11px] font-bold text-gray-700">In Stock</span>
-                        </div>
-                        <div
-                            class="carousel-container relative w-[85%] h-[85%] flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
-                            <img src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?q=80&w=600&auto=format&fit=crop"
-                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-100" />
-                            <img src="https://images.unsplash.com/photo-1514989940723-e8e51635b782?q=80&w=600&auto=format&fit=crop"
-                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                            <img src="https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=600&auto=format&fit=crop"
-                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
+                            <span class="text-[9px] font-black uppercase tracking-tighter text-gray-700">In Stock</span>
                         </div>
                     </div>
-                    <div class="px-1 flex-1 flex flex-col">
-                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">PREMIUM</div>
-                        <h3 class="text-[15px] font-extrabold text-gray-900 mb-1.5">reebok</h3>
-                        <div class="text-[19px] font-extrabold text-gray-900 mb-6 leading-none">₹8,000</div>
+
+                    <!-- Card Info -->
+                    <div class="px-1 flex-1 flex flex-col pt-1">
+                        <div class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{{this.badge}}</div>
+                        <h3 class="text-[15px] font-black text-gray-900 mb-1">{{this.productName}}</h3>
+                        <div class="text-lg font-black text-gray-900 mb-6">₹{{this.price}}</div>
 
                         <div class="mt-auto flex flex-col gap-2">
-                            <button
-                                class="w-full bg-black text-white text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-800 transition-colors">Add
-                                to Cart</button>
-                            <button
-                                class="w-full bg-[#f4f4f5] text-black text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-200 transition-colors">Buy
-                                Now</button>
+                            <button onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{this.id}}', true)" 
+                                class="w-full bg-black text-white py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-all shadow-sm">
+                                Add to Cart
+                            </button>
+                            <button onclick="event.preventDefault(); event.stopPropagation(); buyNow('{{this.id}}')" 
+                                class="w-full bg-[#f4f4f5] text-black py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-gray-200 transition-all">
+                                Buy Now
+                            </button>
                         </div>
                     </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="product-grid-card group border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white">
-                    <div
-                        class="relative bg-[#f6f6f6] rounded-[16px] aspect-square flex items-center justify-center mb-5 overflow-hidden">
-                        <button
-                            class="absolute top-3 right-3 bg-white w-[34px] h-[34px] rounded-full flex items-center justify-center shadow-sm text-gray-400 hover:text-red-500 transition-all z-10 hover:shadow">
-                            <span class="material-symbols-outlined text-[18px]">favorite</span>
-                        </button>
-                        <div
-                            class="absolute bottom-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-[8px] flex items-center gap-1 z-10 shadow-sm border border-gray-100/50">
-                            <span class="material-symbols-outlined text-[14px] text-gray-400">check_circle</span>
-                            <span class="text-[11px] font-bold text-gray-700">In Stock</span>
-                        </div>
-                        <div
-                            class="carousel-container relative w-[85%] h-[85%] flex items-center justify-center transition-transform duration-700 group-hover:scale-110">
-                            <img src="https://images.unsplash.com/photo-1582236940866-23b08e7ff2b3?q=80&w=600&auto=format&fit=crop"
-                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-100" />
-                            <img src="https://images.unsplash.com/photo-1539185441755-769473a23570?q=80&w=600&auto=format&fit=crop"
-                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                            <img src="https://images.unsplash.com/photo-1508243529287-e21914733111?q=80&w=600&auto=format&fit=crop"
-                                class="carousel-img absolute inset-0 w-full h-full object-contain mix-blend-multiply filter drop-shadow-md transition-opacity duration-300 opacity-0" />
-                        </div>
-                    </div>
-                    <div class="px-1 flex-1 flex flex-col">
-                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1.5">RAPIDO</div>
-                        <h3 class="text-[15px] font-extrabold text-gray-900 mb-1.5">New balance</h3>
-                        <div class="text-[19px] font-extrabold text-gray-900 mb-6 leading-none">₹72,000</div>
-
-                        <div class="mt-auto flex flex-col gap-2">
-                            <button
-                                class="w-full bg-black text-white text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-800 transition-colors">Add
-                                to Cart</button>
-                            <button
-                                class="w-full bg-[#f4f4f5] text-black text-[13px] font-bold py-3.5 px-4 rounded-[14px] hover:bg-gray-200 transition-colors">Buy
-                                Now</button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </section>
-
-        <!-- Customer Reviews -->
-        <section class="mb-32">
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
-
-                <!-- Left: Overall Rating -->
-                <div class="lg:col-span-4">
-                    <h2 class="text-2xl font-black uppercase tracking-tighter mb-6">CUSTOMER REVIEWS</h2>
-                    <div class="flex items-baseline gap-2 mb-3">
-                        <span class="text-6xl font-black tracking-tighter">4.8</span>
-                        <span class="text-xl font-bold text-gray-400">/ 5.0</span>
-                    </div>
-                    <div class="flex text-black mb-4">
-                        <span class="material-symbols-outlined icon-fill">star</span>
-                        <span class="material-symbols-outlined icon-fill">star</span>
-                        <span class="material-symbols-outlined icon-fill">star</span>
-                        <span class="material-symbols-outlined icon-fill">star</span>
-                        <span class="material-symbols-outlined icon-fill text-gray-200">star</span>
-                    </div>
-                    <p class="text-xs text-gray-500 font-medium tracking-wide">Based on 1,428 verified guest reviews.
-                    </p>
-                </div>
-
-                <!-- Right: Review List -->
-                <div class="lg:col-span-8 flex flex-col gap-10">
-
-                    <!-- Review Item 1 -->
-                    <div class="border-l-[3px] border-black pl-6">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h4 class="text-sm font-black uppercase tracking-tight mb-1">INCREDIBLE RESPONSIVENESS
-                                </h4>
-                                <div class="flex text-black text-[12px]">
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">MARCUS J. — 3
-                                DAYS AGO</span>
-                        </div>
-                        <p class="text-[13px] text-gray-600 font-medium leading-relaxed mt-3">
-                            The plate is snappy and the lockdown is the best I've ever felt in a Mercurial. Definitely
-                            see a noticeable pro tag to my sprint time play.
-                        </p>
-                    </div>
-
-                    <!-- Review Item 2 -->
-                    <div class="border-l-[3px] border-gray-200 hover:border-black transition-colors pl-6">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h4 class="text-sm font-black uppercase tracking-tight mb-1">GREAT TOUCH, NARROW FIT
-                                </h4>
-                                <div class="flex text-black text-[12px]">
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                    <span class="material-symbols-outlined text-[14px]">star</span>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">DANNIL T. — 1
-                                WEEK AGO</span>
-                        </div>
-                        <p class="text-[13px] text-gray-600 font-medium leading-relaxed mt-3">
-                            Touch on the ball is sublime. Be warned : they are very narrow, so I'd recommend sizing up
-                            by half if you have wide feet.
-                        </p>
-                    </div>
-
-                    <!-- Review Item 3 -->
-                    <div class="border-l-[3px] border-gray-200 hover:border-black transition-colors pl-6">
-                        <div class="flex justify-between items-start mb-2">
-                            <div>
-                                <h4 class="text-sm font-black uppercase tracking-tight mb-1">PURE SPEED</h4>
-                                <div class="flex text-black text-[12px]">
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                    <span class="material-symbols-outlined icon-fill text-[14px]">star</span>
-                                </div>
-                            </div>
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">LEO G. — 2 WEEKS
-                                AGO</span>
-                        </div>
-                        <p class="text-[13px] text-gray-600 font-medium leading-relaxed mt-3">
-                            Translates force down directly into forward trajectory. The traction is simply on another
-                            level right out the box. The aggression level is elite.
-                        </p>
-                    </div>
-
-                </div>
+                </a>
+                {{/each}}
             </div>
         </section>
 
     </main>
 
-    <!-- Footer -->
     {{>footer}}
 
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <!-- Interaction Script -->
     <script>
-        const imageSources = [
-            'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=1200&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1608231387042-66d1773070a5?q=80&w=1200&auto=format&fit=crop',
-            'https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?q=80&w=1200&auto=format&fit=crop'
-        ];
+        const productVariants = {{{ json product.variants }}};
+        const initialImages = {{{ json product.images }}};
+        
+        // State Management
+        let currentImages = initialImages;
+        let selectedVariantId = (productVariants.find(v => v.isDefault) || productVariants[0] || {}).id;
+        let selectedSize = null;
+        const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
 
-        // Changing the main image from thumbnail
-        function changeImage(index, element) {
-            const mainImg = document.getElementById('main-image');
-
-            // Fade out
-            mainImg.style.opacity = '0.3';
-
-            setTimeout(() => {
-                mainImg.src = imageSources[index];
-                // Fade back in
-                requestAnimationFrame(() => {
-                    mainImg.style.opacity = '1';
-                });
-            }, 200); // 200ms matches approx transition
-
-            // Update active state on thumbnails
-            document.querySelectorAll('.thumbnail').forEach(th => {
-                th.classList.remove('active');
-            });
-            element.classList.add('active');
-        }
-
-        // Image Zoom Logic
-        function zoomImage(event) {
-            const container = event.currentTarget;
-            const img = document.getElementById('main-image');
-
-            // Get boundaries of the container
-            const rect = container.getBoundingClientRect();
-
-            // Calculate mouse position relative to container
-            let x = event.clientX - rect.left;
-            let y = event.clientY - rect.top;
-
-            // Cap the values to stay safely inside bounds
-            x = Math.max(0, Math.min(x, rect.width));
-            y = Math.max(0, Math.min(y, rect.height));
-
-            // Convert to percentage
-            const xPercent = (x / rect.width) * 100;
-            const yPercent = (y / rect.height) * 100;
-
-            // Move origin dynamically as user moves mouse
-            img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
-
-            // Scale up if not already scaled
-            if (!container.dataset.zooming) {
-                img.style.transform = 'scale(2.4)';
-                container.dataset.zooming = "true";
-            }
-        }
-
-        function resetZoom(event) {
-            const container = event.currentTarget;
-            const img = document.getElementById('main-image');
-
-            // Revert scale
-            img.style.transform = 'scale(1)';
-            container.dataset.zooming = "";
-
-            // Reset origin smoothly after scale finishes
-            setTimeout(() => {
-                if (!container.dataset.zooming) {
-                    img.style.transformOrigin = 'center center';
-                }
-            }, 300);
-        }
-
-        // Color selector logic
-        function selectColor(btn) {
-            document.querySelectorAll('.color-selector-btn').forEach(b => {
-                b.classList.remove('ring-black');
-                b.classList.add('ring-transparent');
-            });
-            btn.classList.add('ring-black');
-            btn.classList.remove('ring-transparent', 'hover:ring-gray-300');
-        }
-
-        // Product Carousel logic
+        // Sync initial visual state
         document.addEventListener('DOMContentLoaded', () => {
-            const cards = document.querySelectorAll('.product-grid-card');
+            const initialBtn = document.querySelector(`[data-variant-id="${selectedVariantId}"]`);
+            if (initialBtn) {
+                document.querySelectorAll('#color-container button').forEach(b => {
+                    b.classList.remove('ring-black');
+                    b.classList.add('ring-transparent');
+                });
+                initialBtn.classList.add('ring-black');
+                initialBtn.classList.remove('ring-transparent');
+            }
+        });
 
+        // Dynamic Badge Updates
+        function updateBadges() {
+            axios.get('/user/nav-counts').then(response => {
+                if(response.data.success) {
+                    const cartBadge = document.getElementById('cart-badge');
+                    const wishlistBadge = document.getElementById('wishlist-badge');
+                    
+                    if(cartBadge) {
+                        cartBadge.innerText = response.data.cartCount;
+                        const isEmpty = response.data.cartCount === 0;
+                        cartBadge.classList.toggle('opacity-0', isEmpty);
+                        cartBadge.classList.toggle('scale-0', isEmpty);
+                    }
+                    if(wishlistBadge) {
+                        wishlistBadge.innerText = response.data.wishlistCount;
+                        const isEmpty = response.data.wishlistCount === 0;
+                        wishlistBadge.classList.toggle('opacity-0', isEmpty);
+                        wishlistBadge.classList.toggle('scale-0', isEmpty);
+                    }
+                }
+            }).catch(err => console.error("Error updating badges:", err));
+        }
+
+        // Initialize badges on load
+        document.addEventListener('DOMContentLoaded', updateBadges);
+
+        // Toast Helper
+        function showToast(type = 'success',message) {
+            Toastify({
+                text: message,
+                duration: 3000,
+                gravity: "bottom",
+                position: "right",
+                stopOnFocus: true,
+                style: {
+                    background: type === 'success' ? "#000000" : "#ef4444",
+                    borderRadius: "12px",
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                    textTransform: "uppercase",
+                    letterSpacing: "1px",
+                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
+                }
+            }).showToast();
+        }
+
+        // Hover Carousel for Similar Products
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.product-card-similar');
             cards.forEach(card => {
                 const images = card.querySelectorAll('.carousel-img');
                 if (images.length <= 1) return;
@@ -521,25 +355,179 @@
                         currentIndex = (currentIndex + 1) % images.length;
                         images[currentIndex].classList.remove('opacity-0');
                         images[currentIndex].classList.add('opacity-100');
-                    }, 1000);
+                    }, 1200);
                 });
 
                 card.addEventListener('mouseleave', () => {
                     clearInterval(intervalId);
                     images.forEach((img, idx) => {
-                        if (idx === 0) {
-                            img.classList.remove('opacity-0');
-                            img.classList.add('opacity-100');
-                        } else {
-                            img.classList.remove('opacity-100');
-                            img.classList.add('opacity-0');
-                        }
+                        img.classList.replace('opacity-100', 'opacity-0');
+                        if (idx === 0) img.classList.replace('opacity-0', 'opacity-100');
                     });
                     currentIndex = 0;
                 });
             });
         });
+
+        function changeImage(index, el) {
+            const mainImg = document.getElementById('main-image');
+            mainImg.style.opacity = '0.4';
+            
+            setTimeout(() => {
+                mainImg.src = currentImages[index];
+                mainImg.style.opacity = '1';
+                document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+                el.classList.add('active');
+            }, 150);
+        }
+
+        function selectVariant(id, el) {
+            const variant = productVariants.find(v => v.id === id);
+            if (!variant) return;
+
+            selectedVariantId = id;
+            selectedSize = null; // Reset size on variant change
+
+            // Visual feedback for color
+            document.querySelectorAll('#color-container button').forEach(btn => {
+                btn.classList.remove('ring-black');
+                btn.classList.add('ring-transparent');
+            });
+            el.classList.add('ring-black');
+            el.classList.remove('ring-transparent');
+
+            // PRICE
+            document.getElementById('product-price').innerText = `₹${variant.price}`;
+
+            // SIZES
+            const sizeContainer = document.getElementById('size-container');
+            sizeContainer.innerHTML = variant.sizes.map(size => `
+                <button onclick="selectSize(this)" 
+                    class="size-btn w-12 h-10 border border-gray-200 rounded-lg text-[11px] font-bold hover:border-black transition-all flex items-center justify-center">
+                    ${size}
+                </button>
+            `).join('');
+
+            // IMAGES
+            currentImages = variant.images;
+            const mainImg = document.getElementById('main-image');
+            if (variant.images.length > 0) {
+                mainImg.src = variant.images[0];
+            }
+
+            // THUMBNAILS
+            const thumbnailContainer = document.getElementById('thumbnail-container');
+            if (thumbnailContainer) {
+                thumbnailContainer.innerHTML = variant.images.map((img, index) => `
+                    <button type="button" class="thumbnail ${index === 0 ? 'active' : ''} w-20 h-24 border-2 rounded-lg overflow-hidden flex-shrink-0"
+                        onclick="changeImage(${index}, this)">
+                        <img src="${img}" class="w-full h-full object-contain mix-blend-multiply">
+                    </button>
+                `).join('');
+            }
+        }
+
+        function selectSize(el) {
+            selectedSize = el.innerText.trim();
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.classList.remove('bg-black', 'text-white', 'border-black');
+                btn.classList.add('bg-white', 'text-black', 'border-gray-200');
+            });
+            el.classList.add('bg-black', 'text-white', 'border-black');
+            el.classList.remove('bg-white', 'text-black', 'border-gray-200');
+        }
+
+        // ZOOM
+        function zoomImage(event) {
+            const container = event.currentTarget;
+            const img = document.getElementById('main-image');
+            const rect = container.getBoundingClientRect();
+            let x = event.clientX - rect.left;
+            let y = event.clientY - rect.top;
+            const xPercent = (x / rect.width) * 100;
+            const yPercent = (y / rect.height) * 100;
+            img.style.transformOrigin = `${xPercent}% ${yPercent}%`;
+            img.style.transform = 'scale(2.4)';
+        }
+
+        function resetZoom() {
+            const img = document.getElementById('main-image');
+            img.style.transform = 'scale(1)';
+            img.style.transformOrigin = 'center center';
+        }
+
+        // API OPERATIONS
+        async function addToCart(productId, isSimilar = false) {
+            if (!isLoggedIn) {
+                showToast("error","Please login to continue");
+                return;
+            }
+
+            try {
+                let data = { productId };
+                
+                if (!isSimilar) {
+                    if (!selectedSize) {
+                        showToast("error","Please select a size first");
+                        return;
+                    }
+                    data.variantId = selectedVariantId;
+                    data.size = selectedSize;
+                }
+
+                const response = await axios.post('/users/addCart', data);
+                if (response.data.success) {
+                    showToast("success","Added to Cart Successfully");
+                    updateBadges();
+                } else {
+                    showToast(response.data.message || "error","Failed to add to cart");
+                }
+            } catch (error) {
+                console.error("Cart Error:", error);
+                showToast("error","Something went wrong");
+            }
+        }
+
+        async function toggleWishlist(productId, btn) {
+            if (!isLoggedIn) {
+                showToast("error","Please login to continue");
+                return;
+            }
+
+            try {
+                const response = await axios.post('/user/wishlist/toggle', { productId });
+                if (response.data.success) {
+                    const icon = btn.querySelector('.material-symbols-outlined');
+                    if (response.data.isWishlisted) {
+                        icon.classList.add('icon-fill', 'text-red-500');
+                        showToast("success","Added to Wishlist");
+                    } else {
+                        icon.classList.remove('icon-fill', 'text-red-500');
+                        showToast("success","Removed from Wishlist");
+                    }
+                    updateBadges();
+                }
+            } catch (error) {
+                console.error("Wishlist Error:", error);
+                showToast("error","Failed to update wishlist");
+            }
+        }
+
+        async function buyNow(productId) {
+            if (!isLoggedIn) {
+                showToast("error","Please login to continue");
+                return;
+            }
+
+            if (!selectedSize) {
+                showToast("error","Please select a size first");
+                return;
+            }
+            await addToCart(productId);
+            window.location.href = '/users/cart';
+        }
     </script>
+
 </body>
 
 </html>

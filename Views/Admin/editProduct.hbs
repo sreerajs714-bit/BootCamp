@@ -305,7 +305,7 @@
     function triggerUpload() {
         const filled = imageSlots.filter(Boolean).length;
         if (filled >= 3) {
-            showError('Maximum 3 images allowed. Remove one first.');
+            showToast("error",'Maximum 3 images allowed. Remove one first.');
             return;
         }
         document.getElementById('imageInput').click();

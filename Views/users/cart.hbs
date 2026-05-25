@@ -74,11 +74,12 @@
                     <h1 class="text-[32px] font-black tracking-tight">Your Items</h1>
                 </div>
 
-                <!-- Item 1 -->
-                <div class="cart-item flex flex-col sm:flex-row gap-6 p-5 sm:p-6 bg-white border border-gray-100 rounded-[24px] shadow-sm hover:shadow-md transition-shadow relative" data-id="item-1">
+                <!-- Dynamic Items -->
+                {{#each cartItems}}
+                <div class="cart-item flex flex-col sm:flex-row gap-6 p-5 sm:p-6 bg-white border border-gray-100 rounded-[24px] shadow-sm hover:shadow-md transition-shadow relative" data-id="{{this.productId._id}}" data-price="{{this.price}}" data-variant="{{this.variantId}}">
                     <!-- Image -->
                     <div class="w-full sm:w-[130px] h-[150px] bg-[#f0f4f8] rounded-[16px] overflow-hidden flex-shrink-0 flex items-center justify-center">
-                        <img src="https://images.unsplash.com/photo-1596755094514-f87e32f6b717?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover mix-blend-multiply" alt="Shirt">
+                        <img src="{{this.productId.images.[0]}}" class="w-full h-full object-cover mix-blend-multiply" alt="{{this.productId.name}}">
                     </div>
                     
                     <!-- Details Space -->
@@ -86,13 +87,15 @@
                         <!-- Top Row: Title + Price -->
                         <div class="flex justify-between items-start gap-4">
                             <div>
-                                <h3 class="text-[15px] font-bold text-gray-900 leading-tight mb-2">Relaxed Fit Linen-blend shirt</h3>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">S</p>
+                                <h3 class="text-[15px] font-bold text-gray-900 leading-tight mb-2">{{this.productId.brand}} - {{this.productId.name}}</h3>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{this.size}}</p>
                             </div>
                             <!-- Price Block -->
                             <div class="text-right flex flex-col items-end">
-                                <span class="text-[16px] font-black">₹1439</span>
-                                <span class="text-[11px] text-gray-400 font-bold line-through mt-0.5">₹1599</span>
+                                <span class="text-[16px] font-black">₹{{this.price}}</span>
+                                {{#if this.productId.price}}
+                                <span class="text-[11px] text-gray-400 font-bold line-through mt-0.5">₹{{this.productId.price}}</span>
+                                {{/if}}
                             </div>
                         </div>
 
@@ -102,69 +105,28 @@
                         <div class="flex items-center justify-between mt-6">
                             <!-- Qty Button Wrapper -->
                             <div class="flex items-center bg-[#f7f7f7] rounded-full px-5 py-2">
-                                <button class="text-gray-500 hover:text-black font-medium transition-colors text-[18px] leading-none" onclick="updateQty('item-1', -1)">−</button>
-                                <input type="number" id="qty-item-1" value="1" readonly class="w-10 text-center bg-transparent text-[13px] font-black outline-none pointer-events-none">
-                                <button class="text-gray-500 hover:text-black font-medium transition-colors text-[18px] leading-none" onclick="updateQty('item-1', 1)">+</button>
+                                <button class="text-gray-500 hover:text-black font-medium transition-colors text-[18px] leading-none" onclick="updateQty('{{this.productId._id}}', -1)">−</button>
+                                <input type="number" id="qty-{{this.productId._id}}" value="{{this.quantity}}" readonly class="w-10 text-center bg-transparent text-[13px] font-black outline-none pointer-events-none">
+                                <button class="text-gray-500 hover:text-black font-medium transition-colors text-[18px] leading-none" onclick="updateQty('{{this.productId._id}}', 1)">+</button>
                             </div>
                             
                             <!-- Remove Button -->
-                            <button class="flex items-center gap-1.5 text-gray-400 hover:text-red-500 transition-colors group" onclick="openRemoveModal('item-1', 'Relaxed Fit Linen-blend shirt')">
+                            <button class="flex items-center gap-1.5 text-gray-400 hover:text-red-500 transition-colors group" onclick="openRemoveModal('{{this.productId._id}}', '{{this.productId.name}}')">
                                 <span class="material-symbols-outlined text-[18px]">delete</span>
                                 <span class="text-[10px] font-bold uppercase tracking-[0.1em]">REMOVE</span>
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <!-- Item 2 -->
-                <div class="cart-item flex flex-col sm:flex-row gap-6 p-5 sm:p-6 bg-white border border-gray-100 rounded-[24px] shadow-sm hover:shadow-md transition-shadow relative" data-id="item-2">
-                    <!-- Image -->
-                    <div class="w-full sm:w-[130px] h-[150px] bg-[#f4f4f5] rounded-[16px] overflow-hidden flex-shrink-0 flex items-center justify-center">
-                        <!-- Pseudo raglan sleeve shirt using unsplash -->
-                        <img src="https://images.unsplash.com/photo-1574180566232-aaad1b5b8450?q=80&w=600&auto=format&fit=crop" class="w-full h-full object-cover mix-blend-multiply" alt="Top">
-                    </div>
-                    
-                    <!-- Details Space -->
-                    <div class="flex flex-col flex-1">
-                        <!-- Top Row: Title + Price -->
-                        <div class="flex justify-between items-start gap-4">
-                            <div>
-                                <h3 class="text-[15px] font-bold text-gray-900 leading-tight mb-2">Slim Fit Waffled jersey top</h3>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">M</p>
-                            </div>
-                            <!-- Price Block -->
-                            <div class="text-right flex flex-col items-end">
-                                <span class="text-[16px] font-black">₹1399</span>
-                            </div>
-                        </div>
-
-                        <div class="flex-1"></div> <!-- Spacer -->
-
-                        <!-- Bottom Row: Qty + Remove -->
-                        <div class="flex items-center justify-between mt-6">
-                            <!-- Qty Button Wrapper -->
-                            <div class="flex items-center bg-[#f7f7f7] rounded-full px-5 py-2">
-                                <button class="text-gray-500 hover:text-black font-medium transition-colors text-[18px] leading-none" onclick="updateQty('item-2', -1)">−</button>
-                                <input type="number" id="qty-item-2" value="1" readonly class="w-10 text-center bg-transparent text-[13px] font-black outline-none pointer-events-none">
-                                <button class="text-gray-500 hover:text-black font-medium transition-colors text-[18px] leading-none" onclick="updateQty('item-2', 1)">+</button>
-                            </div>
-                            
-                            <!-- Remove Button -->
-                            <button class="flex items-center gap-1.5 text-gray-400 hover:text-red-500 transition-colors group" onclick="openRemoveModal('item-2', 'Slim Fit Waffled jersey top')">
-                                <span class="material-symbols-outlined text-[18px]">delete</span>
-                                <span class="text-[10px] font-bold uppercase tracking-[0.1em]">REMOVE</span>
-                            </button>
-                        </div>
-                    </div>
+                {{else}}
+                <!-- Empty State -->
+                <div class="p-20 text-center bg-white border border-dashed border-gray-200 rounded-[32px]">
+                    <span class="material-symbols-outlined text-[48px] text-gray-200 mb-4">shopping_cart_off</span>
+                    <h2 class="text-xl font-bold mb-2">Your bag is empty</h2>
+                    <p class="text-gray-400 mb-8">Looks like you haven't added anything yet.</p>
+                    <a href="/" class="bg-black text-white px-8 py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest">Start Shopping</a>
                 </div>
-
-                <!-- Continue Shopping -->
-                <div class="mt-4 pb-12">
-                    <a href="boot_camp_home.html" class="inline-flex items-center gap-2 text-black hover:text-gray-500 transition-colors group">
-                        <span class="material-symbols-outlined text-[18px] transition-transform group-hover:-translate-x-1">arrow_back</span>
-                        <span class="text-[10px] font-bold uppercase tracking-[0.15em]">CONTINUE SHOPPING</span>
-                    </a>
-                </div>
+                {{/each}}
 
             </div>
             
@@ -184,12 +146,14 @@
                         <!-- Line items -->
                         <div class="flex justify-between items-center text-[13px] font-medium text-gray-500">
                             <span>Subtotal</span>
-                            <span class="text-black font-bold">₹2998.00</span>
+                            <span class="text-black font-bold" id="subtotal-display">₹{{subtotal}}</span>
                         </div>
+                        {{#if savings}}
                         <div class="flex justify-between items-center text-[13px] font-bold text-[#1b9a67]">
                             <span>Offer Savings</span>
-                            <span>- ₹159.90</span>
+                            <span>- ₹{{savings}}</span>
                         </div>
+                        {{/if}}
                         <div class="flex justify-between items-center text-[13px] font-medium text-gray-500">
                             <span class="flex items-center gap-1.5">Shipping <span class="material-symbols-outlined text-[14px]">help</span></span>
                             <span class="text-[9px] font-bold uppercase tracking-[0.1em] text-gray-400">TBD AT CHECKOUT</span>
@@ -204,7 +168,7 @@
                                 <span class="text-[10px] font-black uppercase tracking-[0.15em] mb-1">TOTAL</span>
                                 <span class="text-[9px] font-bold text-gray-400">INR</span>
                             </div>
-                            <span class="text-[32px] font-black tracking-tighter leading-none">₹2838.10</span>
+                            <span class="text-[32px] font-black tracking-tighter leading-none" id="total-display">₹{{total}}</span>
                         </div>
 
                         <!-- Button -->
@@ -216,7 +180,9 @@
                         <!-- Little Divider Text -->
                         <div class="flex items-center gap-4 mt-6">
                             <div class="h-px bg-gray-100 flex-1"></div>
-                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-[0.15em]" id="bag-count-text">2 ITEMS IN YOUR BAG</span>
+                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-[0.15em]" id="bag-count-text">
+                                {{bagCount}} ITEMS IN YOUR BAG
+                            </span>
                             <div class="h-px bg-gray-100 flex-1"></div>
                         </div>
 
@@ -232,10 +198,7 @@
             </div>
 
         </div>
-
     </main>
-    <!-- footer -->
-          {{>footer}}
 
     <!-- Remove Item Modal -->
     <div id="removeModal" class="modal fixed inset-0 z-50 flex items-center justify-center">
@@ -258,6 +221,9 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- Logic Script -->
     <script>
@@ -265,12 +231,38 @@
 
         // Qty changer logic
         function updateQty(itemId, change) {
-            const input = document.getElementById(`qty-${itemId}`);
-            let newVal = parseInt(input.value) + change;
-            if (newVal < 1) newVal = 1;
-            if (newVal > 10) newVal = 10;
-            input.value = newVal;
-        }
+    const input = document.getElementById(`qty-${itemId}`);
+    let newVal = parseInt(input.value) + change;
+    if (newVal < 1) newVal = 1;
+    if (newVal > 5) newVal = 5;
+    input.value = newVal;
+
+    recalculateTotals(); // ← add this
+}
+
+function recalculateTotals() {
+    let subtotal = 0;
+
+    document.querySelectorAll('.cart-item').forEach(item => {
+        const price = parseFloat(item.dataset.price);
+        const itemId = item.dataset.id;
+        const qty = parseInt(document.getElementById(`qty-${itemId}`).value);
+        subtotal += price * qty;
+    });
+
+    // Update DOM
+    document.getElementById('subtotal-display').textContent = '₹' + subtotal.toLocaleString('en-IN');
+    document.getElementById('total-display').textContent = '₹' + subtotal.toLocaleString('en-IN');
+
+    // Update bag count
+    let totalItems = 0;
+    document.querySelectorAll('.cart-item').forEach(item => {
+        const itemId = item.dataset.id;
+        totalItems += parseInt(document.getElementById(`qty-${itemId}`).value);
+    });
+    const bagEl = document.getElementById('bag-count-text');
+    if (bagEl) bagEl.textContent = `${totalItems} ITEMS IN YOUR BAG`;
+}
 
         // Modal triggers
         function openRemoveModal(itemId, itemName) {
@@ -284,32 +276,46 @@
             itemToRemoveId = null;
         }
 
-        function confirmRemoveItem() {
-            if (itemToRemoveId) {
-                // Find element and animate removal
-                const itemEl = document.querySelector(`.cart-item[data-id="${itemToRemoveId}"]`);
-                if (itemEl) {
-                    itemEl.style.transition = 'all 0.3s ease';
-                    itemEl.style.opacity = '0';
-                    itemEl.style.transform = 'translateY(10px)';
-                    
-                    setTimeout(() => {
-                        itemEl.remove();
-                        // Update bag count roughly
-                        const remaining = document.querySelectorAll('.cart-item').length;
-                        const txt = remaining === 1 ? '1 ITEM IN YOUR BAG' : `${remaining} ITEMS IN YOUR BAG`;
-                        const bagEl = document.getElementById('bag-count-text');
-                        if (bagEl) bagEl.textContent = txt;
-                        
-                        // If empty bag, you would show an "empty bag" state here
-                        if (remaining === 0) {
-                            bagEl.textContent = 'YOUR BAG IS EMPTY';
-                        }
-                    }, 300);
-                }
+      async function confirmRemoveItem() {
+    if (!itemToRemoveId) return;
+
+    try {
+        const itemEl = document.querySelector(`.cart-item[data-id="${itemToRemoveId}"]`);
+        const variantId = itemEl?.dataset.variant; // add data-variant to your cart item HTML
+
+        const response = await axios.delete("/users/removeFromCart", {
+            data: { productId: itemToRemoveId, variantId }
+        });
+
+        if (response.data.success) {
+            if (itemEl) {
+                itemEl.style.transition = 'all 0.3s ease';
+                itemEl.style.opacity = '0';
+                itemEl.style.transform = 'translateY(10px)';
+
+                setTimeout(() => {
+                    itemEl.remove();
+                    recalculateTotals();
+                     showToast("success","Item removed from cart");  // ← add this
+
+                    const remaining = document.querySelectorAll('.cart-item').length;
+                    if (remaining === 0) {
+                        document.getElementById('bag-count-text').textContent = 'YOUR BAG IS EMPTY';
+                        setTimeout(() => window.location.reload(), 500);
+                    }
+                }, 300);
             }
-            closeRemoveModal();
+        } else {
+            showToast(response.data.message || "Failed to remove item");
         }
+
+    } catch (err) {
+        console.error("Remove error:", err);
+        showToast("Something went wrong");
+    }
+
+    closeRemoveModal();
+}
     </script>
 </body>
 </html>

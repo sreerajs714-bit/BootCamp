@@ -110,46 +110,34 @@ export const LoginUser = async (req, res) => {
     const existingUser = await userSchema.findOne({ email });
 
     if (!existingUser) {
-      return res.render("users/login", {
-        message: "User does not exist"
-      });
+      return res.status(404).json({ message: "User does not exist" });
     }
 
     if (existingUser.isBlocked) {
-      return res.render("users/login", {
-        message: "Your Account Is Blocked By Admin"
-      });
+      return res.status(403).json({ message: "Your Account Is Blocked By Admin" });
     }
 
-    const isMatch = await bcrypt.compare(
-      password,
-      existingUser.password
-    );
+    const isMatch = await bcrypt.compare(password, existingUser.password);
 
     if (!isMatch) {
-      return res.render("users/login", {
-        message: "Incorrect password"
-      });
+      return res.status(401).json({ message: "Incorrect password" });
     }
 
     req.session.user = {
       id: existingUser._id,
       username: existingUser.username,
       email: existingUser.email,
-      phoneNo:existingUser.phoneNO,
+      phoneNo: existingUser.phoneNO,
       profilePhoto: existingUser.profilePhoto || null
     };
 
-     req.session.save(() => {
-      return res.redirect("/users/home");
+    req.session.save(() => {
+      return res.status(200).json({ redirect: "/users/home" });
     });
 
   } catch (error) {
     console.log(error.message);
-
-    return res.render("users/login", {
-      message: "Something went wrong"
-    });
+    return res.status(500).json({ message: "Something went wrong" });
   }
 };
 

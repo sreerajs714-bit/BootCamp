@@ -56,42 +56,10 @@
 <body class="min-h-screen flex flex-col font-sans selection:bg-brand-950 selection:text-white">
 
     <!-- Navigation -->
-    <header class="w-full bg-white/90 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 transition-all duration-300">
-        <div class="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
-            <div class="flex-shrink-0 cursor-pointer group">
-                <h1 class="font-display font-black text-3xl tracking-tighter uppercase transition-transform duration-500 group-hover:scale-105">
-                    BOOT<span class="text-brand-400 font-light">CAMP</span>
-                </h1>
-            </div>
-            <nav class="hidden lg:flex items-center space-x-12 font-medium text-[15px] text-brand-500 tracking-wide">
-                <a href="#" class="nav-link text-black font-semibold">Home</a>
-                <a href="#" class="nav-link hover:text-black">Categories</a>
-                <a href="#" class="nav-link hover:text-black">Brand</a>
-                <a href="#" class="nav-link hover:text-black">New Arrivals</a>
-                <a href="#" class="nav-link text-red-600 hover:text-red-700">Limited Edition</a>
-            </nav>
-            <div class="flex items-center space-x-7 text-brand-900">
-                <button class="icon-btn" aria-label="Search">
-                    <span class="material-symbols-outlined font-light text-[28px]">search</span>
-                </button>
-                <button class="icon-btn" aria-label="Wishlist">
-                    <span class="material-symbols-outlined font-light text-[28px]">favorite</span>
-                </button>
-                <button class="icon-btn relative" aria-label="Cart">
-                    <span class="material-symbols-outlined font-light text-[28px]">shopping_bag</span>
-                    <span class="absolute -top-1 -right-1 bg-black text-white text-[10px] font-bold w-4.5 h-4.5 p-1 rounded-full flex items-center justify-center border-2 border-white box-content">2</span>
-                </button>
-                <button class="icon-btn" aria-label="Profile">
-                    <a href="/users/profile">
-                        <span class="material-symbols-outlined font-light text-[28px]">person</span>
-                    </a>
-                </button>
-            </div>
-        </div>
-    </header>
+   {{>navbar}}
 
     <!-- Main Content -->
-    <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-16 flex flex-col lg:block relative">
+    <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-40 flex flex-col lg:block relative">
 
         <!-- Sidebar -->
         <aside class="w-full lg:w-48 lg:fixed lg:top-32 h-fit mb-10 lg:mb-0">
