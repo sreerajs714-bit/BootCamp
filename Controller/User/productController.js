@@ -13,6 +13,7 @@ export const loadMens = async (req, res) => {
             .populate("category", "name categoryName")
             .lean();
 
+
         // 2. Filter ONLY MEN category (IMPORTANT)
         const mensProducts = products.filter(product => {
             const categoryName =

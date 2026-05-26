@@ -324,9 +324,11 @@ export const editProduct = async (req, res) => {
         product.description      = description.trim();
         product.category         = category;
         product.brand            = brand;
-        product.isLimitedEdition = isLimitedEdition === "true" || isLimitedEdition === true;
-        product.status           = status === "active" ? "active" : "inactive";
- 
+        const limitedValues = Array.isArray(isLimitedEdition) ? isLimitedEdition : [isLimitedEdition];
+        product.isLimitedEdition = limitedValues.includes("true");
+        const statusValues = Array.isArray(status) ? status : [status];
+        product.status = statusValues.includes("active") ? "active" : "inactive";
+
        // ── Update variant ────────────────────────────────────
          const variant = variantId 
          ? product.variants.id(variantId) 
@@ -336,13 +338,14 @@ export const editProduct = async (req, res) => {
           return res.status(404).json({ success: false, message: "Variant not found." });
         }
  
-        variant.color  = color.trim();
-        variant.sku    = sku.trim().toUpperCase();
-        variant.price  = Number(price);
-        variant.stock  = Number(stock);
-        variant.sizes  = parsedSizes;
-        variant.images = allImages;
- 
+        variant.color    = color.trim();
+        variant.sku      = sku.trim().toUpperCase();
+        variant.price    = Number(price);
+        variant.stock    = Number(stock);
+        variant.sizes    = parsedSizes;
+        variant.images   = allImages;
+        variant.isActive = true;
+        variant.isDefault = true;
         await product.save();
  
         return res.json({ success: true, message: "Product updated successfully." });
@@ -725,3 +728,4 @@ export const setDefaultVariant = async (req, res) => {
         });
     }
 };
+

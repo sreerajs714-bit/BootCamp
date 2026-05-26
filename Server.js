@@ -51,7 +51,8 @@ hbs.registerHelper("add", (a, b) => a + b);
 hbs.registerHelper("eq", function (a, b) {
     return a === b;
 });
-
+hbs.registerHelper('includes', (arr, val) => Array.isArray(arr) && arr.map(String).includes(String(val)));
+hbs.registerHelper('eq', (a, b) => String(a) === String(b));
 hbs.registerHelper("lte", (a, b) => a <= b);
 hbs.registerHelper('json', (context) => JSON.stringify(context));
 hbs.registerHelper('selected', (a, b) => a && b && a.toString() === b.toString() ? 'selected' : '');

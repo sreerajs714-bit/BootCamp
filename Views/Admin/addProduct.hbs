@@ -1,633 +1,792 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Product | Admin | BOOTCAMP</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <style>
-        * { box-sizing: border-box; }
-        body { background-color: #f8f9fa; color: #111827; overflow-x: hidden; }
-        .sidebar-item { transition: all 0.18s ease; }
-        .sidebar-item:hover:not(.active) { background-color: #f9fafb; }
-        .sidebar-item.active { background-color: #000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .sidebar-item.active .material-symbols-outlined { color: #fff; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
-        .form-input { background-color: #f8f9fa; border: 1px solid transparent; transition: all 0.2s ease; }
-        .form-input:focus { background-color: #fff; border-color: #e5e7eb; outline: none; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
-        .section-title { display: flex; align-items: center; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 24px; color: #000; }
-        .section-title::before { content: ''; display: inline-block; width: 4px; height: 16px; background-color: #000; margin-right: 10px; }
-        .size-btn.selected { background: #000; color: #fff; border-color: #000; }
-        .error-msg { color: #ef4444; font-size: 11px; font-weight: 600; margin-top: 4px; display: none; }
-        @keyframes spin {
-        from { transform: rotate(0deg); }
-         to { transform: rotate(360deg); }
+        * {
+            box-sizing: border-box;
         }
-          .spin-active {
-          display: inline-block;
-          animation: spin 0.7s linear infinite;
+
+        body {
+            background-color: #f8f9fa;
+            color: #111827;
+            overflow-x: hidden;
+        }
+
+        .sidebar-item {
+            transition: all 0.18s ease;
+        }
+
+        .sidebar-item:hover:not(.active) {
+            background-color: #f9fafb;
+        }
+
+        .sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-item.active .material-symbols-outlined {
+            color: #fff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        .form-input {
+            background-color: #f8f9fa;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            background-color: #fff;
+            border-color: #e5e7eb;
+            outline: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 24px;
+            color: #000;
+        }
+
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 4px;
+            height: 16px;
+            background-color: #000;
+            margin-right: 10px;
+        }
+
+        .size-btn.selected {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+            display: none;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .spin-active {
+            display: inline-block;
+            animation: spin 0.7s linear infinite;
         }
     </style>
 </head>
 
 <body class="font-sans antialiased h-screen flex bg-white">
 
-<!-- ===== SIDEBAR ===== -->
-<aside class="w-64 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
-    <div class="h-24 flex flex-col justify-center px-8">
-        <h1 class="font-sans font-black text-2xl tracking-tight uppercase text-black mt-2">BOOTCAMP</h1>
-        <span class="text-[9px] font-bold tracking-[0.2em] text-emerald-500 mt-1">SYSTEM ADMIN</span>
-    </div>
-    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
-        <a href="/admin/dashboard" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard
-        </a>
-        <a href="/admin/productManagement" class="sidebar-item active flex items-center px-4 py-3 text-[11px] font-bold uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">sports_soccer</span>Products
-        </a>
-        <a href="/admin/category" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">category</span>Categories
-        </a>
-        <a href="/admin/orders" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">shopping_bag</span>Orders
-        </a>
-        <a href="/admin/offers" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">local_offer</span>Offers
-        </a>
-        <a href="/admin/coupons" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">confirmation_number</span>Coupons
-        </a>
-        <a href="/admin/usermanagement" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">group</span>Users
-        </a>
-        <a href="/admin/returns" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">assignment_return</span>Returns
-        </a>
-        <a href="/admin/reviews" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">reviews</span>Review
-        </a>
-        <a href="/admin/brand" class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">sell</span>Brand
-        </a>
-    </nav>
-</aside>
-
-<!-- ===== MAIN ===== -->
-<main class="flex-1 flex flex-col h-full overflow-y-auto bg-white relative">
-
-    <!-- ✅ FORM TAG with enctype for file uploads -->
-    <form id="productForm" action="/admin/addProduct" method="POST" enctype="multipart/form-data">
-
-    <div class="p-12 lg:px-16 lg:pt-14 lg:pb-32 max-w-[1400px] w-full mx-auto flex flex-col">
-        <!-- Header -->
-        <div class="mb-12">
-            <h2 class="font-sans font-black text-[36px] tracking-tight text-black uppercase mb-2">Create Product</h2>
-            <p class="text-[13px] text-gray-500 font-medium">Initialize the base product profile before adding visual variants.</p>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+        <div class="h-24 flex flex-col justify-center px-8">
+            <h1 class="font-sans font-black text-2xl tracking-tight uppercase text-black mt-2">BOOTCAMP</h1>
+            <span class="text-[9px] font-bold tracking-[0.2em] text-emerald-500 mt-1">SYSTEM ADMIN</span>
         </div>
+        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <a href="/admin/dashboard"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard
+            </a>
+            <a href="/admin/productManagement"
+                class="sidebar-item active flex items-center px-4 py-3 text-[11px] font-bold uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">sports_soccer</span>Products
+            </a>
+            <a href="/admin/category"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">category</span>Categories
+            </a>
+            <a href="/admin/orders"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">shopping_bag</span>Orders
+            </a>
+            <a href="/admin/offers"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">local_offer</span>Offers
+            </a>
+            <a href="/admin/coupons"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">confirmation_number</span>Coupons
+            </a>
+            <a href="/admin/usermanagement"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">group</span>Users
+            </a>
+            <a href="/admin/returns"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">assignment_return</span>Returns
+            </a>
+            <a href="/admin/reviews"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">reviews</span>Review
+            </a>
+            <a href="/admin/brand"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">sell</span>Brand
+            </a>
+        </nav>
+    </aside>
 
-        <div class="flex flex-col lg:flex-row gap-12 lg:gap-16">
+    <!-- ===== MAIN ===== -->
+    <main class="flex-1 flex flex-col h-full overflow-y-auto bg-white relative">
 
-            <!-- ── Left Column ── -->
-            <div class="flex-[3]">
+        <!-- ✅ FORM TAG with enctype for file uploads -->
+        <form id="productForm" action="/admin/addProduct" method="POST" enctype="multipart/form-data">
 
-                <!-- Description -->
-                <div class="mb-14">
-                    <h3 class="section-title">Detailed Description</h3>
-                    <textarea
-                        id="description"
-                        name="description"
-                        rows="6"
-                        placeholder="A nourishing narrative detailing the fit, occasion, and design essence..."
-                        class="form-input w-full rounded py-4 px-5 text-[13px] font-medium text-black resize-none"
-                    ></textarea>
-                    <p class="error-msg" id="descriptionError">Description is required.</p>
+            <div class="p-12 lg:px-16 lg:pt-14 lg:pb-32 max-w-[1400px] w-full mx-auto flex flex-col">
+                <!-- Header -->
+                <div class="mb-12">
+                    <h2 class="font-sans font-black text-[36px] tracking-tight text-black uppercase mb-2">Create Product
+                    </h2>
+                    <p class="text-[13px] text-gray-500 font-medium">Initialize the base product profile before adding
+                        visual variants.</p>
                 </div>
 
-                <!-- Product Media -->
-                <div class="mb-14">
-                    <div class="mb-6">
-                        <h3 class="section-title !mb-1">Product Media (Default Variant)</h3>
-                        <p class="text-[12px] text-gray-500 font-medium mt-1">Minimum 3 high-fidelity images required for the primary variant.</p>
-                    </div>
+                <div class="flex flex-col lg:flex-row gap-12 lg:gap-16">
 
-                    <!-- ✅ Real file input multer reads — name="images" -->
-                    <input type="file" id="imageInput" name="images" accept="image/*" class="hidden">
+                    <!-- ── Left Column ── -->
+                    <div class="flex-[3]">
 
-                    <div id="uploadZone" onclick="handleUploadClick()" class="border border-dashed border-gray-300 bg-[#f8f9fa] rounded-lg p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-black transition-colors min-h-[240px] mb-4">
-                        <span class="material-symbols-outlined text-gray-300 text-[36px] mb-3">image</span>
-                        <p id="uploadZoneLabel" class="text-[11px] font-bold text-black uppercase tracking-widest">Upload Images</p>
-                        <p id="uploadZoneSublabel" class="text-[10px] text-gray-400 mt-1">Click to select — each image opens the crop tool</p>
-                    </div>
-
-                    <div class="flex items-center justify-between">
-                        <p class="text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase">
-                            <span id="uploadCount">0</span> / 3 Images Uploaded
-                        </p>
-                    </div>
-                    <div id="imagesError" class="hidden mt-2 bg-red-50 border border-red-200 text-red-700 text-[11px] font-semibold px-4 py-2 rounded-lg">
-                       Minimum 3 images are required.
-                     </div>
-
-                    <!-- Thumbnails -->
-                    <div id="thumbnailsContainer" class="grid grid-cols-3 gap-3 mt-4 hidden">
-                        <div class="thumbnail-slot aspect-square bg-[#f8f9fa] border border-gray-100 flex items-center justify-center rounded overflow-hidden relative"></div>
-                        <div class="thumbnail-slot aspect-square bg-[#f8f9fa] border border-gray-100 flex items-center justify-center rounded overflow-hidden relative"></div>
-                        <div class="thumbnail-slot aspect-square bg-[#f8f9fa] border border-gray-100 flex items-center justify-center rounded overflow-hidden relative"></div>
-                    </div>
-                </div>
-
-                <!-- Settings & Visibility -->
-                <div class="mb-14 space-y-5">
-
-                    <!-- Limited Edition -->
-                    <div class="border border-gray-100 bg-[#fcfcfc] p-6 rounded-xl flex flex-row items-center justify-between shadow-sm">
-                        <div>
-                            <h3 class="text-[14px] font-black uppercase tracking-wider text-black mb-1 border-l-4 border-black pl-3 ml-[-24px]">Limited Edition</h3>
-                            <p class="text-[11px] text-gray-500 font-medium mt-1">Mark as an exclusive limited drop.</p>
+                        <!-- Description -->
+                        <div class="mb-14">
+                            <h3 class="section-title">Detailed Description</h3>
+                            <textarea id="description" name="description" rows="6"
+                                placeholder="A nourishing narrative detailing the fit, occasion, and design essence..."
+                                class="form-input w-full rounded py-4 px-5 text-[13px] font-medium text-black resize-none"
+                                oninput="clearError('descriptionError')"></textarea>
+                            <p class="error-msg" id="descriptionError">Description is required.</p>
                         </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <!-- ✅ hidden input always submits false; checkbox overrides to true when checked -->
-                            <input type="hidden"   name="isLimitedEdition" value="false">
-                            <input type="checkbox" name="isLimitedEdition" value="true" id="limitedToggle" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                        </label>
-                    </div>
 
-                    <!-- Active -->
-                    <div class="border border-gray-100 bg-[#fcfcfc] p-6 rounded-xl flex flex-row items-center justify-between shadow-sm">
-                        <div>
-                            <h3 class="text-[14px] font-black uppercase tracking-wider text-black mb-1 border-l-4 border-black pl-3 ml-[-24px]">Active</h3>
-                            <p class="text-[11px] text-gray-500 font-medium mt-1">Enable to show on store front immediately.</p>
+                        <!-- Product Media -->
+                        <div class="mb-14">
+                            <div class="mb-6">
+                                <h3 class="section-title !mb-1">Product Media (Default Variant)</h3>
+                                <p class="text-[12px] text-gray-500 font-medium mt-1">Minimum 3 high-fidelity images
+                                    required for the primary variant.</p>
+                            </div>
+
+                            <!-- ✅ Real file input multer reads — name="images" -->
+                            <input type="file" id="imageInput" name="images" accept="image/*" class="hidden">
+
+                            <div id="uploadZone" onclick="handleUploadClick()"
+                                class="border border-dashed border-gray-300 bg-[#f8f9fa] rounded-lg p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-black transition-colors min-h-[240px] mb-4">
+                                <span class="material-symbols-outlined text-gray-300 text-[36px] mb-3">image</span>
+                                <p id="uploadZoneLabel"
+                                    class="text-[11px] font-bold text-black uppercase tracking-widest">Upload Images</p>
+                                <p id="uploadZoneSublabel" class="text-[10px] text-gray-400 mt-1">Click to select — each
+                                    image opens the crop tool</p>
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <p class="text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase">
+                                    <span id="uploadCount">0</span> / 3 Images Uploaded
+                                </p>
+                            </div>
+                            <div id="imagesError"
+                                class="hidden mt-2 bg-red-50 border border-red-200 text-red-700 text-[11px] font-semibold px-4 py-2 rounded-lg">
+                                Minimum 3 images are required.
+                            </div>
+
+                            <!-- Thumbnails -->
+                            <div id="thumbnailsContainer" class="grid grid-cols-3 gap-3 mt-4 hidden">
+                                <div
+                                    class="thumbnail-slot aspect-square bg-[#f8f9fa] border border-gray-100 flex items-center justify-center rounded overflow-hidden relative">
+                                </div>
+                                <div
+                                    class="thumbnail-slot aspect-square bg-[#f8f9fa] border border-gray-100 flex items-center justify-center rounded overflow-hidden relative">
+                                </div>
+                                <div
+                                    class="thumbnail-slot aspect-square bg-[#f8f9fa] border border-gray-100 flex items-center justify-center rounded overflow-hidden relative">
+                                </div>
+                            </div>
                         </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <!-- ✅ status uses select pattern: hidden default + checkbox override -->
-                            <input type="hidden"   name="status" value="inactive">
-                            <input type="checkbox" id="statusToggle" name="status" value="active" checked class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                        </label>
+
+                        <!-- Settings & Visibility -->
+                        <div class="mb-14 space-y-5">
+
+                            <!-- Limited Edition -->
+                            <div
+                                class="border border-gray-100 bg-[#fcfcfc] p-6 rounded-xl flex flex-row items-center justify-between shadow-sm">
+                                <div>
+                                    <h3
+                                        class="text-[14px] font-black uppercase tracking-wider text-black mb-1 border-l-4 border-black pl-3 ml-[-24px]">
+                                        Limited Edition</h3>
+                                    <p class="text-[11px] text-gray-500 font-medium mt-1">Mark as an exclusive limited
+                                        drop.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <!-- ✅ hidden input always submits false; checkbox overrides to true when checked -->
+                                    <input type="hidden" name="isLimitedEdition" value="false">
+                                    <input type="checkbox" name="isLimitedEdition" value="true" id="limitedToggle"
+                                        class="sr-only peer">
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black">
+                                    </div>
+                                </label>
+                            </div>
+
+                            <!-- Active -->
+                            <div
+                                class="border border-gray-100 bg-[#fcfcfc] p-6 rounded-xl flex flex-row items-center justify-between shadow-sm">
+                                <div>
+                                    <h3
+                                        class="text-[14px] font-black uppercase tracking-wider text-black mb-1 border-l-4 border-black pl-3 ml-[-24px]">
+                                        Active</h3>
+                                    <p class="text-[11px] text-gray-500 font-medium mt-1">Enable to show on store front
+                                        immediately.</p>
+                                </div>
+                                <label class="relative inline-flex items-center cursor-pointer">
+                                    <!-- ✅ status uses select pattern: hidden default + checkbox override -->
+                                    <input type="hidden" name="status" value="inactive">
+                                    <input type="checkbox" id="statusToggle" name="status" value="active" checked
+                                        class="sr-only peer">
+                                    <div
+                                        class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500">
+                                    </div>
+                                </label>
+                            </div>
+
+                        </div>
                     </div>
 
+                    <!-- ── Right Column ── -->
+                    <div class="flex-[2] min-w-[340px] max-w-[480px]">
+
+                        <!-- General Information -->
+                        <div class="border border-gray-100 bg-[#fcfcfc] p-8 rounded-xl mb-6 shadow-sm">
+                            <h3
+                                class="text-[15px] font-black uppercase tracking-wider text-black mb-8 border-l-4 border-black pl-3 ml-[-32px]">
+                                General Information</h3>
+
+                            <div class="space-y-6">
+                                <!-- Product Name -->
+                                <div>
+                                    <label
+                                        class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Product
+                                        Name <span class="text-red-500">*</span></label>
+                                    <input type="text" id="productName" name="productName"
+                                        placeholder="e.g. The Executive Oxford"
+                                        oninput="clearError('productNameError')"
+                                        class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 px-4 text-[13px] font-medium text-black outline-none transition-colors">
+                                    <p class="error-msg" id="productNameError">Product name is required.</p>
+                                </div>
+
+                                <!-- Category -->
+                                <div>
+                                    <label
+                                        class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Category
+                                        <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <select id="category" name="category" onchange="clearError('categoryError')"
+                                            class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 pl-4 pr-10 text-[13px] font-medium text-gray-500 appearance-none outline-none cursor-pointer transition-colors">
+                                            <option value="">Select category</option>
+                                            {{#each categories}}
+                                            <option value="{{this._id}}">{{this.name}}</option>
+                                            {{/each}}
+                                        </select>
+                                        <span
+                                            class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[18px]">expand_more</span>
+                                    </div>
+                                    <p class="error-msg" id="categoryError">Please select a category.</p>
+                                </div>
+
+                                <!-- Brand -->
+                                <div>
+                                    <label
+                                        class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Brand
+                                        <span class="text-red-500">*</span></label>
+                                    <div class="relative">
+                                        <select id="brand" name="brand" onchange="clearError('brandError')"
+                                            class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 pl-4 pr-10 text-[13px] font-medium text-gray-500 appearance-none outline-none cursor-pointer transition-colors">
+                                            <option value="">Select brand</option>
+                                            {{#each brands}}
+                                            <option value="{{this._id}}">{{this.name}}</option>
+                                            {{/each}}
+                                        </select>
+                                        <span
+                                            class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[18px]">expand_more</span>
+                                    </div>
+                                    <p class="error-msg" id="brandError">Please select a brand.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Default Variant Details -->
+                        <div class="border border-gray-100 bg-[#fcfcfc] p-8 rounded-xl mb-6 shadow-sm">
+                            <h3
+                                class="text-[15px] font-black uppercase tracking-wider text-black mb-8 border-l-4 border-black pl-3 ml-[-32px]">
+                                Default Variant Details</h3>
+
+                            <div class="space-y-6">
+                                <!-- Color -->
+                                <div>
+                                    <label
+                                        class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Primary
+                                        Color <span class="text-red-500">*</span></label>
+                                    <input type="text" id="color" name="color" placeholder="e.g. Midnight Black"
+                                        oninput="clearError('colorError')"
+                                        class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 px-4 text-[13px] font-medium text-black outline-none transition-colors">
+                                    <p class="error-msg" id="colorError">Color is required.</p>
+                                </div>
+
+                                <!-- SKU -->
+                                <div>
+                                    <label
+                                        class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">SKU
+                                        Identifier <span class="text-red-500">*</span></label>
+                                    <input type="text" id="sku" name="sku" placeholder="e.g. AJAX-OXFORD-BLK"
+                                        oninput="clearError('skuError')"
+                                        class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 px-4 text-[13px] font-medium text-black outline-none transition-colors">
+                                    <p class="error-msg" id="skuError">SKU is required.</p>
+                                </div>
+
+                                <!-- Price & Stock -->
+                                <div class="grid grid-cols-2 gap-5">
+                                    <div>
+                                        <label
+                                            class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Price
+                                            (₹) <span class="text-red-500">*</span></label>
+                                        <input type="text" id="price" name="price" placeholder="0" inputmode="numeric"
+                                         onkeydown="return ['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight'].includes(event.key) || /[0-9]/.test(event.key)"
+                                         oninput="this.value = this.value.replace(/[^0-9]/g, ''); clearError('priceError')"
+                                         class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 px-4 text-[13px] font-medium text-black outline-none transition-colors">
+                                         <p class="error-msg" id="priceError">Price is required.</p>
+                                    </div>
+                                    <div>
+                                        <label
+                                            class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Stock
+                                            <span class="text-red-500">*</span></label>
+                                        <input type="text" id="stock" name="stock" placeholder="0" inputmode="numeric"
+                                          onkeydown="return ['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight'].includes(event.key) || /[0-9]/.test(event.key)"
+                                          oninput="this.value = this.value.replace(/[^0-9]/g, ''); clearError('stockError')"
+                                          class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 px-4 text-[13px] font-medium text-black outline-none transition-colors">
+                                        <p class="error-msg" id="stockError">Stock is required.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Sizes -->
+                                <div>
+                                    <label
+                                        class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Size
+                                        <span class="text-red-500">*</span></label>
+                                    <div class="flex flex-wrap gap-2.5" id="sizeButtons">
+                                        <button type="button" data-size="6"
+                                            class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">6</button>
+                                        <button type="button" data-size="7"
+                                            class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">7</button>
+                                        <button type="button" data-size="8"
+                                            class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">8</button>
+                                        <button type="button" data-size="9"
+                                            class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">9</button>
+                                        <button type="button" data-size="10"
+                                            class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">10</button>
+                                    </div>
+                                    <!-- ✅ Hidden inputs injected here on submit -->
+                                    <div id="sizeInputs"></div>
+                                    <p class="error-msg" id="sizesError">Please select at least one size.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
 
-            <!-- ── Right Column ── -->
-            <div class="flex-[2] min-w-[340px] max-w-[480px]">
+            <!-- Fixed Footer -->
+            <div
+                class="fixed bottom-0 right-0 w-[calc(100%-256px)] bg-white border-t border-gray-200 px-12 py-5 flex items-center justify-end gap-4 z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
+                <a href="/admin/productManagement"
+                    class="px-8 py-3.5 bg-white border border-gray-200 text-black text-[11px] font-bold tracking-widest uppercase rounded hover:bg-gray-50 transition-colors">Discard</a>
+                <button type="button" id="submitBtn"
+                    class="px-8 py-3.5 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded shadow-lg shadow-black/10 hover:bg-gray-800 transition-colors flex items-center gap-2">
+                    <span id="submitBtnLabel">Add Product</span>
+                    <span id="submitSpinner" class="material-symbols-outlined text-[16px]"
+                        style="display:none;">progress_activity</span>
+                </button>
+            </div>
 
-                <!-- General Information -->
-                <div class="border border-gray-100 bg-[#fcfcfc] p-8 rounded-xl mb-6 shadow-sm">
-                    <h3 class="text-[15px] font-black uppercase tracking-wider text-black mb-8 border-l-4 border-black pl-3 ml-[-32px]">General Information</h3>
+        </form><!-- end form -->
+    </main>
 
-                    <div class="space-y-6">
-                        <!-- Product Name -->
-                        <div>
-                            <label class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Product Name <span class="text-red-500">*</span></label>
-                            <input
-                                type="text"
-                                id="productName"
-                                name="productName"
-                                placeholder="e.g. The Executive Oxford"
-                                class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 px-4 text-[13px] font-medium text-black outline-none transition-colors"
-                            >
-                            <p class="error-msg" id="productNameError">Product name is required.</p>
-                        </div>
-
-                        <!-- Category -->
-                        <div>
-                            <label class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Category <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <select
-                                    id="category"
-                                    name="category"
-                                    class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 pl-4 pr-10 text-[13px] font-medium text-gray-500 appearance-none outline-none cursor-pointer transition-colors"
-                                >
-                                    <option value="">Select category</option>
-                                    {{#each categories}}
-                                    <option value="{{this._id}}">{{this.name}}</option>
-                                    {{/each}}
-                                </select>
-                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[18px]">expand_more</span>
-                            </div>
-                            <p class="error-msg" id="categoryError">Please select a category.</p>
-                        </div>
-
-                        <!-- Brand -->
-                        <div>
-                            <label class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Brand <span class="text-red-500">*</span></label>
-                            <div class="relative">
-                                <select
-                                    id="brand"
-                                    name="brand"
-                                    class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 pl-4 pr-10 text-[13px] font-medium text-gray-500 appearance-none outline-none cursor-pointer transition-colors"
-                                >
-                                    <option value="">Select brand</option>
-                                    {{#each brands}}
-                                    <option value="{{this._id}}">{{this.name}}</option>
-                                    {{/each}}
-                                </select>
-                                <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-[18px]">expand_more</span>
-                            </div>
-                            <p class="error-msg" id="brandError">Please select a brand.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Default Variant Details -->
-                <div class="border border-gray-100 bg-[#fcfcfc] p-8 rounded-xl mb-6 shadow-sm">
-                    <h3 class="text-[15px] font-black uppercase tracking-wider text-black mb-8 border-l-4 border-black pl-3 ml-[-32px]">Default Variant Details</h3>
-
-                    <div class="space-y-6">
-                        <!-- Color -->
-                        <div>
-                            <label class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Primary Color <span class="text-red-500">*</span></label>
-                            <input
-                                type="text"
-                                id="color"
-                                name="color"
-                                placeholder="e.g. Midnight Black"
-                                class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 px-4 text-[13px] font-medium text-black outline-none transition-colors"
-                            >
-                            <p class="error-msg" id="colorError">Color is required.</p>
-                        </div>
-
-                        <!-- SKU -->
-                        <div>
-                            <label class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">SKU Identifier <span class="text-red-500">*</span></label>
-                            <input
-                                type="text"
-                                id="sku"
-                                name="sku"
-                                placeholder="e.g. AJAX-OXFORD-BLK"
-                                class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 px-4 text-[13px] font-medium text-black outline-none transition-colors"
-                            >
-                            <p class="error-msg" id="skuError">SKU is required.</p>
-                        </div>
-
-                        <!-- Price & Stock -->
-                        <div class="grid grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Price (₹) <span class="text-red-500">*</span></label>
-                                <input
-                                    type="number"
-                                    id="price"
-                                    name="price"
-                                    placeholder="0"
-                                    min="0"
-                                    class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 px-4 text-[13px] font-medium text-black outline-none transition-colors"
-                                >
-                                <p class="error-msg" id="priceError">Price is required.</p>
-                            </div>
-                            <div>
-                                <label class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Stock <span class="text-red-500">*</span></label>
-                                <input
-                                    type="number"
-                                    id="stock"
-                                    name="stock"
-                                    placeholder="0"
-                                    min="0"
-                                    class="w-full bg-white border border-gray-200 focus:border-black rounded py-3.5 px-4 text-[13px] font-medium text-black outline-none transition-colors"
-                                >
-                                <p class="error-msg" id="stockError">Stock is required.</p>
-                            </div>
-                        </div>
-
-                        <!-- Sizes -->
-                        <div>
-                            <label class="block text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-3">Size <span class="text-red-500">*</span></label>
-                            <div class="flex flex-wrap gap-2.5" id="sizeButtons">
-                                <button type="button" data-size="6"  class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">6</button>
-                                <button type="button" data-size="7"  class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">7</button>
-                                <button type="button" data-size="8"  class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">8</button>
-                                <button type="button" data-size="9"  class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">9</button>
-                                <button type="button" data-size="10" class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">10</button>
-                            </div>
-                            <!-- ✅ Hidden inputs injected here on submit -->
-                            <div id="sizeInputs"></div>
-                            <p class="error-msg" id="sizesError">Please select at least one size.</p>
-                        </div>
-                    </div>
-                </div>
-
+    <!-- ===== CROP MODAL ===== -->
+    <div id="cropModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="bg-white shadow-2xl rounded-xl w-[600px] max-w-[95vw] flex flex-col overflow-hidden">
+            <div class="p-6 border-b border-gray-100 flex items-center justify-between">
+                <h3 class="text-[14px] font-black uppercase tracking-wider text-black">Crop & Resize Image</h3>
+                <button id="cancelCrop" type="button" class="text-gray-400 hover:text-black transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
+            <div class="p-6 bg-[#f8f9fa] flex items-center justify-center h-[400px]">
+                <img id="cropImage" src="" alt="Crop" class="max-w-full max-h-full block">
+            </div>
+            <div class="p-6 border-t border-gray-100 flex items-center justify-end gap-4 bg-white">
+                <button id="cancelCropBtn" type="button"
+                    class="px-6 py-2.5 bg-white border border-gray-200 text-black text-[10px] font-bold tracking-widest uppercase rounded hover:bg-gray-50 transition-colors">Cancel</button>
+                <button id="saveCropBtn" type="button"
+                    class="px-6 py-2.5 bg-black text-white text-[10px] font-bold tracking-widest uppercase rounded hover:bg-gray-800 transition-colors">Crop
+                    & Save</button>
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // ─── STATE ────────────────────────────────────────────────────
+        let cropper = null;
+        let uploadedFiles = [];          // stores File objects for multer
+        let selectedSizes = new Set();
+        const MAX_IMAGES = 3;
 
-    <!-- Fixed Footer -->
-    <div class="fixed bottom-0 right-0 w-[calc(100%-256px)] bg-white border-t border-gray-200 px-12 py-5 flex items-center justify-end gap-4 z-30 shadow-[0_-4px_20px_rgba(0,0,0,0.02)]">
-        <a href="/admin/productManagement" class="px-8 py-3.5 bg-white border border-gray-200 text-black text-[11px] font-bold tracking-widest uppercase rounded hover:bg-gray-50 transition-colors">Discard</a>
-        <button type="button" id="submitBtn" class="px-8 py-3.5 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded shadow-lg shadow-black/10 hover:bg-gray-800 transition-colors flex items-center gap-2">
-    <span id="submitBtnLabel">Add Product</span>
-    <span id="submitSpinner" class="material-symbols-outlined text-[16px]" style="display:none;">progress_activity</span>
-     </button>
-    </div>
+        // ─── ELEMENTS ────────────────────────────────────────────────
+        const imageInput = document.getElementById('imageInput');
+        const cropModal = document.getElementById('cropModal');
+        const cropImageEl = document.getElementById('cropImage');
+        const thumbnailsContainer = document.getElementById('thumbnailsContainer');
+        const uploadCount = document.getElementById('uploadCount');
+        const thumbnailSlots = document.querySelectorAll('.thumbnail-slot');
+        const uploadZone = document.getElementById('uploadZone');
+        const uploadZoneLabel = document.getElementById('uploadZoneLabel');
+        const uploadZoneSublabel = document.getElementById('uploadZoneSublabel');
 
-    </form><!-- end form -->
-</main>
+        // ─── HELPER: UPDATE UPLOAD ZONE UI ──────────────────────────
+        function updateUploadZoneUI() {
+            if (uploadedFiles.length >= MAX_IMAGES) {
+                uploadZone.classList.add('opacity-50', 'bg-gray-100');
+                uploadZoneLabel.textContent = 'MAX IMAGES REACHED';
+                uploadZoneSublabel.textContent = 'Remove an image to upload another';
+            } else {
+                uploadZone.classList.remove('opacity-50', 'bg-gray-100');
+                uploadZoneLabel.textContent = 'UPLOAD IMAGES';
+                uploadZoneSublabel.textContent = 'Click to select — each image opens the crop tool';
+            }
+        }
 
-<!-- ===== CROP MODAL ===== -->
-<div id="cropModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-sm">
-    <div class="bg-white shadow-2xl rounded-xl w-[600px] max-w-[95vw] flex flex-col overflow-hidden">
-        <div class="p-6 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="text-[14px] font-black uppercase tracking-wider text-black">Crop & Resize Image</h3>
-            <button id="cancelCrop" type="button" class="text-gray-400 hover:text-black transition-colors">
-                <span class="material-symbols-outlined text-[20px]">close</span>
-            </button>
-        </div>
-        <div class="p-6 bg-[#f8f9fa] flex items-center justify-center h-[400px]">
-            <img id="cropImage" src="" alt="Crop" class="max-w-full max-h-full block">
-        </div>
-        <div class="p-6 border-t border-gray-100 flex items-center justify-end gap-4 bg-white">
-            <button id="cancelCropBtn" type="button" class="px-6 py-2.5 bg-white border border-gray-200 text-black text-[10px] font-bold tracking-widest uppercase rounded hover:bg-gray-50 transition-colors">Cancel</button>
-            <button id="saveCropBtn"   type="button" class="px-6 py-2.5 bg-black text-white text-[10px] font-bold tracking-widest uppercase rounded hover:bg-gray-800 transition-colors">Crop & Save</button>
-        </div>
-    </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="/toast/toast.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-// ─── STATE ────────────────────────────────────────────────────
-let cropper          = null;
-let uploadedFiles    = [];          // stores File objects for multer
-let selectedSizes    = new Set();
-const MAX_IMAGES     = 3;
+        // ─── CLICK HANDLER: CHECK LIMIT ──────────────────────────────
+        function handleUploadClick() {
+            if (uploadedFiles.length >= MAX_IMAGES) {
+                showToast("error", "Maximum 3 images allowed.");
+                return;
+            }
+            imageInput.click();
+        }
 
-// ─── ELEMENTS ────────────────────────────────────────────────
-const imageInput         = document.getElementById('imageInput');
-const cropModal          = document.getElementById('cropModal');
-const cropImageEl        = document.getElementById('cropImage');
-const thumbnailsContainer = document.getElementById('thumbnailsContainer');
-const uploadCount        = document.getElementById('uploadCount');
-const thumbnailSlots     = document.querySelectorAll('.thumbnail-slot');
-const uploadZone         = document.getElementById('uploadZone');
-const uploadZoneLabel    = document.getElementById('uploadZoneLabel');
-const uploadZoneSublabel = document.getElementById('uploadZoneSublabel');
+        // ─── IMAGE UPLOAD → CROP ─────────────────────────────────────
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-// ─── HELPER: UPDATE UPLOAD ZONE UI ──────────────────────────
-function updateUploadZoneUI() {
-    if (uploadedFiles.length >= MAX_IMAGES) {
-        uploadZone.classList.add('opacity-50', 'bg-gray-100');
-        uploadZoneLabel.textContent = 'MAX IMAGES REACHED';
-        uploadZoneSublabel.textContent = 'Remove an image to upload another';
-    } else {
-        uploadZone.classList.remove('opacity-50', 'bg-gray-100');
-        uploadZoneLabel.textContent = 'UPLOAD IMAGES';
-        uploadZoneSublabel.textContent = 'Click to select — each image opens the crop tool';
-    }
-}
+            if (uploadedFiles.length >= MAX_IMAGES) {
+                showToast("error", "Maximum 3 images allowed.");
+                imageInput.value = '';
+                return;
+            }
 
-// ─── CLICK HANDLER: CHECK LIMIT ──────────────────────────────
-function handleUploadClick() {
-    if (uploadedFiles.length >= MAX_IMAGES) {
-        showToast("error", "Maximum 3 images allowed.");
-        return;
-    }
-    imageInput.click();
-}
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
-// ─── IMAGE UPLOAD → CROP ─────────────────────────────────────
-imageInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+            const fileType = file.type;
+            const fileName = file.name.toLowerCase();
 
-    if (uploadedFiles.length >= MAX_IMAGES) {
-        showToast("error", "Maximum 3 images allowed.");
-        imageInput.value = '';
-        return;
-    }
+            const isValid =
+                allowedTypes.includes(fileType) ||
+                fileName.endsWith('.jpg') ||
+                fileName.endsWith('.jpeg') ||
+                fileName.endsWith('.png') ||
+                fileName.endsWith('.webp');
 
-    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+            // ❌ INVALID FILE → STOP EVERYTHING
+            if (!isValid) {
+                showToast("error", "File format not supported. Please upload JPG, PNG, or WEBP images.");
+                imageInput.value = '';
+                return; // 🚨 IMPORTANT: stops crop modal
+            }
 
-    const fileType = file.type;
-    const fileName = file.name.toLowerCase();
+            const maxSize = 2 * 1024 * 1024;
 
-    const isValid =
-        allowedTypes.includes(fileType) ||
-        fileName.endsWith('.jpg') ||
-        fileName.endsWith('.jpeg') ||
-        fileName.endsWith('.png') ||
-        fileName.endsWith('.webp');
+            if (file.size > maxSize) {
+                showToast("error", "Image must be less than 2MB");
+                imageInput.value = '';
+                return;
+            }
 
-    // ❌ INVALID FILE → STOP EVERYTHING
-    if (!isValid) {
-        showToast("error", "File format not supported. Please upload JPG, PNG, or WEBP images.");
-        imageInput.value = '';
-        return; // 🚨 IMPORTANT: stops crop modal
-    }
+            // ✅ ONLY VALID FILES COME HERE → OPEN CROPPER
 
-    const maxSize = 2 * 1024 * 1024;
+            const reader = new FileReader();
 
-    if (file.size > maxSize) {
-        showToast("error", "Image must be less than 2MB");
-        imageInput.value = '';
-        return;
-    }
+            reader.onload = (event) => {
+                cropImageEl.src = event.target.result;
 
-    // ✅ ONLY VALID FILES COME HERE → OPEN CROPPER
+                cropImageEl.onload = () => {
+                    cropModal.classList.remove('hidden');
+                    cropModal.classList.add('flex');
 
-    const reader = new FileReader();
+                    if (cropper) cropper.destroy();
 
-    reader.onload = (event) => {
-        cropImageEl.src = event.target.result;
+                    cropper = new Cropper(cropImageEl, {
+                        aspectRatio: 1,
+                        viewMode: 2,
+                        autoCropArea: 1,
+                        background: false,
+                    });
+                };
+            };
 
-        cropImageEl.onload = () => {
-            cropModal.classList.remove('hidden');
-            cropModal.classList.add('flex');
+            reader.readAsDataURL(file);
+        });
 
-            if (cropper) cropper.destroy();
-
-            cropper = new Cropper(cropImageEl, {
-                aspectRatio: 1,
-                viewMode: 2,
-                autoCropArea: 1,
-                background: false,
-            });
+        // ─── CLOSE CROP ───────────────────────────────────────────────
+        const closeCropModal = () => {
+            cropModal.classList.add('hidden');
+            cropModal.classList.remove('flex');
+            if (cropper) { cropper.destroy(); cropper = null; }
+            imageInput.value = ''; // Clear for next selection
         };
-    };
 
-    reader.readAsDataURL(file);
-});
+        document.getElementById('cancelCrop').addEventListener('click', closeCropModal);
+        document.getElementById('cancelCropBtn').addEventListener('click', closeCropModal);
 
-// ─── CLOSE CROP ───────────────────────────────────────────────
-const closeCropModal = () => {
-    cropModal.classList.add('hidden');
-    cropModal.classList.remove('flex');
-    if (cropper) { cropper.destroy(); cropper = null; }
-    imageInput.value = ''; // Clear for next selection
-};
+        // ─── SAVE CROP → convert canvas to File → attach to input ────
+        document.getElementById('saveCropBtn').addEventListener('click', () => {
+            if (!cropper) return;
 
-document.getElementById('cancelCrop').addEventListener('click', closeCropModal);
-document.getElementById('cancelCropBtn').addEventListener('click', closeCropModal);
+            const canvas = cropper.getCroppedCanvas({
+                width: 1000, height: 1000,
+                fillColor: '#fff',
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            });
 
-// ─── SAVE CROP → convert canvas to File → attach to input ────
-document.getElementById('saveCropBtn').addEventListener('click', () => {
-    if (!cropper) return;
+            canvas.toBlob((blob) => {
+                // ✅ Convert blob → real File so multer can process it
+                const file = new File([blob], `product_image_${Date.now()}.jpg`, { type: 'image/jpeg' });
+                uploadedFiles.push(file);
 
-    const canvas = cropper.getCroppedCanvas({
-        width: 1000, height: 1000,
-        fillColor: '#fff',
-        imageSmoothingEnabled: true,
-        imageSmoothingQuality: 'high',
-    });
+                // ✅ Sync all files back to the <input type="file"> via DataTransfer
+                syncFilesToInput();
 
-    canvas.toBlob((blob) => {
-        // ✅ Convert blob → real File so multer can process it
-        const file = new File([blob], `product_image_${Date.now()}.jpg`, { type: 'image/jpeg' });
-        uploadedFiles.push(file);
-
-        // ✅ Sync all files back to the <input type="file"> via DataTransfer
-        syncFilesToInput();
-
-        // Show thumbnail
-        const slotIndex = uploadedFiles.length - 1;
-        if (slotIndex < MAX_IMAGES) {
-            const slot = thumbnailSlots[slotIndex];
-            const url  = URL.createObjectURL(blob);
-            slot.innerHTML = `
+                // Show thumbnail
+                const slotIndex = uploadedFiles.length - 1;
+                if (slotIndex < MAX_IMAGES) {
+                    const slot = thumbnailSlots[slotIndex];
+                    const url = URL.createObjectURL(blob);
+                    slot.innerHTML = `
                 <img src="${url}" class="w-full h-full object-cover rounded shadow-sm">
                 <button type="button" onclick="removeImage(${slotIndex})" class="absolute top-1 right-1 bg-white/90 text-red-500 rounded p-0.5 hover:bg-red-50 shadow-sm">
                     <span class="material-symbols-outlined text-[14px] block">delete</span>
                 </button>`;
-            thumbnailsContainer.classList.remove('hidden');
+                    thumbnailsContainer.classList.remove('hidden');
+                }
+
+                uploadCount.textContent = uploadedFiles.length;
+                updateUploadZoneUI();
+                closeCropModal();
+            }, 'image/jpeg', 0.9);
+        });
+
+        // ✅ Sync uploadedFiles array → real file input (multer reads this)
+        function syncFilesToInput() {
+            const dt = new DataTransfer();
+            uploadedFiles.forEach(f => dt.items.add(f));
+            imageInput.files = dt.files;
         }
 
-        uploadCount.textContent = uploadedFiles.length;
-        updateUploadZoneUI();
-        closeCropModal();
-    }, 'image/jpeg', 0.9);
-});
+        // ─── REMOVE IMAGE ────────────────────────────────────────────
+        function removeImage(index) {
+            uploadedFiles.splice(index, 1);
+            syncFilesToInput();
 
-// ✅ Sync uploadedFiles array → real file input (multer reads this)
-function syncFilesToInput() {
-    const dt = new DataTransfer();
-    uploadedFiles.forEach(f => dt.items.add(f));
-    imageInput.files = dt.files;
-}
-
-// ─── REMOVE IMAGE ────────────────────────────────────────────
-function removeImage(index) {
-    uploadedFiles.splice(index, 1);
-    syncFilesToInput();
-
-    // Re-render all thumbnail slots
-    thumbnailSlots.forEach(slot => slot.innerHTML = '');
-    uploadedFiles.forEach((file, i) => {
-        const url  = URL.createObjectURL(file);
-        const slot = thumbnailSlots[i];
-        slot.innerHTML = `
+            // Re-render all thumbnail slots
+            thumbnailSlots.forEach(slot => slot.innerHTML = '');
+            uploadedFiles.forEach((file, i) => {
+                const url = URL.createObjectURL(file);
+                const slot = thumbnailSlots[i];
+                slot.innerHTML = `
             <img src="${url}" class="w-full h-full object-cover rounded shadow-sm">
             <button type="button" onclick="removeImage(${i})" class="absolute top-1 right-1 bg-white/90 text-red-500 rounded p-0.5 hover:bg-red-50 shadow-sm">
                 <span class="material-symbols-outlined text-[14px] block">delete</span>
             </button>`;
-    });
+            });
 
-    uploadCount.textContent = uploadedFiles.length;
-    updateUploadZoneUI();
-    if (uploadedFiles.length === 0) thumbnailsContainer.classList.add('hidden');
-}
+            uploadCount.textContent = uploadedFiles.length;
+            updateUploadZoneUI();
+            if (uploadedFiles.length === 0) thumbnailsContainer.classList.add('hidden');
+        }
 
-// ─── SIZE BUTTONS ─────────────────────────────────────────────
-document.querySelectorAll('.size-btn').forEach(btn => {
+        // ─── SIZE BUTTONS ─────────────────────────────────────────────
+       document.querySelectorAll('.size-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         const size = btn.dataset.size;
-        if (selectedSizes.has(size)) {
-            selectedSizes.delete(size);
-            btn.classList.remove('selected');
-        } else {
+
+        // Deselect all first
+        selectedSizes.clear();
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+
+        // Select only clicked one (toggle off if already selected)
+        if (!btn.classList.contains('selected')) {
             selectedSizes.add(size);
             btn.classList.add('selected');
+            clearError('sizesError');
         }
     });
 });
 
-// ─── FORM SUBMIT ─────────────────────────────────────────────
-document.getElementById('submitBtn').addEventListener('click', async () => {
-    let valid = true;
-
-    const showError = (id, show) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    
-    if (el.classList.contains('error-msg')) {
-        el.style.display = show ? 'block' : 'none';
-    } else {
-        if (show) {
-            el.classList.remove('hidden');
-        } else {
-            el.classList.add('hidden');
+        // ─── CLEAR ERROR HELPER ──────────────────────────────────────
+        function clearError(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            if (el.classList.contains('error-msg')) {
+                el.style.display = 'none';
+            } else {
+                el.classList.add('hidden');
+            }
         }
-    }
-    if (show) valid = false;
-};
 
-    showError('productNameError', !document.getElementById('productName').value.trim());
-    showError('descriptionError', !document.getElementById('description').value.trim());
-    showError('categoryError',    !document.getElementById('category').value);
-    showError('brandError',       !document.getElementById('brand').value);
-    showError('colorError',       !document.getElementById('color').value.trim());
-    showError('skuError',         !document.getElementById('sku').value.trim());
-    showError('priceError',       !document.getElementById('price').value);
-    showError('stockError',       !document.getElementById('stock').value);
-    showError('imagesError', uploadedFiles.length < MAX_IMAGES);
-    showError('sizesError',       selectedSizes.size === 0);
+        // ─── FORM SUBMIT ─────────────────────────────────────────────
+        document.getElementById('submitBtn').addEventListener('click', async () => {
+            let valid = true;
 
-    if (!valid) return;
+            const showError = (id, show) => {
+                const el = document.getElementById(id);
+                if (!el) return;
 
-    // ✅ Inject sizes as hidden inputs
-    const sizeInputs = document.getElementById('sizeInputs');
-    sizeInputs.innerHTML = '';
-    selectedSizes.forEach(size => {
-        const input = document.createElement('input');
-        input.type  = 'hidden';
-        input.name  = 'sizes';
-        input.value = size;
-        sizeInputs.appendChild(input);
-    });
+                if (el.classList.contains('error-msg')) {
+                    el.style.display = show ? 'block' : 'none';
+                } else {
+                    if (show) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                }
+                if (show) valid = false;
+            };
 
-    // ✅ Show loading spinner
-    const submitBtn     = document.getElementById('submitBtn');
-    const submitLabel   = document.getElementById('submitBtnLabel');
-    const submitSpinner = document.getElementById('submitSpinner');
-    submitBtn.disabled = true;
-    submitLabel.textContent = 'Saving…';
-    submitSpinner.classList.add('spin-active');   
-    submitSpinner.style.display = 'inline-block';
-    const form = document.getElementById('productForm');
-    const formData = new FormData(form);
+            showError('productNameError', !document.getElementById('productName').value.trim());
+            showError('descriptionError', !document.getElementById('description').value.trim());
+            showError('categoryError', !document.getElementById('category').value);
+            showError('brandError', !document.getElementById('brand').value);
+            showError('colorError', !document.getElementById('color').value.trim());
+            showError('skuError', !document.getElementById('sku').value.trim());
 
-    formData.delete('images');
-    uploadedFiles.forEach(file => {
-    formData.append('images', file);
-    });
+            const price = document.getElementById('price').value;
+            const stock = document.getElementById('stock').value;
 
-    try {
-        const res = await axios.post('/admin/addProduct', formData, {
-            headers: { 'Content-Type': 'multipart/form-data' }
+            if (!price || parseFloat(price) < 0) {
+                showError('priceError', true);
+                document.getElementById('priceError').textContent = parseFloat(price) < 0 ? "Price cannot be negative." : "Price is required.";
+            } else {
+                showError('priceError', false);
+            }
+
+            if (!stock || parseInt(stock) < 0) {
+                showError('stockError', true);
+                document.getElementById('stockError').textContent = parseInt(stock) < 0 ? "Stock cannot be negative." : "Stock is required.";
+            } else {
+                showError('stockError', false);
+            }
+
+            showError('imagesError', uploadedFiles.length < MAX_IMAGES);
+            showError('sizesError', selectedSizes.size === 0);
+
+            if (!valid) return;
+
+            // ✅ Inject sizes as hidden inputs
+            const sizeInputs = document.getElementById('sizeInputs');
+            sizeInputs.innerHTML = '';
+            selectedSizes.forEach(size => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'sizes';
+                input.value = size;
+                sizeInputs.appendChild(input);
+            });
+
+            // ✅ Show loading spinner
+            const submitBtn = document.getElementById('submitBtn');
+            const submitLabel = document.getElementById('submitBtnLabel');
+            const submitSpinner = document.getElementById('submitSpinner');
+            submitBtn.disabled = true;
+            submitLabel.textContent = 'Saving…';
+            submitSpinner.classList.add('spin-active');
+            submitSpinner.style.display = 'inline-block';
+            const form = document.getElementById('productForm');
+            const formData = new FormData(form);
+
+            formData.delete('images');
+            uploadedFiles.forEach(file => {
+                formData.append('images', file);
+            });
+
+            try {
+                const res = await axios.post('/admin/addProduct', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+
+                if (res.data.success) {
+                    showToast("success", res.data.message);
+                    setTimeout(() => {
+                        window.location.href = "/admin/productManagement";
+                    }, 1000);
+                }
+            } catch (err) {
+                console.log(err);
+                showToast("error", err.response?.data?.message || "Something went wrong");
+            } finally {
+                // ✅ Reset button state
+                submitBtn.disabled = false;
+                submitLabel.textContent = 'Add Product';
+                submitSpinner.classList.remove('spin-active');
+                submitSpinner.style.display = 'none';
+            }
         });
-
-        if (res.data.success) {
-            showToast("success", res.data.message);
-            setTimeout(() => {
-                window.location.href = "/admin/productManagement";
-            }, 1000);
-        }
-    } catch (err) {
-        console.log(err);
-        showToast("error", err.response?.data?.message || "Something went wrong");
-    } finally {
-        // ✅ Reset button state
-        submitBtn.disabled = false;
-        submitLabel.textContent = 'Add Product';
-        submitSpinner.classList.remove('spin-active');
-        submitSpinner.style.display = 'none';
-    }
-});
-</script>
+    </script>
 
 </body>
+
 </html>

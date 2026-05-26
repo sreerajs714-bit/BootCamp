@@ -24,7 +24,6 @@ export const RegisterUser = async (req, res) => {
   try {
 
     const { username, email, password } = req.body;
-    console.log(req.body);
 
     const cleanEmail = email.trim().toLowerCase();
 
@@ -160,38 +159,42 @@ export const resetPassword = async (req, res) => {
     const existingUser = await userSchema.findOne({ email });
 
     if (!existingUser) {
-      return res.render("users/resetPassword", {
-        message: "User does not exist"
+      return res.status(404).json({ 
+        success: false, 
+        message: "User does not exist" 
       });
     }
 
     const otp = generateOTP();
-
     const hashedOTP = await bcrypt.hash(otp, 10);
    
     req.session.otpEmail = email;
     req.session.otpPurpose = "reset";
 
-  
     await OTP.deleteMany({ email, purpose: "reset" });
 
-    // save new OTP 
     await OTP.create({
       email,
-      otp:hashedOTP,
+      otp: hashedOTP,
       purpose: "reset",
       expiresAt: Date.now() + 60 * 1000
     });
 
     await sendOTPEmail(email, otp);
 
-  req.session.save((err) => {
-  if (err) return res.send("Session error");
-  return res.render("users/otpVerify", { email, purpose: "reset", message: "OTP sent" });
-});
+    req.session.save((err) => {
+      if (err) return res.status(500).json({ success: false, message: "Session error" });
+      
+      return res.json({ 
+        success: true, 
+        message: "OTP sent",
+        redirect: "/users/otpVerify"   // frontend will use this to navigate
+      });
+    });
 
   } catch (error) {
     console.log(error.message);
+    res.status(500).json({ success: false, message: "Something went wrong" });
   }
 };
 
@@ -201,7 +204,6 @@ export const loadVerifyOtp=(req,res)=>{
 
 export const loadSetNew = (req, res) => {
   const email = req.session.otpEmail;
-   console.log("SET NEW SESSION:", req.session);
 
   if (!req.session.resetVerified) {
     return res.redirect("/users/login"); 
@@ -218,34 +220,28 @@ export const SetNew = async (req, res) => {
   try {
 
     if (!req.session.resetVerified) {
-      return res.redirect("/login");
+      return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
-    const email = req.session.otpEmail; 
+    const email = req.session.otpEmail;
     let { password } = req.body;
-  
 
     if (!email) {
-      return res.render("users/SetNewPassword", {
-        message: "Session Expired",
-      });
+      return res.status(400).json({ success: false, message: "Session expired" });
     }
 
     const user = await userSchema.findOne({ email });
 
     if (!user) {
-      return res.render("users/SetNewPassword", {
-        message: "User not found",
-        email
-      });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
     const isSame = await bcrypt.compare(password, user.password);
 
     if (isSame) {
-      return res.render("users/SetNewPassword", {
-        message: "New password cannot be same as old password",
-        email
+      return res.status(400).json({ 
+        success: false, 
+        message: "New password cannot be same as old password" 
       });
     }
 
@@ -254,16 +250,20 @@ export const SetNew = async (req, res) => {
     user.password = hashedPassword;
     await user.save();
 
+    // Clear session
     req.session.resetVerified = null;
     req.session.otpEmail = null;
     req.session.otpPurpose = null;
 
-    res.render("users/login", {
-      message: "Password reset successful. Please login."
+    return res.json({ 
+      success: true, 
+      message: "Password reset successful",
+      redirect: "/users/login"
     });
 
   } catch (error) {
     console.log(error.message);
+    return res.status(500).json({ success: false, message: "Something went wrong" });
   }
 };
 

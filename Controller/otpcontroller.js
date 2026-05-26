@@ -5,16 +5,23 @@ import userSchema from "../Model/userModel.js"
 import bcrypt from "bcrypt"
 
 export const verifyOTP = async (req, res) => {
-
     try {
+        let { email, otp, purpose } = req.body;
 
-        let { email, otp } = req.body;
+        // Fallback to session if body values are missing
+        if (!email || email.trim() === '') {
+            email = req.session.otpEmail;
+        }
+        if (!purpose) {
+            purpose = req.session.otpPurpose;
+        }
 
-        email = email.trim().toLowerCase();
-        otp = otp.trim();
-
-       // In verifyOTP controller
-        const purpose = req.body.purpose || req.session.otpPurpose; // ✅ fallback
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Session expired. Please try again."
+            });
+        }
 
         if (!purpose) {
             return res.status(400).json({
@@ -23,10 +30,10 @@ export const verifyOTP = async (req, res) => {
             });
         }
 
-       const otpRecord = await OTP.findOne({
-  email,
-  purpose
-});
+        email = email.trim().toLowerCase();
+        otp = otp.trim();
+
+        const otpRecord = await OTP.findOne({ email, purpose });
 
         // OTP NOT FOUND
         if (!otpRecord) {
@@ -36,11 +43,17 @@ export const verifyOTP = async (req, res) => {
             });
         }
 
+        // CHECK EXPIRY
+        if (otpRecord.expiresAt < Date.now()) {
+            await OTP.deleteOne({ _id: otpRecord._id });
+            return res.status(400).json({
+                success: false,
+                message: "OTP has expired. Please request a new one."
+            });
+        }
+
         // VERIFY OTP
-        const isMatch = await bcrypt.compare(
-            otp,
-            otpRecord.otp
-        );
+        const isMatch = await bcrypt.compare(otp, otpRecord.otp);
 
         if (!isMatch) {
             return res.status(400).json({
@@ -50,12 +63,9 @@ export const verifyOTP = async (req, res) => {
         }
 
         // DELETE USED OTP
-        await OTP.deleteOne({
-            _id: otpRecord._id
-        });
+        await OTP.deleteOne({ _id: otpRecord._id });
 
         // ================= REGISTER =================
-
         if (purpose === "register") {
 
             if (!req.session.pendingUser) {
@@ -64,8 +74,6 @@ export const verifyOTP = async (req, res) => {
                     message: "Registration session expired"
                 });
             }
-           console.log("VERIFY SESSION:", req.session);
-        console.log("BODY:", req.body);
 
             const { username, password } = req.session.pendingUser;
 
@@ -96,26 +104,27 @@ export const verifyOTP = async (req, res) => {
         }
 
         // ================= RESET PASSWORD =================
-
         if (purpose === "reset") {
-    req.session.resetVerified = true;
-    req.session.otpEmail = email; // ✅ make sure this is still set
+            req.session.resetVerified = true;
+            req.session.otpEmail = email;
 
-    req.session.save((err) => {
-        if (err) {
-            console.log("Session save error:", err);
-            return res.status(500).json({ success: false, message: "Session error" });
+            req.session.save((err) => {
+                if (err) {
+                    console.log("Session save error:", err);
+                    return res.status(500).json({
+                        success: false,
+                        message: "Session error"
+                    });
+                }
+                return res.json({
+                    success: true,
+                    redirectUrl: "/users/setNew"
+                });
+            });
+            return;
         }
-        return res.json({
-            success: true,
-            redirectUrl: "/users/setNew"
-        });
-    });
-    return;
-}
 
         // ================= CHANGE EMAIL =================
-
         if (purpose === "changeEmail") {
 
             const userId = req.session.user.id;
@@ -140,9 +149,7 @@ export const verifyOTP = async (req, res) => {
         });
 
     } catch (error) {
-
         console.log(error);
-
         return res.status(500).json({
             success: false,
             message: "Something went wrong"
@@ -153,8 +160,6 @@ export const verifyOTP = async (req, res) => {
 export const resendOTP = async (req, res) => {
 
   try {
-    console.log("Session ID:", req.sessionID);
-console.log("Session data:", req.session);
 
     const email = req.session.otpEmail;
     const purpose = req.session.otpPurpose;
@@ -179,7 +184,8 @@ console.log("RESEND SESSION:", req.session);
     await OTP.create({
       email,
       otp: hashedOTP,
-      purpose
+      purpose,
+      expiresAt: Date.now() + 60 * 100
     });
 
     await sendOTPEmail(email, otp);

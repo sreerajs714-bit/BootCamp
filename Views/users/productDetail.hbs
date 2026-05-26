@@ -318,25 +318,6 @@
         // Initialize badges on load
         document.addEventListener('DOMContentLoaded', updateBadges);
 
-        // Toast Helper
-        function showToast(type = 'success',message) {
-            Toastify({
-                text: message,
-                duration: 3000,
-                gravity: "bottom",
-                position: "right",
-                stopOnFocus: true,
-                style: {
-                    background: type === 'success' ? "#000000" : "#ef4444",
-                    borderRadius: "12px",
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                    textTransform: "uppercase",
-                    letterSpacing: "1px",
-                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
-                }
-            }).showToast();
-        }
 
         // Hover Carousel for Similar Products
         document.addEventListener('DOMContentLoaded', () => {

@@ -22,7 +22,7 @@ route.put("/category/edit/:id",isAdmin,editCategory);
 route.delete("/category/delete/:id",isAdmin,deleteCategory);
 route.get("/productManagement",isAdmin,loadProduct);
 route.get("/addProduct",isAdmin,loadAddProduct)
-route.post("/addProduct",isAdmin,uploadProduct.array("images", 5),addProduct);
+route.post("/addProduct",isAdmin,uploadProduct.array("images", 3),addProduct);
 route.get("/editProduct/:id",isAdmin,loadEditProduct);
 route.put("/editProduct/:id",isAdmin,uploadProduct.array("images", 3),editProduct);
 route.delete("/deleteProduct/:id",isAdmin,deleteProduct);

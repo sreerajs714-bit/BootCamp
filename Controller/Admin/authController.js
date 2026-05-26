@@ -24,7 +24,8 @@ export const Adminlogin = async (req, res) => {
     if (!admin) {
       return res.status(400).json({
         success: false,
-        message: "Invalid email or password"
+        message: "Invalid email or password",
+        email
       });
     }
 
@@ -33,7 +34,7 @@ export const Adminlogin = async (req, res) => {
     if (!isMatch) {
       return res.status(400).json({
         success: false,
-        message: "Invalid email or password"
+        message: "Invalid email or password",
       });
     }
 

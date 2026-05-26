@@ -1,628 +1,808 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Variant Management | Admin | BOOTCAMP</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+
     <!-- Cropper.js -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 
     <style>
-        * { box-sizing: border-box; }
-        body { background-color: #f8f9fa; color: #111827; overflow: hidden; }
-        .sidebar-item { transition: all 0.18s ease; }
-        .sidebar-item:hover:not(.active) { background-color: #f9fafb; }
-        .sidebar-item.active { background-color: #000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
-        .sidebar-item.active .material-symbols-outlined { color: #fff; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
-        .modal-box { animation: slideUp 0.2s ease; }
-        @keyframes slideUp { from { opacity:0; transform: translateY(12px) scale(0.98); } to { opacity:1; transform: translateY(0) scale(1); } }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .animate-spin { animation: spin 1s linear infinite; }
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #111827;
+            overflow: hidden;
+        }
+
+        .sidebar-item {
+            transition: all 0.18s ease;
+        }
+
+        .sidebar-item:hover:not(.active) {
+            background-color: #f9fafb;
+        }
+
+        .sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-item.active .material-symbols-outlined {
+            color: #fff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        .modal-box {
+            animation: slideUp 0.2s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .animate-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        .size-btn.selected {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
         /* Custom select arrow */
-        select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e"); background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem; }
+        select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
     </style>
 </head>
 
 <body class="font-sans antialiased h-screen flex">
 
-<!-- ===== SIDEBAR ===== -->
-<aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
-    <div class="h-24 flex flex-col justify-center px-8 border-b border-gray-100">
-        <h1 class="font-sans font-black text-2xl tracking-tight uppercase text-black">BOOTCAMP</h1>
-        <span class="text-[10px] font-bold tracking-widest text-emerald-500 mt-1">SYSTEM ADMIN</span>
-    </div>
-    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
-        <a href="/admin/dashboard" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard
-        </a>
-        <a href="/admin/productManagement" class="sidebar-item active flex items-center px-4 py-3 text-[13px] font-bold uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">sports_soccer</span>Products
-        </a>
-        <a href="/admin/category" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">category</span>Categories
-        </a>
-        <a href="/admin/orders" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">shopping_bag</span>Orders
-        </a>
-        <a href="/admin/offers" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">local_offer</span>Offers
-        </a>
-        <a href="/admin/coupons" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">confirmation_number</span>Coupons
-        </a>
-        <a href="/admin/usermanagement" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">group</span>Users
-        </a>
-        <a href="/admin/returns" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">assignment_return</span>Returns
-        </a>
-        <a href="/admin/reviews" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">reviews</span>Review
-        </a>
-        <a href="/admin/brand" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-            <span class="material-symbols-outlined mr-3.5 text-[19px]">sell</span>Brand
-        </a>
-    </nav>
-</aside>
-
-<!-- ===== MAIN ===== -->
-<main class="flex-1 flex flex-col h-full overflow-hidden bg-[#fafafa]">
-    
-    <!-- Top Bar -->
-    <header class="h-[72px] bg-white border-b border-gray-100 flex items-center justify-between px-10 flex-shrink-0 z-10 sticky top-0 shadow-sm">
-        <div class="flex items-center gap-4">
-            <div>
-                <h1 class="font-sans font-black text-[18px] tracking-tight text-black leading-tight">Variant Management</h1>
-                 <p class="text-[11px] text-gray-400 font-medium mt-0.5">Configure options and stock</p>
-            </div>
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+        <div class="h-24 flex flex-col justify-center px-8 border-b border-gray-100">
+            <h1 class="font-sans font-black text-2xl tracking-tight uppercase text-black">BOOTCAMP</h1>
+            <span class="text-[10px] font-bold tracking-widest text-emerald-500 mt-1">SYSTEM ADMIN</span>
         </div>
-        <div class="relative w-[320px]">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[18px] pointer-events-none">search</span>
-            <input id="searchInput" type="text" value="{{search}}" placeholder="Search SKU or color..." class="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 pl-10 pr-4 text-[13px] font-medium text-black outline-none focus:border-black transition-colors" onkeydown="if(event.key==='Enter') applyFilters()">
-        </div>
-    </header>
+        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <a href="/admin/dashboard"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard
+            </a>
+            <a href="/admin/productManagement"
+                class="sidebar-item active flex items-center px-4 py-3 text-[13px] font-bold uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">sports_soccer</span>Products
+            </a>
+            <a href="/admin/category"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">category</span>Categories
+            </a>
+            <a href="/admin/orders"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">shopping_bag</span>Orders
+            </a>
+            <a href="/admin/offers"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">local_offer</span>Offers
+            </a>
+            <a href="/admin/coupons"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">confirmation_number</span>Coupons
+            </a>
+            <a href="/admin/usermanagement"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">group</span>Users
+            </a>
+            <a href="/admin/returns"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">assignment_return</span>Returns
+            </a>
+            <a href="/admin/reviews"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">reviews</span>Review
+            </a>
+            <a href="/admin/brand"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">sell</span>Brand
+            </a>
+        </nav>
+    </aside>
 
-    <!-- Body -->
-    <div class="flex-1 overflow-y-auto px-10 py-8 max-w-7xl mx-auto w-full">
-        
-        <!-- Product Summary Box -->
-        <div class="bg-white border border-gray-100/80 rounded-2xl p-6 flex items-center justify-between shadow-[0_2px_10px_rgba(0,0,0,0.02)] mb-8">
-            <div class="flex items-center gap-6">
-                <div class="w-20 h-24 bg-[#f8f9fa] rounded-xl p-2 border border-gray-55 flex items-center justify-center">
-                    {{#if product.variants.[0].images.[0]}}
-                    <img id="summaryProductImage" src="{{product.variants.[0].images.[0]}}" alt="{{product.productName}}" class="w-full h-full object-contain mix-blend-multiply transition-all duration-200 ease-in-out">
-                    {{else}}
-                    <img id="summaryProductImage" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover rounded-lg transition-all duration-200 ease-in-out">
-                    {{/if}}
-                </div>
+    <!-- ===== MAIN ===== -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-[#fafafa]">
+
+        <!-- Top Bar -->
+        <header
+            class="h-[72px] bg-white border-b border-gray-100 flex items-center justify-between px-10 flex-shrink-0 z-10 sticky top-0 shadow-sm">
+            <div class="flex items-center gap-4">
                 <div>
-                    <h2 class="font-sans font-black text-2xl text-black tracking-tight">{{product.productName}}</h2>
-                    <p class="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase mt-2">{{product.category.name}} / {{product.brand.name}}</p>
+                    <h1 class="font-sans font-black text-[18px] tracking-tight text-black leading-tight">Variant
+                        Management</h1>
+                    <p class="text-[11px] text-gray-400 font-medium mt-0.5">Configure options and stock</p>
                 </div>
             </div>
-            
-            <div class="flex items-center gap-12 px-8">
-                <div class="text-center">
-                    <div class="text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Total Variants</div>
-                    <div class="text-[28px] font-black text-black leading-none">{{variants.length}}</div>
-                </div>
-                <div class="text-center">
-                    <div class="text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Active</div>
-                    <div class="text-[28px] font-black text-black leading-none">{{activeCount}}</div>
-                </div>
+            <div class="relative w-[320px]">
+                <span
+                    class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[18px] pointer-events-none">search</span>
+                <input id="searchInput" type="text" value="{{search}}" placeholder="Search SKU or color..."
+                    class="w-full bg-gray-50 border border-gray-200 rounded-lg py-2 pl-10 pr-4 text-[13px] font-medium text-black outline-none focus:border-black transition-colors"
+                    onkeydown="if(event.key==='Enter') applyFilters()">
             </div>
-        </div>
+        </header>
 
-        <!-- Controls Row -->
-        <div class="flex items-center justify-end mb-4">
-            <div class="flex items-center gap-3">
-                <select id="statusFilter" onchange="applyFilters()" class=" appearance-none bg-white border border-gray-200 text-black text-[12px] font-bold rounded-lg py-2.5 px-4 outline-none focus:border-black cursor-pointer shadow-sm w-32">
-                    <option value="all" {{selected status 'all'}}>All Status</option>
-                    <option value="active" {{selected status 'active'}}>Active</option>
-                    <option value="inactive" {{selected status 'inactive'}}>Inactive</option>
-                </select>
-                <button onclick="openAddVariantModal()" class="px-6 py-2.5 bg-black text-white text-[12px] font-bold rounded-lg hover:bg-gray-800 transition-colors shadow-lg shadow-black/10">
-                    Add Variant
-                </button>
-            </div>
-        </div>
+        <!-- Body -->
+        <div class="flex-1 overflow-y-auto px-10 py-8 max-w-7xl mx-auto w-full">
 
-        <!-- Variants Table -->
-        <div class="bg-white border border-gray-100/80 rounded-2xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="border-b border-gray-100">
-                        <th class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase w-24 text-center">Default</th>
-                        <th class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">Variants</th>
-                        <th class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">SKU</th>
-                        <th class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">Price</th>
-                        <th class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase text-center w-24">Status</th>
-                        <th class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">Stock</th>
-                        <th class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase text-center w-32">Stock Status</th>
-                        <th class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase text-right w-28">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50/80">
-                    {{#each variants}}
-                    <tr class="hover:bg-gray-50/50 transition-colors">
-                        <!-- Default Radio -->
-                        <td class="py-4 px-6 text-center">
-                            <label class="relative flex items-center justify-center cursor-pointer">
-                                <input type="radio" name="defaultVariant" class="peer sr-only" {{#if this.isDefault}}checked{{/if}} onchange="setDefaultVariant('{{../product._id}}', '{{this._id}}')">
-                                <div class="w-[18px] h-[18px] rounded-full border-[1.5px] border-gray-300 peer-checked:border-red-500 flex items-center justify-center after:content-[''] after:w-[8px] after:h-[8px] after:bg-red-500 after:rounded-full after:opacity-0 peer-checked:after:opacity-100 transition-all"></div>
-                            </label>
-                        </td>
-                        
-                        <!-- Variant Info -->
-                        <td class="py-4 px-6">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-12 bg-[#f8f9fa] rounded-md p-0.5 border border-gray-100 flex items-center justify-center flex-shrink-0">
-                                    {{#if this.images.length}}
-                                    <img src="{{this.images.[0]}}" alt="" class="w-full h-full object-contain mix-blend-multiply">
-                                    {{else}}
-                                    <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover rounded">
-                                    {{/if}}
-                                </div>
-                                <div>
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="text-[13px] font-bold text-black">{{this.color}}</span>
+            <!-- Product Summary Box -->
+            <div
+                class="bg-white border border-gray-100/80 rounded-2xl p-6 flex items-center justify-between shadow-[0_2px_10px_rgba(0,0,0,0.02)] mb-8">
+                <div class="flex items-center gap-6">
+                    <div
+                        class="w-20 h-24 bg-[#f8f9fa] rounded-xl p-2 border border-gray-55 flex items-center justify-center">
+                        {{#if product.variants.[0].images.[0]}}
+                        <img id="summaryProductImage" src="{{product.variants.[0].images.[0]}}"
+                            alt="{{product.productName}}"
+                            class="w-full h-full object-contain mix-blend-multiply transition-all duration-200 ease-in-out">
+                        {{else}}
+                        <img id="summaryProductImage"
+                            src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800"
+                            class="w-full h-full object-cover rounded-lg transition-all duration-200 ease-in-out">
+                        {{/if}}
+                    </div>
+                    <div>
+                        <h2 class="font-sans font-black text-2xl text-black tracking-tight">{{product.productName}}</h2>
+                        <p class="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase mt-2">
+                            {{product.category.name}} / {{product.brand.name}}</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-12 px-8">
+                    <div class="text-center">
+                        <div class="text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Total Variants
+                        </div>
+                        <div class="text-[28px] font-black text-black leading-none">{{variants.length}}</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Active</div>
+                        <div class="text-[28px] font-black text-black leading-none">{{activeCount}}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls Row -->
+            <div class="flex items-center justify-end mb-4">
+                <div class="flex items-center gap-3">
+                    <select id="statusFilter" onchange="applyFilters()"
+                        class=" appearance-none bg-white border border-gray-200 text-black text-[12px] font-bold rounded-lg py-2.5 px-4 outline-none focus:border-black cursor-pointer shadow-sm w-32">
+                        <option value="all" {{selected status 'all' }}>All Status</option>
+                        <option value="active" {{selected status 'active' }}>Active</option>
+                        <option value="inactive" {{selected status 'inactive' }}>Inactive</option>
+                    </select>
+                    <button onclick="openAddVariantModal()"
+                        class="px-6 py-2.5 bg-black text-white text-[12px] font-bold rounded-lg hover:bg-gray-800 transition-colors shadow-lg shadow-black/10">
+                        Add Variant
+                    </button>
+                </div>
+            </div>
+
+            <!-- Variants Table -->
+            <div
+                class="bg-white border border-gray-100/80 rounded-2xl overflow-hidden shadow-[0_2px_10px_rgba(0,0,0,0.02)]">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-gray-100">
+                            <th
+                                class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase w-24 text-center">
+                                Default</th>
+                            <th class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">
+                                Variants</th>
+                            <th class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">SKU
+                            </th>
+                            <th class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">Price
+                            </th>
+                            <th
+                                class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase text-center w-24">
+                                Status</th>
+                            <th class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">Stock
+                            </th>
+                            <th
+                                class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase text-center w-32">
+                                Stock Status</th>
+                            <th
+                                class="py-5 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase text-right w-28">
+                                Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50/80">
+                        {{#each variants}}
+                        <tr class="hover:bg-gray-50/50 transition-colors">
+                            <!-- Default Radio -->
+                            <td class="py-4 px-6 text-center">
+                                <label class="relative flex items-center justify-center cursor-pointer">
+                                    <input type="radio" name="defaultVariant" class="peer sr-only" {{#if
+                                        this.isDefault}}checked{{/if}}
+                                        onchange="setDefaultVariant('{{../product._id}}', '{{this._id}}')">
+                                    <div
+                                        class="w-[18px] h-[18px] rounded-full border-[1.5px] border-gray-300 peer-checked:border-red-500 flex items-center justify-center after:content-[''] after:w-[8px] after:h-[8px] after:bg-red-500 after:rounded-full after:opacity-0 peer-checked:after:opacity-100 transition-all">
                                     </div>
-                                    <div class="text-[11px] text-gray-400 font-medium">{{this.color}} • {{this.sizes}}</div>
+                                </label>
+                            </td>
+
+                            <!-- Variant Info -->
+                            <td class="py-4 px-6">
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="w-10 h-12 bg-[#f8f9fa] rounded-md p-0.5 border border-gray-100 flex items-center justify-center flex-shrink-0">
+                                        {{#if this.images.length}}
+                                        <img src="{{this.images.[0]}}" alt=""
+                                            class="w-full h-full object-contain mix-blend-multiply">
+                                        {{else}}
+                                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800"
+                                            class="w-full h-full object-cover rounded">
+                                        {{/if}}
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <span class="text-[13px] font-bold text-black">{{this.color}}</span>
+                                        </div>
+                                        <div class="text-[11px] text-gray-400 font-medium">{{this.color}} •
+                                            {{this.sizes}}</div>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
-                        
-                        <!-- SKU -->
-                        <td class="py-4 px-6">
-                            <span class="text-[12px] font-bold text-gray-500 uppercase tracking-widest">{{this.sku}}</span>
-                        </td>
-                        
-                        <!-- Price -->
-                        <td class="py-4 px-6">
-                            <span class="text-[14px] font-black text-black">₹{{this.price}}</span>
-                        </td>
-                        
-                        <!-- Status Badge -->
-                        <td class="py-4 px-6 text-center">
-                           {{#if this.isActive}}
-                           <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-black tracking-widest uppercase rounded-full">Active</span>
-                           {{else}}
-                           <span class="px-2.5 py-1 bg-gray-100 text-gray-500 text-[9px] font-black tracking-widest uppercase rounded-full">Inactive</span>
-                            {{/if}}
-                        </td>
-                        
-                        <!-- Stock -->
-                        <td class="py-4 px-6">
-                            <span class="text-[13px] font-black text-black">{{this.stock}}</span>
-                        </td>
-                        
-                        <!-- Stock Status -->
-                        <td class="py-4 px-6 text-center">
-                            {{#if (gt this.stock 0)}}
-                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-black tracking-widest uppercase rounded-full">In Stock</span>
-                            {{else}}
-                            <span class="px-2.5 py-1 bg-red-50 text-red-500 text-[9px] font-black tracking-widest uppercase rounded-full">Stock Out</span>
-                            {{/if}}
-                        </td>
-                        
-                        <!-- Actions -->
-                        <td class="py-4 px-6 text-right">
-                            <div class="flex items-center justify-end gap-3 transition-opacity">
-                                <button onclick="openEditVariantModal('{{this._id}}')" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-100 transition-colors">
-                                    <span class="material-symbols-outlined text-[18px]">edit</span>
-                                </button>
-                                <button onclick="openDeleteModal('{{this._id}}')" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
-                                    <span class="material-symbols-outlined text-[18px]">delete</span>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    {{/each}}
+                            </td>
 
-                    {{#unless variants.length}}
-                    <tr>
-                        <td colspan="8" class="py-16 text-center">
-                            <div class="flex flex-col items-center gap-3 text-gray-400">
-                                <span class="material-symbols-outlined text-[40px]">inventory_2</span>
-                                <p class="text-[13px] font-bold uppercase tracking-widest">No variants found</p>
-                                <p class="text-[11px] font-medium">Try adjusting the filter or add a new variant</p>
-                            </div>
-                        </td>
-                    </tr>
-                    {{/unless}}
-                </tbody>
-            </table>
-            
-            <!-- Pagination -->
-            <div class="px-6 py-5 border-t border-gray-100 flex items-center justify-between bg-white mt-auto">
-                <div class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
-                    Showing <span class="text-black">{{variants.length}}</span> of <span class="text-black">{{totalVariants}}</span> variants
-                </div>
-                <div class="flex items-center gap-1">
+                            <!-- SKU -->
+                            <td class="py-4 px-6">
+                                <span
+                                    class="text-[12px] font-bold text-gray-500 uppercase tracking-widest">{{this.sku}}</span>
+                            </td>
 
-                    {{#if hasPrevPage}}
-                    <button onclick="changePage({{prevPage}})" class="w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-50 transition-colors">
-                        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-                    </button>
-                    {{else}}
-                    <button disabled class="w-8 h-8 rounded flex items-center justify-center text-gray-200 cursor-not-allowed">
-                        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-                    </button>
-                    {{/if}}
+                            <!-- Price -->
+                            <td class="py-4 px-6">
+                                <span class="text-[14px] font-black text-black">₹{{this.price}}</span>
+                            </td>
 
-                    {{#each pageNumbers}}
-                    <button onclick="changePage({{this}})" class="w-8 h-8 rounded flex items-center justify-center text-[11px] font-bold border transition-colors {{#if (eq this ../currentPage)}}bg-black text-white border-black{{else}}bg-white border-gray-200 text-gray-600 hover:border-gray-400{{/if}}">
-                        {{this}}
-                    </button>
-                    {{/each}}
+                            <!-- Status Badge -->
+                            <td class="py-4 px-6 text-center">
+                                {{#if this.isActive}}
+                                <span
+                                    class="px-2.5 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-black tracking-widest uppercase rounded-full">Active</span>
+                                {{else}}
+                                <span
+                                    class="px-2.5 py-1 bg-gray-100 text-gray-500 text-[9px] font-black tracking-widest uppercase rounded-full">Inactive</span>
+                                {{/if}}
+                            </td>
 
-                    {{#if hasNextPage}}
-                    <button onclick="changePage({{nextPage}})" class="w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-50 transition-colors">
-                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                    </button>
-                    {{else}}
-                    <button disabled class="w-8 h-8 rounded flex items-center justify-center text-gray-200 cursor-not-allowed">
-                        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-                    </button>
-                    {{/if}}
+                            <!-- Stock -->
+                            <td class="py-4 px-6">
+                                <span class="text-[13px] font-black text-black">{{this.stock}}</span>
+                            </td>
 
-                </div>
-            </div>
-        </div>
+                            <!-- Stock Status -->
+                            <td class="py-4 px-6 text-center">
+                                {{#if (gt this.stock 0)}}
+                                <span
+                                    class="px-2.5 py-1 bg-emerald-50 text-emerald-600 text-[9px] font-black tracking-widest uppercase rounded-full">In
+                                    Stock</span>
+                                {{else}}
+                                <span
+                                    class="px-2.5 py-1 bg-red-50 text-red-500 text-[9px] font-black tracking-widest uppercase rounded-full">Stock
+                                    Out</span>
+                                {{/if}}
+                            </td>
 
-    </div>
-</main>
+                            <!-- Actions -->
+                            <td class="py-4 px-6 text-right">
+                                <div class="flex items-center justify-end gap-3 transition-opacity">
+                                    <button onclick="openEditVariantModal('{{this._id}}')"
+                                        class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-100 transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                                    </button>
+                                    <button onclick="openDeleteModal('{{this._id}}')"
+                                        class="w-8 h-8 rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
+                                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {{/each}}
 
-<!-- ===== MODAL OVERLAY ===== -->
-<div id="modalOverlay" class="fixed inset-0 z-50 items-center justify-center" style="display:none; background:rgba(0,0,0,0.5); backdrop-filter: blur(2px);" onclick="handleModalBackdropClick(event)">
-    
-    <!-- ADD/EDIT VARIANT MODAL -->
-    <div id="variantModal" class="modal-box hidden bg-white rounded-2xl shadow-2xl w-[600px] max-w-[90vw] overflow-y-auto max-h-[90vh] p-8 relative">
-        <button onclick="closeModals()" class="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors z-10">
-            <span class="material-symbols-outlined text-[20px]">close</span>
-        </button>
-        
-        <h4 id="variantModalTitle" class="text-[20px] font-black text-black tracking-tight uppercase mb-6">Add New Variant</h4>
-        <div class="w-12 h-[3px] bg-black mb-8"></div>
-        
-        <form id="variantForm" class="space-y-6">
-            <input type="hidden" id="variantId">
-            
-            <!-- Image Upload Section -->
-            <div class="mb-8">
-                <div class="border-2 border-dashed border-gray-200 rounded-xl bg-[#f8f9fa] flex flex-col items-center justify-center py-10 cursor-pointer hover:border-gray-300 transition-colors" onclick="triggerImageUpload()">
-                    <div class="w-12 h-12 bg-white shadow-sm border border-gray-100 rounded-lg mb-4 flex items-center justify-center text-gray-300">
-                        <span class="material-symbols-outlined text-[28px]">image</span>
+                        {{#unless variants.length}}
+                        <tr>
+                            <td colspan="8" class="py-16 text-center">
+                                <div class="flex flex-col items-center gap-3 text-gray-400">
+                                    <span class="material-symbols-outlined text-[40px]">inventory_2</span>
+                                    <p class="text-[13px] font-bold uppercase tracking-widest">No variants found</p>
+                                    <p class="text-[11px] font-medium">Try adjusting the filter or add a new variant</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {{/unless}}
+                    </tbody>
+                </table>
+
+                <!-- Pagination -->
+                <div class="px-6 py-5 border-t border-gray-100 flex items-center justify-between bg-white mt-auto">
+                    <div class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">
+                        Showing <span class="text-black">{{variants.length}}</span> of <span
+                            class="text-black">{{totalVariants}}</span> variants
                     </div>
-                    <div class="text-[14px] font-black tracking-widest text-black uppercase mb-1">Upload Images</div>
-                    <div class="text-[12px] text-gray-400 font-medium">Click to select — each image opens the crop tool</div>
-                </div>
-                <input type="file" accept="image/*" class="hidden" id="imageUpload">
-                
-                <div class="mt-4 flex flex-wrap gap-4" id="thumbnailContainer">
-                    <!-- Thumbnails will appear here -->
-                </div>
+                    <div class="flex items-center gap-1">
 
-                <div class="mt-3 flex items-center justify-between text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">
-                    <span><span id="imageCount">0</span> / 3 IMAGES UPLOADED</span>
-                </div>
-            </div>
+                        {{#if hasPrevPage}}
+                        <button onclick="changePage({{prevPage}})"
+                            class="w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-50 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                        </button>
+                        {{else}}
+                        <button disabled
+                            class="w-8 h-8 rounded flex items-center justify-center text-gray-200 cursor-not-allowed">
+                            <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                        </button>
+                        {{/if}}
 
-            <!-- Fields -->
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">Color</label>
-                    <input type="text" id="variantColor" placeholder="e.g. Black" class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3.5 px-4 text-[13px] font-medium text-black outline-none focus:bg-white focus:border-black transition-colors" required>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">Sizes (Select Multiple)</label>
-                    <div class="flex items-center gap-1.5 flex-wrap mt-2">
-                        <label class="size-checkbox-label relative flex items-center justify-center w-9 h-9 border border-gray-200 rounded-lg cursor-pointer hover:border-gray-400 select-none transition-all">
-                            <input type="checkbox" name="sizes" value="6" class="sr-only peer">
-                            <span class="text-[12px] font-black text-black peer-checked:text-white z-10">6</span>
-                            <div class="absolute inset-0 bg-black rounded-lg opacity-0 peer-checked:opacity-100 transition-opacity"></div>
-                        </label>
-                        <label class="size-checkbox-label relative flex items-center justify-center w-9 h-9 border border-gray-200 rounded-lg cursor-pointer hover:border-gray-400 select-none transition-all">
-                            <input type="checkbox" name="sizes" value="7" class="sr-only peer">
-                            <span class="text-[12px] font-black text-black peer-checked:text-white z-10">7</span>
-                            <div class="absolute inset-0 bg-black rounded-lg opacity-0 peer-checked:opacity-100 transition-opacity"></div>
-                        </label>
-                        <label class="size-checkbox-label relative flex items-center justify-center w-9 h-9 border border-gray-200 rounded-lg cursor-pointer hover:border-gray-400 select-none transition-all">
-                            <input type="checkbox" name="sizes" value="8" class="sr-only peer">
-                            <span class="text-[12px] font-black text-black peer-checked:text-white z-10">8</span>
-                            <div class="absolute inset-0 bg-black rounded-lg opacity-0 peer-checked:opacity-100 transition-opacity"></div>
-                        </label>
-                        <label class="size-checkbox-label relative flex items-center justify-center w-9 h-9 border border-gray-200 rounded-lg cursor-pointer hover:border-gray-400 select-none transition-all">
-                            <input type="checkbox" name="sizes" value="9" class="sr-only peer">
-                            <span class="text-[12px] font-black text-black peer-checked:text-white z-10">9</span>
-                            <div class="absolute inset-0 bg-black rounded-lg opacity-0 peer-checked:opacity-100 transition-opacity"></div>
-                        </label>
-                        <label class="size-checkbox-label relative flex items-center justify-center w-9 h-9 border border-gray-200 rounded-lg cursor-pointer hover:border-gray-400 select-none transition-all">
-                            <input type="checkbox" name="sizes" value="10" class="sr-only peer">
-                            <span class="text-[12px] font-black text-black peer-checked:text-white z-10">10</span>
-                            <div class="absolute inset-0 bg-black rounded-lg opacity-0 peer-checked:opacity-100 transition-opacity"></div>
-                        </label>
-                    </div>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">SKU</label>
-                    <input type="text" id="variantSku" placeholder="e.g. TS-L-BL" class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3.5 px-4 text-[13px] font-medium text-black outline-none focus:bg-white focus:border-black transition-colors" required>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">Price (₹)</label>
-                    <input type="number" id="variantPrice" placeholder="0.00" class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3.5 px-4 text-[13px] font-medium text-black outline-none focus:bg-white focus:border-black transition-colors" required>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">Stock Quantity</label>
-                    <input type="number" id="variantStock" placeholder="0" class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3.5 px-4 text-[13px] font-medium text-black outline-none focus:bg-white focus:border-black transition-colors" required>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">Status</label>
-                    <div class="flex items-center h-[50px]">
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="variantStatus" class="sr-only peer" checked>
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
-                            <span class="ml-3 text-[13px] font-bold text-gray-500 peer-checked:text-black uppercase tracking-wide transition-colors" id="statusLabel">Active</span>
-                        </label>
+                        {{#each pageNumbers}}
+                        <button onclick="changePage({{this}})"
+                            class="w-8 h-8 rounded flex items-center justify-center text-[11px] font-bold border transition-colors {{#if (eq this ../currentPage)}}bg-black text-white border-black{{else}}bg-white border-gray-200 text-gray-600 hover:border-gray-400{{/if}}">
+                            {{this}}
+                        </button>
+                        {{/each}}
+
+                        {{#if hasNextPage}}
+                        <button onclick="changePage({{nextPage}})"
+                            class="w-8 h-8 rounded flex items-center justify-center text-gray-400 hover:text-black hover:bg-gray-50 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                        </button>
+                        {{else}}
+                        <button disabled
+                            class="w-8 h-8 rounded flex items-center justify-center text-gray-200 cursor-not-allowed">
+                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                        </button>
+                        {{/if}}
+
                     </div>
                 </div>
             </div>
 
-            <div class="flex items-center justify-end gap-5 mt-8 pt-6 border-t border-gray-100">
-                <button type="button" onclick="closeModals()" class="text-[11px] font-bold text-gray-500 uppercase tracking-wider hover:text-black transition-colors">Cancel</button>
-                <button type="submit" id="saveVariantBtn" class="px-6 py-3 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-800 transition-colors">Save Variant</button>
+        </div>
+    </main>
+
+    <!-- ===== MODAL OVERLAY ===== -->
+    <div id="modalOverlay" class="fixed inset-0 z-50 items-center justify-center"
+        style="display:none; background:rgba(0,0,0,0.5); backdrop-filter: blur(2px);"
+        onclick="handleModalBackdropClick(event)">
+
+        <!-- ADD/EDIT VARIANT MODAL -->
+        <div id="variantModal"
+            class="modal-box hidden bg-white rounded-2xl shadow-2xl w-[600px] max-w-[90vw] overflow-y-auto max-h-[90vh] p-8 relative">
+            <button onclick="closeModals()"
+                class="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors z-10">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+
+            <h4 id="variantModalTitle" class="text-[20px] font-black text-black tracking-tight uppercase mb-6">Add New
+                Variant</h4>
+            <div class="w-12 h-[3px] bg-black mb-8"></div>
+
+            <form id="variantForm" class="space-y-6">
+                <input type="hidden" id="variantId">
+
+                <!-- Image Upload Section -->
+                <div class="mb-8">
+                    <div class="border-2 border-dashed border-gray-200 rounded-xl bg-[#f8f9fa] flex flex-col items-center justify-center py-10 cursor-pointer hover:border-gray-300 transition-colors"
+                        onclick="triggerImageUpload()">
+                        <div
+                            class="w-12 h-12 bg-white shadow-sm border border-gray-100 rounded-lg mb-4 flex items-center justify-center text-gray-300">
+                            <span class="material-symbols-outlined text-[28px]">image</span>
+                        </div>
+                        <div class="text-[14px] font-black tracking-widest text-black uppercase mb-1">Upload Images
+                        </div>
+                        <div class="text-[12px] text-gray-400 font-medium">Click to select — each image opens the crop
+                            tool</div>
+                    </div>
+                    <input type="file" accept="image/*" class="hidden" id="imageUpload">
+
+                    <div class="mt-4 flex flex-wrap gap-4" id="thumbnailContainer">
+                        <!-- Thumbnails will appear here -->
+                    </div>
+
+                    <div
+                        class="mt-3 flex items-center justify-between text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">
+                        <span><span id="imageCount">0</span> / 3 IMAGES UPLOADED</span>
+                    </div>
+                </div>
+
+                <!-- Fields -->
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label
+                            class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">Color</label>
+                        <input type="text" id="variantColor" placeholder="e.g. Black"
+                            class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3.5 px-4 text-[13px] font-medium text-black outline-none focus:bg-white focus:border-black transition-colors">
+                        <p id="colorError" class="text-[11px] text-red-500  mt-1 hidden"></p>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">Size</label>
+                        <div class="flex flex-wrap gap-2" id="sizeButtons">
+                            <button type="button" data-size="6"
+                                class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">6</button>
+                            <button type="button" data-size="7"
+                                class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">7</button>
+                            <button type="button" data-size="8"
+                                class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">8</button>
+                            <button type="button" data-size="9"
+                                class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">9</button>
+                            <button type="button" data-size="10"
+                                class="size-btn w-11 h-11 bg-white border border-gray-200 rounded text-[12px] font-bold text-gray-500 hover:border-black hover:text-black transition-colors">10</button>
+                        </div>
+                        <input type="hidden" id="sizeSelect" name="sizes" value="">
+                        <p id="sizesError" class="text-[11px] text-red-500  mt-1 hidden"></p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">SKU</label>
+                        <input type="text" id="variantSku" placeholder="e.g. TS-L-BL"
+                            class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3.5 px-4 text-[13px] font-medium text-black outline-none focus:bg-white focus:border-black transition-colors">
+                        <p id="skuError" class="text-[11px] text-red-500  mt-1 hidden"></p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">Price
+                            (₹)</label>
+                        <input type="text" id="variantPrice" placeholder="0" inputmode="numeric"
+                            onkeydown="return ['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight'].includes(event.key) || /[0-9]/.test(event.key)"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                            class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3.5 px-4 text-[13px] font-medium text-black outline-none focus:bg-white focus:border-black transition-colors">
+                        <p id="priceError" class="text-[11px] text-red-500  mt-1 hidden"></p>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">Stock
+                            Quantity</label>
+                        <input type="text" id="variantStock" placeholder="0" inputmode="numeric"
+                            onkeydown="return ['Backspace','Delete','Tab','Escape','Enter','ArrowLeft','ArrowRight'].includes(event.key) || /[0-9]/.test(event.key)"
+                            oninput="this.value = this.value.replace(/[^0-9]/g, '');"
+                            class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3.5 px-4 text-[13px] font-medium text-black outline-none focus:bg-white focus:border-black transition-colors">
+                        <p id="stockError" class="text-[11px] text-red-500  mt-1 hidden"></p>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">Status</label>
+                        <div class="flex items-center h-[50px]">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="variantStatus" class="sr-only peer" checked>
+                                <div
+                                    class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black">
+                                </div>
+                                <span
+                                    class="ml-3 text-[13px] font-bold text-gray-500 peer-checked:text-black uppercase tracking-wide transition-colors"
+                                    id="statusLabel">Active</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-5 mt-8 pt-6 border-t border-gray-100">
+                    <button type="button" onclick="closeModals()"
+                        class="text-[11px] font-bold text-gray-500 uppercase tracking-wider hover:text-black transition-colors">Cancel</button>
+                    <button type="submit" id="saveVariantBtn"
+                        class="px-6 py-3 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-800 transition-colors">Save
+                        Variant</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- CROP MODAL -->
+        <div id="cropModal"
+            class="modal-box hidden bg-white rounded-2xl shadow-2xl w-[600px] max-w-[90vw] overflow-hidden p-8 relative z-[60]">
+            <button onclick="closeCropModal()"
+                class="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors z-10">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+            <h4 class="text-[20px] font-black text-black tracking-tight uppercase mb-6">Crop Image</h4>
+            <div class="w-12 h-[3px] bg-black mb-8"></div>
+
+            <div class="w-full h-[400px] bg-gray-100 rounded-lg overflow-hidden mb-8 relative">
+                <img id="cropImage" src="" class="max-w-full block">
             </div>
-        </form>
+
+            <div class="flex items-center justify-end gap-3">
+                <button onclick="closeCropModal()"
+                    class="px-6 py-3 bg-gray-100 text-gray-600 text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
+                <button id="applyCropBtn"
+                    class="px-6 py-3 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-800 transition-colors">Apply
+                    Crop</button>
+            </div>
+        </div>
+
+        <!-- DELETE VARIANT MODAL -->
+        <div id="deleteModal"
+            class="modal-box hidden bg-white rounded-2xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden p-8 relative text-center">
+            <div class="w-16 h-16 rounded-full bg-red-50 mx-auto flex items-center justify-center mb-5">
+                <span class="material-symbols-outlined text-[32px] text-red-500">warning</span>
+            </div>
+            <h4 class="text-[20px] font-black text-black tracking-tight uppercase mb-2">Delete Variant?</h4>
+            <p class="text-[13px] text-gray-500 leading-relaxed mb-8">Are you sure you want to delete this variant? This
+                action cannot be undone.</p>
+
+            <input type="hidden" id="deleteVariantId">
+
+            <div class="flex items-center justify-center gap-3">
+                <button onclick="closeModals()"
+                    class="px-6 py-3 bg-gray-100 text-gray-600 text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
+                <button id="confirmDeleteBtn"
+                    class="px-6 py-3 bg-red-500 text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-red-600 transition-colors">Delete</button>
+            </div>
+        </div>
+
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Embed variants from Handlebars context
+        const variantsList = {{{ json variants }}};
+        const productId = '{{product._id}}';
 
-    <!-- CROP MODAL -->
-    <div id="cropModal" class="modal-box hidden bg-white rounded-2xl shadow-2xl w-[600px] max-w-[90vw] overflow-hidden p-8 relative z-[60]">
-        <button onclick="closeCropModal()" class="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors z-10">
-            <span class="material-symbols-outlined text-[20px]">close</span>
-        </button>
-        <h4 class="text-[20px] font-black text-black tracking-tight uppercase mb-6">Crop Image</h4>
-        <div class="w-12 h-[3px] bg-black mb-8"></div>
-        
-        <div class="w-full h-[400px] bg-gray-100 rounded-lg overflow-hidden mb-8 relative">
-            <img id="cropImage" src="" class="max-w-full block">
-        </div>
-        
-        <div class="flex items-center justify-end gap-3">
-            <button onclick="closeCropModal()" class="px-6 py-3 bg-gray-100 text-gray-600 text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
-            <button id="applyCropBtn" class="px-6 py-3 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-800 transition-colors">Apply Crop</button>
-        </div>
-    </div>
+        // Set top summary image on page load to match the checked default variant
+        window.addEventListener('DOMContentLoaded', () => {
+            const checkedRadio = document.querySelector('input[name="defaultVariant"]:checked');
+            if (checkedRadio) {
+                const row = checkedRadio.closest('tr');
+                const imgEl = row.querySelector('td:nth-child(2) img');
+                if (imgEl && imgEl.src) {
+                    document.getElementById('summaryProductImage').src = imgEl.src;
+                }
+            }
+        });
 
-    <!-- DELETE VARIANT MODAL -->
-    <div id="deleteModal" class="modal-box hidden bg-white rounded-2xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden p-8 relative text-center">
-        <div class="w-16 h-16 rounded-full bg-red-50 mx-auto flex items-center justify-center mb-5">
-            <span class="material-symbols-outlined text-[32px] text-red-500">warning</span>
-        </div>
-        <h4 class="text-[20px] font-black text-black tracking-tight uppercase mb-2">Delete Variant?</h4>
-        <p class="text-[13px] text-gray-500 leading-relaxed mb-8">Are you sure you want to delete this variant? This action cannot be undone.</p>
-        
-        <input type="hidden" id="deleteVariantId">
-
-        <div class="flex items-center justify-center gap-3">
-            <button onclick="closeModals()" class="px-6 py-3 bg-gray-100 text-gray-600 text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
-            <button id="confirmDeleteBtn" class="px-6 py-3 bg-red-500 text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-red-600 transition-colors">Delete</button>
-        </div>
-    </div>
-
-</div>
-<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script src="/toast/toast.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script>
-    // Embed variants from Handlebars context
-    const variantsList = {{{json variants}}};
-    const productId = '{{product._id}}';
-
-    // Set top summary image on page load to match the checked default variant
-    window.addEventListener('DOMContentLoaded', () => {
-        const checkedRadio = document.querySelector('input[name="defaultVariant"]:checked');
-        if (checkedRadio) {
-            const row = checkedRadio.closest('tr');
-            const imgEl = row.querySelector('td:nth-child(2) img');
-            if (imgEl && imgEl.src) {
-                document.getElementById('summaryProductImage').src = imgEl.src;
+        // General Modal Functions
+        function showError(id, show, message = '') {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = message;
+                el.classList.toggle('hidden', !show);
             }
         }
-    });
 
-    // General Modal Functions
-    function closeModals() {
-        document.getElementById('modalOverlay').style.display = 'none';
-        document.getElementById('deleteModal').classList.add('hidden');
-        document.getElementById('variantModal').classList.add('hidden');
-        document.getElementById('cropModal').classList.add('hidden');
-    }
+        function closeModals() {
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.getElementById('deleteModal').classList.add('hidden');
+            document.getElementById('variantModal').classList.add('hidden');
+            document.getElementById('cropModal').classList.add('hidden');
+        }
 
-    function handleModalBackdropClick(e) {
-        if (e.target === document.getElementById('modalOverlay')) closeModals();
-    }
+        function handleModalBackdropClick(e) {
+            if (e.target === document.getElementById('modalOverlay')) closeModals();
+        }
 
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
 
-    // Delete Modal
-    function openDeleteModal(variantId) {
-        document.getElementById('deleteVariantId').value = variantId;
-        document.getElementById('modalOverlay').style.display = 'flex';
-        document.getElementById('deleteModal').classList.remove('hidden');
-        document.getElementById('variantModal').classList.add('hidden');
-    }
+        // Delete Modal
+        function openDeleteModal(variantId) {
+            document.getElementById('deleteVariantId').value = variantId;
+            // Reset errors
+            ['colorError', 'sizesError', 'skuError', 'priceError', 'stockError'].forEach(id => showError(id, false));
 
-    // Add/Edit Modal
-    function openAddVariantModal() {
-        document.getElementById('variantForm').reset();
-        document.getElementById('variantId').value = '';
-        document.getElementById('variantModalTitle').textContent = 'Add New Variant';
-        document.getElementById('variantStatus').checked = true;
-        document.getElementById('statusLabel').textContent = 'Active';
-        
-        // Reset sizes checkboxes
-        document.querySelectorAll('input[name="sizes"]').forEach(chk => {
-            chk.checked = false;
-        });
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.getElementById('deleteModal').classList.remove('hidden');
+            document.getElementById('variantModal').classList.add('hidden');
+        }
 
-        resetUploadArea();
-        
-        document.getElementById('modalOverlay').style.display = 'flex';
-        document.getElementById('variantModal').classList.remove('hidden');
-        document.getElementById('deleteModal').classList.add('hidden');
-    }
+        // Add/Edit Modal
+        function openAddVariantModal() {
+            document.getElementById('variantForm').reset();
+            document.getElementById('variantId').value = '';
+            document.getElementById('variantModalTitle').textContent = 'Add New Variant';
+            document.getElementById('variantStatus').checked = true;
+            document.getElementById('statusLabel').textContent = 'Active';
 
-    function openEditVariantModal(variantId) {
-        document.getElementById('variantForm').reset();
-        document.getElementById('variantId').value = variantId;
-        document.getElementById('variantModalTitle').textContent = 'Edit Variant';
-        resetUploadArea();
-        
-        // Find variant in the embedded list
-        const variant = variantsList.find(v => v._id.toString() === variantId.toString());
-        if (variant) {
-            document.getElementById('variantColor').value = variant.color;
-            document.getElementById('variantSku').value = variant.sku;
-            document.getElementById('variantPrice').value = variant.price;
-            document.getElementById('variantStock').value = variant.stock;
-            document.getElementById('variantStatus').checked = variant.isActive !== false;
-            document.getElementById('statusLabel').textContent = (variant.isActive !== false) ? 'Active' : 'Inactive';
-            
-            // Set size checkboxes
-            const sizes = Array.isArray(variant.sizes) ? variant.sizes.map(String) : [String(variant.sizes)];
-            document.querySelectorAll('input[name="sizes"]').forEach(chk => {
-                chk.checked = sizes.includes(chk.value);
-            });
-            
-            // Set images
-            uploadedImages = [...variant.images];
+            // Reset errors
+            ['colorError', 'sizesError', 'skuError', 'priceError', 'stockError'].forEach(id => showError(id, false));
+
+            // Reset size select
+            document.getElementById('sizeSelect').value = '';
+
+            resetUploadArea();
+
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.getElementById('variantModal').classList.remove('hidden');
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        function openEditVariantModal(variantId) {
+            document.getElementById('variantForm').reset();
+            document.getElementById('variantId').value = variantId;
+            document.getElementById('variantModalTitle').textContent = 'Edit Variant';
+            resetUploadArea();
+
+            // Reset errors
+            ['colorError', 'sizesError', 'skuError', 'priceError', 'stockError'].forEach(id => showError(id, false));
+
+            // Find variant in the embedded list
+            const variant = variantsList.find(v => v._id.toString() === variantId.toString());
+            if (variant) {
+                document.getElementById('variantColor').value = variant.color;
+                document.getElementById('variantSku').value = variant.sku;
+                document.getElementById('variantPrice').value = variant.price;
+                document.getElementById('variantStock').value = variant.stock;
+                document.getElementById('variantStatus').checked = variant.isActive !== false;
+                document.getElementById('statusLabel').textContent = (variant.isActive !== false) ? 'Active' : 'Inactive';
+
+
+                // Pre-select size button
+                const sizeValue = String(Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes);
+                document.getElementById('sizeSelect').value = sizeValue;
+                document.querySelectorAll('.size-btn').forEach(b => {
+                    b.classList.toggle('selected', b.dataset.size === sizeValue);
+                });
+
+                // Set images
+                uploadedImages = [...variant.images];
+                updateUploadAreaUI();
+            }
+
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.getElementById('variantModal').classList.remove('hidden');
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        function resetUploadArea() {
+            uploadedImages = [];
             updateUploadAreaUI();
         }
-        
-        document.getElementById('modalOverlay').style.display = 'flex';
-        document.getElementById('variantModal').classList.remove('hidden');
-        document.getElementById('deleteModal').classList.add('hidden');
-    }
 
-    function resetUploadArea() {
-        uploadedImages = [];
-        updateUploadAreaUI();
-    }
+        // Image Cropping Logic
+        let cropper = null;
+        let uploadedImages = [];
 
-    // Image Cropping Logic
-    let cropper = null;
-    let uploadedImages = [];
-
-    function triggerImageUpload() {
-        if (uploadedImages.length >= 3) {
-            alert("Maximum 3 images allowed.");
-            return;
+        function triggerImageUpload() {
+            if (uploadedImages.length >= 3) {
+                showToast("error","Maximum 3 images allowed.");
+                return;
+            }
+            document.getElementById('imageUpload').click();
         }
-        document.getElementById('imageUpload').click();
-    }
 
-  const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
-const maxSize = 2 * 1024 * 1024; // 2MB
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        const maxSize = 2 * 1024 * 1024; // 2MB
 
-document.getElementById('imageUpload').addEventListener('change', function (e) {
-    const file = e.target.files[0];
-    if (!file) return;
+        document.getElementById('imageUpload').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (!file) return;
 
-    // ❌ Type validation
-    if (!allowedTypes.includes(file.type)) {
-        showToast("error", "Only JPG, PNG, WEBP images allowed.");
-        e.target.value = '';
-        return;
-    }
+            // ❌ Type validation
+            if (!allowedTypes.includes(file.type)) {
+                showToast("error", "Only JPG, PNG, WEBP images allowed.");
+                e.target.value = '';
+                return;
+            }
 
-    // ❌ Size validation
-    if (file.size > maxSize) {
-        showToast("error", "Image must be less than 2MB.");
-        e.target.value = '';
-        return;
-    }
+            // ❌ Size validation
+            if (file.size > maxSize) {
+                showToast("error", "Image must be less than 2MB.");
+                e.target.value = '';
+                return;
+            }
 
-    // ✅ If valid → proceed to cropper
-    const reader = new FileReader();
+            // ✅ If valid → proceed to cropper
+            const reader = new FileReader();
 
-    reader.onload = function (event) {
-        document.getElementById('cropImage').src = event.target.result;
-        openCropModal();
-    };
+            reader.onload = function (event) {
+                document.getElementById('cropImage').src = event.target.result;
+                openCropModal();
+            };
 
-    reader.readAsDataURL(file);
+            reader.readAsDataURL(file);
 
-    // reset so same image can be selected again
-    this.value = '';
-});
-
-    function openCropModal() {
-        document.getElementById('variantModal').classList.add('hidden');
-        document.getElementById('cropModal').classList.remove('hidden');
-        
-        const image = document.getElementById('cropImage');
-        if (cropper) cropper.destroy();
-        
-        cropper = new Cropper(image, {
-            aspectRatio: 4/5, // Standard product portrait ratio
-            viewMode: 1,
-            autoCropArea: 1,
+            // reset so same image can be selected again
+            this.value = '';
         });
-    }
 
-    function closeCropModal() {
-        if (cropper) cropper.destroy();
-        cropper = null;
-        document.getElementById('cropModal').classList.add('hidden');
-        document.getElementById('variantModal').classList.remove('hidden');
-    }
+        function openCropModal() {
+            document.getElementById('variantModal').classList.add('hidden');
+            document.getElementById('cropModal').classList.remove('hidden');
 
-    // ========== UPDATED WITH LOADING INDICATOR & COMPRESSION ==========
-    document.getElementById('applyCropBtn').addEventListener('click', () => {
-        if (!cropper) return;
-        
-        // Add loading indicator
-        const applyBtn = document.getElementById('applyCropBtn');
-        const originalText = applyBtn.textContent;
-        applyBtn.disabled = true;
-        applyBtn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Processing...';
-        
-        // Use setTimeout to allow UI to update before heavy processing
-        setTimeout(() => {
-            // Reduced size for faster upload (600x750 instead of 800x1000)
-            const canvas = cropper.getCroppedCanvas({ 
-                width: 600,   
-                height: 750   
+            const image = document.getElementById('cropImage');
+            if (cropper) cropper.destroy();
+
+            cropper = new Cropper(image, {
+                aspectRatio: NaN, // Allow free cropping
+                viewMode: 1,
+                autoCropArea: 1,
             });
-            // Compress to 75% quality for smaller file size
-            const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
-            
-            uploadedImages.push(croppedDataUrl);
-            updateUploadAreaUI();
-            
-            // Restore button state
-            applyBtn.disabled = false;
-            applyBtn.textContent = originalText;
-            
-            closeCropModal();
-        }, 50);
-    });
+        }
 
-    function updateUploadAreaUI() {
-        document.getElementById('imageCount').textContent = uploadedImages.length;
-        const container = document.getElementById('thumbnailContainer');
-        
-        let html = '';
-        uploadedImages.forEach((src, idx) => {
-            html += `
+        function closeCropModal() {
+            if (cropper) cropper.destroy();
+            cropper = null;
+            document.getElementById('cropModal').classList.add('hidden');
+            document.getElementById('variantModal').classList.remove('hidden');
+        }
+
+        // ========== UPDATED WITH LOADING INDICATOR & COMPRESSION ==========
+        document.getElementById('applyCropBtn').addEventListener('click', () => {
+            if (!cropper) return;
+
+            // Add loading indicator
+            const applyBtn = document.getElementById('applyCropBtn');
+            const originalText = applyBtn.textContent;
+            applyBtn.disabled = true;
+            applyBtn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Processing...';
+
+            // Use setTimeout to allow UI to update before heavy processing
+            setTimeout(() => {
+                // Remove fixed width/height to respect cropped aspect ratio
+                const canvas = cropper.getCroppedCanvas();
+                // Compress to 75% quality for smaller file size
+                const croppedDataUrl = canvas.toDataURL('image/jpeg', 0.75);
+
+                uploadedImages.push(croppedDataUrl);
+                updateUploadAreaUI();
+
+                // Restore button state
+                applyBtn.disabled = false;
+                applyBtn.textContent = originalText;
+
+                closeCropModal();
+            }, 50);
+        });
+
+        function updateUploadAreaUI() {
+            document.getElementById('imageCount').textContent = uploadedImages.length;
+            const container = document.getElementById('thumbnailContainer');
+
+            let html = '';
+            uploadedImages.forEach((src, idx) => {
+                html += `
                 <div class="relative group">
                     <img src="${src}" class="w-24 h-32 object-cover rounded-lg shadow-sm border border-gray-200">
                     <button type="button" onclick="removeImage(${idx})" class="absolute -top-2 -right-2 w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-red-500 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity">
@@ -630,233 +810,272 @@ document.getElementById('imageUpload').addEventListener('change', function (e) {
                     </button>
                 </div>
             `;
-        });
-        container.innerHTML = html;
-    }
+            });
+            container.innerHTML = html;
+        }
 
-    function removeImage(idx) {
-        uploadedImages.splice(idx, 1);
-        updateUploadAreaUI();
-    }
+        function removeImage(idx) {
+            uploadedImages.splice(idx, 1);
+            updateUploadAreaUI();
+        }
 
-    // Actions
-    async function setDefaultVariant(productId, variantId) {
-    try {
-        const response = await axios.post('/admin/productManagement/variants/setDefault', {
-            productId, 
-            variantId 
-        });
+        // Actions
+        async function setDefaultVariant(productId, variantId) {
+            try {
+                const response = await axios.post('/admin/productManagement/variants/setDefault', {
+                    productId,
+                    variantId
+                });
 
-        const data = await response.data;
+                const data = await response.data;
 
-        if (data.success) {
-              showToast('success', 'set Default successfully');
+                if (data.success) {
+                    showToast('success', 'set Default successfully');
 
-              setTimeout(() => {
-              window.location.href =`/admin/viewVariants/${productId}`;
-              }, 500);
-             } else {
-             showToast('error', data.message || 'faild to set Default');
-             }
-    } catch (error) {
-        console.error('Error submitting variant:', error.response?.data || error);
-        alert('❌ Failed to update default variant');
-        location.reload(); 
-    }
-}
+                    setTimeout(() => {
+                        window.location.href = `/admin/viewVariants/${productId}`;
+                    }, 500);
+                } else {
+                    showToast('error', data.message || 'faild to set Default');
+                }
+            } catch (error) {
+                console.error('Error submitting variant:', error.response?.data || error);
+                showToast("error", ' Failed to update default variant');
+                location.reload();
+            }
+        }
 
-    async function toggleVariantStatus(variantId, isActive) {
-        console.log("Toggle variant status: ", variantId, isActive);
-    }
+        async function toggleVariantStatus(variantId, isActive) {
+            console.log("Toggle variant status: ", variantId, isActive);
+        }
 
-    // ========== UPDATED DELETE WITH LOADING INDICATOR ==========
-    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
-        const id = document.getElementById('deleteVariantId').value;
-        
-        // Add loading indicator
-        const deleteBtn = document.getElementById('confirmDeleteBtn');
-        const originalText = deleteBtn.textContent;
-        deleteBtn.disabled = true;
-        deleteBtn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Deleting...';
-        
-        try {
-            const res = await axios.delete(`/admin/viewVariants/${productId}/variant/${id}`);
-            const data = await res.data;
-            if (data.success) {
-              showToast('success', 'variant deleted');
+        // ========== UPDATED DELETE WITH LOADING INDICATOR ==========
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+            const id = document.getElementById('deleteVariantId').value;
 
-              setTimeout(() => {
-              window.location.href = `/admin/viewVariants/${productId}`;
-              }, 500);
+            // Add loading indicator
+            const deleteBtn = document.getElementById('confirmDeleteBtn');
+            const originalText = deleteBtn.textContent;
+            deleteBtn.disabled = true;
+            deleteBtn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Deleting...';
 
-            } else {
-                // Restore button on error
+            try {
+                const res = await axios.delete(`/admin/viewVariants/${productId}/variant/${id}`);
+                const data = await res.data;
+                if (data.success) {
+                    showToast('success', 'variant deleted');
+
+                    setTimeout(() => {
+                        window.location.href = `/admin/viewVariants/${productId}`;
+                    }, 500);
+
+                } else {
+                    // Restore button on error
+                    deleteBtn.disabled = false;
+                    deleteBtn.textContent = originalText;
+                    showToast(data.message || "error", 'Error deleting variant.');
+                }
+            } catch (error) {
+                console.error('Error deleting variant:', error);
                 deleteBtn.disabled = false;
                 deleteBtn.textContent = originalText;
-                showToast(data.message || 'Error deleting variant.');
+                showToast("error", 'Network error occurred.');
             }
-        } catch (error) {
-            console.error('Error deleting variant:', error);
-            deleteBtn.disabled = false;
-            deleteBtn.textContent = originalText;
-            showToast('Network error occurred.');
-        }
-        closeModals();
-    });
+            closeModals();
+        });
 
-    // ========== UPDATED FORM SUBMIT WITH LOADING INDICATOR ==========
-    document.getElementById('variantForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const selectedSizes = Array.from(document.querySelectorAll('input[name="sizes"]:checked')).map(el => Number(el.value));
-        if (selectedSizes.length === 0) {
-            alert('Please select at least one size.');
-            return;
-        }
+        // ========== UPDATED FORM SUBMIT WITH LOADING INDICATOR & VALIDATION ==========
+        document.getElementById('variantForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
 
-        const id = document.getElementById('variantId').value;
-        
-        // Add loading indicator
-        const submitBtn = document.getElementById('saveVariantBtn');
-        const originalText = submitBtn.textContent;
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Processing...';
-        
-        const existingImages = [];
-        const newImages = [];
+            // Validation logic
+            let isValid = true;
+            const color = document.getElementById('variantColor').value.trim();
+            const selectedSize = document.getElementById('sizeSelect').value;
+            const sku = document.getElementById('variantSku').value.trim();
+            const price = document.getElementById('variantPrice').value.trim();
+            const stock = document.getElementById('variantStock').value.trim();
 
-        uploadedImages.forEach(img => {
-            if (img.startsWith('data:')) {
-                newImages.push(img);
+            if (!color) { showError('colorError', true, 'Color is required'); isValid = false; }
+            else { showError('colorError', false); }
+
+            if (!selectedSize) { showError('sizesError', true, 'Size is required'); isValid = false; }
+            else { showError('sizesError', false); }
+
+            if (!sku) { showError('skuError', true, 'SKU is required'); isValid = false; }
+            else { showError('skuError', false); }
+
+            if (!price) { showError('priceError', true, 'Price is required'); isValid = false; }
+            else if (isNaN(price) || Number(price) <= 0) { showError('priceError', true, 'Enter valid price'); isValid = false; }
+            else { showError('priceError', false); }
+
+            if (!stock) { showError('stockError', true, 'Stock is required'); isValid = false; }
+            else if (isNaN(stock) || Number(stock) < 0) { showError('stockError', true, 'Enter valid stock'); isValid = false; }
+            else { showError('stockError', false); }
+
+            if (!isValid) return;
+
+            const id = document.getElementById('variantId').value;
+
+            // Add loading indicator
+            const submitBtn = document.getElementById('saveVariantBtn');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="inline-block animate-spin mr-2">⏳</span> Processing...';
+
+            const existingImages = [];
+            const newImages = [];
+
+            uploadedImages.forEach(img => {
+                if (img.startsWith('data:')) {
+                    newImages.push(img);
+                } else {
+                    existingImages.push(img);
+                }
+            });
+
+            if (!id && newImages.length < 3) {
+                // Restore button on validation error
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                showToast("error", 'Please upload and crop at least 3 images.');
+                return;
+            }
+
+            if (id && (existingImages.length + newImages.length) < 3) {
+                // Restore button on validation error
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+                showToast("error", 'Please keep or upload at least 3 images.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('color', document.getElementById('variantColor').value.trim());
+            formData.append('sku', document.getElementById('variantSku').value.trim());
+            formData.append('price', document.getElementById('variantPrice').value);
+            formData.append('stock', document.getElementById('variantStock').value);
+            formData.append('isActive', document.getElementById('variantStatus').checked);
+
+            formData.append('sizes', selectedSize);
+
+            if (id) {
+                formData.append('existingImages', JSON.stringify(existingImages));
+            }
+
+            function dataURLtoBlob(dataurl) {
+                var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+                    bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new Blob([u8arr], { type: mime });
+            }
+
+            newImages.forEach((imgBase64, index) => {
+                const blob = dataURLtoBlob(imgBase64);
+                formData.append('images', blob, `image_${index}.jpg`);
+            });
+
+            try {
+                const url = id
+                    ? `/admin/viewVariants/${productId}/variant/${id}`
+                    : `/admin/viewVariants/${productId}/variant`;
+
+                const method = id ? "put" : "post";
+
+                const res = await axios({
+                    method: method,
+                    url: url,
+                    data: formData,
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                });
+
+                const data = res.data;
+
+                if (data.success) {
+                    showToast("success", data.message || "Saved successfully");
+
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 500);
+
+                } else {
+                    // restore button
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+
+                    showToast("error", data.message || "Error occurred while saving variant");
+                }
+
+            } catch (error) {
+                console.error("Error submitting variant:", error);
+
+                // restore button
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+
+                showToast("error", "Network error occurred");
+            }
+        });
+
+        // ── Size button logic (single select) ──
+        document.querySelectorAll('.size-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Deselect all
+                document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+                // Select clicked
+                btn.classList.add('selected');
+                document.getElementById('sizeSelect').value = btn.dataset.size;
+                showError('sizesError', false);
+            });
+        });
+
+        document.getElementById('variantStatus').addEventListener('change', function () {
+            document.getElementById('statusLabel').textContent = this.checked ? 'Active' : 'Inactive';
+        });
+
+        // Real-time error clearing
+        document.getElementById('variantColor').addEventListener('input', () => showError('colorError', false));
+        document.getElementById('sizeSelect').addEventListener('change', () => showError('sizesError', false));
+        document.getElementById('variantSku').addEventListener('input', () => showError('skuError', false));
+        document.getElementById('variantPrice').addEventListener('input', () => showError('priceError', false));
+        document.getElementById('variantStock').addEventListener('input', () => showError('stockError', false));
+
+        function applyFilters() {
+            const status = document.getElementById('statusFilter').value;
+            const search = document.getElementById('searchInput').value.trim();
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', '1');
+            url.searchParams.set('status', status);
+            if (search) {
+                url.searchParams.set('search', search);
             } else {
-                existingImages.push(img);
+                url.searchParams.delete('search');
             }
-        });
-
-        if (!id && newImages.length < 3) {
-            // Restore button on validation error
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-            alert('Please upload and crop at least 3 images.');
-            return;
+            window.location.href = url.toString();
         }
 
-        if (id && (existingImages.length + newImages.length) < 3) {
-            // Restore button on validation error
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-            alert('Please keep or upload at least 3 images.');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('color', document.getElementById('variantColor').value.trim());
-        formData.append('sku', document.getElementById('variantSku').value.trim());
-        formData.append('price', document.getElementById('variantPrice').value);
-        formData.append('stock', document.getElementById('variantStock').value);
-        formData.append('isActive', document.getElementById('variantStatus').checked);
-        
-        selectedSizes.forEach(size => {
-            formData.append('sizes', size);
-        });
-
-        if (id) {
-            formData.append('existingImages', JSON.stringify(existingImages));
-        }
-
-        function dataURLtoBlob(dataurl) {
-            var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
-                bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
-            while(n--){
-                u8arr[n] = bstr.charCodeAt(n);
+        function changePage(page) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', page);
+            // Preserve current status + search when paginating
+            const status = document.getElementById('statusFilter') ? document.getElementById('statusFilter').value : (url.searchParams.get('status') || 'all');
+            const search = document.getElementById('searchInput') ? document.getElementById('searchInput').value.trim() : (url.searchParams.get('search') || '');
+            url.searchParams.set('status', status);
+            if (search) {
+                url.searchParams.set('search', search);
+            } else {
+                url.searchParams.delete('search');
             }
-            return new Blob([u8arr], {type:mime});
+            window.location.href = url.toString();
         }
 
-        newImages.forEach((imgBase64, index) => {
-            const blob = dataURLtoBlob(imgBase64);
-            formData.append('images', blob, `image_${index}.jpg`);
-        });
-
-       try {
-    const url = id
-        ? `/admin/viewVariants/${productId}/variant/${id}`
-        : `/admin/viewVariants/${productId}/variant`;
-
-    const method = id ? "put" : "post";
-
-    const res = await axios({
-        method: method,
-        url: url,
-        data: formData,
-        headers: {
-            "Content-Type": "multipart/form-data"
-        }
-    });
-
-    const data = res.data;
-
-    if (data.success) {
-        showToast("success", data.message || "Saved successfully");
-
-        setTimeout(() => {
-            window.location.reload();
-        }, 500);
-
-    } else {
-        // restore button
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalText;
-
-        showToast("error", data.message || "Error occurred while saving variant");
-    }
-
-} catch (error) {
-    console.error("Error submitting variant:", error);
-
-    // restore button
-    submitBtn.disabled = false;
-    submitBtn.textContent = originalText;
-
-    showToast("error", "Network error occurred");
-}
-});
-
-    document.getElementById('variantStatus').addEventListener('change', function() {
-        document.getElementById('statusLabel').textContent = this.checked ? 'Active' : 'Inactive';
-    });
-
-    function applyFilters() {
-        const status = document.getElementById('statusFilter').value;
-        const search = document.getElementById('searchInput').value.trim();
-        const url = new URL(window.location.href);
-        url.searchParams.set('page', '1');
-        url.searchParams.set('status', status);
-        if (search) {
-            url.searchParams.set('search', search);
-        } else {
-            url.searchParams.delete('search');
-        }
-        window.location.href = url.toString();
-    }
-
-    function changePage(page) {
-        const url = new URL(window.location.href);
-        url.searchParams.set('page', page);
-        // Preserve current status + search when paginating
-        const status = document.getElementById('statusFilter') ? document.getElementById('statusFilter').value : (url.searchParams.get('status') || 'all');
-        const search = document.getElementById('searchInput')  ? document.getElementById('searchInput').value.trim()  : (url.searchParams.get('search') || '');
-        url.searchParams.set('status', status);
-        if (search) {
-            url.searchParams.set('search', search);
-        } else {
-            url.searchParams.delete('search');
-        }
-        window.location.href = url.toString();
-    }
-
-    // Setup complete
-</script>
+        // Setup complete
+    </script>
 
 </body>
+
 </html>
