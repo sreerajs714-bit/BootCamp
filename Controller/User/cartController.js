@@ -45,19 +45,20 @@ export const loadCart = async (req, res) => {
 
             subtotal += price * qty;
 
-            return {
-                productId: {
-                    _id: product._id,
-                    name: product.productName,
-                    brand: product.brand?.name || product.brand?.brandName || "Brand",
-                    images: variant?.images || []
-                },
-                variantId: item.variantId,
-                color: variant?.color || "",
-                size: item.size || "",
-                quantity: qty,
-                price
-            };
+           return {
+    productId: {
+        _id: product._id,
+        name: product.productName,
+        brand: product.brand?.name || product.brand?.brandName || "Brand",
+        images: variant?.images || []
+    },
+    variantId: item.variantId,
+    color: variant?.color || "",
+    size: item.size || "",
+    quantity: qty,
+    price,
+    stock: variant?.stock || 0
+};
         });
 
         return res.render("users/cart", {
@@ -136,14 +137,17 @@ export const addToCart = async (req, res) => {
                 });
             }
 
-            req.session.cart.push({
-                productId,
-                variantId,
-                quantity,
-                price: variant.price,
-                productName: product.productName,
-                productImage: product.images?.[0] || ""
-            });
+        const guestSize = Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes;
+
+req.session.cart.push({
+    productId,
+    variantId,
+    quantity,
+    price: variant.price,
+    size: guestSize || "",
+    productName: product.productName,
+    productImage: product.images?.[0] || ""
+});
 
             return res.status(200).json({
                 success: true,
@@ -173,12 +177,15 @@ export const addToCart = async (req, res) => {
             });
         }
 
-        cart.items.push({
-            productId,
-            variantId,
-            quantity,
-            price: variant.price
-        });
+       const cartSize = Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes;
+
+cart.items.push({
+    productId,
+    variantId,
+    quantity,
+    price: variant.price,
+    size: cartSize || ""
+});
 
         await cart.save();
 
