@@ -6,6 +6,7 @@ import Wishlist from "../../Model/wishlistModel.js";
 
 export const loadCart = async (req, res) => {
     try {
+        
 
         const userId = req.session?.user?.id;
 
@@ -46,6 +47,7 @@ export const loadCart = async (req, res) => {
             subtotal += price * qty;
 
            return {
+            _id: item._id, 
     productId: {
         _id: product._id,
         name: product.productName,
@@ -80,7 +82,7 @@ export const addToCart = async (req, res) => {
 
         const userId = req.session?.user?.id || null;
 
-        const { productId, variantId, quantity = 1 } = req.body;
+        const { productId, variantId,size, quantity = 1 } = req.body;
 
         if (!productId || !variantId) {
             return res.status(400).json({
@@ -139,12 +141,13 @@ export const addToCart = async (req, res) => {
 
         const guestSize = Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes;
 
+// Guest cart push
 req.session.cart.push({
     productId,
     variantId,
     quantity,
     price: variant.price,
-    size: guestSize || "",
+    size: size || (Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes),
     productName: product.productName,
     productImage: product.images?.[0] || ""
 });
@@ -165,9 +168,10 @@ req.session.cart.push({
         }
 
         const existingItem = cart.items.find(item =>
-            item.productId.toString() === productId &&
-            item.variantId?.toString() === variantId
-        );
+    item.productId.toString() === productId &&
+    item.variantId?.toString() === variantId &&
+    item.size === (size || "")   // ← add this
+);
 
         if (existingItem) {
             return res.status(200).json({
@@ -177,14 +181,15 @@ req.session.cart.push({
             });
         }
 
-       const cartSize = Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes;
+       const cartSize = size || (Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes);
 
+// User cart push
 cart.items.push({
     productId,
     variantId,
     quantity,
     price: variant.price,
-    size: cartSize || ""
+    size: size || (Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes)
 });
 
         await cart.save();
@@ -211,16 +216,8 @@ cart.items.push({
 
 export const removeFromCart = async (req, res) => {
     try {
-
         const userId = req.session?.user?.id || null;
-        const { productId, variantId } = req.body;
-
-        if (!productId) {
-            return res.status(400).json({
-                success: false,
-                message: "productId is required"
-            });
-        }
+        const { itemId, productId, variantId, size } = req.body;
 
         // GUEST CART
         if (!userId) {
@@ -236,7 +233,8 @@ export const removeFromCart = async (req, res) => {
 
             req.session.cart = req.session.cart.filter(item =>
                 !(item.productId === productId &&
-                  item.variantId === variantId)
+                  item.variantId === variantId &&
+                  item.size === size)
             );
 
             if (req.session.cart.length === beforeLength) {
@@ -252,9 +250,7 @@ export const removeFromCart = async (req, res) => {
             });
         }
 
-
         // USER CART
-
         const cart = await Cart.findOne({ userId });
 
         if (!cart) {
@@ -264,19 +260,19 @@ export const removeFromCart = async (req, res) => {
             });
         }
 
-        const beforeLength = cart.items.length;
-
-        cart.items = cart.items.filter(item =>
-            !(item.productId.toString() === productId &&
-              item.variantId?.toString() === variantId)
+        // ✅ Remove by itemId (_id of the cart item)
+        const indexToRemove = cart.items.findIndex(item =>
+            item._id.toString() === itemId?.toString()
         );
 
-        if (cart.items.length === beforeLength) {
+        if (indexToRemove === -1) {
             return res.status(404).json({
                 success: false,
                 message: "Item not found in cart"
             });
         }
+
+        cart.items.splice(indexToRemove, 1);
 
         await cart.save();
 

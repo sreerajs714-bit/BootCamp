@@ -27,8 +27,7 @@ const cartItemSchema = new mongoose.Schema(
             type: String, 
             default: "" 
         }
-    },
-    { _id: false }
+    }
 );
 
 const cartSchema = new mongoose.Schema(

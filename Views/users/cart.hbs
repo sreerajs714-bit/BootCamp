@@ -86,7 +86,7 @@
                 <!-- Dynamic Items -->
                 {{#each cartItems}}
                 <div class="cart-item flex flex-col sm:flex-row gap-6 p-5 sm:p-6 bg-white border border-gray-100 rounded-[24px] shadow-sm hover:shadow-md transition-shadow relative"
-                    data-id="{{this.productId._id}}" data-price="{{this.price}}" data-variant="{{this.variantId}}"
+                    data-item-id="{{this._id}}" data-id="{{this.productId._id}}" data-price="{{this.price}}" data-variant="{{this.variantId}}" data-size="{{this.size}}"
                     data-stock="{{this.stock}}">
                     <!-- Image -->
                     <a href="/users/productDetail/{{this.productId._id}}"
@@ -136,7 +136,7 @@
                             <!-- Remove Button -->
                             <button
                                 class="flex items-center gap-1.5 text-gray-400 hover:text-red-500 transition-colors group"
-                                onclick="openRemoveModal('{{this.productId._id}}', '{{this.productId.name}}')">
+                                onclick="openRemoveModal('{{this._id}}', '{{this.productId.name}}')">
                                 <span class="material-symbols-outlined text-[18px]">delete</span>
                                 <span class="text-[10px] font-bold uppercase tracking-[0.1em]">REMOVE</span>
                             </button>
@@ -310,6 +310,7 @@
 
         // Modal triggers
         function openRemoveModal(itemId, itemName) {
+            console.log("openRemoveModal called:", itemId, itemName); // ← add this
             itemToRemoveId = itemId;
             document.getElementById('modalItemName').textContent = itemName;
             document.getElementById('removeModal').classList.add('active');
@@ -319,47 +320,47 @@
             document.getElementById('removeModal').classList.remove('active');
             itemToRemoveId = null;
         }
+async function confirmRemoveItem() {
+    if (!itemToRemoveId) return;
 
-        async function confirmRemoveItem() {
-            if (!itemToRemoveId) return;
+    // ✅ Save BEFORE closeRemoveModal resets it
+    const idToRemove = itemToRemoveId;
+    const itemEl = document.querySelector(`.cart-item[data-item-id="${idToRemove}"]`);
 
-            try {
-                const itemEl = document.querySelector(`.cart-item[data-id="${itemToRemoveId}"]`);
-                const variantId = itemEl?.dataset.variant; // add data-variant to your cart item HTML
+    closeRemoveModal(); // resets itemToRemoveId to null — but we already saved it
 
-                const response = await axios.delete("/users/removeFromCart", {
-                    data: { productId: itemToRemoveId, variantId }
-                });
+    try {
+        const response = await axios.delete("/users/removeFromCart", {
+            data: { itemId: idToRemove }
+        });
 
-                if (response.data.success) {
-                    if (itemEl) {
-                        itemEl.style.transition = 'all 0.3s ease';
-                        itemEl.style.opacity = '0';
-                        itemEl.style.transform = 'translateY(10px)';
+        if (response.data.success) {
+            if (itemEl) {
+                itemEl.style.transition = 'all 0.3s ease';
+                itemEl.style.opacity = '0';
+                itemEl.style.transform = 'translateY(10px)';
 
-                        setTimeout(() => {
-                            itemEl.remove();
-                            recalculateTotals();
-                            showToast("success", "Item removed from cart");  // ← add this
-
-                            const remaining = document.querySelectorAll('.cart-item').length;
-                            if (remaining === 0) {
-                                document.getElementById('bag-count-text').textContent = 'YOUR BAG IS EMPTY';
-                                setTimeout(() => window.location.reload(), 500);
-                            }
-                        }, 300);
+                setTimeout(() => {
+                    itemEl.remove();
+                    const remaining = document.querySelectorAll('.cart-item').length;
+                    if (remaining === 0) {
+                        showToast("success", "Item removed from cart");
+                        setTimeout(() => window.location.reload(), 1000);
+                        return;
                     }
-                } else {
-                    showToast(response.data.message || "Failed to remove item");
-                }
-
-            } catch (err) {
-                console.error("Remove error:", err);
-                showToast("Something went wrong");
+                    recalculateTotals();
+                    showToast("success", "Item removed from cart");
+                }, 300);
             }
-
-            closeRemoveModal();
+        } else {
+            showToast("error", response.data.message || "Failed to remove item");
         }
+
+    } catch (err) {
+        console.error("Remove error:", err.response?.data);
+        showToast("error", "Something went wrong");
+    }
+}
     </script>
 </body>
 
