@@ -86,22 +86,26 @@
                 <!-- Dynamic Items -->
                 {{#each cartItems}}
                 <div class="cart-item flex flex-col sm:flex-row gap-6 p-5 sm:p-6 bg-white border border-gray-100 rounded-[24px] shadow-sm hover:shadow-md transition-shadow relative"
-                 data-id="{{this.productId._id}}" data-price="{{this.price}}" data-variant="{{this.variantId}}" data-stock="{{this.stock}}">
+                    data-id="{{this.productId._id}}" data-price="{{this.price}}" data-variant="{{this.variantId}}"
+                    data-stock="{{this.stock}}">
                     <!-- Image -->
-                    <div
-                        class="w-full sm:w-[130px] h-[150px] bg-[#f0f4f8] rounded-[16px] overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    <a href="/users/productDetail/{{this.productId._id}}"
+                        class="w-full sm:w-[130px] h-[150px] bg-[#f0f4f8] rounded-[16px] overflow-hidden flex-shrink-0 flex items-center justify-center hover:opacity-80 transition-opacity">
                         <img src="{{this.productId.images.[0]}}" class="w-full h-full object-cover mix-blend-multiply"
                             alt="{{this.productId.name}}">
-                    </div>
+                    </a>
 
                     <!-- Details Space -->
                     <div class="flex flex-col flex-1">
                         <!-- Top Row: Title + Price -->
                         <div class="flex justify-between items-start gap-4">
                             <div>
-                                <h3 class="text-[15px] font-bold text-gray-900 leading-tight">{{this.productId.brand}} - {{this.productId.name}}</h3>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">SIZE : {{this.size}}</p>
-                                
+                                <a href="/users/productDetail/{{this.productId._id}}" class="hover:underline">
+                                    <h3 class="text-[15px] font-bold text-gray-900 leading-tight">{{this.productId.brand}} - {{this.productId.name}}</h3>
+                                </a>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">SIZE :
+                                    {{this.size}}</p>
+
                             </div>
                             <!-- Price Block -->
                             <div class="text-right flex flex-col items-end">
@@ -263,22 +267,22 @@
         let itemToRemoveId = null;
 
         // Qty changer logic
-       function updateQty(itemId, change) {
-    const input = document.getElementById(`qty-${itemId}`);
-    const cartItem = document.querySelector(`.cart-item[data-id="${itemId}"]`);
-    const stock = parseInt(cartItem?.dataset.stock) || 5;
-    const maxQty = Math.min(5, stock);
+        function updateQty(itemId, change) {
+            const input = document.getElementById(`qty-${itemId}`);
+            const cartItem = document.querySelector(`.cart-item[data-id="${itemId}"]`);
+            const stock = parseInt(cartItem?.dataset.stock) || 5;
+            const maxQty = Math.min(5, stock);
 
-    let newVal = parseInt(input.value) + change;
-    if (newVal < 1) newVal = 1;
-    if (newVal > maxQty) {
-        newVal = maxQty;
-        showToast("error", `Only ${maxQty} items available in stock`);
-    }
-    input.value = newVal;
+            let newVal = parseInt(input.value) + change;
+            if (newVal < 1) newVal = 1;
+            if (newVal > maxQty) {
+                newVal = maxQty;
+                showToast("error", `Only ${maxQty} items available in stock`);
+            }
+            input.value = newVal;
 
-    recalculateTotals();
-}
+            recalculateTotals();
+        }
 
         function recalculateTotals() {
             let subtotal = 0;

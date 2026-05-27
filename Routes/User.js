@@ -9,7 +9,7 @@ import { changeEmail, changePassword, editProfile, loadEditProfile, loadProfile,
 import { uploadProfile } from "../Middleware/multer.js";
 import passport from "../Config/passport.js";
 import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controller/User/addressController.js";
-import { loadMens, loadProductDetail } from "../Controller/User/productController.js";
+import { loadAllProducts, loadMens, loadProductDetail } from "../Controller/User/productController.js";
 import { loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
 import { addToCart, loadCart, removeFromCart } from "../Controller/User/cartController.js";
 
@@ -59,6 +59,7 @@ route.get("/address",checkSession,loadAddress);
 route.post("/address",checkSession,addAddress)
 route.put("/address/:id", checkSession,editAddress);
 route.delete("/address/:id", checkSession,deleteAddress);
+route.get("/allProduct",loadAllProducts);
 route.get("/mens",loadMens);
 route.get("/productDetail/:id",loadProductDetail);
 route.get("/wishlist",loadWishlist);

@@ -1,5 +1,76 @@
 import Product from "../../Model/productModel.js";
 import User from "../../Model/userModel.js";
+import Category from "../../Model/categoryModel.js";
+import Brand from "../../Model/brandModel.js";
+
+export const loadAllProducts = async (req, res) => {
+    try {
+        const products = await Product.find({
+            status: "active",
+            isDeleted: false
+        })
+            .populate("brand", "name")
+            .populate("category", "name")
+            .lean();
+
+        // Get wishlist IDs if user is logged in
+        let wishlistedIds = [];
+        if (req.user) {
+            const user = await User.findById(req.user._id).select('wishlist').lean();
+            wishlistedIds = (user?.wishlist || []).map(id => String(id));
+        }
+
+        const shaped = products.map(product => {
+            const variant =
+                product.variants?.find(v => v.isDefault && v.isActive) ||
+                product.variants?.find(v => v.isActive) ||
+                product.variants?.[0];
+
+            let stock_label, stock_icon;
+            if (!variant || variant.stock === 0) {
+                stock_label = "Out of Stock";
+                stock_icon = "cancel";
+            } else if (variant.stock <= 10) {
+                stock_label = `Only ${variant.stock} left`;
+                stock_icon = "schedule";
+            } else {
+                stock_label = "In Stock";
+                stock_icon = "check_circle";
+            }
+
+            return {
+                id: product._id,
+                productName: product.productName,
+                brand: product.brand?.name || "Unknown Brand",
+                category: product.category,
+                badge: product.isLimitedEdition ? "LIMITED" : "STANDARD",
+                rawPrice: variant?.price || 0,
+                stock_label,
+                stock_icon,
+                images: variant?.images || [],
+                variantId: variant?._id ? String(variant._id) : "",
+                isWishlisted: wishlistedIds.includes(String(product._id))
+            };
+        });
+
+        // Get all active categories and brands for filter chips
+        const [categories, brands] = await Promise.all([
+            Category.find({ isActive: true, isDeleted: false }).select("name").lean(),
+            Brand.find({ isDeleted: false }).select("name").lean()
+        ]);
+
+        res.render("users/allProduct", {
+            products: shaped,
+            categories,
+            brands,
+            user: req.user || null
+        });
+
+    } catch (error) {
+        console.error("loadAllProducts error:", error);
+        res.status(500).send("Failed to load products");
+    }
+};
 
 export const loadMens = async (req, res) => {
     try {

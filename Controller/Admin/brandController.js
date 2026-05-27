@@ -3,8 +3,6 @@ import Product from "../../Model/productModel.js"
 import Brand from "../../Model/brandModel.js";
 
 
-// GET BRAND MANAGEMENT PAGE
-
 export const loadBrand = async (req, res) => {
     try {
 
@@ -91,8 +89,6 @@ export const loadBrand = async (req, res) => {
     }
 };
 
-// ADD BRAND
-
 export const addBrand = async (req, res) => {
     try {
         let { name, isActive } = req.body;
@@ -154,8 +150,6 @@ export const addBrand = async (req, res) => {
     }
 };
 
-// EDIT BRAND
-
 export const editBrand = async (req, res) => {
     try {
         const { id } = req.params;
@@ -204,8 +198,6 @@ export const editBrand = async (req, res) => {
     }
 };
 
-// DELETE BRAND (SOFT DELETE)
-
 export const deleteBrand = async (req, res) => {
     try {
         const { id } = req.params;
@@ -241,8 +233,6 @@ export const deleteBrand = async (req, res) => {
         });
     }
 };
-
-// RESTORE BRAND
 
 export const restoreBrand = async (req, res) => {
     try {

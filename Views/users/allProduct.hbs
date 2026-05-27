@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Products | Boot Camp</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Toastify -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #fff; }
+
+        .product-card { transition: all 0.3s ease; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 16px 32px -12px rgba(0,0,0,0.1); }
+
+        img { -webkit-user-drag: none; }
+
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; }
+        .icon-fill { font-variation-settings: 'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24; }
+
+        #filter-sidebar { transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); }
+        #filter-overlay { transition: opacity 0.4s ease; pointer-events: none; }
+        body.sidebar-open { overflow: hidden; }
+        body.sidebar-open #filter-overlay { opacity: 1; pointer-events: auto; }
+
+        .filter-chip {
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            border: 1px solid #f3f4f6;
+            font-size: 11px; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 0.2em;
+            transition: all 0.3s; cursor: pointer; background: white;
+        }
+        .filter-chip.active {
+            background-color: #000; color: #fff; border-color: #000;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transform: scale(1.05);
+        }
+        .filter-chip:not(.active):hover { border-color: #d1d5db; background-color: #f9fafb; }
+
+        .refine-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            background-color: #fff; border: 1px solid #f3f4f6; border-radius: 9999px;
+            padding: 0.6rem 1.75rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); transition: all 0.3s;
+        }
+        .refine-bar:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-color: #e5e7eb; }
+
+        .refine-search-container { width: 0; overflow: hidden; transition: all 0.4s cubic-bezier(0.16,1,0.3,1); opacity: 0; }
+        .refine-bar.search-active .refine-search-container { width: 250px; opacity: 1; margin-right: 1.5rem; }
+
+        .sort-dropdown {
+            opacity: 0; transform: translateY(10px); pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        .sort-dropdown.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+        .range-wrapper { position: relative; height: 20px; margin: 20px 0; }
+        .range-track { position: absolute; top: 50%; transform: translateY(-50%); height: 4px; width: 100%; background: #f1f1f1; z-index: 1; }
+        .range-fill { position: absolute; top: 50%; transform: translateY(-50%); height: 4px; background: #000; z-index: 2; }
+        .dual-range {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 100%; pointer-events: none; appearance: none;
+            background: transparent; z-index: 3; margin: 0;
+        }
+        .dual-range::-webkit-slider-thumb {
+            pointer-events: auto; appearance: none;
+            width: 18px; height: 18px; background: #000;
+            border: 2px solid #fff; border-radius: 50%;
+            cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        #no-results { display: none; }
+
+        #pagination-container button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    {{>navbar}}
+
+    <!-- HEADER -->
+    <header class="max-w-[1400px] mx-auto px-6 pt-32 pb-8 text-center">
+        <div class="inline-flex items-center gap-2 bg-[#f4f4f5] px-4 py-1 rounded-full mb-6">
+            <span class="material-symbols-outlined text-[16px]">stars</span>
+            <span class="text-[10px] font-bold tracking-[0.2em] uppercase">PREMIUM STYLE</span>
+        </div>
+        <h1 class="text-4xl md:text-[52px] font-black mb-4">All Products</h1>
+        <p class="text-gray-500 mb-6">Discover premium collection crafted with exceptional quality.</p>
+        <div class="text-gray-400 text-sm">
+            <span id="result-count">{{products.length}}</span> Products Available
+        </div>
+    </header>
+
+    <!-- FILTER & CATEGORY SECTION -->
+    <section class="max-w-[1400px] mx-auto px-6 mb-12">
+        <div class="refine-bar relative" id="refine-bar">
+
+            <!-- Left: Refine Trigger -->
+            <button onclick="openSidebar()" class="flex items-center space-x-3 group shrink-0">
+                <span class="material-symbols-outlined text-[20px] text-gray-400 group-hover:text-black transition-colors">tune</span>
+                <span class="text-[11px] font-black tracking-[0.2em] uppercase">Refine</span>
+            </button>
+
+            <!-- Active filter tags -->
+            <div id="active-filter-tags" class="flex items-center gap-2 flex-1 px-4 flex-wrap"></div>
+
+            <!-- Right: Search & Sort -->
+            <div class="flex items-center justify-end pl-4">
+                <div class="refine-search-container">
+                    <input type="text" id="bar-search-input" placeholder="SEARCH PRODUCT..."
+                        oninput="applyFilters()"
+                        onkeyup="if(event.key==='Escape') toggleBarSearch()"
+                        class="w-full bg-transparent border-none outline-none text-[10px] font-black tracking-widest text-right placeholder:text-gray-300">
+                </div>
+
+                <div class="flex items-center space-x-6">
+                    <button onclick="toggleBarSearch()" class="icon-btn">
+                        <span class="material-symbols-outlined text-[20px] text-gray-400 hover:text-black transition-colors">search</span>
+                    </button>
+                    <div class="h-4 w-[1px] bg-gray-200"></div>
+
+                    <!-- Sort By -->
+                    <div class="relative">
+                        <button onclick="toggleSortDropdown()" class="flex items-center space-x-2 group h-full">
+                            <span id="active-sort-label" class="text-[11px] font-black tracking-[0.2em] uppercase">Sort By</span>
+                            <span class="material-symbols-outlined text-[18px] text-gray-400 group-hover:text-black transition-colors">expand_more</span>
+                        </button>
+                        <div id="sort-dropdown" class="sort-dropdown absolute top-full right-0 mt-4 w-56 bg-white border border-gray-100 rounded-2xl shadow-2xl z-[80] overflow-hidden">
+                            <div class="py-2">
+                                <button onclick="selectSort('Latest Drop')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Latest Drop</button>
+                                <button onclick="selectSort('Price Low - High')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Price Low - High</button>
+                                <button onclick="selectSort('Price High - Low')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Price High - Low</button>
+                                <button onclick="selectSort('Name A - Z')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Name A - Z</button>
+                                <button onclick="selectSort('Name Z - A')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Name Z - A</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FILTER SIDEBAR DRAWER -->
+    <div id="filter-overlay" onclick="closeSidebar()" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] opacity-0 pointer-events-none transition-all duration-300"></div>
+
+    <aside id="filter-sidebar" class="fixed top-0 right-0 h-full w-full max-w-[450px] bg-white z-[70] translate-x-full shadow-2xl flex flex-col">
+        <div class="p-8 border-b border-gray-100 flex items-center justify-between">
+            <h2 class="text-xl font-black uppercase tracking-tighter">Filters</h2>
+            <button onclick="closeSidebar()" class="icon-btn hover:scale-110 transition-transform">
+                <span class="material-symbols-outlined text-gray-400 hover:text-black">close</span>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-8 space-y-12">
+
+            <!-- Search -->
+            <div class="space-y-4">
+                <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Search Product</label>
+                <input type="text" id="filter-search" placeholder="Enter keywords..."
+                    oninput="syncSearchAndFilter()"
+                    class="w-full bg-[#f8f9fc] border-none outline-none rounded-2xl py-5 px-6 text-[14px] font-medium transition-all focus:ring-2 focus:ring-black/5">
+            </div>
+
+            <!-- Categories -->
+            <div class="space-y-6">
+                <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Categories</label>
+                <div class="flex flex-wrap gap-2" id="category-chips">
+                    {{#each categories}}
+                    <button class="filter-chip category-chip" data-category="{{this.name}}">{{this.name}}</button>
+                    {{/each}}
+                </div>
+            </div>
+
+            <!-- Brands -->
+            <div class="space-y-6">
+                <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Brands</label>
+                <div class="flex flex-wrap gap-2" id="brand-chips">
+                    {{#each brands}}
+                    <button class="filter-chip brand-chip" data-brand="{{this.name}}">{{this.name}}</button>
+                    {{/each}}
+                </div>
+            </div>
+
+            <!-- Sort Options -->
+            <div class="space-y-6">
+                <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Sort Options</label>
+                <div class="flex flex-wrap gap-3" id="sort-chips">
+                    <button class="filter-chip sort-chip active" data-sort="Latest Drop">Latest Drop</button>
+                    <button class="filter-chip sort-chip" data-sort="Price Low - High">Price Low - High</button>
+                    <button class="filter-chip sort-chip" data-sort="Price High - Low">Price High - Low</button>
+                    <button class="filter-chip sort-chip" data-sort="Name A - Z">Name A - Z</button>
+                    <button class="filter-chip sort-chip" data-sort="Name Z - A">Name Z - A</button>
+                </div>
+            </div>
+
+            <!-- Price Range -->
+            <div class="space-y-8">
+                <div class="flex items-center justify-between">
+                    <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Price Range</label>
+                    <span id="price-display" class="text-[12px] font-bold">₹0 - ₹10,000</span>
+                </div>
+                <div class="range-wrapper">
+                    <div class="range-track"></div>
+                    <div class="range-fill" id="range-fill"></div>
+                    <input type="range" min="0" max="10000" value="0" class="dual-range" id="price-min">
+                    <input type="range" min="0" max="10000" value="10000" class="dual-range" id="price-max">
+                </div>
+                <div class="flex justify-between text-[10px] font-bold text-gray-400 uppercase">
+                    <span>₹0</span><span>₹10,000+</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar Footer -->
+        <div class="p-8 border-t border-gray-100 grid grid-cols-2 gap-4">
+            <button onclick="clearAll()" class="px-6 py-5 rounded-2xl border border-gray-100 text-[11px] font-black uppercase tracking-widest hover:bg-gray-50 transition-colors">
+                Clear All
+            </button>
+            <button onclick="applyFilters(); closeSidebar();" class="px-6 py-5 rounded-2xl bg-black text-white text-[11px] font-black uppercase tracking-widest hover:bg-black/90 shadow-lg shadow-black/10 transition-all">
+                Apply Filters
+            </button>
+        </div>
+    </aside>
+
+    <!-- GRID -->
+    <main class="max-w-[1400px] mx-auto px-6 pb-20">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="product-grid">
+
+            {{#each products}}
+            <a href="/users/productDetail/{{this.id}}"
+                class="product-card block border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white hover:no-underline text-inherit"
+                data-brand="{{this.brand}}"
+                data-price="{{this.rawPrice}}"
+                data-category="{{this.category.name}}"
+                data-name="{{this.productName}}"
+                data-variant="{{this.variantId}}">
+
+                <!-- IMAGE -->
+                <div class="relative bg-gray-100 rounded-[16px] aspect-square overflow-hidden mb-5">
+                    <button onclick="toggleWishlist(event, '{{this.id}}', this)"
+                        class="absolute top-3 right-3 z-20 bg-white w-[38px] h-[38px] rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition">
+                        <span class="material-symbols-outlined text-[20px] text-gray-600 hover:text-red-500 {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
+                    </button>
+                    <div class="absolute bottom-3 left-3 z-20 bg-white px-2 py-1 text-[11px] rounded flex items-center gap-1 shadow-sm">
+                        <span class="material-symbols-outlined text-[14px] text-gray-400">{{this.stock_icon}}</span>
+                        {{this.stock_label}}
+                    </div>
+                    <div class="carousel-container relative w-full h-full flex items-center justify-center">
+                        {{#each this.images}}
+                        <img src="{{this}}" class="carousel-img absolute w-full h-full object-contain transition-opacity duration-300 {{#if @first}}opacity-100{{else}}opacity-0{{/if}}">
+                        {{/each}}
+                    </div>
+                </div>
+
+                <!-- DETAILS -->
+                <div class="flex flex-col flex-1">
+                    <div class="text-[10px] text-gray-400 uppercase">{{this.category.name}}</div>
+                    <h3 class="font-bold text-[15px] mb-1 leading-tight">{{this.productName}}</h3>
+                    <p class="text-[12px] text-[#9ca3af] font-bold mb-4 line-clamp-1">{{this.brand}}</p>
+                    <div class="text-[18px] font-black mb-4">₹{{this.rawPrice}}</div>
+                    <div class="mt-auto flex flex-col gap-2">
+                        <button onclick="addToCart(event, '{{this.id}}')"
+                            class="w-full bg-black text-white py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-gray-800 transition-all">
+                            Add to Cart
+                        </button>
+                        <button onclick="buyNow(event, '{{this.id}}')"
+                            class="w-full bg-gray-100 text-black py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-gray-200 transition-all">
+                            Buy Now
+                        </button>
+                    </div>
+                </div>
+            </a>
+            {{/each}}
+
+        </div>
+
+        <!-- No Results State -->
+        <div id="no-results" class="py-24 text-center">
+            <span class="material-symbols-outlined text-[48px] text-gray-200 mb-4 block">search_off</span>
+            <h2 class="text-xl font-bold mb-2">No products found</h2>
+            <p class="text-gray-400 mb-6">Try adjusting your filters or search term.</p>
+            <button onclick="clearAll()" class="bg-black text-white px-8 py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest">Clear Filters</button>
+        </div>
+
+        <!-- PAGINATION -->
+        <div id="pagination-container" class="flex items-center justify-center gap-2 mt-12 mb-4">
+            <button id="prev-btn" onclick="changePage(currentPage - 1)"
+                class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition-all">
+                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+            </button>
+            <div id="page-numbers" class="flex items-center gap-2"></div>
+            <button id="next-btn" onclick="changePage(currentPage + 1)"
+                class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition-all">
+                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+            </button>
+        </div>
+    </main>
+
+    {{>footer}}
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
+        let originalCards = [];
+        const ITEMS_PER_PAGE = 8;
+        let currentPage = 1;
+        let filteredCards = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            originalCards = [...document.querySelectorAll('.product-card')];
+
+            // Carousel logic
+            originalCards.forEach(card => {
+                const images = card.querySelectorAll('.carousel-img');
+                if (images.length <= 1) return;
+                let i = 0, interval;
+                card.addEventListener('mouseenter', () => {
+                    interval = setInterval(() => {
+                        images[i].classList.replace('opacity-100', 'opacity-0');
+                        i = (i + 1) % images.length;
+                        images[i].classList.replace('opacity-0', 'opacity-100');
+                    }, 1000);
+                });
+                card.addEventListener('mouseleave', () => {
+                    clearInterval(interval);
+                    images.forEach((img, idx) => {
+                        img.classList.toggle('opacity-100', idx === 0);
+                        img.classList.toggle('opacity-0', idx !== 0);
+                    });
+                    i = 0;
+                });
+            });
+
+            updateDualSlider();
+            applyFilters();
+        });
+
+        // ── Cart ─────────────────────────────────────────────
+        async function addToCart(e, productId) {
+            e.preventDefault(); e.stopPropagation();
+            if (!isLoggedIn) { showToast("error","Please login to continue"); return; }
+            const productCard = e.currentTarget.closest('.product-card');
+            const variantId = productCard?.dataset?.variant;
+            try {
+                const response = await axios.post("/users/addCart", { productId, variantId, quantity: 1 });
+                if (response.data.success) showToast("success","Added to cart");
+                else showToast("error", response.data.message || "Failed to add to cart");
+            } catch (err) { showToast("error","Something went wrong"); }
+        }
+
+        async function buyNow(e, productId) {
+            e.preventDefault(); e.stopPropagation();
+            if (!isLoggedIn) { showToast("error","Please login to continue"); return; }
+            const productCard = e.currentTarget.closest('.product-card');
+            const variantId = productCard?.dataset?.variant;
+            try {
+                const res = await axios.post('/users/addCart', { productId, variantId, quantity: 1 });
+                if (res.data.success) window.location.href = "/users/cart";
+            } catch (err) { showToast("error","Failed to process request"); }
+        }
+
+        async function toggleWishlist(e, id, btn) {
+            e.preventDefault(); e.stopPropagation();
+            if (!isLoggedIn) { showToast("error","Please login to continue"); return; }
+            try {
+                const response = await axios.post('/users/toggleWishlist', { productId: id });
+                if (response.data.success) {
+                    const icon = btn.querySelector('.material-symbols-outlined');
+                    icon.classList.toggle('icon-fill', response.data.isWishlisted);
+                    icon.classList.toggle('text-red-500', response.data.isWishlisted);
+                    showToast("success", response.data.isWishlisted ? "Added to wishlist" : "Removed from wishlist");
+                }
+            } catch (err) { showToast("error","Failed to update wishlist"); }
+        }
+
+        // ── Sidebar ───────────────────────────────────────────
+        function openSidebar() {
+            document.body.classList.add('sidebar-open');
+            document.getElementById('filter-sidebar').classList.replace('translate-x-full', 'translate-x-0');
+        }
+        function closeSidebar() {
+            document.body.classList.remove('sidebar-open');
+            document.getElementById('filter-sidebar').classList.replace('translate-x-0', 'translate-x-full');
+        }
+
+        // ── Search bar ────────────────────────────────────────
+        function toggleBarSearch() {
+            const bar = document.getElementById('refine-bar');
+            const input = document.getElementById('bar-search-input');
+            bar.classList.toggle('search-active');
+            if (bar.classList.contains('search-active')) {
+                setTimeout(() => input.focus(), 300);
+            } else {
+                input.value = '';
+                applyFilters();
+            }
+        }
+        function syncSearchAndFilter() {
+            document.getElementById('bar-search-input').value = document.getElementById('filter-search').value;
+            applyFilters();
+        }
+
+        // ── Chips Interaction ─────────────────────────────────
+        document.querySelectorAll('.filter-chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                if (chip.classList.contains('sort-chip')) {
+                    document.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    document.getElementById('active-sort-label').innerText = chip.dataset.sort;
+                } else {
+                    chip.classList.toggle('active');
+                }
+            });
+        });
+
+        function toggleSortDropdown() {
+            document.getElementById('sort-dropdown').classList.toggle('active');
+        }
+
+        function selectSort(sortType) {
+            document.getElementById('active-sort-label').innerText = sortType;
+            document.getElementById('sort-dropdown').classList.remove('active');
+            document.querySelectorAll('.sort-chip').forEach(c => {
+                c.classList.toggle('active', c.dataset.sort === sortType);
+            });
+            applyFilters();
+        }
+
+        // ── Price slider ──────────────────────────────────────
+        const minRange = document.getElementById('price-min');
+        const maxRange = document.getElementById('price-max');
+        const rangeFill = document.getElementById('range-fill');
+        const priceDisplay = document.getElementById('price-display');
+
+        function updateDualSlider() {
+            let minVal = parseInt(minRange.value);
+            let maxVal = parseInt(maxRange.value);
+            if (minVal > maxVal) [minVal, maxVal] = [maxVal, minVal];
+            const minPct = (minVal / 10000) * 100;
+            const maxPct = (maxVal / 10000) * 100;
+            rangeFill.style.left = minPct + '%';
+            rangeFill.style.width = (maxPct - minPct) + '%';
+            priceDisplay.innerText = `₹${minVal.toLocaleString('en-IN')} - ₹${maxVal.toLocaleString('en-IN')}`;
+        }
+        minRange.addEventListener('input', updateDualSlider);
+        maxRange.addEventListener('input', updateDualSlider);
+
+        // ── Filter Engine ─────────────────────────────────────
+        function applyFilters() {
+            const searchQuery = (document.getElementById('bar-search-input').value || document.getElementById('filter-search').value).toLowerCase().trim();
+            const activeSort = document.getElementById('active-sort-label').innerText;
+            const selectedCats = [...document.querySelectorAll('.category-chip.active')].map(c => c.dataset.category);
+            const selectedBrands = [...document.querySelectorAll('.brand-chip.active')].map(b => b.dataset.brand);
+            let minP = parseInt(minRange.value), maxP = parseInt(maxRange.value);
+            if (minP > maxP) [minP, maxP] = [maxP, minP];
+
+            filteredCards = originalCards.filter(card => {
+                const name  = (card.dataset.name  || '').toLowerCase();
+                const brand = card.dataset.brand;
+                const cat   = card.dataset.category;
+                const price = parseFloat(card.dataset.price) || 0;
+
+                if (searchQuery && !name.includes(searchQuery) && !brand.toLowerCase().includes(searchQuery)) return false;
+                if (selectedCats.length && !selectedCats.includes(cat)) return false;
+                if (selectedBrands.length && !selectedBrands.includes(brand)) return false;
+                if (price < minP || price > maxP) return false;
+                return true;
+            });
+
+            // Sort
+            if (activeSort.toUpperCase().includes('LOW - HIGH')) filteredCards.sort((a,b) => a.dataset.price - b.dataset.price);
+            else if (activeSort.toUpperCase().includes('HIGH - LOW')) filteredCards.sort((a,b) => b.dataset.price - a.dataset.price);
+            else if (activeSort.toUpperCase().includes('A - Z')) filteredCards.sort((a,b) => a.dataset.name.localeCompare(b.dataset.name));
+            else if (activeSort.toUpperCase().includes('Z - A')) filteredCards.sort((a,b) => b.dataset.name.localeCompare(a.dataset.name));
+
+            currentPage = 1;
+            renderPage();
+            renderFilterTags(searchQuery, activeSort, minP, maxP, selectedCats, selectedBrands);
+        }
+
+        function renderPage() {
+            const grid = document.getElementById('product-grid');
+            const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
+            const start = (currentPage - 1) * ITEMS_PER_PAGE;
+            const end   = start + ITEMS_PER_PAGE;
+            const pageCards = filteredCards.slice(start, end);
+
+            originalCards.forEach(c => c.style.display = 'none');
+            pageCards.forEach(c => {
+                c.style.display = 'flex';
+                grid.appendChild(c);
+            });
+
+            document.getElementById('result-count').textContent = filteredCards.length;
+            document.getElementById('no-results').style.display = filteredCards.length === 0 ? 'block' : 'none';
+            document.getElementById('pagination-container').style.display = filteredCards.length === 0 ? 'none' : 'flex';
+
+            renderPaginationButtons(totalPages);
+        }
+
+        function renderPaginationButtons(totalPages) {
+            const container = document.getElementById('page-numbers');
+            const prevBtn   = document.getElementById('prev-btn');
+            const nextBtn   = document.getElementById('next-btn');
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+
+            container.innerHTML = '';
+            if (totalPages <= 1) return;
+
+            const pages = [];
+            if (totalPages <= 5) for (let i = 1; i <= totalPages; i++) pages.push(i);
+            else {
+                if (currentPage <= 3) pages.push(1, 2, 3, 4, '...', totalPages);
+                else if (currentPage >= totalPages - 2) pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+                else pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+            }
+
+            pages.forEach(p => {
+                if (p === '...') {
+                    const dots = document.createElement('span');
+                    dots.className = 'text-gray-400 text-[12px] font-bold px-1'; dots.textContent = '...';
+                    container.appendChild(dots);
+                } else {
+                    const btn = document.createElement('button');
+                    btn.textContent = p;
+                    btn.className = `w-10 h-10 rounded-full text-[11px] font-black transition-all ${p === currentPage ? 'bg-black text-white shadow-lg shadow-black/20' : 'border border-gray-200 hover:bg-black hover:text-white hover:border-black'}`;
+                    btn.onclick = () => changePage(p);
+                    container.appendChild(btn);
+                }
+            });
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderPage();
+            document.getElementById('product-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function renderFilterTags(search, sort, minP, maxP, cats, brands) {
+            const container = document.getElementById('active-filter-tags');
+            container.innerHTML = '';
+            const makeTag = (l, fn) => {
+                const t = document.createElement('span');
+                t.className = 'inline-flex items-center gap-2 bg-black text-white text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full';
+                t.innerHTML = `${l} <button onclick="${fn}" class="hover:text-gray-300 transition-colors">✕</button>`;
+                container.appendChild(t);
+            };
+
+            if (search) makeTag(`"${search}"`, "document.getElementById('bar-search-input').value='';document.getElementById('filter-search').value='';applyFilters();");
+            cats.forEach(c => makeTag(c, `document.querySelector('.category-chip[data-category="${c}"]').classList.remove('active');applyFilters();`));
+            brands.forEach(b => makeTag(b, `document.querySelector('.brand-chip[data-brand="${b}"]').classList.remove('active');applyFilters();`));
+            if (minP > 0 || maxP < 10000) makeTag(`₹${minP}-₹${maxP}`, "minRange.value=0;maxRange.value=10000;updateDualSlider();applyFilters();");
+        }
+
+        function clearAll() {
+            document.getElementById('filter-search').value = '';
+            document.getElementById('bar-search-input').value = '';
+            minRange.value = 0; maxRange.value = 10000; updateDualSlider();
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.sort-chip[data-sort="Latest Drop"]').forEach(c => c.classList.add('active'));
+            document.getElementById('active-sort-label').innerText = 'Sort By';
+            applyFilters();
+            closeSidebar();
+        }
+    </script>
+</body>
+</html>
