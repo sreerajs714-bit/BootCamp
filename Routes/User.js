@@ -59,15 +59,15 @@ route.get("/address",checkSession,loadAddress);
 route.post("/address",checkSession,addAddress)
 route.put("/address/:id", checkSession,editAddress);
 route.delete("/address/:id", checkSession,deleteAddress);
-route.get("/allProduct",loadAllProducts);
-route.get("/mens",loadMens);
-route.get("/productDetail/:id",loadProductDetail);
-route.get("/wishlist",loadWishlist);
-route.post("/toggleWishlist",toggleWishlist);
-route.delete("/removeFromWishlist",removeFromWishlist);
-route.get("/cart",loadCart);
-route.post("/addCart",addToCart);
-route.delete("/removeFromCart",removeFromCart);
+route.get("/allProduct",noCache,loadAllProducts);
+route.get("/mens",noCache,loadMens);
+route.get("/productDetail/:id",noCache,loadProductDetail);
+route.get("/wishlist",noCache,loadWishlist);
+route.post("/toggleWishlist",noCache,checkSession,toggleWishlist);
+route.delete("/removeFromWishlist",noCache,checkSession,removeFromWishlist);
+route.get("/cart",noCache,loadCart);
+route.post("/addCart",noCache,checkSession,addToCart);
+route.delete("/removeFromCart",noCache,checkSession,removeFromCart);
 
 
 export default route;

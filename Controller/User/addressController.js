@@ -4,6 +4,10 @@ import mongoose from "mongoose";
 export const loadAddress = async (req, res) => {
   try {
     const userId = req.session.user.id;
+     res.locals.breadcrumbs = [
+       { label: 'Home', url: '/' },
+       { label: "Address" },
+       ];
 
     const addresses = await Address.find({ user: userId }).sort({ isDefault: -1, createdAt: -1 });
 

@@ -69,9 +69,10 @@
 
     <!-- Navbar -->
     {{>navbar}}
+    {{>breadCrumbs}}
 
     <!-- Main Content -->
-    <main class="flex-1 w-full max-w-[1250px] mx-auto px-6 py-40 lg:py-40">
+    <main class="flex-1 w-full max-w-[1250px] mx-auto px-6 pt-8 lg:pt-8">
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
 
@@ -85,14 +86,26 @@
 
                 <!-- Dynamic Items -->
                 {{#each cartItems}}
-                <div class="cart-item flex flex-col sm:flex-row gap-6 p-5 sm:p-6 bg-white border border-gray-100 rounded-[24px] shadow-sm hover:shadow-md transition-shadow relative"
-                    data-item-id="{{this._id}}" data-id="{{this.productId._id}}" data-price="{{this.price}}" data-variant="{{this.variantId}}" data-size="{{this.size}}"
-                    data-stock="{{this.stock}}">
+                <div class="cart-item flex flex-col sm:flex-row gap-6 p-5 sm:p-6 bg-white border {{#if this.isUnavailable}}border-red-100{{else}}border-gray-100{{/if}} rounded-[24px] shadow-sm hover:shadow-md transition-shadow relative"
+                    data-item-id="{{this._id}}"
+                    data-id="{{this.productId._id}}"
+                    data-price="{{this.price}}"
+                    data-variant="{{this.variantId}}"
+                    data-size="{{this.size}}"
+                    data-stock="{{this.stock}}"
+                    data-unavailable="{{this.isUnavailable}}">
+
                     <!-- Image -->
                     <a href="/users/productDetail/{{this.productId._id}}"
-                        class="w-full sm:w-[130px] h-[150px] bg-[#f0f4f8] rounded-[16px] overflow-hidden flex-shrink-0 flex items-center justify-center hover:opacity-80 transition-opacity">
-                        <img src="{{this.productId.images.[0]}}" class="w-full h-full object-cover mix-blend-multiply"
+                        class="relative w-full sm:w-[130px] h-[150px] bg-[#f0f4f8] rounded-[16px] overflow-hidden flex-shrink-0 flex items-center justify-center hover:opacity-80 transition-opacity">
+                        <img src="{{this.productId.images.[0]}}" class="w-full h-full object-cover mix-blend-multiply {{#if this.isUnavailable}}opacity-40{{/if}}"
                             alt="{{this.productId.name}}">
+                        {{#if this.isUnavailable}}
+                        <!-- Unavailable overlay -->
+                        <div class="absolute inset-0 bg-white/60 rounded-[16px] flex items-center justify-center">
+                            <span class="text-red-500 text-[9px] font-black uppercase tracking-widest bg-white px-2 py-1 rounded-full border border-red-100 shadow-sm">Unavailable</span>
+                        </div>
+                        {{/if}}
                     </a>
 
                     <!-- Details Space -->
@@ -101,18 +114,26 @@
                         <div class="flex justify-between items-start gap-4">
                             <div>
                                 <a href="/users/productDetail/{{this.productId._id}}" class="hover:underline">
-                                    <h3 class="text-[15px] font-bold text-gray-900 leading-tight">{{this.productId.brand}} - {{this.productId.name}}</h3>
+                                    <h3 class="text-[15px] font-bold {{#if this.isUnavailable}}text-gray-400{{else}}text-gray-900{{/if}} leading-tight">
+                                        {{this.productId.brand}} - {{this.productId.name}}
+                                    </h3>
                                 </a>
-                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">SIZE :
-                                    {{this.size}}</p>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">SIZE : {{this.size}}</p>
 
+                                {{#if this.isUnavailable}}
+                                <!-- Out of stock badge -->
+                                <span class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 bg-red-50 text-red-500 rounded-full text-[9px] font-black uppercase tracking-widest border border-red-100">
+                                    <span class="material-symbols-outlined text-[11px]">block</span>
+                                    Out of Stock
+                                </span>
+                                {{/if}}
                             </div>
+
                             <!-- Price Block -->
                             <div class="text-right flex flex-col items-end">
-                                <span class="text-[16px] font-black">₹{{this.price}}</span>
+                                <span class="text-[16px] font-black {{#if this.isUnavailable}}text-gray-300{{/if}}">₹{{this.price}}</span>
                                 {{#if this.productId.price}}
-                                <span
-                                    class="text-[11px] text-gray-400 font-bold line-through mt-0.5">₹{{this.productId.price}}</span>
+                                <span class="text-[11px] text-gray-400 font-bold line-through mt-0.5">₹{{this.productId.price}}</span>
                                 {{/if}}
                             </div>
                         </div>
@@ -121,7 +142,17 @@
 
                         <!-- Bottom Row: Qty + Remove -->
                         <div class="flex items-center justify-between mt-6">
-                            <!-- Qty Button Wrapper -->
+
+                            {{#if this.isUnavailable}}
+                            <!-- Disabled qty controls when unavailable -->
+                            <div class="flex items-center bg-gray-100 rounded-full px-5 py-2 opacity-40 cursor-not-allowed">
+                                <button disabled class="text-gray-400 font-medium text-[18px] leading-none cursor-not-allowed">−</button>
+                                <input type="number" id="qty-{{this.productId._id}}" value="{{this.quantity}}" readonly
+                                    class="w-10 text-center bg-transparent text-[13px] font-black outline-none pointer-events-none text-gray-400">
+                                <button disabled class="text-gray-400 font-medium text-[18px] leading-none cursor-not-allowed">+</button>
+                            </div>
+                            {{else}}
+                            <!-- Active qty controls -->
                             <div class="flex items-center bg-[#f7f7f7] rounded-full px-5 py-2">
                                 <button
                                     class="text-gray-500 hover:text-black font-medium transition-colors text-[18px] leading-none"
@@ -132,6 +163,7 @@
                                     class="text-gray-500 hover:text-black font-medium transition-colors text-[18px] leading-none"
                                     onclick="updateQty('{{this.productId._id}}', 1)">+</button>
                             </div>
+                            {{/if}}
 
                             <!-- Remove Button -->
                             <button
@@ -270,6 +302,13 @@
         function updateQty(itemId, change) {
             const input = document.getElementById(`qty-${itemId}`);
             const cartItem = document.querySelector(`.cart-item[data-id="${itemId}"]`);
+
+            // ✅ Block if unavailable/out of stock
+            if (cartItem?.dataset.unavailable === 'true' || parseInt(cartItem?.dataset.stock) === 0) {
+                showToast("error", "This item is out of stock");
+                return;
+            }
+
             const stock = parseInt(cartItem?.dataset.stock) || 5;
             const maxQty = Math.min(5, stock);
 
@@ -288,6 +327,9 @@
             let subtotal = 0;
 
             document.querySelectorAll('.cart-item').forEach(item => {
+                // ✅ Skip unavailable items from subtotal
+                if (item.dataset.unavailable === 'true') return;
+
                 const price = parseFloat(item.dataset.price);
                 const itemId = item.dataset.id;
                 const qty = parseInt(document.getElementById(`qty-${itemId}`).value);
@@ -298,9 +340,10 @@
             document.getElementById('subtotal-display').textContent = '₹' + subtotal.toLocaleString('en-IN');
             document.getElementById('total-display').textContent = '₹' + subtotal.toLocaleString('en-IN');
 
-            // Update bag count
+            // Update bag count — only count available items
             let totalItems = 0;
             document.querySelectorAll('.cart-item').forEach(item => {
+                if (item.dataset.unavailable === 'true') return;
                 const itemId = item.dataset.id;
                 totalItems += parseInt(document.getElementById(`qty-${itemId}`).value);
             });
@@ -310,7 +353,6 @@
 
         // Modal triggers
         function openRemoveModal(itemId, itemName) {
-            console.log("openRemoveModal called:", itemId, itemName); // ← add this
             itemToRemoveId = itemId;
             document.getElementById('modalItemName').textContent = itemName;
             document.getElementById('removeModal').classList.add('active');
@@ -320,47 +362,48 @@
             document.getElementById('removeModal').classList.remove('active');
             itemToRemoveId = null;
         }
-async function confirmRemoveItem() {
-    if (!itemToRemoveId) return;
 
-    // ✅ Save BEFORE closeRemoveModal resets it
-    const idToRemove = itemToRemoveId;
-    const itemEl = document.querySelector(`.cart-item[data-item-id="${idToRemove}"]`);
+        async function confirmRemoveItem() {
+            if (!itemToRemoveId) return;
 
-    closeRemoveModal(); // resets itemToRemoveId to null — but we already saved it
+            // ✅ Save BEFORE closeRemoveModal resets it
+            const idToRemove = itemToRemoveId;
+            const itemEl = document.querySelector(`.cart-item[data-item-id="${idToRemove}"]`);
 
-    try {
-        const response = await axios.delete("/users/removeFromCart", {
-            data: { itemId: idToRemove }
-        });
+            closeRemoveModal();
 
-        if (response.data.success) {
-            if (itemEl) {
-                itemEl.style.transition = 'all 0.3s ease';
-                itemEl.style.opacity = '0';
-                itemEl.style.transform = 'translateY(10px)';
+            try {
+                const response = await axios.delete("/users/removeFromCart", {
+                    data: { itemId: idToRemove }
+                });
 
-                setTimeout(() => {
-                    itemEl.remove();
-                    const remaining = document.querySelectorAll('.cart-item').length;
-                    if (remaining === 0) {
-                        showToast("success", "Item removed from cart");
-                        setTimeout(() => window.location.reload(), 1000);
-                        return;
+                if (response.data.success) {
+                    if (itemEl) {
+                        itemEl.style.transition = 'all 0.3s ease';
+                        itemEl.style.opacity = '0';
+                        itemEl.style.transform = 'translateY(10px)';
+
+                        setTimeout(() => {
+                            itemEl.remove();
+                            const remaining = document.querySelectorAll('.cart-item').length;
+                            if (remaining === 0) {
+                                showToast("success", "Item removed from cart");
+                                setTimeout(() => window.location.reload(), 1000);
+                                return;
+                            }
+                            recalculateTotals();
+                            showToast("success", "Item removed from cart");
+                        }, 300);
                     }
-                    recalculateTotals();
-                    showToast("success", "Item removed from cart");
-                }, 300);
-            }
-        } else {
-            showToast("error", response.data.message || "Failed to remove item");
-        }
+                } else {
+                    showToast("error", response.data.message || "Failed to remove item");
+                }
 
-    } catch (err) {
-        console.error("Remove error:", err.response?.data);
-        showToast("error", "Something went wrong");
-    }
-}
+            } catch (err) {
+                console.error("Remove error:", err.response?.data);
+                showToast("error", "Something went wrong");
+            }
+        }
     </script>
 </body>
 

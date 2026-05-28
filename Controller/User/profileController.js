@@ -9,6 +9,10 @@ import { sendOTPEmail } from "../service/mail.js";
 export const loadProfile = async (req, res) => {
   try {
     const userId = req.session.user.id;
+      res.locals.breadcrumbs = [
+       { label: 'Home', url: '/' },
+       { label: "Profile" },
+       ];
     const user = await userSchema.findById(userId);
 
     return res.render("users/profile", { 
@@ -25,6 +29,11 @@ export const loadProfile = async (req, res) => {
 export const loadEditProfile=async (req,res)=>{
   try {
     const userId = req.session.user.id;
+      res.locals.breadcrumbs = [
+       { label: 'Home', url: '/' },
+        { label: 'Profile', url: '/users/profile' },
+       { label: "editProfile" },
+       ];
 
     // ✅ Fetch full user from DB
     const user = await userSchema.findById(userId);

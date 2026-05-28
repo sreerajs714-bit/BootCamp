@@ -98,14 +98,15 @@
 <body>
 
     {{>navbar}}
+    {{>breadCrumbs}}
 
-    <main class="max-w-[1500px] mx-auto px-6 py-24 lg:py-40">
+    <main class="max-w-[1500px] mx-auto px-6 py-8 lg:py-8">
 
         <!-- PRODUCT GRID -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
 
             <!-- IMAGES -->
-            <div class="lg:col-span-5 flex flex-col-reverse lg:flex-row gap-6">
+            <div class="lg:col-span-5 flex flex-col-reverse lg:flex-row gap-6 pt-12">
 
                 <!-- THUMBNAILS -->
                 <div id="thumbnail-container" class="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
@@ -120,18 +121,13 @@
                 <!-- MAIN IMAGE -->
                 <div class="flex-1 zoom-container group" onmousemove="zoomImage(event)" onmouseleave="resetZoom(event)">
                     <img id="main-image" src="{{product.images.[0]}}" class="max-h-full object-contain mix-blend-multiply filter drop-shadow-2xl">
-                    
-                    <!-- Zoom Hint -->
-                    <div class="absolute bottom-4 left-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full flex items-center gap-2 pointer-events-none shadow-sm border border-gray-200/50">
-                        <span class="material-symbols-outlined text-[14px]">zoom_in</span>
-                    </div>
                 </div>
             </div>
 
             <!-- DETAILS -->
             <div class="lg:col-span-7 flex flex-col justify-center">
 
-                <h1 id="product-name" class="text-4xl lg:text-5xl font-black uppercase tracking-tighter mb-4 leading-tight">
+                <h1 id="product-name" class="text-4xl lg:text-3xl font-black uppercase tracking-tighter mb-4 leading-tight">
                     {{product.productName}}
                 </h1>
 
@@ -168,14 +164,16 @@
                         <p class="text-[10px] font-black uppercase tracking-widest text-gray-500">Select Size</p>
                     </div>
 
-                    <div id="size-container" class="flex flex-wrap gap-2">
-                        {{#each product.sizes}}
-                        <button onclick="selectSize(this)" 
-                            class="size-btn w-12 h-10 border border-gray-200 rounded-lg text-[11px] font-bold hover:border-black transition-all flex items-center justify-center">
-                            {{this}}
-                        </button>
-                        {{/each}}
-                    </div>
+                    <!-- REPLACE THIS -->
+                       <div id="size-container" class="flex flex-wrap gap-2">
+                            {{#each product.sizes}}
+                                <button onclick="selectSize(this)"  class="size-btn w-12 h-10 border border-gray-200 rounded-lg text-[11px] font-bold hover:border-black transition-all flex items-center justify-center">
+                             {{this}}
+                                 </button>
+                             {{/each}}
+                        </div>
+                        <!-- EMPTY — JS will populate this -->
+                       <div id="size-container" class="flex flex-wrap gap-2"></div>
                 </div>
 
                 <!-- ACTIONS -->
@@ -216,7 +214,7 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {{#each similarProducts}}
-                <a href="/user/product-details/{{this.id}}" class="product-card-similar block group flex flex-col bg-white rounded-3xl p-3 border border-gray-50 transition-all cursor-pointer hover:no-underline text-inherit">
+                <a href="/users/productdetail/{{this.id}}" class="product-card-similar block group flex flex-col bg-white rounded-3xl p-3 border border-gray-50 transition-all cursor-pointer hover:no-underline text-inherit">
                     
                     <!-- Card Top (Image + Icons) -->
                     <div class="relative aspect-square bg-[#f8f8f8] rounded-2xl overflow-hidden mb-5">
@@ -350,6 +348,16 @@
             });
         });
 
+
+        document.addEventListener('DOMContentLoaded', () => {
+    // find default variant button and trigger selectVariant
+    const defaultVariant = productVariants.find(v => v.isDefault) || productVariants[0];
+    if (defaultVariant) {
+        const defaultBtn = document.querySelector(`[data-variant-id="${defaultVariant.id}"]`);
+        if (defaultBtn) selectVariant(defaultVariant.id, defaultBtn);
+    }
+});
+
         function changeImage(index, el) {
             const mainImg = document.getElementById('main-image');
             mainImg.style.opacity = '0.4';
@@ -460,12 +468,23 @@
                 if (response.data.success) {
                     showToast("success","Added to Cart Successfully");
                     updateBadges();
-                } else {
+                }else if(response.data.alreadyInCart){
+                    showToast("error", "Already in cart!"); 
+                }  else if (response.data.outOfStock) {
+                    showToast("error", "Sorry, this item is out of stock!");
+                }else {
                     showToast(response.data.message || "error","Failed to add to cart");
                 }
-            } catch (error) {
-                console.error("Cart Error:", error);
-                showToast("error","Something went wrong");
+           } catch (error) {
+               console.error("Cart Error:", error);
+               const data = error.response?.data;
+               if (data?.outOfStock) {
+                     showToast("error", "Sorry, this item is out of stock!");
+                } else if (data?.alreadyInCart) {
+                     showToast("error", "Already in cart!");
+                } else {
+                      showToast("error", data?.message || "Something went wrong");
+                }
             }
         }
 
@@ -476,7 +495,7 @@
             }
 
             try {
-                const response = await axios.post('/user/wishlist/toggle', { productId });
+                const response = await axios.post('/users/toggleWishlist', { productId });
                 if (response.data.success) {
                     const icon = btn.querySelector('.material-symbols-outlined');
                     if (response.data.isWishlisted) {

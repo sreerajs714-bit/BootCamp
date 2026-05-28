@@ -5,15 +5,27 @@ import Brand from "../../Model/brandModel.js";
 
 export const loadAllProducts = async (req, res) => {
     try {
+        // ✅ Step 1 — get only active category and brand IDs first
+        const [activeCategories, activeBrands] = await Promise.all([
+            Category.find({ isActive: true, isDeleted: false }).select("_id name").lean(),
+            Brand.find({ isActive: true, isDeleted: false }).select("_id name").lean()
+        ]);
+
+        const activeCategoryIds = activeCategories.map(c => c._id);
+        const activeBrandIds = activeBrands.map(b => b._id);
+
+        // ✅ Step 2 — filter products by active category and brand too
         const products = await Product.find({
             status: "active",
-            isDeleted: false
+            isDeleted: false,
+            category: { $in: activeCategoryIds },  // ← add this
+            brand: { $in: activeBrandIds }          // ← add this
         })
             .populate("brand", "name")
             .populate("category", "name")
             .lean();
 
-        // Get wishlist IDs if user is logged in
+        // rest of your code stays exactly the same...
         let wishlistedIds = [];
         if (req.user) {
             const user = await User.findById(req.user._id).select('wishlist').lean();
@@ -45,6 +57,9 @@ export const loadAllProducts = async (req, res) => {
                 category: product.category,
                 badge: product.isLimitedEdition ? "LIMITED" : "STANDARD",
                 rawPrice: variant?.price || 0,
+                defaultSize: Array.isArray(variant?.sizes)  // ← add this for cart
+                    ? variant.sizes[0]
+                    : variant?.sizes || "",
                 stock_label,
                 stock_icon,
                 images: variant?.images || [],
@@ -53,16 +68,14 @@ export const loadAllProducts = async (req, res) => {
             };
         });
 
-        // Get all active categories and brands for filter chips
-        const [categories, brands] = await Promise.all([
-            Category.find({ isActive: true, isDeleted: false }).select("name").lean(),
-            Brand.find({ isDeleted: false }).select("name").lean()
-        ]);
-
         res.render("users/allProduct", {
+            breadcrumbs: [
+               { label: 'Home', url: '/' },
+               { label: 'All Products' } 
+            ],
             products: shaped,
-            categories,
-            brands,
+            categories: activeCategories,  // ← use already fetched active ones
+            brands: activeBrands,          // ← use already fetched active ones
             user: req.user || null
         });
 
@@ -74,45 +87,49 @@ export const loadAllProducts = async (req, res) => {
 
 export const loadMens = async (req, res) => {
     try {
-        
-        // 1. Fetch only active, non-deleted products
+        // ✅ Get only active categories and brands first
+        const [activeCategories, activeBrands] = await Promise.all([
+            Category.find({ isActive: true, isDeleted: false }).select("_id name").lean(),
+            Brand.find({ isActive: true, isDeleted: false }).select("_id name").lean()
+        ]);
+
+        const activeCategoryIds = activeCategories.map(c => c._id.toString());
+        const activeBrandIds = activeBrands.map(b => b._id.toString());
+
+        // ✅ Fetch only active, non-deleted products with active category & brand
         const products = await Product.find({
             status: "active",
-            isDeleted: false
+            isDeleted: false,
+            category: { $in: activeCategoryIds },
+            brand: { $in: activeBrandIds }
         })
             .populate("brand", "name brandName")
             .populate("category", "name categoryName")
             .lean();
 
-
-        // 2. Filter ONLY MEN category (IMPORTANT)
+        // ✅ Filter ONLY MEN category
         const mensProducts = products.filter(product => {
             const categoryName =
                 product.category?.name ||
                 product.category?.categoryName;
-
             return categoryName?.toLowerCase() === "men";
         });
 
-        // ✅ GET wishlist IDs if user is logged in
+        // ✅ Get wishlist IDs if user is logged in
         let wishlistedIds = [];
         if (req.user) {
             const user = await User.findById(req.user._id).select('wishlist').lean();
             wishlistedIds = (user?.wishlist || []).map(id => String(id));
         }
 
-        // 3. Shape data for frontend
+        // ✅ Shape data for frontend
         const shaped = mensProducts.map(product => {
-
-            // pick best variant
             const variant =
                 product.variants?.find(v => v.isDefault && v.isActive) ||
                 product.variants?.find(v => v.isActive) ||
                 product.variants?.[0];
 
-            // stock logic
             let stock_label, stock_icon;
-
             if (!variant || variant.stock === 0) {
                 stock_label = "Out of Stock";
                 stock_icon = "cancel";
@@ -124,7 +141,6 @@ export const loadMens = async (req, res) => {
                 stock_icon = "check_circle";
             }
 
-            // safe brand & category
             const brandName =
                 product.brand?.name ||
                 product.brand?.brandName ||
@@ -140,27 +156,27 @@ export const loadMens = async (req, res) => {
                 productName: product.productName,
                 brand: brandName,
                 category: categoryName,
-
                 badge: product.isLimitedEdition ? "LIMITED" : "STANDARD",
-
                 rawPrice: variant?.price || 0,
-
+                defaultSize: Array.isArray(variant?.sizes)  // ✅ add this
+                    ? variant.sizes[0]
+                    : variant?.sizes || "",
                 stock_label,
                 stock_icon,
-
                 images: variant?.images || [],
-                variantId: variant && variant._id ? String(variant._id) : "",
-
-                // ✅ ADD THIS
+                variantId: variant?._id ? String(variant._id) : "",
                 isWishlisted: wishlistedIds.includes(String(product._id))
             };
         });
 
-        // 4. Render page
         res.render("users/mensCollection", {
+             breadcrumbs: [
+               { label: 'Home', url: '/' },
+               { label: 'Mens' } 
+            ],
             products: shaped,
             count: shaped.length,
-            user: req.user || null  // ✅ ADD THIS — needed for isLoggedIn check in frontend
+            user: req.user || null
         });
 
     } catch (error) {
@@ -173,7 +189,6 @@ export const loadProductDetail = async (req, res) => {
     try {
         const { id } = req.params;
 
-        // CURRENT PRODUCT
         const product = await Product.findById(id)
             .populate("brand", "name brandName")
             .populate("category", "name categoryName")
@@ -183,7 +198,6 @@ export const loadProductDetail = async (req, res) => {
             return res.status(404).send("Product not found");
         }
 
-        // DEFAULT VARIANT
         const variant =
             product.variants?.find(v => v.isDefault && v.isActive) ||
             product.variants?.find(v => v.isActive) ||
@@ -193,7 +207,6 @@ export const loadProductDetail = async (req, res) => {
             return res.status(404).send("No variant available");
         }
 
-        // BRAND & CATEGORY
         const brandName =
             product.brand?.name ||
             product.brand?.brandName ||
@@ -204,49 +217,75 @@ export const loadProductDetail = async (req, res) => {
             product.category?.categoryName ||
             "Unknown Category";
 
-        // MAIN PRODUCT SHAPE
+        // GROUP VARIANTS BY COLOR
+        const groups = {};
+
+        product.variants
+            .filter(v => v.isActive)
+            .forEach(v => {
+                const colorKey = (v.color || 'default').toLowerCase().trim();
+                const sizes = (v.sizes || []).map(s => String(s));
+
+                if (!groups[colorKey]) {
+                    groups[colorKey] = {
+                        id: v._id,
+                        color: v.color,
+                        price: v.price,
+                        stock: v.stock,
+                        sizes: sizes,
+                        images: v.images || [],
+                        isDefault: v.isDefault || false,
+                        variantIds: Object.fromEntries(
+                            sizes.length ? sizes.map(s => [s, String(v._id)]) : [['', String(v._id)]]
+                        )
+                    };
+                } else {
+                    // merge sizes
+                    sizes.forEach(s => {
+                        if (!groups[colorKey].sizes.includes(s)) {
+                            groups[colorKey].sizes.push(s);
+                        }
+                        groups[colorKey].variantIds[s] = String(v._id);
+                    });
+
+                    groups[colorKey].stock += v.stock;
+
+                    if (v.isDefault) {
+                        groups[colorKey].id = v._id;
+                        groups[colorKey].isDefault = true;
+                        groups[colorKey].price = v.price;
+                        groups[colorKey].images = v.images || [];
+                    }
+                }
+            });
+
+        const groupedVariants = Object.values(groups);
+
         const shapedProduct = {
             id: product._id,
-
             productName: product.productName,
             description: product.description,
-
             brand: brandName,
             category: categoryName,
-
             badge: product.isLimitedEdition ? "LIMITED" : "STANDARD",
-
             price: variant.price,
             stock: variant.stock,
-
             sizes: variant.sizes || [],
             images: variant.images || [],
-
-            variants: product.variants
-                .filter(v => v.isActive)
-                .map(v => ({
-                    id: v._id,
-                    color: v.color,
-                    price: v.price,
-                    stock: v.stock,
-                    sizes: v.sizes || [],
-                    images: v.images || [],
-                    isDefault: v.isDefault
-                }))
+            variants: groupedVariants
         };
 
-        // SIMILAR PRODUCTS
         const similarProductsRaw = await Product.find({
             _id: { $ne: product._id },
             category: product.category._id,
+            brand: product.brand._id,
             status: "active",
             isDeleted: false
         })
-            .limit(8)
+            .limit(4)
             .lean();
 
         const similarProducts = similarProductsRaw.map(p => {
-
             const firstVariant =
                 p.variants?.find(v => v.isDefault && v.isActive) ||
                 p.variants?.find(v => v.isActive) ||
@@ -256,14 +295,17 @@ export const loadProductDetail = async (req, res) => {
                 id: p._id,
                 productName: p.productName,
                 badge: p.isLimitedEdition ? "LIMITED" : "STANDARD",
-
                 price: firstVariant?.price || 0,
-
                 images: firstVariant?.images || []
             };
         });
 
-        // RENDER
+        res.locals.breadcrumbs = [
+            { label: 'Home', url: '/' },
+            { label: categoryName, url: '/users/allProduct' },
+            { label: product.productName }
+        ];
+
         res.render("users/productDetail", {
             product: shapedProduct,
             similarProducts

@@ -10,6 +10,11 @@ export const loadCart = async (req, res) => {
 
         const userId = req.session?.user?.id;
 
+       res.locals.breadcrumbs = [
+       { label: 'Home', url: '/' },
+       { label: "Cart" },
+       ];
+
         const cart = await Cart.findOne({ userId })
             .populate({
                 path: "items.productId",
@@ -59,7 +64,8 @@ export const loadCart = async (req, res) => {
     size: item.size || "",
     quantity: qty,
     price,
-    stock: variant?.stock || 0
+    stock: variant?.stock || 0,
+    isUnavailable: product.isDeleted || product.status !== "active" || variant?.stock === 0 
 };
         });
 
@@ -79,10 +85,8 @@ export const loadCart = async (req, res) => {
 
 export const addToCart = async (req, res) => {
     try {
-
         const userId = req.session?.user?.id || null;
-
-        const { productId, variantId,size, quantity = 1 } = req.body;
+        const { productId, variantId, size, quantity = 1 } = req.body;
 
         if (!productId || !variantId) {
             return res.status(400).json({
@@ -123,12 +127,21 @@ export const addToCart = async (req, res) => {
         // GUEST CART
         // =====================
         if (!userId) {
-
             if (!req.session.cart) req.session.cart = [];
+
+            // Cart limit check
+            if (req.session.cart.length >= 10) {
+                return res.status(400).json({
+                    success: false,
+                    cartLimit: true,
+                    message: "Cart limit reached. Maximum 10 items allowed."
+                });
+            }
 
             const existingItem = req.session.cart.find(item =>
                 item.productId === productId &&
-                item.variantId === variantId
+                item.variantId === variantId &&
+                item.size === (size || "")
             );
 
             if (existingItem) {
@@ -139,18 +152,15 @@ export const addToCart = async (req, res) => {
                 });
             }
 
-        const guestSize = Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes;
-
-// Guest cart push
-req.session.cart.push({
-    productId,
-    variantId,
-    quantity,
-    price: variant.price,
-    size: size || (Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes),
-    productName: product.productName,
-    productImage: product.images?.[0] || ""
-});
+            req.session.cart.push({
+                productId,
+                variantId,
+                quantity,
+                price: variant.price,
+                size: size || (Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes),
+                productName: product.productName,
+                productImage: product.images?.[0] || ""
+            });
 
             return res.status(200).json({
                 success: true,
@@ -167,11 +177,20 @@ req.session.cart.push({
             cart = new Cart({ userId, items: [] });
         }
 
+        // Cart limit check
+        if (cart.items.length >= 10) {
+            return res.status(400).json({
+                success: false,
+                cartLimit: true,
+                message: "Cart limit reached. Maximum 10 items allowed."
+            });
+        }
+
         const existingItem = cart.items.find(item =>
-    item.productId.toString() === productId &&
-    item.variantId?.toString() === variantId &&
-    item.size === (size || "")   // ← add this
-);
+            item.productId.toString() === productId &&
+            item.variantId?.toString() === variantId &&
+            item.size === (size || "")
+        );
 
         if (existingItem) {
             return res.status(200).json({
@@ -181,20 +200,17 @@ req.session.cart.push({
             });
         }
 
-       const cartSize = size || (Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes);
-
-// User cart push
-cart.items.push({
-    productId,
-    variantId,
-    quantity,
-    price: variant.price,
-    size: size || (Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes)
-});
+        cart.items.push({
+            productId,
+            variantId,
+            quantity,
+            price: variant.price,
+            size: size || (Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes)
+        });
 
         await cart.save();
 
-        // ← Remove from wishlist if present
+        // Remove from wishlist if present
         await Wishlist.updateOne(
             { userId },
             { $pull: { products: { productId } } }
@@ -206,6 +222,7 @@ cart.items.push({
         });
 
     } catch (error) {
+        // ✅ Backend only — no frontend code here
         console.error("addToCart error:", error);
         return res.status(500).json({
             success: false,

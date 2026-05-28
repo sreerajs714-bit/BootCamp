@@ -15,72 +15,177 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
 
     <style>
-        body { font-family: 'Inter', sans-serif; background: #fff; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #fff;
+        }
 
-        .product-card { transition: all 0.3s ease; }
-        .product-card:hover { transform: translateY(-4px); box-shadow: 0 16px 32px -12px rgba(0,0,0,0.1); }
+        .product-card {
+            transition: all 0.3s ease;
+        }
 
-        img { -webkit-user-drag: none; }
+        .product-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.1);
+        }
 
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0,'wght' 300,'GRAD' 0,'opsz' 24; }
-        .icon-fill { font-variation-settings: 'FILL' 1,'wght' 300,'GRAD' 0,'opsz' 24; }
+        img {
+            -webkit-user-drag: none;
+        }
 
-        #filter-sidebar { transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); }
-        #filter-overlay { transition: opacity 0.4s ease; pointer-events: none; }
-        body.sidebar-open { overflow: hidden; }
-        body.sidebar-open #filter-overlay { opacity: 1; pointer-events: auto; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+
+        #filter-sidebar {
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #filter-overlay {
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
+        body.sidebar-open #filter-overlay {
+            opacity: 1;
+            pointer-events: auto;
+        }
 
         .filter-chip {
             padding: 0.75rem 1.5rem;
             border-radius: 9999px;
             border: 1px solid #f3f4f6;
-            font-size: 11px; font-weight: 900;
-            text-transform: uppercase; letter-spacing: 0.2em;
-            transition: all 0.3s; cursor: pointer; background: white;
+            font-size: 11px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: white;
         }
+
         .filter-chip.active {
-            background-color: #000; color: #fff; border-color: #000;
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transform: scale(1.05);
+            background-color: #000;
+            color: #fff;
+            border-color: #000;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: scale(1.05);
         }
-        .filter-chip:not(.active):hover { border-color: #d1d5db; background-color: #f9fafb; }
+
+        .filter-chip:not(.active):hover {
+            border-color: #d1d5db;
+            background-color: #f9fafb;
+        }
 
         .refine-bar {
-            display: flex; align-items: center; justify-content: space-between;
-            background-color: #fff; border: 1px solid #f3f4f6; border-radius: 9999px;
-            padding: 0.6rem 1.75rem; box-shadow: 0 1px 2px 0 rgba(0,0,0,0.05); transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: #fff;
+            border: 1px solid #f3f4f6;
+            border-radius: 9999px;
+            padding: 0.6rem 1.75rem;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
         }
-        .refine-bar:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border-color: #e5e7eb; }
 
-        .refine-search-container { width: 0; overflow: hidden; transition: all 0.4s cubic-bezier(0.16,1,0.3,1); opacity: 0; }
-        .refine-bar.search-active .refine-search-container { width: 250px; opacity: 1; margin-right: 1.5rem; }
+        .refine-bar:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border-color: #e5e7eb;
+        }
+
+        .refine-search-container {
+            width: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            opacity: 0;
+        }
+
+        .refine-bar.search-active .refine-search-container {
+            width: 250px;
+            opacity: 1;
+            margin-right: 1.5rem;
+        }
 
         .sort-dropdown {
-            opacity: 0; transform: translateY(10px); pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .sort-dropdown.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-        .range-wrapper { position: relative; height: 20px; margin: 20px 0; }
-        .range-track { position: absolute; top: 50%; transform: translateY(-50%); height: 4px; width: 100%; background: #f1f1f1; z-index: 1; }
-        .range-fill { position: absolute; top: 50%; transform: translateY(-50%); height: 4px; background: #000; z-index: 2; }
-        .dual-range {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            width: 100%; pointer-events: none; appearance: none;
-            background: transparent; z-index: 3; margin: 0;
+        .sort-dropdown.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
         }
+
+        .range-wrapper {
+            position: relative;
+            height: 20px;
+            margin: 20px 0;
+        }
+
+        .range-track {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 4px;
+            width: 100%;
+            background: #f1f1f1;
+            z-index: 1;
+        }
+
+        .range-fill {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 4px;
+            background: #000;
+            z-index: 2;
+        }
+
+        .dual-range {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 100%;
+            pointer-events: none;
+            appearance: none;
+            background: transparent;
+            z-index: 3;
+            margin: 0;
+        }
+
         .dual-range::-webkit-slider-thumb {
-            pointer-events: auto; appearance: none;
-            width: 18px; height: 18px; background: #000;
-            border: 2px solid #fff; border-radius: 50%;
-            cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            pointer-events: auto;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: #000;
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
 
         /* Empty state for no results */
-        #no-results { display: none; }
+        #no-results {
+            display: none;
+        }
 
         /* Pagination */
         #pagination-container button:disabled {
@@ -94,9 +199,10 @@
 <body>
 
     {{>navbar}}
+    {{>breadCrumbs}}
 
     <!-- HEADER -->
-    <header class="max-w-[1400px] mx-auto px-6 pt-32 pb-8 text-center">
+    <header class="max-w-[1400px] mx-auto px-6 pt-8 pb-8 text-center">
         <div class="inline-flex items-center gap-2 bg-[#f4f4f5] px-4 py-1 rounded-full mb-6">
             <span class="material-symbols-outlined text-[16px]">male</span>
             <span class="text-[10px] font-bold tracking-[0.2em]">MEN'S STYLE</span>
@@ -114,7 +220,8 @@
 
             <!-- Left: Refine Trigger -->
             <button onclick="openSidebar()" class="flex items-center space-x-3 group shrink-0">
-                <span class="material-symbols-outlined text-[20px] text-gray-400 group-hover:text-black transition-colors">tune</span>
+                <span
+                    class="material-symbols-outlined text-[20px] text-gray-400 group-hover:text-black transition-colors">tune</span>
                 <span class="text-[11px] font-black tracking-[0.2em] uppercase">Refine</span>
             </button>
 
@@ -124,31 +231,50 @@
             <!-- Right: Search & Sort -->
             <div class="flex items-center justify-end pl-4">
                 <div class="refine-search-container">
-                    <input type="text" id="bar-search-input" placeholder="SEARCH PRODUCT..."
-                        oninput="applyFilters()"
+                    <input type="text" id="bar-search-input" placeholder="SEARCH PRODUCT..." oninput="applyFilters()"
                         onkeyup="if(event.key==='Escape') toggleBarSearch()"
                         class="w-full bg-transparent border-none outline-none text-[10px] font-black tracking-widest text-right placeholder:text-gray-300">
                 </div>
 
                 <div class="flex items-center space-x-6">
                     <button onclick="toggleBarSearch()" class="icon-btn">
-                        <span class="material-symbols-outlined text-[20px] text-gray-400 hover:text-black transition-colors">search</span>
+                        <span
+                            class="material-symbols-outlined text-[20px] text-gray-400 hover:text-black transition-colors">search</span>
                     </button>
                     <div class="h-4 w-[1px] bg-gray-200"></div>
 
                     <!-- Sort By -->
                     <div class="relative">
                         <button onclick="toggleSortDropdown()" class="flex items-center space-x-2 group h-full">
-                            <span id="active-sort-label" class="text-[11px] font-black tracking-[0.2em] uppercase">Sort By</span>
-                            <span class="material-symbols-outlined text-[18px] text-gray-400 group-hover:text-black transition-colors">expand_more</span>
+                            <span id="active-sort-label" class="text-[11px] font-black tracking-[0.2em] uppercase">Sort
+                                By</span>
+                            <span
+                                class="material-symbols-outlined text-[18px] text-gray-400 group-hover:text-black transition-colors">expand_more</span>
                         </button>
-                        <div id="sort-dropdown" class="sort-dropdown absolute top-full right-0 mt-4 w-56 bg-white border border-gray-100 rounded-2xl shadow-2xl z-[80] overflow-hidden">
+                        <div id="sort-dropdown"
+                            class="sort-dropdown absolute top-full right-0 mt-4 w-56 bg-white border border-gray-100 rounded-2xl shadow-2xl z-[80] overflow-hidden">
                             <div class="py-2">
-                                <button onclick="selectSort('Latest Drop')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Latest Drop</button>
-                                <button onclick="selectSort('Price Low - High')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Price Low - High</button>
-                                <button onclick="selectSort('Price High - Low')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Price High - Low</button>
-                                <button onclick="selectSort('Name A - Z')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Name A - Z</button>
-                                <button onclick="selectSort('Name Z - A')" class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Name Z - A</button>
+                                <button onclick="selectSort('Latest Drop')"
+                                    class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Latest
+                                    Drop</button>
+                                <button onclick="selectSort('Price Low - High')"
+                                    class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Price
+                                    Low - High</button>
+                                <button onclick="selectSort('Price High - Low')"
+                                    class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Price
+                                    High - Low</button>
+                                <button onclick="selectSort('Name A - Z')"
+                                    class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Name
+                                    A - Z</button>
+                                <button onclick="selectSort('Name Z - A')"
+                                    class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Name
+                                    Z - A</button>
+                                <button onclick="selectSort('Brand A - Z')"
+                                    class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Brand
+                                    A - Z</button>
+                                <button onclick="selectSort('Brand Z - A')"
+                                    class="w-full text-left px-6 py-3 text-[10px] font-black tracking-widest uppercase hover:bg-gray-50 transition-colors">Brand
+                                    Z - A</button>
                             </div>
                         </div>
                     </div>
@@ -158,9 +284,12 @@
     </section>
 
     <!-- FILTER SIDEBAR DRAWER -->
-    <div id="filter-overlay" onclick="closeSidebar()" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] opacity-0 pointer-events-none transition-all duration-300"></div>
+    <div id="filter-overlay" onclick="closeSidebar()"
+        class="fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] opacity-0 pointer-events-none transition-all duration-300">
+    </div>
 
-    <aside id="filter-sidebar" class="fixed top-0 right-0 h-full w-full max-w-[450px] bg-white z-[70] translate-x-full shadow-2xl flex flex-col">
+    <aside id="filter-sidebar"
+        class="fixed top-0 right-0 h-full w-full max-w-[450px] bg-white z-[70] translate-x-full shadow-2xl flex flex-col">
         <div class="p-8 border-b border-gray-100 flex items-center justify-between">
             <h2 class="text-xl font-black uppercase tracking-tighter">Filters</h2>
             <button onclick="closeSidebar()" class="icon-btn hover:scale-110 transition-transform">
@@ -173,8 +302,7 @@
             <!-- Search -->
             <div class="space-y-4">
                 <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Search Product</label>
-                <input type="text" id="filter-search" placeholder="Enter keywords..."
-                    oninput="syncSearchAndFilter()"
+                <input type="text" id="filter-search" placeholder="Enter keywords..." oninput="syncSearchAndFilter()"
                     class="w-full bg-[#f8f9fc] border-none outline-none rounded-2xl py-5 px-6 text-[14px] font-medium transition-all focus:ring-2 focus:ring-black/5">
             </div>
 
@@ -187,6 +315,16 @@
                     <button class="filter-chip sort-chip" data-sort="Price High - Low">Price High - Low</button>
                     <button class="filter-chip sort-chip" data-sort="Name A - Z">Name A - Z</button>
                     <button class="filter-chip sort-chip" data-sort="Name Z - A">Name Z - A</button>
+                    <button class="filter-chip sort-chip" data-sort="Brand A - Z">Brand A - Z</button>
+                    <button class="filter-chip sort-chip" data-sort="Brand Z - A">Brand Z - A</button>
+                </div>
+            </div>
+
+            <!-- Brand Filter -->
+            <div class="space-y-6">
+                <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Filter by Brand</label>
+                <div class="flex flex-wrap gap-3" id="brand-chips">
+                    <!-- Brands will be dynamically inserted here -->
                 </div>
             </div>
 
@@ -211,10 +349,12 @@
 
         <!-- Sidebar Footer -->
         <div class="p-8 border-t border-gray-100 grid grid-cols-2 gap-4">
-            <button id="clear-btn" class="px-6 py-5 rounded-2xl border border-gray-100 text-[11px] font-black uppercase tracking-widest hover:bg-gray-50 transition-colors">
+            <button id="clear-btn"
+                class="px-6 py-5 rounded-2xl border border-gray-100 text-[11px] font-black uppercase tracking-widest hover:bg-gray-50 transition-colors">
                 Clear All
             </button>
-            <button id="apply-btn" class="px-6 py-5 rounded-2xl bg-black text-white text-[11px] font-black uppercase tracking-widest hover:bg-black/90 shadow-lg shadow-black/10 transition-all">
+            <button id="apply-btn"
+                class="px-6 py-5 rounded-2xl bg-black text-white text-[11px] font-black uppercase tracking-widest hover:bg-black/90 shadow-lg shadow-black/10 transition-all">
                 Apply Filters
             </button>
         </div>
@@ -227,25 +367,25 @@
             {{#each products}}
             <a href="/users/productDetail/{{this.id}}"
                 class="product-card block border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white hover:no-underline text-inherit"
-                data-brand="{{this.brand}}"
-                data-price="{{this.rawPrice}}"
-                data-category="{{this.badge}}"
-                data-name="{{this.productName}}"
-                data-variant="{{this.variantId}}">
+                data-brand="{{this.brand}}" data-price="{{this.rawPrice}}" data-category="{{this.badge}}"
+                data-name="{{this.productName}}" data-variant="{{this.variantId}}"  data-size="{{this.defaultSize}}">
 
                 <!-- IMAGE -->
                 <div class="relative bg-gray-100 rounded-[16px] aspect-square overflow-hidden mb-5">
                     <button onclick="toggleWishlist(event, '{{this.id}}', this)"
                         class="absolute top-3 right-3 z-20 bg-white w-[38px] h-[38px] rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition">
-                        <span class="material-symbols-outlined text-[20px] text-gray-600 hover:text-red-500 {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
+                        <span
+                            class="material-symbols-outlined text-[20px] text-gray-600 hover:text-red-500 {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
                     </button>
-                    <div class="absolute bottom-3 left-3 z-20 bg-white px-2 py-1 text-[11px] rounded flex items-center gap-1 shadow-sm">
+                    <div
+                        class="absolute bottom-3 left-3 z-20 bg-white px-2 py-1 text-[11px] rounded flex items-center gap-1 shadow-sm">
                         <span class="material-symbols-outlined text-[14px]">{{this.stock_icon}}</span>
                         {{this.stock_label}}
                     </div>
                     <div class="carousel-container relative w-full h-full flex items-center justify-center">
                         {{#each this.images}}
-                        <img src="{{this}}" class="carousel-img absolute w-full h-full object-contain transition-opacity duration-300 {{#if @first}}opacity-100{{else}}opacity-0{{/if}}">
+                        <img src="{{this}}"
+                            class="carousel-img absolute w-full h-full object-contain transition-opacity duration-300 {{#if @first}}opacity-100{{else}}opacity-0{{/if}}">
                         {{/each}}
                     </div>
                 </div>
@@ -277,7 +417,9 @@
             <span class="material-symbols-outlined text-[48px] text-gray-200 mb-4 block">search_off</span>
             <h2 class="text-xl font-bold mb-2">No products found</h2>
             <p class="text-gray-400 mb-6">Try adjusting your filters or search term.</p>
-            <button onclick="clearAll()" class="bg-black text-white px-8 py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest">Clear Filters</button>
+            <button onclick="clearAll()"
+                class="bg-black text-white px-8 py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest">Clear
+                Filters</button>
         </div>
 
         <!-- PAGINATION -->
@@ -300,67 +442,79 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
+        const isLoggedIn = {{#if user}}true{{else}} false{{/if}};
 
-        // ── Cart ─────────────────────────────────────────────
-        async function addToCart(e, productId) {
-            e.preventDefault(); e.stopPropagation();
-            if (!isLoggedIn) { showToast("error","Please login to continue"); return; }
+       async function addToCart(e, productId) {
+    e.preventDefault(); e.stopPropagation();
+    if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
 
-            const productCard = e.currentTarget.closest('.product-card');
-            const variantId = productCard?.dataset?.variant;
+    const productCard = e.currentTarget.closest('.product-card');
+    const variantId = productCard?.dataset?.variant;
+    const size = productCard?.dataset?.size;  // ← add this
 
-            if (!variantId) { showToast("error","Variant missing for this product"); return; }
+    if (!variantId) { showToast("error", "Variant missing for this product"); return; }
 
-            try {
-                const response = await axios.post("/users/addCart", { productId, variantId, quantity: 1 }, {
-                    validateStatus: (status) => status < 500
-                });
+    try {
+        const response = await axios.post("/users/addCart", { productId, variantId, size, quantity: 1 }, {
+            validateStatus: (status) => status < 500
+        });
 
-                if (response.data.alreadyInCart) {
-                    showToast("error","Already in your cart");
-                } else if (response.data.success) {
-                    showToast("success","Added to cart");
-                } else if (response.data.outOfStock) {
-                    showToast("warning","This product is out of stock");
-                } else {
-                    showToast(response.data.message || "error","Failed to add to cart");
-                }
-            } catch (err) {
-                showToast(err?.response?.data?.message || "error","Something went wrong");
-            }
+        if (response.data.alreadyInCart) {
+            showToast("error", "Already in your cart");
+        } else if (response.data.cartLimit) {
+            showToast("error", "Cart is full! Maximum 10 items allowed.");
+        } else if (response.data.success) {
+            showToast("success", "Added to cart");
+        } else if (response.data.outOfStock) {
+            showToast("error", "This product is out of stock");
+        } else {
+            showToast("error", response.data.message || "Failed to add to cart");
         }
+    } catch (err) {
+        const data = err?.response?.data;
+        if (data?.cartLimit) showToast("error", "Cart is full! Maximum 10 items allowed.");
+        else if (data?.outOfStock) showToast("error", "This product is out of stock!");
+        else showToast("error", data?.message || "Something went wrong");
+    }
+}
 
-        async function buyNow(e, productId) {
-            e.preventDefault(); e.stopPropagation();
-            if (!isLoggedIn) { showToast("error","Please login to continue"); return; }
-            try {
-                const productCard = e.currentTarget.closest('.product-card');
-                const variantId = productCard?.dataset?.variant;
-                await axios.post('/users/addCart', { productId, variantId, quantity: 1 });
-                window.location.href = "/users/cart";
-            } catch (err) {
-                showToast(err?.response?.data?.message || "error","Failed to process request");
-            }
+async function buyNow(e, productId) {
+    e.preventDefault(); e.stopPropagation();
+    if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
+    try {
+        const productCard = e.currentTarget.closest('.product-card');
+        const variantId = productCard?.dataset?.variant;
+        const size = productCard?.dataset?.size;  // ← add this
+        const res = await axios.post('/users/addCart', { productId, variantId, size, quantity: 1 });
+        if (res.data.success || res.data.alreadyInCart) {
+            window.location.href = "/users/cart";
+        } else {
+            showToast("error", res.data.message || "Failed to process");
         }
+    } catch (err) {
+        const data = err?.response?.data;
+        if (data?.outOfStock) showToast("error", "This product is out of stock!");
+        else window.location.href = "/users/cart";
+    }
+}
 
         async function toggleWishlist(e, id, btn) {
             e.preventDefault(); e.stopPropagation();
-            if (!isLoggedIn) { showToast("error","Please login to continue"); return; }
+            if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
             try {
                 const response = await axios.post('/users/toggleWishlist', { productId: id });
                 if (response.data.success) {
                     const icon = btn.querySelector('.material-symbols-outlined');
                     if (response.data.isWishlisted) {
                         icon.classList.add('icon-fill', 'text-red-500');
-                        showToast("success","Added to wishlist");
+                        showToast("success", "Added to wishlist");
                     } else {
                         icon.classList.remove('icon-fill', 'text-red-500');
-                        showToast("success","Removed from wishlist");
+                        showToast("success", "Removed from wishlist");
                     }
                 }
             } catch (err) {
-                showToast("error","Failed to update wishlist");
+                showToast("error", "Failed to update wishlist");
             }
         }
 
@@ -453,6 +607,9 @@
         document.addEventListener('DOMContentLoaded', () => {
             originalCards = [...document.querySelectorAll('.product-card')];
 
+            // Extract and render brands
+            renderBrandChips();
+
             // Carousel logic
             originalCards.forEach(card => {
                 const images = card.querySelectorAll('.carousel-img');
@@ -486,6 +643,7 @@
             ).toLowerCase().trim();
 
             const activeSort = document.getElementById('active-sort-label').innerText;
+            const selectedBrands = [...document.querySelectorAll('.brand-chip.active')].map(c => c.dataset.brand);
 
             let minPrice = parseInt(minRange.value);
             let maxPrice = parseInt(maxRange.value);
@@ -493,10 +651,11 @@
 
             // ── 1. Filter ─────────────────────────────────────
             filteredCards = originalCards.filter(card => {
-                const name  = (card.dataset.name  || '').toLowerCase();
+                const name = (card.dataset.name || '').toLowerCase();
                 const brand = (card.dataset.brand || '').toLowerCase();
                 const price = parseFloat(card.dataset.price) || 0;
 
+                if (selectedBrands.length > 0 && !selectedBrands.includes(card.dataset.brand)) return false;
                 if (searchQuery && !name.includes(searchQuery) && !brand.includes(searchQuery)) return false;
                 if (price < minPrice || price > maxPrice) return false;
                 return true;
@@ -511,6 +670,10 @@
                 filteredCards.sort((a, b) => (a.dataset.name || '').localeCompare(b.dataset.name || ''));
             } else if (activeSort === 'NAME Z - A' || activeSort === 'Name Z - A') {
                 filteredCards.sort((a, b) => (b.dataset.name || '').localeCompare(a.dataset.name || ''));
+            } else if (activeSort === 'Brand A - Z') {
+                filteredCards.sort((a, b) => (a.dataset.brand || '').localeCompare(b.dataset.brand || ''));
+            } else if (activeSort === 'Brand Z - A') {
+                filteredCards.sort((a, b) => (b.dataset.brand || '').localeCompare(a.dataset.brand || ''));
             }
 
             // ── 3. Reset to page 1 on new filter ─────────────
@@ -524,7 +687,7 @@
             const grid = document.getElementById('product-grid');
             const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
             const start = (currentPage - 1) * ITEMS_PER_PAGE;
-            const end   = start + ITEMS_PER_PAGE;
+            const end = start + ITEMS_PER_PAGE;
             const pageCards = filteredCards.slice(start, end);
 
             // Hide all
@@ -546,8 +709,8 @@
 
         function renderPaginationButtons(totalPages) {
             const container = document.getElementById('page-numbers');
-            const prevBtn   = document.getElementById('prev-btn');
-            const nextBtn   = document.getElementById('next-btn');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
 
             prevBtn.disabled = currentPage === 1;
             nextBtn.disabled = currentPage === totalPages || totalPages === 0;
@@ -579,11 +742,10 @@
                 } else {
                     const btn = document.createElement('button');
                     btn.textContent = p;
-                    btn.className = `w-10 h-10 rounded-full text-[11px] font-black transition-all ${
-                        p === currentPage
+                    btn.className = `w-10 h-10 rounded-full text-[11px] font-black transition-all ${p === currentPage
                             ? 'bg-black text-white shadow-lg shadow-black/20'
                             : 'border border-gray-200 hover:bg-black hover:text-white hover:border-black'
-                    }`;
+                        }`;
                     btn.onclick = () => changePage(p);
                     container.appendChild(btn);
                 }
@@ -642,15 +804,35 @@
             document.querySelectorAll('.sort-chip').forEach(c => {
                 c.classList.toggle('active', c.dataset.sort === 'Latest Drop');
             });
+            document.querySelectorAll('.brand-chip').forEach(c => c.classList.remove('active'));
             document.getElementById('active-sort-label').innerText = 'Sort By';
             applyFilters();
             closeSidebar();
         }
 
+        function renderBrandChips() {
+            const container = document.getElementById('brand-chips');
+            if (!container) return;
+            const brands = [...new Set(originalCards.map(c => c.dataset.brand))].filter(b => b).sort();
+
+            container.innerHTML = '';
+            brands.forEach(brand => {
+                const chip = document.createElement('button');
+                chip.className = 'filter-chip brand-chip';
+                chip.dataset.brand = brand;
+                chip.textContent = brand;
+                chip.onclick = () => {
+                    chip.classList.toggle('active');
+                };
+                container.appendChild(chip);
+            });
+        }
+
         // ── Sidebar buttons ───────────────────────────────────
         document.getElementById('clear-btn').onclick = clearAll;
-        document.getElementById('apply-btn').onclick = () => { applyFilters(); closeSidebar(); showToast("success","Filters Applied"); };
+        document.getElementById('apply-btn').onclick = () => { applyFilters(); closeSidebar(); showToast("success", "Filters Applied"); };
     </script>
 
 </body>
+
 </html>
