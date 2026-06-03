@@ -154,13 +154,62 @@
         }
 
         .details-btn {
-            border: 1px solid #e5e7eb;
-            transition: all 0.3s ease;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            border: 1px solid #000000;
         }
 
         .details-btn:hover {
             border-color: #000000;
             background: #fcfcfc;
+        }
+
+        /* Time Filter Dropdown */
+        .filter-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 12px;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f3f4f6;
+            min-width: 240px;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 12px;
+        }
+
+        .filter-dropdown.active {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        .filter-option {
+            width: 100%;
+            padding: 16px 24px;
+            border-radius: 16px;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #000000;
+            transition: all 0.3s ease;
+            display: block;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .filter-option:hover {
+            background-color: #f9fafb;
+        }
+
+        .filter-option.active {
+            background-color: #0c111d;
+            color: #ffffff;
         }
     </style>
 </head>
@@ -169,37 +218,43 @@
 
     <!-- Navigation -->
     {{>navbar}}
+    {{>breadCrumbs}}
 
     <!-- Main Content -->
-    <main class="flex-grow max-w-7xl mx-auto w-full px-6 pt-30 pb-16 flex flex-col lg:flex-row relative">
+    <main class="flex-grow max-w-7xl mx-auto w-full px-6  pb-16 flex flex-col lg:flex-row relative">
 
         <!-- Sidebar Section (Fixed on Large Screens) -->
         <div class="w-full lg:w-80 lg:flex-shrink-0 mb-10 lg:mb-0 pt-40">
             <div class="lg:fixed lg:w-80 lg:pr-12">
                 <aside class="w-full lg:w-48 lg:fixed lg:top-32 h-fit mb-10 lg:mb-0 pt-12">
-               <h3 class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-8">Account</h3>
-                <nav class="flex flex-col space-y-6">
-                <a href="/users/profile" class="sidebar-link flex items-center text-[13px] font-bold text-gray-400 tracking-widest uppercase hover:text-black">
-                    <span class="material-symbols-outlined mr-4 text-[20px]">person</span>Profile
-                </a>
-                <a href="/users/address" class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
-                    <span class="material-symbols-outlined mr-4 text-[20px]">location_on</span>Address
-                </a>
-                <a href="/users/myOrders" class="sidebar-link flex items-center text-[13px] font-medium text-black tracking-widest uppercase">
-                    <span class="material-symbols-outlined mr-4 text-[20px]">inventory_2</span>My Orders
-                </a>
-                <a href="#" class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
-                    <span class="material-symbols-outlined mr-4 text-[20px]">account_balance_wallet</span>Wallet
-                </a>
-            </nav>
-        </aside>
-     </div>
-</div>
+                    <h3 class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-8">Account</h3>
+                    <nav class="flex flex-col space-y-6">
+                        <a href="/users/profile"
+                            class="sidebar-link flex items-center text-[13px] font-bold text-gray-400 tracking-widest uppercase hover:text-black">
+                            <span class="material-symbols-outlined mr-4 text-[20px]">person</span>Profile
+                        </a>
+                        <a href="/users/address"
+                            class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                            <span class="material-symbols-outlined mr-4 text-[20px]">location_on</span>Address
+                        </a>
+                        <a href="/users/myOrders"
+                            class="sidebar-link flex items-center text-[13px] font-medium text-black tracking-widest uppercase">
+                            <span class="material-symbols-outlined mr-4 text-[20px]">inventory_2</span>My Orders
+                        </a>
+                        <a href="#"
+                            class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                            <span class="material-symbols-outlined mr-4 text-[20px]">account_balance_wallet</span>Wallet
+                        </a>
+                    </nav>
+                </aside>
+            </div>
+        </div>
 
         <!-- Right Content Area (Scrollable) -->
         <div class="w-full flex-grow">
             <!-- Header Section (Scrollable) -->
-            <div class="mb-12 flex flex-col xl:flex-row xl:items-end justify-between gap-8 pt-32 border-b border-gray-50 -mx-4 px-4">
+            <div
+                class="mb-12 flex flex-col xl:flex-row xl:items-end justify-between gap-8 pt-4 border-b border-gray-50 -mx-4 px-4">
                 <div class="flex-grow">
                     <h1 class="text-4xl font-serif text-black uppercase tracking-tight mb-2 leading-none">Order History
                     </h1>
@@ -215,12 +270,19 @@
                         <input type="text" placeholder="Search orders..."
                             class="search-input w-64 pl-12 pr-6 py-3 bg-[#fbfbfb] border border-gray-100 rounded-lg text-[13px] focus:bg-white focus:border-black transition-all">
                     </div>
-                    <div class="relative">
-                        <button
-                            class="flex items-center gap-3 px-6 py-3 bg-[#fbfbfb] border border-gray-100 rounded-lg text-[11px] font-bold tracking-widest uppercase hover:border-black transition-all">
-                            All Time
-                            <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                    <div class="relative" id="time-filter-container">
+                        <button id="time-filter-btn"
+                            class="flex items-center gap-3 px-8 py-3.5 bg-white border border-gray-900 rounded-2xl text-[11px] font-black tracking-[0.2em] uppercase hover:bg-black hover:text-white transition-all shadow-sm">
+                            <span id="current-filter-label">All Time</span>
+                            <span class="material-symbols-outlined text-[20px] transition-transform duration-300" id="filter-chevron">expand_more</span>
                         </button>
+                        
+                        <div class="filter-dropdown" id="time-filter-dropdown">
+                            <button class="filter-option active" data-filter="all-time">All Time</button>
+                            <button class="filter-option" data-filter="last-30">Last 30 Days</button>
+                            <button class="filter-option" data-filter="last-6">Last 6 Months</button>
+                            <button class="filter-option" data-filter="2025">2025 Orders</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -250,19 +312,11 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-4 ml-auto">
-                            <span class="status-tag 
-                                    {{#eq this.status 'Placed'}}status-placed{{/eq}}
-                                    {{#eq this.status 'Processing'}}status-processing{{/eq}}
-                                    {{#eq this.status 'Delivered'}}status-delivered{{/eq}}
-                                    {{#eq this.status 'Cancelled'}}bg-red-50 text-red-600{{/eq}}">
-                                <span class="w-1.5 h-1.5 rounded-full 
-                                        {{#eq this.status 'Placed'}}bg-amber-500{{/eq}}
-                                        {{#eq this.status 'Processing'}}bg-blue-500{{/eq}}
-                                        {{#eq this.status 'Delivered'}}bg-green-500{{/eq}}
-                                        {{#eq this.status 'Cancelled'}}bg-red-500{{/eq}}"></span>
+                            <span class="status-tag {{this.statusTagClass}}">
+                                <span class="w-1.5 h-1.5 rounded-full {{this.statusDotClass}}"></span>
                                 {{this.status}}
                             </span>
-                            <a href="/users/orders/{{this._id}}"
+                            <a href="/users/orderDetail/{{this._id}}"
                                 class="details-btn px-6 py-2.5 rounded-lg text-[11px] font-bold tracking-widest uppercase flex items-center gap-2">
                                 <span class="material-symbols-outlined text-[18px]">info</span>
                                 Order Details
@@ -285,19 +339,38 @@
                                     <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-6">Size:
                                         {{this.size}} | Qty: {{this.quantity}}</p>
 
-                                    <div class="flex items-center gap-2 
-                                            {{#eq ../status 'Delivered'}}text-green-600{{else}}text-gray-400{{/eq}}">
-                                        <span class="material-symbols-outlined text-[18px]">
-                                            {{#eq ../status 'Delivered'}}check_circle{{else}}sync{{/eq}}
-                                        </span>
-                                        <span class="text-[11px] font-bold tracking-widest uppercase">
-                                            {{#eq ../status 'Delivered'}}Delivered
-                                            Successfully{{else}}{{../status}}{{/eq}}
-                                        </span>
+                                    <div class="flex items-center gap-4 mt-2">
+                                        <!-- Order Level Status -->
+                                        <div
+                                            class="flex items-center gap-2 {{#if ../isDelivered}}text-green-600{{else}}text-gray-400{{/if}}">
+                                            <span class="material-symbols-outlined text-[18px]">
+                                                {{#if ../isDelivered}}check_circle{{else}}sync{{/if}}
+                                            </span>
+                                            <span class="text-[11px] font-bold tracking-widest uppercase">
+                                                {{#if ../isDelivered}}Delivered Successfully{{else}}{{../status}}{{/if}}
+                                            </span>
+                                        </div>
+
+                                        <!-- Item Level Status -->
+                                        {{#if (or (eq this.status 'Cancelled') (eq this.status 'Canceled'))}}
+                                        <div class="flex items-center gap-2 text-red-500 border-l border-gray-100 pl-4">
+                                            <span class="material-symbols-outlined text-[18px]">cancel</span>
+                                            <span class="text-[11px] font-bold tracking-widest uppercase">Item
+                                                Cancelled</span>
+                                        </div>
+                                        {{else if (or (eq this.status 'Returned') (eq this.status 'returned'))}}
+                                        <div
+                                            class="flex items-center gap-2 text-blue-500 border-l border-gray-100 pl-4">
+                                            <span class="material-symbols-outlined text-[18px]">replay</span>
+                                            <span class="text-[11px] font-bold tracking-widest uppercase">Item
+                                                Returned</span>
+                                        </div>
+                                        {{/if}}
                                     </div>
                                 </div>
 
-                                {{#eq ../status 'Delivered'}}
+                                {{#if (and ../isDelivered (ne this.status 'Cancelled') (ne this.status 'Canceled') (ne
+                                this.status 'Returned') (ne this.status 'returned'))}}
                                 <div class="flex justify-end mt-4">
                                     <button onclick="buyAgain('{{this.product._id}}')"
                                         class="buy-again-btn premium-btn px-8 py-3.5 text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 rounded-lg">
@@ -305,7 +378,7 @@
                                         Buy Again
                                     </button>
                                 </div>
-                                {{/eq}}
+                                {{/if}}
                             </div>
                         </div>
                         {{#unless @last}}
@@ -341,7 +414,7 @@
         // Buy Again Logic
         async function buyAgain(productId) {
             try {
-                const response = await axios.post('/users/addToCart', {
+                const response = await axios.post('/users/addCart', {
                     productId: productId,
                     quantity: 1
                 });
@@ -386,6 +459,45 @@
                 });
             });
         }
+
+        // Time Filter Logic
+        const filterBtn = document.getElementById('time-filter-btn');
+        const filterDropdown = document.getElementById('time-filter-dropdown');
+        const filterLabel = document.getElementById('current-filter-label');
+        const filterChevron = document.getElementById('filter-chevron');
+        const filterOptions = document.querySelectorAll('.filter-option');
+
+        filterBtn?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            filterDropdown.classList.toggle('active');
+            if (filterChevron) {
+                filterChevron.style.transform = filterDropdown.classList.contains('active') ? 'rotate(180deg)' : 'rotate(0deg)';
+            }
+        });
+
+        filterOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const filterValue = option.getAttribute('data-filter');
+                if (filterLabel) filterLabel.innerText = option.innerText;
+                
+                // Update active state
+                filterOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+                
+                // Close dropdown
+                filterDropdown.classList.remove('active');
+                if (filterChevron) filterChevron.style.transform = 'rotate(0deg)';
+                
+                console.log("Filtering by:", filterValue);
+            });
+        });
+
+        window.addEventListener('click', () => {
+            if (filterDropdown?.classList.contains('active')) {
+                filterDropdown.classList.remove('active');
+                if (filterChevron) filterChevron.style.transform = 'rotate(0deg)';
+            }
+        });
     </script>
 </body>
 

@@ -13,7 +13,7 @@ import { loadAllProducts, loadMens, loadProductDetail } from "../Controller/User
 import { clearWishlist, loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
 import { addToCart, loadCart, removeFromCart } from "../Controller/User/cartController.js";
 import { loadCheckout, loadOrderSuccess, placeOrder } from "../Controller/User/checkoutController.js";
-import { loadMyOrders, loadOrderDetail } from "../Controller/User/ordersController.js";
+import { cancelOrder, downloadInvoice, loadMyOrders, loadOrderDetail } from "../Controller/User/ordersController.js";
 
 
 route.get("/auth/google",
@@ -75,7 +75,9 @@ route.get("/checkout",loadCheckout);
 route.get("/orderSuccess/:id",loadOrderSuccess);
 route.post("/orderSuccess",placeOrder);
 route.get("/myOrders",loadMyOrders);
-route.get("/orderDetail",loadOrderDetail);
+route.get("/orderDetail/:id",loadOrderDetail);
+route.get("/invoice/:id",downloadInvoice);
+route.post("/orderDetail/cancel",cancelOrder);
 
 
 

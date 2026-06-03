@@ -49,9 +49,12 @@ app.use(session({
 hbs.registerHelper('gt', (a, b) => a > b);
 hbs.registerHelper('gte', (a, b) => a >= b); 
 hbs.registerHelper("add", (a, b) => a + b);
-
+hbs.registerHelper('and', (a, b) => a && b);
+hbs.registerHelper('or', (a, b) => a || b);
+hbs.registerHelper('not', (a) => !a);
 hbs.registerHelper('includes', (arr, val) => Array.isArray(arr) && arr.map(String).includes(String(val)));
 hbs.registerHelper('eq', (a, b) => String(a) === String(b));
+hbs.registerHelper('ne', (a, b) => a !== b);
 hbs.registerHelper("lte", (a, b) => a <= b);
 hbs.registerHelper('json', (context) => JSON.stringify(context));
 hbs.registerHelper('selected', (a, b) => a && b && a.toString() === b.toString() ? 'selected' : '');

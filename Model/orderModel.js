@@ -11,7 +11,20 @@ const orderSchema = new mongoose.Schema({
             ref: "Product"
         },
         quantity: Number,
-        price: Number
+        price: Number,
+        size: String,
+        status: {
+            type: String,
+            default: "Active"  // Active | Cancelled
+        },
+        cancelReason: {
+            type: String,
+            default: ""
+        },
+        cancelNote: {
+            type: String,
+            default: ""
+        }
     }],
     address: Object,
     paymentMethod: String,
@@ -23,6 +36,14 @@ const orderSchema = new mongoose.Schema({
     paymentStatus: {
         type: String,
         default: "Pending"
+    },
+    cancelReason: {
+        type: String,
+        default: ""
+    },
+    cancelNote: {
+        type: String,
+        default: ""
     }
 }, {
     timestamps: true

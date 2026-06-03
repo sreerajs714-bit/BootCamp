@@ -100,20 +100,105 @@
         .premium-shadow {
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
         }
+
+        /* Animations */
+        @keyframes pulse-custom {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.2);
+            }
+
+            70% {
+                transform: scale(1.1);
+                opacity: 0.8;
+                box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+            }
+        }
+
+        .animate-pulse-custom {
+            animation: pulse-custom 2s infinite;
+        }
+
+        .btn-loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn-loading::after {
+            content: "";
+            width: 16px;
+            height: 16px;
+            border: 2px solid #000;
+            border-top-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 10px;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Modal Styles */
+        #cancel-modal-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #action-modal-overlay.active {
+            opacity: 1 !important;
+            pointer-events: auto !important;
+        }
+
+        #cancel-modal-content {
+            transform: translateY(20px) scale(0.98);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #action-modal-overlay #action-modal-content {
+            transform: translateY(20px) scale(0.98);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .reason-btn {
+            transition: all 0.3s ease;
+        }
+
+        .reason-btn.selected {
+            background-color: #000000;
+            color: #ffffff;
+            border-color: #000000;
+        }
     </style>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
-<body class="min-h-screen flex flex-col font-sans selection:bg-brand-950 selection:text-white pt-32">
+<body class="min-h-screen flex flex-col font-sans selection:bg-brand-950 selection:text-white pt-16">
 
     <!-- Navigation -->
     {{>navbar}}
+    {{>breadCrumbs}}
 
     <!-- Top Action Bar -->
-    <div class="max-w-7xl mx-auto w-full px-6 flex justify-end">
-        <button
+    <div class="max-w-7xl mx-auto w-full px-6 flex justify-end pt-16">
+        <button id="download-invoice-btn" onclick="downloadInvoice('{{order._id}}')"
             class="flex items-center gap-3 px-8 py-4 border border-gray-100 rounded-2xl text-[11px] font-bold tracking-widest uppercase hover:bg-gray-50 transition-all premium-shadow">
             <span class="material-symbols-outlined text-[20px]">download</span>
-            Download Invoice
+            <span class="btn-text">Download Invoice</span>
         </button>
     </div>
 
@@ -126,10 +211,12 @@
                 <div>
                     <h1 class="text-xl md:text-3xl font-serif mb-2">
                         <span class="italic text-gray-300 font-light mr-2">Order</span>
-                        <span class="font-bold tracking-tight">#{{#if order.orderId}}{{order.orderId}}{{else}}ORD-B576AA9C{{/if}}</span>
+                        <span class="font-bold tracking-tight">#{{#if
+                            order.orderId}}{{order.orderId}}{{else}}ORD-B576AA9C{{/if}}</span>
                     </h1>
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
-                        Placed on <span class="text-black">{{#if order.createdAt}}{{formatDate order.createdAt}}{{else}}June 02, 2026{{/if}}</span>
+                        Placed on <span class="text-black">{{#if order.createdAt}}{{formatDate
+                            order.createdAt}}{{else}}June 02, 2026{{/if}}</span>
                     </p>
                 </div>
             </div>
@@ -145,21 +232,24 @@
                         </div>
                         <div class="flex flex-col">
                             <h3 class="text-lg font-medium text-gray-400">Awaiting Payment</h3>
-                            <p class="text-[11px] text-gray-300 mt-1">Payment is currently being processed or awaiting re-attempt.</p>
+                            <p class="text-[11px] text-gray-300 mt-1">Payment is currently being processed or awaiting
+                                re-attempt.</p>
                         </div>
                     </div>
 
                     <!-- Step: Order Received -->
                     <div class="timeline-step">
-                        <div class="timeline-dot active">
+                        <div class="timeline-dot active animate-pulse-custom">
                             <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
                         </div>
                         <div class="flex justify-between items-start">
                             <div>
                                 <h3 class="text-lg font-medium text-black">Order Received</h3>
-                                <p class="text-[11px] text-gray-400 mt-1 leading-relaxed max-w-[280px]">BootCamp has received your order details and is currently processing them.</p>
+                                <p class="text-[11px] text-gray-400 mt-1 leading-relaxed max-w-[280px]">BootCamp has
+                                    received your order details and is currently processing them.</p>
                             </div>
-                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-2">{{formatTime order.createdAt}}</span>
+                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-2">{{formatTime
+                                order.createdAt}}</span>
                         </div>
                     </div>
 
@@ -200,13 +290,15 @@
                 <h2 class="text-3xl font-serif mb-8">Shipping Destination</h2>
                 <div class="max-w-md bg-white border border-gray-50 p-10 rounded-[40px] premium-shadow">
                     <div class="flex items-start gap-6">
-                        <div class="w-12 h-12 rounded-full bg-[#fbfbfb] border border-gray-50 flex items-center justify-center flex-shrink-0">
+                        <div
+                            class="w-12 h-12 rounded-full bg-[#fbfbfb] border border-gray-50 flex items-center justify-center flex-shrink-0">
                             <span class="material-symbols-outlined text-gray-300 text-xl">location_on</span>
                         </div>
                         <div>
                             <div class="flex items-center gap-3 mb-4">
                                 <h4 class="text-xl font-bold">{{order.address.name}}</h4>
-                                <span class="px-3 py-1 bg-gray-50 text-[9px] font-black uppercase tracking-widest text-gray-400 rounded-full">Delivery</span>
+                                <span
+                                    class="px-3 py-1 bg-gray-50 text-[9px] font-black uppercase tracking-widest text-gray-400 rounded-full">Delivery</span>
                             </div>
                             <div class="text-[13px] text-gray-500 leading-relaxed mb-6">
                                 {{order.address.address}}<br>
@@ -228,13 +320,31 @@
             <div class="summary-card p-10">
                 <div class="flex items-center justify-between mb-8">
                     <h2 class="text-2xl font-bold">Order Summary</h2>
-                    <span class="px-4 py-1.5 bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400 rounded-full">{{order.items.length}} Items</span>
+                    <span
+                        class="px-4 py-1.5 bg-gray-50 text-[10px] font-black uppercase tracking-widest text-gray-400 rounded-full">{{order.items.length}}
+                        Items</span>
                 </div>
 
                 <div class="mb-10">
-                    <button class="w-full py-4 rounded-2xl border border-red-50 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 hover:bg-red-50 transition-all">
+                    {{#if (eq order.orderStatus 'Delivered')}}
+                    <button onclick="openModal('RETURN', 'ALL')" 
+                        class="w-full py-4 rounded-2xl border border-blue-50 text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 hover:bg-blue-50 transition-all">
+                        Return Entire Order
+                    </button>
+                    {{else if (or (eq order.orderStatus 'Returned') (eq order.orderStatus 'returned'))}}
+                    <div class="w-full py-4 rounded-2xl bg-blue-50 text-center">
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Order Returned</span>
+                    </div>
+                    {{else if (or (eq order.orderStatus 'Cancelled') (eq order.orderStatus 'Canceled'))}}
+                    <div class="w-full py-4 rounded-2xl bg-red-50 text-center">
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-red-400">Order Cancelled</span>
+                    </div>
+                    {{else if (and (ne order.orderStatus 'Shipped') (ne order.orderStatus 'Cancelled') (ne order.orderStatus 'Canceled'))}}
+                    <button onclick="openModal('CANCEL', 'ALL')" 
+                        class="w-full py-4 rounded-2xl border border-red-50 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 hover:bg-red-50 transition-all">
                         Cancel Entire Order
                     </button>
+                    {{/if}}
                 </div>
 
                 <!-- Product List -->
@@ -242,17 +352,35 @@
                     {{#each order.items}}
                     <div class="flex gap-6">
                         <div class="w-24 h-28 bg-[#fbfbfb] rounded-2xl overflow-hidden flex-shrink-0">
-                            <img src="{{this.product.images.[0]}}" alt="{{this.product.productName}}" class="w-full h-full object-cover">
+                            <img src="{{this.product.images.[0]}}" alt="{{this.product.productName}}"
+                                class="w-full h-full object-cover">
                         </div>
                         <div class="flex-grow py-1">
                             <div class="flex justify-between items-start mb-1">
-                                <h4 class="text-[13px] font-black uppercase tracking-tight max-w-[160px]">{{this.product.productName}}</h4>
+                                <h4 class="text-[13px] font-black uppercase tracking-tight max-w-[160px]">
+                                    {{this.product.productName}}</h4>
                                 <span class="text-[14px] font-black tracking-tighter">₹{{this.price}}</span>
                             </div>
-                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Size: {{this.size}}</p>
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Size:
+                                {{this.size}}</p>
                             <div class="flex items-center justify-between">
                                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Qty: {{this.quantity}}</span>
-                                <button class="text-[9px] font-black uppercase tracking-[0.15em] text-red-500 hover:underline">Cancel Item</button>
+
+                                <div class="flex items-center">
+                                    {{#if (or (eq this.status 'Cancelled') (eq this.status 'Canceled'))}}
+                                    <span class="text-[9px] font-black uppercase tracking-[0.15em] text-red-500">Cancelled</span>
+                                    {{else if (or (eq this.status 'Returned') (eq this.status 'returned'))}}
+                                    <span class="text-[9px] font-black uppercase tracking-[0.15em] text-blue-500">Returned</span>
+                                    {{else}}
+                                        {{#if (eq order.orderStatus 'Delivered')}}
+                                        <button onclick="openModal('RETURN', '{{this._id}}')" 
+                                            class="text-[9px] font-black uppercase tracking-[0.15em] text-blue-500 hover:underline">Return Item</button>
+                                        {{else if (and (ne order.orderStatus 'Shipped') (ne order.orderStatus 'Cancelled') (ne order.orderStatus 'Canceled'))}}
+                                        <button onclick="openModal('CANCEL', '{{this._id}}')" 
+                                            class="text-[9px] font-black uppercase tracking-[0.15em] text-red-500 hover:underline">Cancel Item</button>
+                                        {{/if}}
+                                    {{/if}}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -261,18 +389,22 @@
 
                 <!-- Totals -->
                 <div class="space-y-4 pt-10 border-t border-gray-50">
-                    <div class="flex justify-between items-center text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em]">
+                    <div
+                        class="flex justify-between items-center text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em]">
                         <span>Order Subtotal</span>
                         <span class="text-black font-black">₹{{order.totalPrice}}</span>
                     </div>
-                    <div class="flex justify-between items-center text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em]">
+                    <div
+                        class="flex justify-between items-center text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em]">
                         <span>Shipping Fee</span>
                         <span class="text-green-500 font-black">FREE</span>
                     </div>
                     <div class="pt-6 flex justify-between items-end">
                         <div>
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Total Settlement</p>
-                            <p class="text-[9px] font-bold text-gray-300 uppercase tracking-widest">{{order.paymentMethod}}</p>
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Total
+                                Settlement</p>
+                            <p class="text-[9px] font-bold text-gray-300 uppercase tracking-widest">
+                                {{order.paymentMethod}}</p>
                         </div>
                         <span class="text-4xl font-serif tracking-tighter">₹{{order.totalPrice}}</span>
                     </div>
@@ -280,20 +412,199 @@
             </div>
 
             <!-- Returns Card -->
-            <div class="mt-8 bg-[#fbfbfb] border border-gray-50 p-8 rounded-[40px] flex items-center gap-6 premium-shadow">
-                <div class="w-14 h-14 rounded-full bg-white border border-gray-50 flex items-center justify-center flex-shrink-0">
+            <div
+                class="mt-8 bg-[#fbfbfb] border border-gray-50 p-8 rounded-[40px] flex items-center gap-6 premium-shadow">
+                <div
+                    class="w-14 h-14 rounded-full bg-white border border-gray-50 flex items-center justify-center flex-shrink-0">
                     <span class="material-symbols-outlined text-gray-300">replay</span>
                 </div>
                 <div>
                     <h5 class="text-[11px] font-black uppercase tracking-widest mb-1">7-Day Easy Returns</h5>
                     <p class="text-[10px] text-gray-400 leading-relaxed max-w-[200px]">
-                        If your selection does not meet your expectations, return it within 7 days for a seamless refund.
+                        If your selection does not meet your expectations, return it within 7 days for a seamless
+                        refund.
                     </p>
                 </div>
             </div>
         </aside>
 
     </main>
+
+    <!-- Action Modal (Used for both Cancel & Return) -->
+    <div id="action-modal-overlay"
+        class="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-6 overflow-hidden opacity-0 pointer-events-none"
+        style="transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);">
+        <div id="action-modal-content" class="bg-white w-full max-w-[540px] rounded-[48px] p-10 md:p-14 relative">
+            <!-- Close Button -->
+            <button onclick="closeModal()"
+                class="absolute top-8 right-8 text-gray-300 hover:text-black transition-colors">
+                <span class="material-symbols-outlined text-[28px]">close</span>
+            </button>
+
+            <!-- Modal Header -->
+            <h2 id="modal-title" class="font-serif text-[42px] leading-tight mb-4">Action</h2>
+            <p id="modal-description" class="text-gray-400 text-[15px] leading-relaxed mb-10">
+                Are you sure? This action cannot be undone.
+            </p>
+
+            <!-- Reason Selection -->
+            <div class="mb-10">
+                <p id="reason-label" class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-300 mb-6">Reason
+                    for action</p>
+                <div id="reasons-container" class="flex flex-wrap gap-3">
+                    <!-- Reasons populated by JS -->
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="mb-12">
+                <div class="bg-[#f9f9f9] rounded-3xl p-6">
+                    <textarea id="action-note" placeholder="Add a note (optional)..."
+                        class="w-full bg-transparent border-none focus:ring-0 text-[14px] text-gray-600 min-h-[100px] resize-none"></textarea>
+                </div>
+            </div>
+
+            <!-- Modal Actions -->
+            <div class="flex gap-4">
+                <button onclick="closeModal()"
+                    class="flex-1 py-5 rounded-2xl bg-gray-50 text-[12px] font-black uppercase tracking-widest hover:bg-gray-100 transition-all">
+                    Discard
+                </button>
+                <button id="confirm-action-btn" onclick="submitAction()"
+                    class="flex-1 py-5 rounded-2xl bg-[#1a1a1a] text-white text-[12px] font-black uppercase tracking-widest hover:bg-black transition-all shadow-xl shadow-black/10">
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/toast/toast.js"></script>
+    <!-- Scripts -->
+    <script>
+        const ORDER_ID = '{{order._id}}';
+        let currentActionId = null;
+        let currentMode = 'CANCEL'; // CANCEL or RETURN
+        let selectedReason = null;
+
+        const cancelReasons = ["Changed my mind", "Ordered by mistake", "Better price", "Slow delivery", "Wrong item"];
+        const returnReasons = ["Defective product", "Wrong size", "Not as described", "Quality issues", "No longer needed"];
+
+        async function downloadInvoice(orderId) {
+            const btn = document.getElementById('download-invoice-btn');
+            const text = btn.querySelector('.btn-text');
+
+            try {
+                btn.classList.add('btn-loading');
+                text.innerText = 'Preparing...';
+
+                window.location.href = `/users/invoice/${orderId}`;
+                setTimeout(() => {
+                    btn.classList.remove('btn-loading');
+                    text.innerText = 'Download Invoice';
+                }, 2000);
+
+            } catch (err) {
+                showToast("Failed to prepare invoice", "error");
+                btn.classList.remove('btn-loading');
+                text.innerText = 'Download Invoice';
+            }
+        }
+
+        function openModal(mode, id) {
+            currentMode = mode;
+            currentActionId = id;
+
+            const overlay = document.getElementById('action-modal-overlay');
+            const title = document.getElementById('modal-title');
+            const description = document.getElementById('modal-description');
+            const label = document.getElementById('reason-label');
+            const container = document.getElementById('reasons-container');
+
+            title.innerText = mode === 'CANCEL' ? 'Cancel Order' : 'Return Order';
+            description.innerText = mode === 'CANCEL'
+                ? 'Are you sure you want to cancel? This action cannot be undone.'
+                : 'Please tell us why you are returning this item. We will process your request shortly.';
+            label.innerText = mode === 'CANCEL' ? 'Reason for cancellation' : 'Reason for return';
+
+            container.innerHTML = '';
+            const reasons = mode === 'CANCEL' ? cancelReasons : returnReasons;
+            reasons.forEach(reason => {
+                const btn = document.createElement('button');
+                btn.className = 'reason-btn px-6 py-3 border border-gray-100 rounded-full text-[12px] font-medium hover:border-black';
+                btn.innerText = reason;
+                btn.onclick = () => selectReason(btn);
+                container.appendChild(btn);
+            });
+
+            // ← changed: use inline styles instead of classList
+            overlay.style.opacity = '1';
+            overlay.style.pointerEvents = 'auto';
+            document.body.style.overflow = 'hidden';
+
+            selectedReason = null;
+            document.getElementById('action-note').value = '';
+        }
+
+        function closeModal() {
+            const overlay = document.getElementById('action-modal-overlay');
+            // ← changed: use inline styles instead of classList
+            overlay.style.opacity = '0';
+            overlay.style.pointerEvents = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function selectReason(btn) {
+            document.querySelectorAll('.reason-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedReason = btn.innerText;
+        }
+
+        async function submitAction() {
+            if (!selectedReason) {
+                showToast(`Please select a reason for ${currentMode.toLowerCase()}`, "error");
+                return;
+            }
+
+            const btn = document.getElementById('confirm-action-btn');
+            const originalText = btn.innerText;
+            const note = document.getElementById('action-note').value;
+            const endpoint = currentMode === 'CANCEL' ? '/users/orderDetail/cancel' : '/users/orderDetail/return';
+
+            try {
+                btn.disabled = true;
+                btn.innerText = 'Processing...';
+
+                const response = await axios.post(endpoint, {
+                    id: currentActionId,
+                    orderId: ORDER_ID,
+                    reason: selectedReason,
+                    note: note
+                });
+
+                if (response.data.success) {
+                    showToast(`${currentMode} successful`, "success");
+                    setTimeout(() => {
+                        window.location.href = currentMode === 'CANCEL' ? '/users/myOrders' : window.location.href;
+                    }, 1500);
+                } else {
+                    showToast(response.data.message || `Failed to ${currentMode.toLowerCase()}`, "error");
+                    btn.disabled = false;
+                    btn.innerText = originalText;
+                }
+            } catch (err) {
+                console.error(`${currentMode} error:`, err);
+                showToast("Something went wrong", "error");
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModal();
+        });
+    </script>
 </body>
 
 </html>
