@@ -44,44 +44,41 @@ export const loadWishlist = async (req, res) => {
         const cart = await Cart.findOne({ userId }).lean();
         const cartProductIds = (cart?.items || []).map(i => i.productId.toString());
  
-        const wishlistItems = wishlist.products
-            .filter(item => {
-                const p = item.productId;
-                return p && !p.isDeleted && p.status === "active";
-            })
-            .map(item => {
-                const product = item.productId;
- 
-                const variant = product.variants?.find(
-                    v => v._id.toString() === item.variantId?.toString()
-                ) || product.variants?.[0];
- 
-                // Safe image extraction
-                const rawImages = variant?.images || [];
-                const images = rawImages.map(img => {
-                    if (typeof img === "string") return img;
-                    return img.url || img.path || img.src || "";
-                }).filter(Boolean);
- 
-                return {
-                    id: product._id,
-                    productName: product.productName,
-                    brand: product.brand?.name || product.brand?.brandName || "Brand",
-                    rawPrice: variant?.price || 0,
-                    price: `₹${(variant?.price || 0).toLocaleString("en-IN")}`,
-                    variantId: variant?._id,
-                    size: item.size || variant?.sizes?.[0] || '',
-                    images,
-                    color: variant?.color || "",
-                    badge: product.category || "",
-                    isLimitedEdition: product.isLimitedEdition || false,
-                    stock: variant?.stock || 0,
-                    stock_label: variant?.stock > 0 ? "In Stock" : "Out of Stock",
-                    stock_icon: variant?.stock > 0 ? "check_circle" : "cancel",
-                    isOutOfStock: (variant?.stock || 0) === 0,                         
-                    isInCart: cartProductIds.includes(product._id.toString()),          
-                };
-            });
+       const wishlistItems = wishlist.products
+        .filter(item => item.productId) // only filter out null/deleted refs
+        .map(item => {
+        const product = item.productId;
+
+        const isInactive = product.isDeleted || product.status !== "active";  // ← flag
+
+        const variant = product.variants?.find(
+            v => v._id.toString() === item.variantId?.toString()
+        ) || product.variants?.[0];
+
+        const rawImages = variant?.images || [];
+        const images = rawImages.map(img => {
+            if (typeof img === "string") return img;
+            return img.url || img.path || img.src || "";
+        }).filter(Boolean);
+
+        return {
+            id: product._id,
+            productName: product.productName,
+            brand: product.brand?.name || product.brand?.brandName || "Brand",
+            rawPrice: variant?.price || 0,
+            price: `₹${(variant?.price || 0).toLocaleString("en-IN")}`,
+            variantId: variant?._id,
+            size: item.size || variant?.sizes?.[0] || '',
+            images,
+            color: variant?.color || "",
+            badge: product.category || "",
+            isLimitedEdition: product.isLimitedEdition || false,
+            stock: variant?.stock || 0,
+            isOutOfStock: (variant?.stock || 0) === 0,
+            isInCart: cartProductIds.includes(product._id.toString()),
+            isInactive,   // ← added
+        };
+    });
  
         res.locals.breadcrumbs = [
             { label: 'Home', url: '/' },
@@ -218,5 +215,24 @@ export const removeFromWishlist = async (req, res) => {
             success: false,
             message: err.message
         });
+    }
+};
+
+export const clearWishlist = async (req, res) => {
+    try {
+        const userId =
+      req.session?.user?.id ||
+      req.session?.user?._id ||
+      req.user?._id;
+
+       const result= await Wishlist.findOneAndUpdate(
+            { userId },
+            { $set: { products: [] } }
+        );
+
+        res.json({ success: true, message: "Wishlist cleared successfully" });
+    } catch (error) {
+        console.error("Clear wishlist error:", error);
+        res.status(500).json({ success: false, message: "Something went wrong" });
     }
 };

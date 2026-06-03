@@ -1,4 +1,5 @@
-import userSchema from "../../Model/userModel.js"
+import userSchema from "../../Model/userModel.js";
+import Product from "../../Model/productModel.js";
 import session from "express-session";
 import { generateOTP }  from "../service/mail.js";
 import { sendOTPEmail } from "../service/mail.js";
@@ -140,10 +141,53 @@ export const LoginUser = async (req, res) => {
   }
 };
 
-export const loadHome = (req, res) => {
-  return res.render("users/home", {
-    user: req.session.user || null
-  });
+export const loadHome = async (req, res) => {
+  try {
+    const [newArrivals, limitedEdition] = await Promise.all([
+      Product.find({ status: "active", isDeleted: false })
+        .sort({ createdAt: -1 })
+        .limit(4)
+        .populate("brand", "name")
+        .lean(),
+
+      Product.find({ status: "active", isDeleted: false, isLimitedEdition: true })
+        .sort({ createdAt: -1 })
+        .limit(2)
+        .populate("brand", "name")
+        .lean(),
+    ]);
+
+    const formatProduct = (p) => {
+      const variant =
+        p.variants?.find((v) => v.isDefault && v.isActive) ||
+        p.variants?.find((v) => v.isActive) ||
+        p.variants?.[0];
+
+      return {
+        id: p._id.toString(),
+        productName: p.productName,
+        brand: p.brand?.name || "",       
+        rawPrice: variant?.price || 0,
+        images: variant?.images || [],
+        isLimitedEdition: p.isLimitedEdition,
+        createdAt: p.createdAt,
+      };
+    };
+
+    const formattedNewArrivals = newArrivals.map(formatProduct);
+    const formattedLimited = limitedEdition.map(formatProduct);
+
+
+    return res.render("users/home", {
+      user: req.session.user || null,
+      products: formattedNewArrivals,       
+      limitedProducts: formattedLimited,     
+    });
+
+  } catch (error) {
+    console.error("Home load error:", error);
+    return res.status(500).send("Server Error");
+  }
 };
 
 export const loadResetPassword=(req,res)=>{

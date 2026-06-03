@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders | BOOT CAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f9f9f9',
+                            100: '#e7e7e7',
+                            200: '#d1d1d1',
+                            300: '#b0b0b0',
+                            400: '#888888',
+                            500: '#6d6d6d',
+                            600: '#5d5d5d',
+                            700: '#4f4f4f',
+                            800: '#454545',
+                            900: '#3d3d3d',
+                            950: '#000000',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .sidebar-link {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .sidebar-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #000000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar-link:hover::after {
+            width: 20px;
+        }
+
+        .sidebar-link.active::after {
+            width: 100%;
+        }
+
+        /* Order Card Styling */
+        .order-card {
+            border: 1px solid #f3f4f6;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .order-card:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
+            transform: translateY(-2px);
+            border-color: #e5e7eb;
+        }
+
+        .status-tag {
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-placed {
+            background-color: #fff9e6;
+            color: #b45309;
+        }
+
+        .status-delivered {
+            background-color: #f0fdf4;
+            color: #15803d;
+        }
+
+        .status-processing {
+            background-color: #f9fafb;
+            color: #6b7280;
+        }
+
+        .search-input:focus {
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+            outline: none;
+        }
+
+        .premium-btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .premium-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .premium-btn:hover::before {
+            width: 300%;
+            height: 300%;
+        }
+
+        .buy-again-btn {
+            background: #000000;
+            color: #ffffff;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .buy-again-btn:hover {
+            background: #333333;
+            transform: scale(1.02);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .details-btn {
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .details-btn:hover {
+            border-color: #000000;
+            background: #fcfcfc;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col font-sans selection:bg-brand-950 selection:text-white">
+
+    <!-- Navigation -->
+    {{>navbar}}
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-6 pt-30 pb-16 flex flex-col lg:flex-row relative">
+
+        <!-- Sidebar Section (Fixed on Large Screens) -->
+        <div class="w-full lg:w-80 lg:flex-shrink-0 mb-10 lg:mb-0 pt-40">
+            <div class="lg:fixed lg:w-80 lg:pr-12">
+                <aside class="w-full lg:w-48 lg:fixed lg:top-32 h-fit mb-10 lg:mb-0 pt-12">
+               <h3 class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-8">Account</h3>
+                <nav class="flex flex-col space-y-6">
+                <a href="/users/profile" class="sidebar-link flex items-center text-[13px] font-bold text-gray-400 tracking-widest uppercase hover:text-black">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">person</span>Profile
+                </a>
+                <a href="/users/address" class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">location_on</span>Address
+                </a>
+                <a href="/users/myOrders" class="sidebar-link flex items-center text-[13px] font-medium text-black tracking-widest uppercase">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">inventory_2</span>My Orders
+                </a>
+                <a href="#" class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">account_balance_wallet</span>Wallet
+                </a>
+            </nav>
+        </aside>
+     </div>
+</div>
+
+        <!-- Right Content Area (Scrollable) -->
+        <div class="w-full flex-grow">
+            <!-- Header Section (Scrollable) -->
+            <div class="mb-12 flex flex-col xl:flex-row xl:items-end justify-between gap-8 pt-32 border-b border-gray-50 -mx-4 px-4">
+                <div class="flex-grow">
+                    <h1 class="text-4xl font-serif text-black uppercase tracking-tight mb-2 leading-none">Order History
+                    </h1>
+                    <p class="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase">Manage your recent orders
+                    </p>
+                </div>
+
+                <!-- Search & Filter Bar -->
+                <div class="flex items-center gap-4">
+                    <div class="relative group">
+                        <span
+                            class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-black transition-colors">search</span>
+                        <input type="text" placeholder="Search orders..."
+                            class="search-input w-64 pl-12 pr-6 py-3 bg-[#fbfbfb] border border-gray-100 rounded-lg text-[13px] focus:bg-white focus:border-black transition-all">
+                    </div>
+                    <div class="relative">
+                        <button
+                            class="flex items-center gap-3 px-6 py-3 bg-[#fbfbfb] border border-gray-100 rounded-lg text-[11px] font-bold tracking-widest uppercase hover:border-black transition-all">
+                            All Time
+                            <span class="material-symbols-outlined text-[18px]">expand_more</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order List -->
+            <div class="space-y-8">
+                {{#if orders.length}}
+                {{#each orders}}
+                <div class="order-card bg-white" data-aos="fade-up">
+                    <!-- Order Card Header -->
+                    <div
+                        class="bg-[#fcfcfc] px-8 py-6 border-b border-gray-50 flex flex-wrap items-center justify-between gap-6">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-16">
+                            <div>
+                                <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">Order
+                                    Placed</p>
+                                <p class="text-[14px] font-semibold text-black">{{formatDate this.createdAt}}</p>
+                            </div>
+                            <div>
+                                <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">Total</p>
+                                <p class="text-[14px] font-semibold text-black">₹{{this.totalPrice}}</p>
+                            </div>
+                            <div class="col-span-2 md:col-span-1">
+                                <p class="text-[10px] font-bold tracking-widest text-gray-400 uppercase mb-1">Order #
+                                </p>
+                                <p class="text-[14px] font-semibold text-black">#{{this.orderId}}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 ml-auto">
+                            <span class="status-tag 
+                                    {{#eq this.status 'Placed'}}status-placed{{/eq}}
+                                    {{#eq this.status 'Processing'}}status-processing{{/eq}}
+                                    {{#eq this.status 'Delivered'}}status-delivered{{/eq}}
+                                    {{#eq this.status 'Cancelled'}}bg-red-50 text-red-600{{/eq}}">
+                                <span class="w-1.5 h-1.5 rounded-full 
+                                        {{#eq this.status 'Placed'}}bg-amber-500{{/eq}}
+                                        {{#eq this.status 'Processing'}}bg-blue-500{{/eq}}
+                                        {{#eq this.status 'Delivered'}}bg-green-500{{/eq}}
+                                        {{#eq this.status 'Cancelled'}}bg-red-500{{/eq}}"></span>
+                                {{this.status}}
+                            </span>
+                            <a href="/users/orders/{{this._id}}"
+                                class="details-btn px-6 py-2.5 rounded-lg text-[11px] font-bold tracking-widest uppercase flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[18px]">info</span>
+                                Order Details
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Order Card Body -->
+                    <div class="p-8 space-y-8">
+                        {{#each this.items}}
+                        <div class="flex flex-col md:flex-row gap-8">
+                            <div
+                                class="w-32 h-40 bg-gray-50 flex-shrink-0 rounded-lg overflow-hidden border border-gray-100">
+                                <img src="{{this.product.images.[0]}}" alt="{{this.product.productName}}"
+                                    class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex-grow flex flex-col justify-between">
+                                <div>
+                                    <h3 class="text-2xl font-serif text-black mb-2">{{this.product.productName}}</h3>
+                                    <p class="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-6">Size:
+                                        {{this.size}} | Qty: {{this.quantity}}</p>
+
+                                    <div class="flex items-center gap-2 
+                                            {{#eq ../status 'Delivered'}}text-green-600{{else}}text-gray-400{{/eq}}">
+                                        <span class="material-symbols-outlined text-[18px]">
+                                            {{#eq ../status 'Delivered'}}check_circle{{else}}sync{{/eq}}
+                                        </span>
+                                        <span class="text-[11px] font-bold tracking-widest uppercase">
+                                            {{#eq ../status 'Delivered'}}Delivered
+                                            Successfully{{else}}{{../status}}{{/eq}}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{#eq ../status 'Delivered'}}
+                                <div class="flex justify-end mt-4">
+                                    <button onclick="buyAgain('{{this.product._id}}')"
+                                        class="buy-again-btn premium-btn px-8 py-3.5 text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 rounded-lg">
+                                        <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+                                        Buy Again
+                                    </button>
+                                </div>
+                                {{/eq}}
+                            </div>
+                        </div>
+                        {{#unless @last}}
+                        <hr class="border-gray-50">{{/unless}}
+                        {{/each}}
+                    </div>
+                </div>
+                {{/each}}
+                {{else}}
+                <!-- Empty State -->
+                <div class="py-24 px-6 flex flex-col items-center justify-center text-center">
+                    <div class="w-20 h-20 rounded-full bg-[#fbfbfb] flex items-center justify-center mb-8">
+                        <span class="material-symbols-outlined text-gray-300 text-4xl">inventory_2</span>
+                    </div>
+                    <h2 class="text-3xl font-serif text-black mb-4">No Orders Yet</h2>
+                    <p class="text-[13px] text-gray-500 max-w-sm mb-10 leading-relaxed">
+                        You haven't placed any orders yet. Once you do, they will appear here.
+                    </p>
+                    <a href="/all-products"
+                        class="px-10 py-4 bg-black text-white text-[11px] font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors">
+                        Start Shopping
+                    </a>
+                </div>
+                {{/if}}
+            </div>
+
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // Buy Again Logic
+        async function buyAgain(productId) {
+            try {
+                const response = await axios.post('/users/addToCart', {
+                    productId: productId,
+                    quantity: 1
+                });
+
+                if (response.data.success) {
+                    Swal.fire({
+                        title: 'Added to Bag',
+                        text: 'Product has been added to your shopping bag.',
+                        icon: 'success',
+                        showCancelButton: true,
+                        confirmButtonColor: '#000000',
+                        confirmButtonText: 'VIEW BAG',
+                        cancelButtonText: 'CONTINUE SHOPPING'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/users/cart';
+                        }
+                    });
+                } else {
+                    Swal.fire('Error', response.data.message || 'Failed to add product to bag', 'error');
+                }
+            } catch (error) {
+                console.error('Buy Again error:', error);
+                Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
+            }
+        }
+
+        // Search Orders Logic
+        const searchInput = document.querySelector('.search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const cards = document.querySelectorAll('.order-card');
+
+                cards.forEach(card => {
+                    const text = card.innerText.toLowerCase();
+                    if (text.includes(term)) {
+                        card.style.display = 'block';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+
+</html>

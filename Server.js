@@ -47,15 +47,34 @@ app.use(session({
 }            
 }));
 hbs.registerHelper('gt', (a, b) => a > b);
+hbs.registerHelper('gte', (a, b) => a >= b); 
 hbs.registerHelper("add", (a, b) => a + b);
-hbs.registerHelper("eq", function (a, b) {
-    return a === b;
-});
+
 hbs.registerHelper('includes', (arr, val) => Array.isArray(arr) && arr.map(String).includes(String(val)));
 hbs.registerHelper('eq', (a, b) => String(a) === String(b));
 hbs.registerHelper("lte", (a, b) => a <= b);
 hbs.registerHelper('json', (context) => JSON.stringify(context));
 hbs.registerHelper('selected', (a, b) => a && b && a.toString() === b.toString() ? 'selected' : '');
+
+hbs.registerHelper("formatDate", function (date) {
+    if (!date) return "";
+
+    return new Date(date).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric"
+    });
+});
+
+hbs.registerHelper("formatTime", function (date) {
+    if (!date) return "";
+
+    return new Date(date).toLocaleTimeString("en-IN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true
+    });
+});
 
 
 app.use(passport.initialize());
@@ -70,7 +89,7 @@ app.use((req, res, next) => {
 app.set("view engine", "hbs");
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static(path.join(process.cwd(), "public")));
 
 app.use("/admin",AdminRoute)
 app.use("/users",UserRoute)

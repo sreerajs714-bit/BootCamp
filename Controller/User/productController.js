@@ -185,6 +185,81 @@ export const loadMens = async (req, res) => {
     }
 };
 
+const loadWomens = async (req, res) => {
+  try {
+    const user = req.session?.user || null;
+
+    const products = await Product.aggregate([
+      {
+        $match: {
+          isDeleted: false,
+          gender: "Women", // adjust field/value to match your schema
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "categoryData",
+        },
+      },
+      { $unwind: { path: "$categoryData", preserveNullAndEmpty: true } },
+      {
+        $lookup: {
+          from: "variants",
+          localField: "_id",
+          foreignField: "productId",
+          as: "variants",
+        },
+      },
+      {
+        $match: {
+          "variants.0": { $exists: true }, // only products with variants
+        },
+      },
+      {
+        $addFields: {
+          defaultVariant: { $arrayElemAt: ["$variants", 0] },
+        },
+      },
+      {
+        $project: {
+          productName: 1,
+          brand: 1,
+          images: "$defaultVariant.images",
+          rawPrice: "$defaultVariant.price",
+          variantId: "$defaultVariant._id",
+          defaultSize: { $arrayElemAt: ["$defaultVariant.sizes", 0] },
+          badge: "$categoryData.name",
+        },
+      },
+    ]);
+
+    // Attach wishlist status if user is logged in
+    let wishlistedIds = [];
+    if (user) {
+      const wishlist = await Wishlist.findOne({ userId: user._id });
+      wishlistedIds = wishlist?.products?.map((p) => p.toString()) || [];
+    }
+
+    const formattedProducts = products.map((p) => ({
+      ...p,
+      id: p._id.toString(),
+      isWishlisted: wishlistedIds.includes(p._id.toString()),
+    }));
+
+    res.render("womens", {
+      user,
+      products: formattedProducts,
+      count: formattedProducts.length,
+    });
+  } catch (error) {
+    console.error("loadWomens error:", error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
 export const loadProductDetail = async (req, res) => {
     try {
         const { id } = req.params;
@@ -316,4 +391,3 @@ export const loadProductDetail = async (req, res) => {
         res.status(500).send("Server error");
     }
 };
-

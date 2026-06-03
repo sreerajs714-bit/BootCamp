@@ -90,6 +90,40 @@
             background-color: #f9fafb;
         }
 
+        .view-toggle {
+            display: inline-flex;
+            align-items: center;
+            background: #f0f0f0;
+            padding: 3px;
+            border-radius: 9999px;
+            gap: 2px;
+        }
+
+        .view-toggle button {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.25s ease;
+            color: #9ca3af;
+            background: transparent;
+            flex-shrink: 0;
+        }
+
+        .view-toggle button.active {
+            width: 36px;
+            height: 36px;
+            background: #000;
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+        }
+
+        .view-toggle button:not(.active):hover {
+            color: #374151;
+        }
+
         .refine-bar {
             display: flex;
             align-items: center;
@@ -97,7 +131,7 @@
             background-color: #fff;
             border: 1px solid #f3f4f6;
             border-radius: 9999px;
-            padding: 0.6rem 1.75rem;
+            padding: 0.4rem 1.25rem;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             transition: all 0.3s;
         }
@@ -115,9 +149,9 @@
         }
 
         .refine-bar.search-active .refine-search-container {
-            width: 250px;
+            width: 200px;
             opacity: 1;
-            margin-right: 1.5rem;
+            margin-right: 1rem;
         }
 
         .sort-dropdown {
@@ -148,6 +182,64 @@
             background: #f1f1f1;
             z-index: 1;
         }
+
+        /* List View Styles */
+        #product-grid.list-view {
+            grid-template-columns: 1fr !important;
+            gap: 12px;
+        }
+
+        /* In list view the card becomes a horizontal row */
+        #product-grid.list-view .product-card {
+            flex-direction: row !important;
+            align-items: center;
+            padding: 20px 24px;
+            gap: 24px;
+            min-height: 140px;
+        }
+
+        /* Image box: fixed 130×130 square */
+        #product-grid.list-view .product-card .card-img-box {
+            width: 130px;
+            height: 130px;
+            flex-shrink: 0;
+            border-radius: 14px;
+            margin-bottom: 0;
+            aspect-ratio: unset;
+        }
+
+        /* Details section: grows to fill space */
+        #product-grid.list-view .product-card .card-details {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2px;
+        }
+
+        /* Buttons: side by side on the right */
+        #product-grid.list-view .product-card .card-actions {
+            display: flex !important;
+            flex-direction: row !important;
+            gap: 10px;
+            flex-shrink: 0;
+            margin-top: 0;
+        }
+
+        #product-grid.list-view .product-card .card-actions button {
+            width: auto !important;
+            padding: 0 20px;
+            height: 44px;
+            white-space: nowrap;
+        }
+
+        /* Grid mode: buttons stacked, details block */
+        .card-details { display: flex; flex-direction: column; flex: 1; }
+        .card-actions { margin-top: auto; display: flex; flex-direction: column; gap: 8px; }
+
+        /* Rating row: hidden in grid, shown in list */
+        .card-rating { display: none; }
+        #product-grid.list-view .card-rating { display: flex; align-items: center; gap: 4px; margin-bottom: 2px; }
 
         .range-fill {
             position: absolute;
@@ -236,10 +328,10 @@
                         class="w-full bg-transparent border-none outline-none text-[10px] font-black tracking-widest text-right placeholder:text-gray-300">
                 </div>
 
-                <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-4">
                     <button onclick="toggleBarSearch()" class="icon-btn">
                         <span
-                            class="material-symbols-outlined text-[20px] text-gray-400 hover:text-black transition-colors">search</span>
+                            class="material-symbols-outlined text-[18px] text-gray-400 hover:text-black transition-colors">search</span>
                     </button>
                     <div class="h-4 w-[1px] bg-gray-200"></div>
 
@@ -277,6 +369,18 @@
                                     Z - A</button>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="h-4 w-[1px] bg-gray-200"></div>
+
+                    <!-- View Toggle -->
+                    <div class="view-toggle">
+                        <button id="grid-view-btn" onclick="toggleView('grid')" class="active" title="Grid View">
+                            <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                        </button>
+                        <button id="list-view-btn" onclick="toggleView('list')" title="List View">
+                            <span class="material-symbols-outlined text-[18px]">view_list</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -368,19 +472,18 @@
             <a href="/users/productDetail/{{this.id}}"
                 class="product-card block border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white hover:no-underline text-inherit"
                 data-brand="{{this.brand}}" data-price="{{this.rawPrice}}" data-category="{{this.badge}}"
-                data-name="{{this.productName}}" data-variant="{{this.variantId}}"  data-size="{{this.defaultSize}}">
+                data-name="{{this.productName}}" data-variant="{{this.variantId}}" data-size="{{this.defaultSize}}">
 
                 <!-- IMAGE -->
-                <div class="relative bg-gray-100 rounded-[16px] aspect-square overflow-hidden mb-5">
+                <div class="card-img-box relative bg-gray-100 rounded-[16px] aspect-square overflow-hidden mb-4">
                     <button onclick="toggleWishlist(event, '{{this.id}}', this)"
-                        class="absolute top-3 right-3 z-20 bg-white w-[38px] h-[38px] rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition">
+                        class="absolute top-3 right-3 z-20 bg-white w-[32px] h-[32px] rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition">
                         <span
-                            class="material-symbols-outlined text-[20px] text-gray-600 hover:text-red-500 {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
+                            class="material-symbols-outlined text-[18px] text-gray-600 hover:text-red-500 {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
                     </button>
-                    <div
-                        class="absolute bottom-3 left-3 z-20 bg-white px-2 py-1 text-[11px] rounded flex items-center gap-1 shadow-sm">
-                        <span class="material-symbols-outlined text-[14px]">{{this.stock_icon}}</span>
-                        {{this.stock_label}}
+                    <div class="absolute bottom-3 left-3 z-20 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-1.5 shadow-sm border border-gray-100">
+                        <span class="material-symbols-outlined text-[13px] text-[#10b981] icon-fill">check_circle</span>
+                        <span class="text-[9px] font-bold text-black uppercase tracking-wider">In Stock</span>
                     </div>
                     <div class="carousel-container relative w-full h-full flex items-center justify-center">
                         {{#each this.images}}
@@ -391,21 +494,37 @@
                 </div>
 
                 <!-- DETAILS -->
-                <div class="flex flex-col flex-1">
-                    <div class="text-[10px] text-gray-400 uppercase">{{this.badge}}</div>
-                    <h3 class="font-bold text-[15px] mb-1">{{this.productName}}</h3>
-                    <p class="text-[12px] text-gray-500 mb-4 line-clamp-1 font-bold">{{this.brand}}</p>
-                    <div class="text-[18px] font-black mb-4">₹{{this.rawPrice}}</div>
-                    <div class="mt-auto flex flex-col gap-2">
-                        <button onclick="addToCart(event, '{{this.id}}')"
-                            class="w-full bg-black text-white py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-gray-800 transition-all">
-                            Add to Cart
-                        </button>
-                        <button onclick="buyNow(event, '{{this.id}}')"
-                            class="w-full bg-gray-100 text-black py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-gray-200 transition-all">
-                            Buy Now
-                        </button>
+                <div class="card-details">
+                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.1em] mb-1">{{this.badge}}</div>
+                    <h3 class="font-bold text-[15px] mb-1 leading-tight">{{this.productName}}</h3>
+
+                    <!-- Rating row: visible in list view only -->
+                    <div class="card-rating">
+                        <div class="flex text-yellow-400">
+                            <span class="material-symbols-outlined text-[13px] icon-fill">star</span>
+                            <span class="material-symbols-outlined text-[13px] icon-fill">star</span>
+                            <span class="material-symbols-outlined text-[13px] icon-fill">star</span>
+                            <span class="material-symbols-outlined text-[13px] icon-fill">star</span>
+                            <span class="material-symbols-outlined text-[13px]">star</span>
+                        </div>
+                        <span class="text-[11px] text-gray-400">(395)</span>
                     </div>
+
+                    <p class="text-[12px] text-gray-500 font-medium mb-3">{{this.brand}}</p>
+                    <div class="text-[18px] font-black">₹{{this.rawPrice}}</div>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="card-actions">
+                    <button onclick="addToCart(event, '{{this.id}}')"
+                        class="w-full bg-black text-white py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-gray-800 transition-all flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-[16px]">shopping_bag</span>
+                        Add to Cart
+                    </button>
+                    <button onclick="buyNow(event, '{{this.id}}')"
+                        class="w-full bg-gray-100 text-black py-3 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-gray-200 transition-all">
+                        Buy Now
+                    </button>
                 </div>
             </a>
             {{/each}}
@@ -442,61 +561,61 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        const isLoggedIn = {{#if user}}true{{else}} false{{/if}};
+        const isLoggedIn = {{#if user}}true{{else }} false{{/if }};
 
-       async function addToCart(e, productId) {
-    e.preventDefault(); e.stopPropagation();
-    if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
+        async function addToCart(e, productId) {
+            e.preventDefault(); e.stopPropagation();
+            if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
 
-    const productCard = e.currentTarget.closest('.product-card');
-    const variantId = productCard?.dataset?.variant;
-    const size = productCard?.dataset?.size;  // ← add this
+            const productCard = e.currentTarget.closest('.product-card');
+            const variantId = productCard?.dataset?.variant;
+            const size = productCard?.dataset?.size;  // ← add this
 
-    if (!variantId) { showToast("error", "Variant missing for this product"); return; }
+            if (!variantId) { showToast("error", "Variant missing for this product"); return; }
 
-    try {
-        const response = await axios.post("/users/addCart", { productId, variantId, size, quantity: 1 }, {
-            validateStatus: (status) => status < 500
-        });
+            try {
+                const response = await axios.post("/users/addCart", { productId, variantId, size, quantity: 1 }, {
+                    validateStatus: (status) => status < 500
+                });
 
-        if (response.data.alreadyInCart) {
-            showToast("error", "Already in your cart");
-        } else if (response.data.cartLimit) {
-            showToast("error", "Cart is full! Maximum 10 items allowed.");
-        } else if (response.data.success) {
-            showToast("success", "Added to cart");
-        } else if (response.data.outOfStock) {
-            showToast("error", "This product is out of stock");
-        } else {
-            showToast("error", response.data.message || "Failed to add to cart");
+                if (response.data.alreadyInCart) {
+                    showToast("error", "Already in your cart");
+                } else if (response.data.cartLimit) {
+                    showToast("error", "Cart is full! Maximum 10 items allowed.");
+                } else if (response.data.success) {
+                    showToast("success", "Added to cart");
+                } else if (response.data.outOfStock) {
+                    showToast("error", "This product is out of stock");
+                } else {
+                    showToast("error", response.data.message || "Failed to add to cart");
+                }
+            } catch (err) {
+                const data = err?.response?.data;
+                if (data?.cartLimit) showToast("error", "Cart is full! Maximum 10 items allowed.");
+                else if (data?.outOfStock) showToast("error", "This product is out of stock!");
+                else showToast("error", data?.message || "Something went wrong");
+            }
         }
-    } catch (err) {
-        const data = err?.response?.data;
-        if (data?.cartLimit) showToast("error", "Cart is full! Maximum 10 items allowed.");
-        else if (data?.outOfStock) showToast("error", "This product is out of stock!");
-        else showToast("error", data?.message || "Something went wrong");
-    }
-}
 
-async function buyNow(e, productId) {
-    e.preventDefault(); e.stopPropagation();
-    if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
-    try {
-        const productCard = e.currentTarget.closest('.product-card');
-        const variantId = productCard?.dataset?.variant;
-        const size = productCard?.dataset?.size;  // ← add this
-        const res = await axios.post('/users/addCart', { productId, variantId, size, quantity: 1 });
-        if (res.data.success || res.data.alreadyInCart) {
-            window.location.href = "/users/cart";
-        } else {
-            showToast("error", res.data.message || "Failed to process");
+        async function buyNow(e, productId) {
+            e.preventDefault(); e.stopPropagation();
+            if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
+            try {
+                const productCard = e.currentTarget.closest('.product-card');
+                const variantId = productCard?.dataset?.variant;
+                const size = productCard?.dataset?.size;  // ← add this
+                const res = await axios.post('/users/addCart', { productId, variantId, size, quantity: 1 });
+                if (res.data.success || res.data.alreadyInCart) {
+                    window.location.href = "/users/cart";
+                } else {
+                    showToast("error", res.data.message || "Failed to process");
+                }
+            } catch (err) {
+                const data = err?.response?.data;
+                if (data?.outOfStock) showToast("error", "This product is out of stock!");
+                else window.location.href = "/users/cart";
+            }
         }
-    } catch (err) {
-        const data = err?.response?.data;
-        if (data?.outOfStock) showToast("error", "This product is out of stock!");
-        else window.location.href = "/users/cart";
-    }
-}
 
         async function toggleWishlist(e, id, btn) {
             e.preventDefault(); e.stopPropagation();
@@ -602,6 +721,27 @@ async function buyNow(e, productId) {
         let currentPage = 1;
         let filteredCards = [];
         let originalCards = [];
+        let currentView = 'grid';
+
+        function toggleView(view) {
+            currentView = view;
+            const grid = document.getElementById('product-grid');
+            const gridBtn = document.getElementById('grid-view-btn');
+            const listBtn = document.getElementById('list-view-btn');
+            if (view === 'list') {
+                grid.classList.add('list-view');
+                listBtn.classList.add('active');
+                gridBtn.classList.remove('active');
+            } else {
+                grid.classList.remove('list-view');
+                gridBtn.classList.add('active');
+                listBtn.classList.remove('active');
+            }
+            localStorage.setItem('productViewPreference', view);
+        }
+
+        const savedView = localStorage.getItem('productViewPreference');
+        if (savedView) setTimeout(() => toggleView(savedView), 0);
 
         // ── Core filter + sort + pagination engine ────────────
         document.addEventListener('DOMContentLoaded', () => {
@@ -743,8 +883,8 @@ async function buyNow(e, productId) {
                     const btn = document.createElement('button');
                     btn.textContent = p;
                     btn.className = `w-10 h-10 rounded-full text-[11px] font-black transition-all ${p === currentPage
-                            ? 'bg-black text-white shadow-lg shadow-black/20'
-                            : 'border border-gray-200 hover:bg-black hover:text-white hover:border-black'
+                        ? 'bg-black text-white shadow-lg shadow-black/20'
+                        : 'border border-gray-200 hover:bg-black hover:text-white hover:border-black'
                         }`;
                     btn.onclick = () => changePage(p);
                     container.appendChild(btn);

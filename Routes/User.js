@@ -10,8 +10,10 @@ import { uploadProfile } from "../Middleware/multer.js";
 import passport from "../Config/passport.js";
 import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controller/User/addressController.js";
 import { loadAllProducts, loadMens, loadProductDetail } from "../Controller/User/productController.js";
-import { loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
+import { clearWishlist, loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
 import { addToCart, loadCart, removeFromCart } from "../Controller/User/cartController.js";
+import { loadCheckout, loadOrderSuccess, placeOrder } from "../Controller/User/checkoutController.js";
+import { loadMyOrders, loadOrderDetail } from "../Controller/User/ordersController.js";
 
 
 route.get("/auth/google",
@@ -65,9 +67,16 @@ route.get("/productDetail/:id",noCache,loadProductDetail);
 route.get("/wishlist",noCache,loadWishlist);
 route.post("/toggleWishlist",noCache,checkSession,toggleWishlist);
 route.delete("/removeFromWishlist",noCache,checkSession,removeFromWishlist);
+route.post("/clearWishlist",clearWishlist);
 route.get("/cart",noCache,loadCart);
 route.post("/addCart",noCache,checkSession,addToCart);
 route.delete("/removeFromCart",noCache,checkSession,removeFromCart);
+route.get("/checkout",loadCheckout);
+route.get("/orderSuccess/:id",loadOrderSuccess);
+route.post("/orderSuccess",placeOrder);
+route.get("/myOrders",loadMyOrders);
+route.get("/orderDetail",loadOrderDetail);
+
 
 
 export default route;

@@ -97,7 +97,7 @@
             background-color: #fff;
             border: 1px solid #f3f4f6;
             border-radius: 9999px;
-            padding: 0.6rem 1.75rem;
+            padding: 0.4rem 1.25rem;
             box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             transition: all 0.3s;
         }
@@ -115,9 +115,9 @@
         }
 
         .refine-bar.search-active .refine-search-container {
-            width: 250px;
+            width: 200px;
             opacity: 1;
-            margin-right: 1.5rem;
+            margin-right: 1rem;
         }
 
         .sort-dropdown {
@@ -191,6 +191,100 @@
             cursor: not-allowed;
             pointer-events: none;
         }
+
+        /* View Toggle Styles */
+        .view-toggle {
+            display: flex;
+            align-items: center;
+            background: #f4f4f5;
+            padding: 4px;
+            border-radius: 9999px;
+            gap: 4px;
+        }
+
+        .view-toggle button {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            color: #9ca3af;
+        }
+
+        .view-toggle button.active {
+            background: #000;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .view-toggle button:not(.active):hover {
+            color: #000;
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        /* List View Styles */
+        #product-grid.list-view {
+            grid-template-columns: 1fr !important;
+            gap: 16px;
+        }
+
+        #product-grid.list-view .product-card {
+            flex-direction: row !important;
+            padding: 24px;
+            align-items: center;
+            gap: 32px;
+        }
+
+        #product-grid.list-view .product-card .relative {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 0;
+            flex-shrink: 0;
+        }
+
+        #product-grid.list-view .product-card .flex-1 {
+            flex-direction: row !important;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+
+        #product-grid.list-view .product-card .details-left {
+            flex: 1;
+        }
+
+        #product-grid.list-view .product-card .mt-auto {
+            flex-direction: row !important;
+            margin-top: 0 !important;
+            width: auto !important;
+            gap: 12px;
+            margin-bottom: 0 !important;
+        }
+
+        #product-grid.list-view .product-card .mt-auto button {
+            width: auto !important;
+            padding-left: 24px;
+            padding-right: 24px;
+            height: 48px;
+        }
+
+        #product-grid.list-view .product-card .rating-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 8px;
+        }
+
+        /* Hide rating row in grid view by default if not present */
+        .rating-row {
+            display: none;
+        }
+
+        #product-grid.list-view .rating-row {
+            display: flex;
+        }
     </style>
 </head>
 
@@ -234,10 +328,10 @@
                         class="w-full bg-transparent border-none outline-none text-[10px] font-black tracking-widest text-right placeholder:text-gray-300">
                 </div>
 
-                <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-4">
                     <button onclick="toggleBarSearch()" class="icon-btn">
                         <span
-                            class="material-symbols-outlined text-[20px] text-gray-400 hover:text-black transition-colors">search</span>
+                            class="material-symbols-outlined text-[18px] text-gray-400 hover:text-black transition-colors">search</span>
                     </button>
                     <div class="h-4 w-[1px] bg-gray-200"></div>
 
@@ -269,6 +363,18 @@
                                     Z - A</button>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="h-4 w-[1px] bg-gray-200"></div>
+
+                    <!-- View Toggle -->
+                    <div class="view-toggle">
+                        <button id="grid-view-btn" onclick="toggleView('grid')" class="active" title="Grid View">
+                            <span class="material-symbols-outlined text-[18px]">grid_view</span>
+                        </button>
+                        <button id="list-view-btn" onclick="toggleView('list')" title="List View">
+                            <span class="material-symbols-outlined text-[18px]">view_list</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -379,7 +485,8 @@
                         <span
                             class="material-symbols-outlined text-[20px] text-gray-600 hover:text-red-500 {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
                     </button>
-                    <div class="absolute bottom-4 left-4 z-20 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-md border border-gray-100">
+                    <div
+                        class="absolute bottom-4 left-4 z-20 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-md border border-gray-100">
                         <span class="material-symbols-outlined text-[15px] text-[#10b981] icon-fill">check_circle</span>
                         <span class="text-[10px] font-bold text-black uppercase tracking-wider">In Stock</span>
                     </div>
@@ -393,17 +500,32 @@
 
                 <!-- DETAILS -->
                 <div class="flex flex-col flex-1">
-                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.1em] mb-1.5">
-                        {{#if this.isLimited}}LIMITED{{else}}STANDARD{{/if}}
+                    <div class="details-left">
+                        <div class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.1em] mb-1.5">
+                            {{#if this.isLimited}}LIMITED{{else}}STANDARD{{/if}}
+                        </div>
+                        <h3 class="font-bold text-[16px] mb-1.5 leading-tight text-black">{{this.productName}}</h3>
+                        
+                        <!-- List view specific: Rating and short desc -->
+                        <div class="rating-row">
+                            <div class="flex text-yellow-400">
+                                <span class="material-symbols-outlined text-[14px] icon-fill">star</span>
+                                <span class="material-symbols-outlined text-[14px] icon-fill">star</span>
+                                <span class="material-symbols-outlined text-[14px] icon-fill">star</span>
+                                <span class="material-symbols-outlined text-[14px] icon-fill">star</span>
+                                <span class="material-symbols-outlined text-[14px]">star</span>
+                            </div>
+                            <span class="text-[11px] text-gray-400 font-medium">(395)</span>
+                        </div>
+                        <p class="text-[12px] text-gray-500 font-medium mb-4">{{this.brand}}</p>
+                        
+                        <div class="text-[20px] font-black text-black mb-6">₹{{this.rawPrice}}</div>
                     </div>
-                    <h3 class="font-bold text-[16px] mb-1.5 leading-tight text-black">{{this.productName}}</h3>
-                    <p class="text-[12px] text-gray-500 font-medium mb-4">{{this.brand}}</p>
-                    
-                    <div class="text-[20px] font-black text-black mb-6">₹{{this.rawPrice}}</div>
                     
                     <div class="mt-auto flex flex-col gap-2">
                         <button onclick="addToCart(event, '{{this.id}}')"
-                            class="w-full bg-black text-white py-4 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-gray-800 transition-all shadow-md">
+                            class="w-full bg-black text-white py-4 rounded-xl font-bold text-[11px] uppercase tracking-widest hover:bg-gray-800 transition-all shadow-md flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
                             Add to Cart
                         </button>
                         <button onclick="buyNow(event, '{{this.id}}')"
@@ -447,11 +569,38 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        const isLoggedIn = {{ #if user }}true{ {else } } false{ {/if } };
+        const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
         let originalCards = [];
         const ITEMS_PER_PAGE = 8;
         let currentPage = 1;
         let filteredCards = [];
+        let currentView = 'grid';
+
+        function toggleView(view) {
+            currentView = view;
+            const grid = document.getElementById('product-grid');
+            const gridBtn = document.getElementById('grid-view-btn');
+            const listBtn = document.getElementById('list-view-btn');
+
+            if (view === 'list') {
+                grid.classList.add('list-view');
+                listBtn.classList.add('active');
+                gridBtn.classList.remove('active');
+            } else {
+                grid.classList.remove('list-view');
+                gridBtn.classList.add('active');
+                listBtn.classList.remove('active');
+            }
+            
+            // Save preference to localStorage if desired
+            localStorage.setItem('productViewPreference', view);
+        }
+
+        // Initialize view from storage
+        const savedView = localStorage.getItem('productViewPreference');
+        if (savedView) {
+            setTimeout(() => toggleView(savedView), 0);
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             originalCards = [...document.querySelectorAll('.product-card')];
@@ -494,12 +643,7 @@
                 const response = await axios.post("/users/addCart", { productId, variantId, size, quantity: 1 });
                 if (response.data.success) {
                     showToast("success", "Added to cart");
-                    
-                    // Sync wishlist
-                    const wishIcon = productCard.querySelector('.material-symbols-outlined.icon-fill');
-                    if (wishIcon) {
-                        toggleWishlist(e, productId, wishIcon.parentElement);
-                    }
+
                 } else if (response.data.alreadyInCart) {
                     showToast("error", "Already in cart!");
                 } else {
