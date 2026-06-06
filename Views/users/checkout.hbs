@@ -73,7 +73,7 @@
 
         .payment-card:hover {
             border-color: #c0c0c0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
 
         .payment-card.selected {
@@ -216,7 +216,7 @@
             left: -100%;
             width: 60%;
             height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
             transition: left 0.5s ease;
         }
 
@@ -278,13 +278,19 @@
         }
 
         /* Razorpay blue */
-        .rzp-blue { color: #528FF0; }
+        .rzp-blue {
+            color: #528FF0;
+        }
 
         /* COD green */
-        .cod-green { color: #3ab54a; }
+        .cod-green {
+            color: #3ab54a;
+        }
 
         /* Savings green */
-        .savings-green { color: #1b9a67; }
+        .savings-green {
+            color: #1b9a67;
+        }
     </style>
 </head>
 
@@ -298,8 +304,10 @@
 
         <!-- Page Header -->
         <div class="text-center mb-10">
-            <h1 class="checkout-title text-4xl sm:text-5xl text-[#1a1a1a] mb-2 font-bold tracking-[0.22em] uppercase">Checkout</h1>
-            <p class="text-[10px] font-semibold tracking-[0.25em] text-gray-400 uppercase">Complete your purchase and begin your journey</p>
+            <h1 class="checkout-title text-4xl sm:text-5xl text-[#1a1a1a] mb-2 font-bold tracking-[0.22em] uppercase">
+                Checkout</h1>
+            <p class="text-[10px] font-semibold tracking-[0.25em] text-gray-400 uppercase">Complete your purchase and
+                begin your journey</p>
         </div>
 
         <!-- Two-column grid -->
@@ -313,10 +321,10 @@
                     <div class="flex items-center justify-between mb-5">
                         <div class="flex items-center gap-3">
                             <div class="step-badge">1</div>
-                            <h2 class="text-[11px] font-black tracking-[0.2em] uppercase text-[#1a1a1a]">Delivery Address</h2>
+                            <h2 class="text-[11px] font-black tracking-[0.2em] uppercase text-[#1a1a1a]">Delivery
+                                Address</h2>
                         </div>
-                        <button
-                            onclick="openAddressModal()"
+                        <button onclick="openAddressModal()"
                             class="text-[10px] font-bold tracking-[0.15em] uppercase text-gray-400 hover:text-black border-b border-gray-300 hover:border-black pb-0.5 transition-all">
                             Change
                         </button>
@@ -325,23 +333,28 @@
                     {{#if defaultAddress}}
                     <!-- Address Info -->
                     <div id="selected-address-display" class="flex gap-4">
-                        <div class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div
+                            class="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                             <span class="material-symbols-outlined text-[18px] text-gray-500">person</span>
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
-                                <span id="disp-name" class="text-[15px] font-bold text-[#1a1a1a]">{{defaultAddress.fullName}}</span>
-                                <span class="text-[9px] font-black uppercase tracking-widest bg-black text-white px-2 py-0.5 rounded">{{defaultAddress.addressType}}</span>
+                                <span id="disp-name"
+                                    class="text-[15px] font-bold text-[#1a1a1a]">{{defaultAddress.fullName}}</span>
+                                <span
+                                    class="text-[9px] font-black uppercase tracking-widest bg-black text-white px-2 py-0.5 rounded">{{defaultAddress.addressType}}</span>
                             </div>
                             <p id="disp-addr" class="text-[13px] text-gray-500 leading-relaxed">
-                                {{defaultAddress.addressLine1}}{{#if defaultAddress.addressLine2}}, {{defaultAddress.addressLine2}}{{/if}}<br>
+                                {{defaultAddress.addressLine1}}{{#if defaultAddress.addressLine2}},
+                                {{defaultAddress.addressLine2}}{{/if}}<br>
                                 <span class="text-[#bb8a4a] font-semibold">{{defaultAddress.city}}</span><br>
                                 {{defaultAddress.state}} — {{defaultAddress.pincode}}
                             </p>
                         </div>
                         <div class="flex items-center gap-2 flex-shrink-0">
                             <span class="material-symbols-outlined text-[16px] text-gray-400">phone</span>
-                            <span id="disp-phone" class="text-[13px] font-semibold text-gray-700">{{defaultAddress.phoneNO}}</span>
+                            <span id="disp-phone"
+                                class="text-[13px] font-semibold text-gray-700">{{defaultAddress.phoneNO}}</span>
                         </div>
                     </div>
                     {{else}}
@@ -349,7 +362,8 @@
                     <div class="text-center py-8">
                         <span class="material-symbols-outlined text-[36px] text-gray-200 mb-3 block">location_off</span>
                         <p class="text-[13px] text-gray-400 mb-4">No delivery address found.</p>
-                        <a href="/users/address" class="text-[11px] font-bold uppercase tracking-widest underline text-black">Add Address</a>
+                        <a href="/users/address"
+                            class="text-[11px] font-bold uppercase tracking-widest underline text-black">Add Address</a>
                     </div>
                     {{/if}}
                 </div>
@@ -364,16 +378,18 @@
                     <div class="flex flex-col gap-3" id="payment-options">
 
                         <!-- Wallet -->
-                        <div class="payment-card" id="pay-wallet" onclick="selectPayment('wallet')">
+                        <div class="payment-card opacity-50 cursor-not-allowed filter grayscale" id="pay-wallet">
                             <div class="payment-radio">
                                 <div class="payment-radio-dot"></div>
                             </div>
                             <div class="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                                <span class="material-symbols-outlined text-[18px] text-gray-600">account_balance_wallet</span>
+                                <span
+                                    class="material-symbols-outlined text-[18px] text-gray-600">account_balance_wallet</span>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-[13px] font-semibold text-[#1a1a1a]">Wallet Balance</p>
-                                <p class="text-[11px] text-gray-400">Available: <span class="font-bold text-[#1a1a1a]">₹{{walletBalance}}</span></p>
+                                <p class="text-[13px] font-semibold text-[#1a1a1a]">Wallet Balance (Unavailable)</p>
+                                <p class="text-[11px] text-gray-400">Available: <span
+                                        class="font-bold text-[#1a1a1a]">₹{{walletBalance}}</span></p>
                             </div>
                             {{#if walletInsufficient}}
                             <span class="insuff-badge">Insufficient</span>
@@ -381,7 +397,7 @@
                         </div>
 
                         <!-- Razorpay -->
-                        <div class="payment-card" id="pay-razorpay" onclick="selectPayment('razorpay')">
+                        <div class="payment-card opacity-50 cursor-not-allowed filter grayscale" id="pay-razorpay">
                             <div class="payment-radio">
                                 <div class="payment-radio-dot"></div>
                             </div>
@@ -389,7 +405,7 @@
                                 <span class="material-symbols-outlined text-[18px] rzp-blue">credit_card</span>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-[13px] font-semibold rzp-blue">Razorpay Online</p>
+                                <p class="text-[13px] font-semibold rzp-blue">Razorpay Online (Disabled)</p>
                                 <p class="text-[11px] text-gray-400">Cards, UPI, Net Banking</p>
                             </div>
                         </div>
@@ -427,16 +443,20 @@
                         {{#each cartItems}}
                         <div class="flex items-center gap-4" data-price="{{this.price}}" data-qty="{{this.quantity}}">
                             <!-- Image -->
-                            <div class="w-[72px] h-[80px] rounded-xl overflow-hidden bg-[#f0ede8] flex-shrink-0 relative">
+                            <div
+                                class="w-[72px] h-[80px] rounded-xl overflow-hidden bg-[#f0ede8] flex-shrink-0 relative">
                                 <img src="{{this.images.[0]}}" alt="{{this.productId.name}}"
                                     class="w-full h-full object-cover mix-blend-multiply">
                                 <!-- Qty badge -->
-                                <span class="absolute top-1 right-1 w-5 h-5 bg-[#1a1a1a] text-white text-[9px] font-black rounded-full flex items-center justify-center">{{this.quantity}}</span>
+                                <span
+                                    class="absolute top-1 right-1 w-5 h-5 bg-[#1a1a1a] text-white text-[9px] font-black rounded-full flex items-center justify-center">{{this.quantity}}</span>
                             </div>
                             <!-- Info -->
                             <div class="flex-1 min-w-0">
-                                <p class="text-[13px] font-semibold text-[#1a1a1a] leading-snug line-clamp-2">{{this.productId.productName}}</p>
-                                <p class="text-[10px] text-gray-400 font-medium mt-0.5 uppercase tracking-wider">Qty {{this.quantity}}</p>
+                                <p class="text-[13px] font-semibold text-[#1a1a1a] leading-snug line-clamp-2">
+                                    {{this.productId.productName}}</p>
+                                <p class="text-[10px] text-gray-400 font-medium mt-0.5 uppercase tracking-wider">Qty
+                                    {{this.quantity}}</p>
                             </div>
                             <!-- Price -->
                             <div class="text-right flex-shrink-0">
@@ -452,13 +472,13 @@
                     <div>
                         <div class="coupon-wrap">
                             <input type="text" id="coupon-input" placeholder="Enter coupon code"
-                                value="{{#if appliedCoupon}}{{appliedCoupon}}{{/if}}"
-                                style="text-transform:uppercase;">
+                                value="{{#if appliedCoupon}}{{appliedCoupon}}{{/if}}" style="text-transform:uppercase;">
                             <button class="coupon-btn" onclick="applyCoupon()">Apply</button>
                         </div>
                         <div class="flex items-center gap-2 mt-2.5">
                             <span class="material-symbols-outlined text-[14px] text-gray-400">local_offer</span>
-                            <a href="#" class="text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 hover:text-black transition-colors underline underline-offset-2">
+                            <a href="#"
+                                class="text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 hover:text-black transition-colors underline underline-offset-2">
                                 View all available coupons
                             </a>
                         </div>
@@ -477,14 +497,19 @@
                             <span class="text-[13px] font-bold text-[#1a1a1a]" id="disp-subtotal">₹{{subtotal}}</span>
                         </div>
 
-                        <div class="flex justify-between items-center" id="savings-row" style="{{#unless savings}}display:none{{/unless}}">
-                            <span class="text-[11px] font-bold uppercase tracking-[0.1em] savings-green">Offer Savings</span>
+                        <div class="flex justify-between items-center" id="savings-row"
+                            style="{{#unless savings}}display:none{{/unless}}">
+                            <span class="text-[11px] font-bold uppercase tracking-[0.1em] savings-green">Offer
+                                Savings</span>
                             <span class="text-[13px] font-bold savings-green" id="disp-savings">-₹{{savings}}</span>
                         </div>
 
-                        <div class="flex justify-between items-center" id="coupon-row" style="{{#unless couponDiscount}}display:none{{/unless}}">
-                            <span class="text-[11px] font-bold uppercase tracking-[0.1em] savings-green">Coupon Discount</span>
-                            <span class="text-[13px] font-bold savings-green" id="disp-coupon">-₹{{couponDiscount}}</span>
+                        <div class="flex justify-between items-center" id="coupon-row"
+                            style="{{#unless couponDiscount}}display:none{{/unless}}">
+                            <span class="text-[11px] font-bold uppercase tracking-[0.1em] savings-green">Coupon
+                                Discount</span>
+                            <span class="text-[13px] font-bold savings-green"
+                                id="disp-coupon">-₹{{couponDiscount}}</span>
                         </div>
 
                         <div class="flex justify-between items-center">
@@ -501,18 +526,19 @@
                             <p class="text-[10px] font-black uppercase tracking-[0.15em] text-[#1a1a1a]">Total</p>
                             <p class="text-[9px] font-bold text-gray-400 tracking-wide">INR</p>
                         </div>
-                        <span class="text-[30px] font-black tracking-tighter text-[#1a1a1a] leading-none" id="disp-total">₹ {{total}}</span>
+                        <span class="text-[30px] font-black tracking-tighter text-[#1a1a1a] leading-none"
+                            id="disp-total">₹ {{total}}</span>
                     </div>
 
                     <!-- Place Order Button -->
-                    <button
-                        onclick="placeOrder()"
+                    <button onclick="placeOrder()"
                         class="order-btn w-full bg-[#1a1a1a] hover:bg-black text-white rounded-xl py-4 text-[11px] font-black uppercase tracking-[0.15em] transition-colors shadow-lg shadow-black/10 mt-1">
                         Complete Order — ₹<span id="btn-total">{{total}}</span>
                     </button>
 
                     <!-- Accepted Payments note -->
-                    <p class="text-center text-[9px] font-bold uppercase tracking-[0.12em] text-gray-300">Secure encrypted checkout</p>
+                    <p class="text-center text-[9px] font-bold uppercase tracking-[0.12em] text-gray-300">Secure
+                        encrypted checkout</p>
 
                     <!-- Trust Icons -->
                     <div class="flex justify-center items-center gap-8 pt-1">
@@ -540,7 +566,8 @@
     <!-- ─── Change Address Modal ─── -->
     <div id="addr-modal-backdrop"
         class="modal-backdrop fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center">
-        <div class="modal-box w-full sm:w-[90%] sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        <div
+            class="modal-box w-full sm:w-[90%] sm:max-w-lg bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
 
             <!-- Modal Header -->
             <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100 flex-shrink-0">
@@ -554,8 +581,7 @@
             <div class="overflow-y-auto modal-scroll flex-1 px-6 py-5 flex flex-col gap-4">
 
                 {{#each addresses}}
-                <div class="addr-card {{#if this.isDefault}}selected{{/if}}"
-                    id="addr-{{this._id}}"
+                <div class="addr-card {{#if this.isDefault}}selected{{/if}}" id="addr-{{this._id}}"
                     onclick="selectAddress('{{this._id}}','{{this.fullName}}','{{this.phoneNO}}','{{this.addressLine1}}','{{this.addressLine2}}','{{this.city}}','{{this.state}}','{{this.pincode}}','{{this.addressType}}')">
                     <div class="flex items-start gap-3">
                         <div class="addr-radio mt-1">
@@ -564,9 +590,11 @@
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1 flex-wrap">
                                 <span class="text-[14px] font-bold text-[#1a1a1a]">{{this.fullName}}</span>
-                                <span class="text-[9px] font-black uppercase tracking-wider bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{{this.addressType}}</span>
+                                <span
+                                    class="text-[9px] font-black uppercase tracking-wider bg-gray-100 text-gray-600 px-2 py-0.5 rounded">{{this.addressType}}</span>
                                 {{#if this.isDefault}}
-                                <span class="text-[9px] font-black uppercase tracking-wider bg-black text-white px-2 py-0.5 rounded">Default</span>
+                                <span
+                                    class="text-[9px] font-black uppercase tracking-wider bg-black text-white px-2 py-0.5 rounded">Default</span>
                                 {{/if}}
                             </div>
                             <p class="text-[12px] text-gray-500 leading-relaxed">
@@ -589,13 +617,126 @@
 
             <!-- Add new address link -->
             <div class="flex-shrink-0 px-6 py-4 border-t border-gray-100">
-                <a href="/users/address"
+                <button onclick="openAddAddressModal()"
                     class="flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.1em] text-black hover:text-gray-600 transition-colors">
                     <span class="material-symbols-outlined text-[18px]">add_circle</span>
                     Add New Address
-                </a>
+                </button>
             </div>
 
+        </div>
+    </div>
+
+    <!-- ─── Add Address Modal ─── -->
+    <div id="add-addr-modal-backdrop"
+        class="modal-backdrop fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center">
+        <div
+            class="modal-box w-full sm:w-[90%] sm:max-w-xl bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+
+            <div class="flex items-center justify-between px-8 py-6 border-b border-gray-100 flex-shrink-0">
+                <h3 class="text-[17px] font-black tracking-tight uppercase">New Delivery Address</h3>
+                <button onclick="closeAddAddressModal()" class="text-gray-400 hover:text-black transition-colors">
+                    <span class="material-symbols-outlined text-[24px]">close</span>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto modal-scroll p-8">
+                <form id="add-address-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Full Name -->
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Full
+                            Name</label>
+                        <input type="text" id="add-fullName"
+                            class="add-addr-input w-full border border-gray-100 bg-gray-50/50 rounded-xl px-4 py-3 text-[13px] font-semibold outline-none focus:bg-white focus:border-black transition-all"
+                            placeholder="Enter full name">
+                        <p id="err-fullName" class="text-[10px] text-red-500 font-bold mt-1 hidden"></p>
+                    </div>
+                    <!-- Phone Number -->
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Phone
+                            Number</label>
+                        <input type="tel" id="add-phone"
+                            class="add-addr-input w-full border border-gray-100 bg-gray-50/50 rounded-xl px-4 py-3 text-[13px] font-semibold outline-none focus:bg-white focus:border-black transition-all"
+                            placeholder="10-digit mobile number">
+                        <p id="err-phone" class="text-[10px] text-red-500 font-bold mt-1 hidden"></p>
+                    </div>
+                    <!-- Address Line 1 -->
+                    <div class="col-span-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Address
+                            Line 1</label>
+                        <input type="text" id="add-line1"
+                            class="add-addr-input w-full border border-gray-100 bg-gray-50/50 rounded-xl px-4 py-3 text-[13px] font-semibold outline-none focus:bg-white focus:border-black transition-all"
+                            placeholder="Flat, House no., Building, Company, Apartment">
+                        <p id="err-line1" class="text-[10px] text-red-500 font-bold mt-1 hidden"></p>
+                    </div>
+                    <!-- Address Line 2 -->
+                    <div class="col-span-2">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Address
+                            Line 2 (Optional)</label>
+                        <input type="text" id="add-line2"
+                            class="add-addr-input w-full border border-gray-100 bg-gray-50/50 rounded-xl px-4 py-3 text-[13px] font-semibold outline-none focus:bg-white focus:border-black transition-all"
+                            placeholder="Area, Street, Sector, Village">
+                    </div>
+                    <!-- City -->
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">City /
+                            Town</label>
+                        <input type="text" id="add-city"
+                            class="add-addr-input w-full border border-gray-100 bg-gray-50/50 rounded-xl px-4 py-3 text-[13px] font-semibold outline-none focus:bg-white focus:border-black transition-all"
+                            placeholder="Enter city">
+                        <p id="err-city" class="text-[10px] text-red-500 font-bold mt-1 hidden"></p>
+                    </div>
+                    <!-- State -->
+                    <div class="col-span-2 md:col-span-1">
+                        <label
+                            class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">State</label>
+                        <select id="add-state"
+                            class="add-addr-input w-full border border-gray-100 bg-gray-50/50 rounded-xl px-4 py-3 text-[13px] font-semibold outline-none focus:bg-white focus:border-black transition-all appearance-none cursor-pointer">
+                            <option value="">Select State</option>
+                            <option value="Kerala">Kerala</option>
+                            <option value="Tamil Nadu">Tamil Nadu</option>
+                            <option value="Karnataka">Karnataka</option>
+                            <option value="Maharashtra">Maharashtra</option>
+                        </select>
+                        <p id="err-state" class="text-[10px] text-red-500 font-bold mt-1 hidden"></p>
+                    </div>
+                    <!-- Pincode -->
+                    <div class="col-span-2 md:col-span-1">
+                        <label
+                            class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Pincode</label>
+                        <input type="text" id="add-pincode"
+                            class="add-addr-input w-full border border-gray-100 bg-gray-50/50 rounded-xl px-4 py-3 text-[13px] font-semibold outline-none focus:bg-white focus:border-black transition-all"
+                            placeholder="6-digit pincode">
+                        <p id="err-pincode" class="text-[10px] text-red-500 font-bold mt-1 hidden"></p>
+                    </div>
+                    <!-- Address Type -->
+                    <div class="col-span-2 md:col-span-1">
+                        <label class="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2 block">Address
+                            Type</label>
+                        <div class="flex gap-4">
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="addressType" value="Home" checked class="hidden peer">
+                                <div
+                                    class="peer-checked:bg-black peer-checked:text-white border border-gray-100 bg-gray-50 rounded-xl py-3 text-center text-[11px] font-black uppercase tracking-wider transition-all">
+                                    Home</div>
+                            </label>
+                            <label class="flex-1 cursor-pointer">
+                                <input type="radio" name="addressType" value="Work" class="hidden peer">
+                                <div
+                                    class="peer-checked:bg-black peer-checked:text-white border border-gray-100 bg-gray-50 rounded-xl py-3 text-center text-[11px] font-black uppercase tracking-wider transition-all">
+                                    Work</div>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="px-8 py-6 border-t border-gray-100 flex-shrink-0">
+                <button onclick="submitNewAddress()" id="submit-addr-btn"
+                    class="w-full bg-[#1a1a1a] hover:bg-black text-white rounded-xl py-4 text-[12px] font-black uppercase tracking-[0.2em] transition-all shadow-xl shadow-black/10">
+                    Save Address
+                </button>
+            </div>
         </div>
     </div>
 
@@ -608,8 +749,8 @@
         let selectedAddressId = '{{defaultAddress._id}}';
         let selectedPaymentMethod = 'cod';
         let appliedCouponCode = '{{#if appliedCoupon}}{{appliedCoupon}}{{/if}}';
-        let currentTotal = {{total}};
-        let currentCouponDiscount = {{#if couponDiscount}}{{couponDiscount}}{{else}}0{{/if}};
+        let currentTotal = {{ total }};
+        let currentCouponDiscount = {{#if couponDiscount}}{{ couponDiscount }} {{else }} 0{{/if }};
 
         // ─── Payment Selection ─────────────────────────────────────
         function selectPayment(method) {
@@ -653,11 +794,112 @@
             setTimeout(closeAddressModal, 300);
         }
 
+        // ─── Add New Address Modal ───
+        function openAddAddressModal() {
+            document.getElementById('add-addr-modal-backdrop').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeAddAddressModal() {
+            document.getElementById('add-addr-modal-backdrop').classList.remove('open');
+            document.body.style.overflow = '';
+            // Reset form and errors
+            document.getElementById('add-address-form').reset();
+            document.querySelectorAll('.add-addr-input').forEach(input => {
+                input.classList.remove('border-red-500');
+            });
+            document.querySelectorAll('[id^="err-"]').forEach(p => {
+                p.classList.add('hidden');
+            });
+        }
+
+        // Close on backdrop click
+        document.getElementById('add-addr-modal-backdrop').addEventListener('click', function (e) {
+            if (e.target === this) closeAddAddressModal();
+        });
+
+        // Real-time validation
+        document.querySelectorAll('.add-addr-input').forEach(input => {
+            input.addEventListener('input', function () {
+                const fieldId = this.id.replace('add-', '');
+                const errorEl = document.getElementById(`err-${fieldId}`);
+                if (errorEl) {
+                    errorEl.classList.add('hidden');
+                    this.classList.remove('border-red-500');
+                }
+            });
+        });
+
+        async function submitNewAddress() {
+            const fullName = document.getElementById('add-fullName').value.trim();
+            const phone = document.getElementById('add-phone').value.trim();
+            const line1 = document.getElementById('add-line1').value.trim();
+            const line2 = document.getElementById('add-line2').value.trim();
+            const city = document.getElementById('add-city').value.trim();
+            const state = document.getElementById('add-state').value;
+            const pincode = document.getElementById('add-pincode').value.trim();
+            const type = document.querySelector('input[name="addressType"]:checked').value;
+
+            let isValid = true;
+
+            function showError(field, msg) {
+                const errEl = document.getElementById(`err-${field}`);
+                const inputEl = document.getElementById(`add-${field}`);
+                if (errEl) {
+                    errEl.textContent = msg;
+                    errEl.classList.remove('hidden');
+                }
+                if (inputEl) {
+                    inputEl.classList.add('border-red-500');
+                }
+                isValid = false;
+            }
+
+            if (!fullName) showError('fullName', 'Full name is required');
+            if (!phone) {
+                showError('phone', 'Phone number is required');
+            } else if (!/^\d{10}$/.test(phone)) {
+                showError('phone', 'Enter a valid 10-digit phone number');
+            }
+            if (!line1) showError('line1', 'Address line 1 is required');
+            if (!city) showError('city', 'City is required');
+            if (!state) showError('state', 'Please select a state');
+            if (!pincode) {
+                showError('pincode', 'Pincode is required');
+            } else if (!/^\d{6}$/.test(pincode)) {
+                showError('pincode', 'Enter a valid 6-digit pincode');
+            }
+
+            if (!isValid) return;
+
+            const btn = document.getElementById('submit-addr-btn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const res = await axios.post('/users/address', {
+                    fullName, phoneNO: phone, addressLine1: line1, addressLine2: line2, city, state, pincode, addressType: type
+                }, { withCredentials: true });
+
+                if (res.data.success) {
+                    showToast('success','Address added successfully!');
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showToast('error',res.data.message || 'Failed to add address');
+                }
+            } catch (err) {
+                showToast('error', err.response?.data?.message || 'Something went wrong');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Address';
+            }
+        }
+
         // ─── Apply Coupon ─────────────────────────────────────────
         async function applyCoupon() {
             const code = document.getElementById('coupon-input').value.trim().toUpperCase();
             if (!code) {
-                showToast('Please enter a coupon code', 'error');
+                showToast('error','Please enter a coupon code');
                 return;
             }
 
@@ -679,29 +921,29 @@
                     document.getElementById('disp-total').textContent = `₹ ${newTotal.toLocaleString('en-IN')}`;
                     document.getElementById('btn-total').textContent = newTotal.toLocaleString('en-IN');
 
-                    showToast(res.data.message || 'Coupon applied!', 'success');
+                    showToast('success',res.data.message || 'Coupon applied!');
                 } else {
-                    showToast(res.data.message || 'Invalid coupon', 'error');
+                    showToast('error',res.data.message || 'Invalid coupon');
                 }
             } catch (err) {
-                showToast(err.response?.data?.message || 'Failed to apply coupon', 'error');
+                showToast( 'error',err.response?.data?.message || 'Failed to apply coupon');
             }
         }
 
         // ─── Place Order ──────────────────────────────────────────
         async function placeOrder() {
 
-   console.log('placeOrder called');  // add this first
-    console.log('selectedAddressId:', selectedAddressId);
-    console.log('selectedPaymentMethod:', selectedPaymentMethod);
-    console.log('orderData about to send:', {
-        addressId: selectedAddressId,
-        paymentMethod: selectedPaymentMethod,
-        couponCode: appliedCouponCode || null,
-    });
+            console.log('placeOrder called');  // add this first
+            console.log('selectedAddressId:', selectedAddressId);
+            console.log('selectedPaymentMethod:', selectedPaymentMethod);
+            console.log('orderData about to send:', {
+                addressId: selectedAddressId,
+                paymentMethod: selectedPaymentMethod,
+                couponCode: appliedCouponCode || null,
+            });
 
             if (!selectedAddressId) {
-                showToast('Please select a delivery address', 'error');
+                showToast('error','Please select a delivery address');
                 return;
             }
 
@@ -726,12 +968,12 @@
 
                 if (res.data.success) {
                     console.log('redirectUrl:', res.data.redirectUrl);
-                    showToast('Order placed successfully!', 'success');
+                    showToast('success','Order placed successfully!');
                     setTimeout(() => {
                         window.location.href = res.data.redirectUrl || '/users/orderSuccess';
                     }, 1000);
                 } else {
-                    showToast(res.data.message || 'Failed to place order', 'error');
+                    showToast( 'error',res.data.message || 'Failed to place order');
                     btn.disabled = false;
                     btn.innerHTML = `Complete Order — ₹<span id="btn-total">${currentTotal.toLocaleString('en-IN')}</span>`;
                 }
@@ -739,7 +981,7 @@
                 console.log('Full error:', err);
                 console.log('Response data:', err.response?.data);
                 console.log('Status:', err.response?.status);
-                showToast(err.response?.data?.message || 'Something went wrong', 'error');
+                showToast( 'error',err.response?.data?.message || 'Something went wrong');
                 const btn = document.querySelector('.order-btn');
                 btn.disabled = false;
                 btn.innerHTML = `Complete Order — ₹<span id="btn-total">${currentTotal.toLocaleString('en-IN')}</span>`;
@@ -752,7 +994,7 @@
                 // Create Razorpay order on backend
                 const res = await axios.post('/users/createRazorpayOrder', orderData, { withCredentials: true });
                 if (!res.data.success) {
-                    showToast(res.data.message || 'Payment initiation failed', 'error');
+                    showToast( 'error',res.data.message || 'Payment initiation failed');
                     return;
                 }
 
@@ -773,12 +1015,12 @@
                         }, { withCredentials: true });
 
                         if (verifyRes.data.success) {
-                            showToast('Payment successful! Order placed.', 'success');
+                            showToast('success','Payment successful! Order placed.');
                             setTimeout(() => {
                                 window.location.href = verifyRes.data.redirectUrl || '/users/orders';
                             }, 1000);
                         } else {
-                            showToast(verifyRes.data.message || 'Payment verification failed', 'error');
+                            showToast( 'error',verifyRes.data.message || 'Payment verification failed');
                         }
                     },
                     prefill: {
@@ -788,7 +1030,7 @@
                     theme: { color: '#1a1a1a' },
                     modal: {
                         ondismiss: function () {
-                            showToast('Payment cancelled', 'error');
+                            showToast('error','Payment cancelled');
                         }
                     }
                 };
@@ -797,7 +1039,7 @@
                 rzp.open();
 
             } catch (err) {
-                showToast(err.response?.data?.message || 'Payment failed', 'error');
+                showToast('error',err.response?.data?.message || 'Payment failed');
             }
         }
 

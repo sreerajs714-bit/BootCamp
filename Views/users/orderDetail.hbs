@@ -397,7 +397,8 @@
                     {{!-- Step 2: Confirmed --}}
                     <div class="timeline-step">
                         {{#if (or (eq order.orderStatus 'Processing') (eq order.orderStatus 'Shipped') (eq
-                        order.orderStatus 'Delivered'))}}
+                        order.orderStatus
+                        'Out for Delivery') (eq order.orderStatus 'Delivered'))}}
                         <div class="timeline-dot completed">
                             <span class="material-symbols-outlined text-[10px] text-white">check</span>
                         </div>
@@ -424,7 +425,8 @@
 
                     {{!-- Step 3: Processing --}}
                     <div class="timeline-step">
-                        {{#if (or (eq order.orderStatus 'Shipped') (eq order.orderStatus 'Delivered'))}}
+                        {{#if (or (eq order.orderStatus 'Shipped') (eq order.orderStatus 'Out for Delivery') (eq
+                        order.orderStatus 'Delivered'))}}
                         <div class="timeline-dot completed">
                             <span class="material-symbols-outlined text-[10px] text-white">check</span>
                         </div>
@@ -451,7 +453,7 @@
 
                     {{!-- Step 4: Shipped --}}
                     <div class="timeline-step">
-                        {{#if (eq order.orderStatus 'Delivered')}}
+                        {{#if (or (eq order.orderStatus 'Out for Delivery') (eq order.orderStatus 'Delivered'))}}
                         <div class="timeline-dot completed">
                             <span class="material-symbols-outlined text-[10px] text-white">check</span>
                         </div>
@@ -476,7 +478,34 @@
                         {{/if}}
                     </div>
 
-                    {{!-- Step 5: Delivered --}}
+                    {{!-- Step 5: Out for Delivery --}}
+                    <div class="timeline-step">
+                        {{#if (eq order.orderStatus 'Delivered')}}
+                        <div class="timeline-dot completed">
+                            <span class="material-symbols-outlined text-[10px] text-white">check</span>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-400">Out for Delivery</h3>
+                        {{else if (eq order.orderStatus 'Out for Delivery')}}
+                        <div class="timeline-dot active animate-pulse-custom">
+                            <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-medium text-black">Out for Delivery</h3>
+                                <p class="text-[11px] text-gray-400 mt-1">Your order is out for delivery.</p>
+                            </div>
+                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-2">
+                                {{#each order.trackingHistory}}{{#if (eq this.status 'Out for Delivery')}}{{formatTime
+                                this.time}}{{/if}}{{/each}}
+                            </span>
+                        </div>
+                        {{else}}
+                        <div class="timeline-dot"></div>
+                        <h3 class="text-lg font-medium text-gray-300">Out for Delivery</h3>
+                        {{/if}}
+                    </div>
+
+                    {{!-- Step 6: Delivered --}}
                     <div class="timeline-step pb-0">
                         {{#if (eq order.orderStatus 'Delivered')}}
                         <div class="timeline-dot active animate-pulse-custom">
@@ -544,7 +573,8 @@
                 </div>
 
                 <div class="mb-10">
-                    {{#if (or (eq order.orderStatus 'Delivered') (eq order.orderStatus 'delivered'))}}
+                    {{#if (and (or (eq order.orderStatus 'Delivered') (eq order.orderStatus 'delivered')) (ne
+                    order.returnStatus 'Rejected'))}}
                     <a href="/users/orderDetail/{{order._id}}/return/ALL"
                         class="w-full h-[54px] flex items-center justify-center rounded-2xl border border-blue-50 text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 hover:bg-blue-50 transition-all text-center">
                         Return Entire Order
@@ -561,6 +591,7 @@
                             Cancelled</span>
                     </div>
                     {{else if (and (ne order.orderStatus 'Shipped') (ne order.orderStatus 'shipped') (ne
+                    order.orderStatus 'Out for Delivery') (ne
                     order.orderStatus 'Cancelled') (ne order.orderStatus 'cancelled') (ne order.orderStatus 'Canceled')
                     (ne order.orderStatus 'canceled') (ne order.orderStatus 'Delivered') (ne order.orderStatus
                     'delivered') (ne order.returnStatus 'Requested') (ne order.returnStatus 'requested'))}}
@@ -604,17 +635,20 @@
                                     {{else if (or (eq this.status 'Returned') (eq this.status 'returned'))}}
                                     <span
                                         class="text-[9px] font-black uppercase tracking-[0.15em] text-blue-500">Returned</span>
-                                    {{else if (or (eq ../order.orderStatus 'Delivered') (eq ../order.orderStatus
-                                    'delivered') (eq ../order.orderStatus 'Returned') (eq ../order.orderStatus 'returned') (eq ../order.returnStatus 'Requested') (eq ../order.returnStatus
-                                    'requested'))}}
+                                    {{else if (and (or (eq ../order.orderStatus 'Delivered') (eq ../order.orderStatus
+                                    'delivered') (eq ../order.orderStatus 'Returned') (eq ../order.orderStatus
+                                    'returned') (eq ../order.returnStatus 'Requested') (eq ../order.returnStatus
+                                    'requested')) (ne this.returnStatus 'Rejected'))}}
                                     <a href="/users/orderDetail/{{../order._id}}/return/{{this._id}}"
                                         class="text-[9px] font-black uppercase tracking-[0.15em] text-blue-500 hover:underline">Return
                                         Item</a>
                                     {{else if (and (ne ../order.orderStatus 'Shipped') (ne ../order.orderStatus
-                                    'shipped') (ne ../order.orderStatus 'Cancelled') (ne ../order.orderStatus
+                                    'shipped') (ne ../order.orderStatus 'Out for Delivery') (ne ../order.orderStatus
+                                    'Cancelled') (ne ../order.orderStatus
                                     'cancelled') (ne ../order.orderStatus 'Canceled') (ne ../order.orderStatus
                                     'canceled') (ne ../order.orderStatus 'Delivered') (ne ../order.orderStatus
-                                    'delivered') (ne ../order.orderStatus 'Returned') (ne ../order.orderStatus 'returned') (ne ../order.returnStatus 'Requested') (ne ../order.returnStatus
+                                    'delivered') (ne ../order.orderStatus 'Returned') (ne ../order.orderStatus
+                                    'returned') (ne ../order.returnStatus 'Requested') (ne ../order.returnStatus
                                     'requested'))}}
                                     <button onclick="openModal('CANCEL', '{{this._id}}')"
                                         class="text-[9px] font-black uppercase tracking-[0.15em] text-red-500 hover:underline">Cancel

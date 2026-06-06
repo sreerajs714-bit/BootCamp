@@ -292,8 +292,8 @@
                         <span class="material-symbols-outlined text-gray-300 text-3xl mb-3">cloud_upload</span>
                         <p class="text-[13px] font-bold">Upload photos</p>
                         <p class="text-[10px] text-gray-400 uppercase tracking-widest mt-1">Or drag and drop here</p>
-                        <input type="file" id="file-input" class="hidden" multiple accept="image/*"
-                            onchange="handleFileSelect(event)">
+                        <input type="file" id="file-input" class="hidden" multiple accept="image/jpeg,image/png,image/webp"
+                                onchange="handleFileSelect(event)">
                     </div>
 
                     <p class="text-center text-[10px] text-gray-300 italic mb-6 leading-relaxed">
@@ -350,7 +350,9 @@
             <input type="hidden" id="item-id-value" value="{{#if isFullReturn}}ALL{{else}}{{item._id}}{{/if}}">
         </form>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         let uploadedFiles = [];
         const MAX_FILES = 3;
@@ -366,34 +368,41 @@
                 countSpan.innerText = `500 / 500`;
             }
         }
+function handleFileSelect(event) {
+    const files = Array.from(event.target.files);
 
-        function handleFileSelect(event) {
-            const files = Array.from(event.target.files);
+    // ✅ Check file types
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const invalidFiles = files.filter(f => !allowedTypes.includes(f.type));
+    if (invalidFiles.length > 0) {
+        showToast("error", "Only JPG, PNG, and WEBP images are allowed.");
+        event.target.value = '';
+        return;
+    }
 
-            if (uploadedFiles.length + files.length > MAX_FILES) {
-                showToast(`You can only upload a maximum of ${MAX_FILES} images.`, "error");
-                return;
-            }
+    if (uploadedFiles.length + files.length > MAX_FILES) {
+        showToast("error", `You can only upload a maximum of ${MAX_FILES} images.`);
+        return;
+    }
 
-            files.forEach(file => {
-                if (file.size > 5 * 1024 * 1024) {
-                    showToast(`${file.name} exceeds 5MB limit.`, "error");
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const id = Date.now() + Math.random();
-                    uploadedFiles.push({ id, file, url: e.target.result });
-                    renderPreviews();
-                    updateUploadZoneVisibility();
-                };
-                reader.readAsDataURL(file);
-            });
-
-            // Reset input so same file can be chosen again if removed
-            event.target.value = '';
+    files.forEach(file => {
+        if (file.size > 5 * 1024 * 1024) {
+            showToast("error", `${file.name} exceeds 5MB limit.`);
+            return;
         }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const id = Date.now() + Math.random();
+            uploadedFiles.push({ id, file, url: e.target.result });
+            renderPreviews();
+            updateUploadZoneVisibility();
+        };
+        reader.readAsDataURL(file);
+    });
+
+    event.target.value = '';
+}
 
         function removeFile(id) {
             uploadedFiles = uploadedFiles.filter(item => item.id !== id);
@@ -460,7 +469,7 @@
             event.preventDefault();
 
             if (!validateForm()) {
-                showToast("Please fix the errors in the form.", "error");
+                showToast("error","Please fix the errors in the form.");
                 return;
             }
 
@@ -488,7 +497,7 @@
                 });
 
                 if (response.data.success) {
-                    showToast("Return request submitted successfully!", "success");
+                    showToast("success","Return request submitted successfully!");
                     setTimeout(() => {
                         window.location.href = `/users/orderDetail/{{order._id}}`;
                     }, 2000);
@@ -498,27 +507,10 @@
 
             } catch (error) {
                 console.error("Submit error:", error);
-                showToast(error.message || "An error occurred. Please try again.", "error");
+                showToast("error",error.message || "An error occurred. Please try again.");
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalContent;
             }
-        }
-
-        function showToast(message, type = "success") {
-            Toastify({
-                text: message,
-                duration: 3000,
-                gravity: "top",
-                position: "right",
-                backgroundColor: type === "success" ? "#000" : "#ef4444",
-                style: {
-                    borderRadius: "12px",
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.1em",
-                }
-            }).showToast();
         }
 
         // Initialize drag and drop

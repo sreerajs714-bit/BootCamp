@@ -299,29 +299,42 @@
         let itemToRemoveId = null;
 
         // Qty changer logic
-        function updateQty(itemId, change) {
-            const input = document.getElementById(`qty-${itemId}`);
-            const cartItem = document.querySelector(`.cart-item[data-id="${itemId}"]`);
+       async function updateQty(itemId, change) {
+       const input = document.getElementById(`qty-${itemId}`);
+       const cartItem = document.querySelector(`.cart-item[data-id="${itemId}"]`);
 
-            // ✅ Block if unavailable/out of stock
-            if (cartItem?.dataset.unavailable === 'true' || parseInt(cartItem?.dataset.stock) === 0) {
-                showToast("error", "This item is out of stock");
-                return;
-            }
+    if (cartItem?.dataset.unavailable === 'true' || parseInt(cartItem?.dataset.stock) === 0) {
+        showToast("error", "This item is out of stock");
+        return;
+    }
 
-            const stock = parseInt(cartItem?.dataset.stock) || 5;
-            const maxQty = Math.min(5, stock);
+    const stock = parseInt(cartItem?.dataset.stock) || 5;
+    const maxQty = Math.min(5, stock);
 
-            let newVal = parseInt(input.value) + change;
-            if (newVal < 1) newVal = 1;
-            if (newVal > maxQty) {
-                newVal = maxQty;
-                showToast("error", `Only ${maxQty} items available in stock`);
-            }
-            input.value = newVal;
+    let newVal = parseInt(input.value) + change;
+    if (newVal < 1) newVal = 1;
+    if (newVal > maxQty) {
+        newVal = maxQty;
+        showToast("error", `Only ${maxQty} items available in stock`);
+    }
 
-            recalculateTotals();
-        }
+    input.value = newVal;
+    recalculateTotals();
+
+    // ✅ Save to DB
+    try {
+        const itemObjectId = cartItem?.dataset.itemId; // uses data-item-id
+        await axios.put('/users/updateCartQty', {
+            itemId: itemObjectId,
+            quantity: newVal
+        });
+    } catch (err) {
+        showToast("error", "Failed to update quantity");
+        // revert UI
+        input.value = newVal - change;
+        recalculateTotals();
+    }
+}
 
         function recalculateTotals() {
             let subtotal = 0;

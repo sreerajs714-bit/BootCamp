@@ -127,7 +127,6 @@ export const loadOrderDetail = async (req, res) => {
         if (!order) {
             return res.status(404).redirect("/admin/orders");
         }
-        console.log("ORDER STATUS:", order.orderStatus);
 
         res.render("admin/orderDetail", { order });
 

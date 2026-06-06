@@ -231,6 +231,28 @@ export const addToCart = async (req, res) => {
     }
 };
 
+export const updateCartQty = async (req, res) => {
+    try {
+        const { itemId, quantity } = req.body;
+        const userId = req.session.user.id;
+
+        const cart = await Cart.findOne({ userId });
+        if (!cart) return res.status(404).json({ success: false, message: 'Cart not found' });
+
+        const item = cart.items.id(itemId);
+        if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
+
+        item.quantity = quantity;
+        await cart.save();
+
+        return res.json({ success: true });
+
+    } catch (error) {
+        console.error('updateCartQty error:', error);
+        return res.status(500).json({ success: false, message: 'Something went wrong' });
+    }
+};
+
 export const removeFromCart = async (req, res) => {
     try {
         const userId = req.session?.user?.id || null;

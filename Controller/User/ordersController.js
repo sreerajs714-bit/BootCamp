@@ -182,7 +182,6 @@ export const cancelOrder = async (req, res) => {
             return res.status(404).json({ success: false, message: "Order not found" });
         }
 
-        // Block cancellation if already delivered or cancelled
         if (['Delivered', 'Cancelled'].includes(order.orderStatus)) {
             return res.status(400).json({
                 success: false,
@@ -192,13 +191,18 @@ export const cancelOrder = async (req, res) => {
 
         // ── Cancel Entire Order ──────────────────────────────
         if (id === 'ALL') {
-            // Restore stock for all active items
             for (const item of order.items) {
                 if (item.status === 'Active') {
-                    await Product.findOneAndUpdate(
-                        { _id: item.product, "variants._id": item.variantId },
-                        { $inc: { "variants.$.stock": item.quantity } }
-                    );
+                    const product = await Product.findById(item.product);
+                    if (product) {
+                        const variant = product.variants.find(v =>
+                            v.sizes && v.sizes.map(s => s.toString()).includes(item.size.toString())
+                        );
+                        if (variant) {
+                            variant.stock += item.quantity;
+                            await product.save();
+                        }
+                    }
                     item.status = 'Cancelled';
                     item.cancelReason = reason;
                     item.cancelNote = note || '';
@@ -208,7 +212,6 @@ export const cancelOrder = async (req, res) => {
             order.orderStatus = 'Cancelled';
             order.cancelReason = reason;
             order.cancelNote = note || '';
-
             await order.save();
 
             return res.json({ success: true, message: "Order cancelled successfully" });
@@ -225,20 +228,24 @@ export const cancelOrder = async (req, res) => {
             return res.status(400).json({ success: false, message: "Item already cancelled" });
         }
 
-        // Restore stock
-        await Product.findOneAndUpdate(
-            { _id: item.product, "variants._id": item.variantId },
-            { $inc: { "variants.$.stock": item.quantity } }
-        );
+        // Restore stock by size
+        const product = await Product.findById(item.product);
+        if (product) {
+            const variant = product.variants.find(v =>
+                v.sizes && v.sizes.map(s => s.toString()).includes(item.size.toString())
+            );
+            if (variant) {
+                variant.stock += item.quantity;
+                await product.save();
+            }
+        }
 
         item.status = 'Cancelled';
         item.cancelReason = reason;
         item.cancelNote = note || '';
 
-        // Deduct cancelled item price from total
         order.totalAmount = Math.max(0, order.totalAmount - (item.price * item.quantity));
 
-        // If all items cancelled, mark order as cancelled too
         const allCancelled = order.items.every(i => i.status === 'Cancelled');
         if (allCancelled) {
             order.orderStatus = 'Cancelled';
@@ -250,8 +257,6 @@ export const cancelOrder = async (req, res) => {
         return res.json({ success: true, message: "Item cancelled successfully" });
 
     } catch (error) {
-         console.error(`${currentMode} error:`, err);
-    console.error('Response data:', err.response?.data); 
         console.error("cancelOrder error:", error);
         return res.status(500).json({ success: false, message: "Something went wrong" });
     }
@@ -466,6 +471,7 @@ export const downloadInvoice = async (req, res) => {
             Delivered: { bg: C.green,   text: C.white },
             Cancelled: { bg: C.red,     text: C.white },
             Shipped:   { bg: C.blue,    text: C.white },
+            'Out for Delivery': { bg: "#0891b2", text: C.white },
         };
         const statusStyle = statusMap[order.orderStatus] || { bg: C.gray400, text: C.white };
 
@@ -704,7 +710,7 @@ export const downloadInvoice = async (req, res) => {
         doc.fontSize(7).font("Helvetica-Bold").fillColor(C.gray400)
             .text("ORDER TIMELINE", TL_X, y);
 
-        const timelineStatuses = ["Pending", "Confirmed", "Processing", "Shipped", "Delivered"];
+        const timelineStatuses = ["Pending", "Confirmed", "Processing", "Shipped", "Out for Delivery", "Delivered"];
         const currentIdx = timelineStatuses.indexOf(order.orderStatus);
         const TL_Y_START = y + 16;
         const STEP_H = 22;

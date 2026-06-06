@@ -11,7 +11,7 @@ import passport from "../Config/passport.js";
 import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controller/User/addressController.js";
 import { loadAllProducts, loadMens, loadProductDetail } from "../Controller/User/productController.js";
 import { clearWishlist, loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
-import { addToCart, loadCart, removeFromCart } from "../Controller/User/cartController.js";
+import { addToCart, loadCart, removeFromCart, updateCartQty } from "../Controller/User/cartController.js";
 import { loadCheckout, loadOrderSuccess, placeOrder } from "../Controller/User/checkoutController.js";
 import { cancelOrder, downloadInvoice, loadMyOrders, loadOrderDetail, loadReturnPage, returnRequest } from "../Controller/User/ordersController.js";
 
@@ -71,21 +71,22 @@ route.get("/productDetail/:id",noCache,loadProductDetail);
 route.get("/wishlist",noCache,loadWishlist);
 route.post("/toggleWishlist",noCache,checkSession,toggleWishlist);
 route.delete("/removeFromWishlist",noCache,checkSession,removeFromWishlist);
-route.post("/clearWishlist",clearWishlist);
+route.post("/clearWishlist",checkSession,clearWishlist);
 
 route.get("/cart",noCache,loadCart);
 route.post("/addCart",noCache,checkSession,addToCart);
+route.put("/updateCartQty",checkSession,updateCartQty);
 route.delete("/removeFromCart",noCache,checkSession,removeFromCart);
-route.get("/checkout",loadCheckout);
+route.get("/checkout",checkSession,loadCheckout);
 
-route.get("/orderSuccess/:id",loadOrderSuccess);
-route.post("/orderSuccess",placeOrder);
-route.get("/myOrders",loadMyOrders);
-route.get("/orderDetail/:id",loadOrderDetail);
-route.get("/invoice/:id",downloadInvoice);
-route.post("/orderDetail/cancel",cancelOrder);
-route.get("/orderDetail/:id/return/:itemId",loadReturnPage);
-route.post("/orderDetail/return-request", uploadReturn.array('images', 3),returnRequest);
+route.get("/orderSuccess/:id",checkSession,loadOrderSuccess);
+route.post("/orderSuccess",checkSession,placeOrder);
+route.get("/myOrders",checkSession,loadMyOrders);
+route.get("/orderDetail/:id",checkSession,loadOrderDetail);
+route.get("/invoice/:id",checkSession,downloadInvoice);
+route.post("/orderDetail/cancel",checkSession,cancelOrder);
+route.get("/orderDetail/:id/return/:itemId",checkSession,loadReturnPage);
+route.post("/orderDetail/return-request",checkSession, uploadReturn.array('images', 3),returnRequest);
 
 
 

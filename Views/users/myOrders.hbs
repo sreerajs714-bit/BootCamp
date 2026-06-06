@@ -366,10 +366,10 @@
                                 {{#if (and ../isDelivered (ne this.status 'Cancelled') (ne this.status 'Canceled') (ne
                                 this.status 'Returned') (ne this.status 'returned'))}}
                                 <div class="flex justify-end mt-4">
-                                    <button onclick="buyAgain('{{this.product._id}}')"
-                                        class="buy-again-btn premium-btn px-8 py-3.5 text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 rounded-lg">
-                                        <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
-                                        Buy Again
+                                    <button onclick="buyAgain('{{this.product._id}}', '{{this.product.variants.[0]._id}}', '{{this.size}}')"
+                                     class="buy-again-btn premium-btn px-8 py-3.5 text-[11px] font-bold tracking-widest uppercase flex items-center gap-2 rounded-lg">
+                                      <span class="material-symbols-outlined text-[18px]">shopping_bag</span>
+                                      Buy Again
                                     </button>
                                 </div>
                                 {{/if}}
@@ -403,38 +403,29 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Buy Again Logic
-        async function buyAgain(productId) {
-            try {
-                const response = await axios.post('/users/addCart', {
-                    productId: productId,
-                    quantity: 1
-                });
+        async function buyAgain(productId, variantId, size) {
+    try {
+        const response = await axios.post('/users/addCart', {
+            productId,
+            variantId,
+            size,
+            quantity: 1
+        });
 
-                if (response.data.success) {
-                    Swal.fire({
-                        title: 'Added to Bag',
-                        text: 'Product has been added to your shopping bag.',
-                        icon: 'success',
-                        showCancelButton: true,
-                        confirmButtonColor: '#000000',
-                        confirmButtonText: 'VIEW BAG',
-                        cancelButtonText: 'CONTINUE SHOPPING'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '/users/cart';
-                        }
-                    });
-                } else {
-                    Swal.fire('Error', response.data.message || 'Failed to add product to bag', 'error');
-                }
-            } catch (error) {
-                console.error('Buy Again error:', error);
-                Swal.fire('Error', 'Something went wrong. Please try again.', 'error');
-            }
+        if (response.data.success || response.data.alreadyInCart) {
+            window.location.href = '/users/cart';
+        } else {
+            showToast('error', response.data.message || 'Failed to add product to bag');
         }
+    } catch (error) {
+        console.error('Buy Again error:', error.response?.data);
+        showToast('error', error.response?.data?.message || 'Something went wrong.');
+    }
+}
 
         // Search Orders Logic
         const searchInput = document.querySelector('.search-input');
