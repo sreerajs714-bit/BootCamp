@@ -6,14 +6,14 @@ import { RegisterUser } from "../Controller/User/authController.js";
 import { resendOTP, verifyOTP } from "../Controller/otpcontroller.js";
 import { checkSession, islogin, noCache } from "../Middleware/userAuth.js";
 import { changeEmail, changePassword, editProfile, loadEditProfile, loadProfile, removeProfilePhoto, uploadProfilePhoto } from "../Controller/User/profileController.js";
-import { uploadProfile } from "../Middleware/multer.js";
+import { uploadProfile ,uploadReturn } from "../Middleware/multer.js";
 import passport from "../Config/passport.js";
 import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controller/User/addressController.js";
 import { loadAllProducts, loadMens, loadProductDetail } from "../Controller/User/productController.js";
 import { clearWishlist, loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
 import { addToCart, loadCart, removeFromCart } from "../Controller/User/cartController.js";
 import { loadCheckout, loadOrderSuccess, placeOrder } from "../Controller/User/checkoutController.js";
-import { cancelOrder, downloadInvoice, loadMyOrders, loadOrderDetail } from "../Controller/User/ordersController.js";
+import { cancelOrder, downloadInvoice, loadMyOrders, loadOrderDetail, loadReturnPage, returnRequest } from "../Controller/User/ordersController.js";
 
 
 route.get("/auth/google",
@@ -50,6 +50,7 @@ route.post("/otpVerify",verifyOTP)
 route.post("/resendOtp",resendOTP)
 route.get("/setNew",noCache,loadSetNew)
 route.post("/setNew",SetNew)
+
 route.get("/editProfile",noCache,checkSession,loadEditProfile)
 route.post("/editProfile", noCache, checkSession, uploadProfile.single("profilePhoto"), editProfile)
 route.post("/uploadProfilePhoto", noCache, checkSession, uploadProfile.single("profilePhoto"),uploadProfilePhoto);
@@ -57,27 +58,34 @@ route.post("/removeProfilePhoto", noCache, checkSession,removeProfilePhoto);
 route.post("/changePassword",noCache,checkSession,changePassword)
 route.post("/changeEmail",changeEmail)
 route.post("/verifyChangeEmailotp",noCache,checkSession,verifyOTP)
+
 route.get("/address",checkSession,loadAddress);
 route.post("/address",checkSession,addAddress)
 route.put("/address/:id", checkSession,editAddress);
 route.delete("/address/:id", checkSession,deleteAddress);
+
 route.get("/allProduct",noCache,loadAllProducts);
 route.get("/mens",noCache,loadMens);
 route.get("/productDetail/:id",noCache,loadProductDetail);
+
 route.get("/wishlist",noCache,loadWishlist);
 route.post("/toggleWishlist",noCache,checkSession,toggleWishlist);
 route.delete("/removeFromWishlist",noCache,checkSession,removeFromWishlist);
 route.post("/clearWishlist",clearWishlist);
+
 route.get("/cart",noCache,loadCart);
 route.post("/addCart",noCache,checkSession,addToCart);
 route.delete("/removeFromCart",noCache,checkSession,removeFromCart);
 route.get("/checkout",loadCheckout);
+
 route.get("/orderSuccess/:id",loadOrderSuccess);
 route.post("/orderSuccess",placeOrder);
 route.get("/myOrders",loadMyOrders);
 route.get("/orderDetail/:id",loadOrderDetail);
 route.get("/invoice/:id",downloadInvoice);
 route.post("/orderDetail/cancel",cancelOrder);
+route.get("/orderDetail/:id/return/:itemId",loadReturnPage);
+route.post("/orderDetail/return-request", uploadReturn.array('images', 3),returnRequest);
 
 
 

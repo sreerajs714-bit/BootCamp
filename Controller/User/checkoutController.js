@@ -188,7 +188,8 @@ export const placeOrder = async (req, res) => {
             orderItems.push({
                 product: product._id,
                 quantity: item.quantity,
-                price: price
+                price: price,
+                size: item.size 
             });
         }
 
@@ -242,9 +243,8 @@ export const placeOrder = async (req, res) => {
             totalAmount,
             orderStatus: "Confirmed",
             paymentStatus:
-                paymentMethod === "cod"
-                    ? "Pending"
-                    : "Paid"
+                paymentMethod === "cod" ? "Pending" : "Paid",
+             trackingHistory: [{ status: "Confirmed", time: new Date() }]
         });
 
         // Reduce stock
@@ -286,7 +286,6 @@ export const placeOrder = async (req, res) => {
 
 export const loadOrderSuccess = async (req, res) => {
     try {
-
         const { id } = req.params;
 
         const order = await Order.findById(id)
@@ -299,9 +298,18 @@ export const loadOrderSuccess = async (req, res) => {
 
         const deliveryStart = new Date();
         const deliveryEnd = new Date();
-
         deliveryStart.setDate(deliveryStart.getDate() + 3);
         deliveryEnd.setDate(deliveryEnd.getDate() + 7);
+
+        // Map orderStatus from DB to tracker step
+        const statusStepMap = {
+            'pending':    0,
+            'processing': 1,
+            'shipped':    2,
+            'delivered':  3,
+        };
+
+        const currentStep = statusStepMap[order.orderStatus?.toLowerCase()] ?? 0;
 
         const formattedOrder = {
             orderNumber: order._id.toString().slice(-8).toUpperCase(),
@@ -317,8 +325,8 @@ export const loadOrderSuccess = async (req, res) => {
             }),
 
             tracking: {
-                currentStep: 0,
-                progressPercent: 25
+                currentStep,
+                progressPercent: (currentStep / 3) * 100
             },
 
             items: order.items.map(item => ({
@@ -339,17 +347,13 @@ export const loadOrderSuccess = async (req, res) => {
 
         res.render('users/orderSuccess', {
             storeName: 'BOOT CAMP',
-
             order: formattedOrder,
-
             continueShoppingUrl: '/users/home',
-
-            myOrdersUrl: '/users/orders'
+            myOrdersUrl: '/users/myOrders'
         });
 
     } catch (error) {
         console.error('loadOrderSuccess error:', error);
-
         return res.redirect('/users/orders');
     }
 };

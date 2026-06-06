@@ -417,15 +417,16 @@
                 });
 
                 if (response.data.success || response.status === 200) {
-                    showToast('success','Your account has been successfully created.')
-                    .then(() => {
-                        window.location.href = '/users/login';
-                    });
+                    showToast('success',response.data.message)
+                        setTimeout(() => {
+                              window.location.href = '/users/otpVerify';
+                          }, 1500);
                 } else {
                     throw new Error(response.data.message || 'Signup failed');
                 }
 
             } catch (error) {
+                console.log("FRONTEND ERROR:", error);
                 showToast( error.response?.data?.message || error.message || 'error','Something went wrong. Please try again.');
             } finally {
                 submitBtn.disabled = false;

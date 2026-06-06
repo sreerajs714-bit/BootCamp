@@ -106,14 +106,22 @@ export const loadOrderDetail = async (req, res) => {
             }).filter(Boolean);
 
             return {
-                ...item,
+                ...item,                              // ← carries item.returnStatus
+                returnStatus: item.returnStatus || null,   // ← explicit, never lost
+                status: item.status || "Active",
+                cancelReason: item.cancelReason || "",
+                size: item.size || variant?.sizes?.[0] || "N/A",
                 product: {
                     ...product,
-                    images
-                },
-                size: item.size || variant?.sizes?.[0] || "N/A",
-                 status: item.status || "Active",        
-                 cancelReason: item.cancelReason || ""  
+                    // FIX: template uses product.variants[0].images[0]
+                    // so we must keep the variants structure intact
+                    variants: [
+                        {
+                            ...(variant || {}),
+                            images
+                        }
+                    ]
+                }
             };
         });
 
@@ -128,8 +136,17 @@ export const loadOrderDetail = async (req, res) => {
                 ...order,
                 orderId: order._id.toString().slice(-8).toUpperCase(),
                 items,
+                orderStatus: order.orderStatus,
+                // FIX: explicitly forward all return-related fields
+                returnStatus: order.returnStatus || null,
+                returnRequestedAt: order.returnRequestedAt || null,
+                returnApprovedAt: order.returnApprovedAt || null,
+                pickupDate: order.pickupDate || null,
+                refundedAt: order.refundedAt || null,
+                trackingHistory: order.trackingHistory || [],
                 totalPrice: order.totalAmount.toLocaleString("en-IN"),
                 paymentMethod: order.paymentMethod,
+                paymentStatus: order.paymentStatus,
                 address: {
                     name: order.address.fullName,
                     phone: order.address.phoneNO,
@@ -240,6 +257,126 @@ export const cancelOrder = async (req, res) => {
     }
 };
 
+export const loadReturnPage = async (req, res) => {
+    try {
+        const { id, itemId } = req.params;
+
+        const order = await Order.findById(id)
+            .populate('items.product')
+            .lean();
+
+        if (!order) return res.redirect('/users/orders');
+
+        if (order.orderStatus !== 'Delivered') {
+            return res.redirect(`/users/orderDetail/${id}`);
+        }
+
+        // ✅ Handle full order return
+        if (itemId === 'ALL') {
+            const returnableItems = order.items.filter(i =>
+                !i.returnRequest?.status || i.returnRequest.status === 'None'
+            );
+
+            if (returnableItems.length === 0) {
+                return res.redirect(`/users/orderDetail/${id}`);
+            }
+
+            return res.render('users/return', {
+                order,
+                item: returnableItems[0],   // for display fallback
+                allItems: returnableItems,
+                isFullReturn: true
+            });
+        }
+
+        // ✅ Handle single item return
+        const item = order.items.find(i => i._id.toString() === itemId);
+        if (!item) return res.redirect(`/users/orderDetail/${id}`);
+
+        if (item.returnRequest?.status && item.returnRequest.status !== 'None') {
+            return res.redirect(`/users/orderDetail/${id}`);
+        }
+
+        res.render('users/return', { order, item, isFullReturn: false });
+
+    } catch (error) {
+        console.error('loadReturnPage error:', error);
+        res.redirect('/users/orders');
+    }
+};
+
+export const returnRequest = async (req, res) => {
+    try {
+        const { itemId, orderId, reason, condition, comments } = req.body;
+        const imageUrls = req.files?.map(file => file.path) ?? [];
+
+        const order = await Order.findById(orderId);
+        if (!order) return res.json({ success: false, message: 'Order not found' });
+
+        if (order.orderStatus !== 'Delivered') {
+            return res.json({ success: false, message: 'Only delivered orders can be returned' });
+        }
+
+        if (itemId === 'ALL') {
+            // FIX: no condition — update ALL items unconditionally
+            order.items.forEach(item => {
+                item.returnStatus = 'Requested';
+                item.status       = 'Return Requested';
+                item.returnRequest = {
+                    status:      'Requested',
+                    reason,
+                    condition,
+                    comments,
+                    images:      imageUrls,
+                    requestedAt: new Date()
+                };
+            });
+
+            order.isFullReturn = true;  // FIX: mark as full order return
+
+        } else {
+            const item = order.items.find(i => i._id.toString() === itemId);
+            if (!item)
+                return res.json({ success: false, message: 'Item not found' });
+
+            if (item.returnStatus && item.returnStatus !== 'None')
+                return res.json({ success: false, message: 'Return already requested' });
+
+            item.returnStatus  = 'Requested';
+            item.status        = 'Return Requested';
+            item.returnRequest = {
+                status:      'Requested',
+                reason,
+                condition,
+                comments,
+                images:      imageUrls,
+                requestedAt: new Date()
+            };
+
+            order.isFullReturn = false;
+        }
+
+        // Always set order-level fields
+        order.returnStatus      = 'Requested';
+        order.returnRequestedAt = new Date();
+        order.orderStatus       = 'Return Requested';
+
+        console.log('itemId:', itemId);
+console.log('isFullReturn:', order.isFullReturn);
+console.log('items after update:', order.items.map(i => ({
+    name: i.product,
+    returnStatus: i.returnStatus,
+    status: i.status
+})));
+
+        await order.save();
+        return res.json({ success: true, message: 'Return request submitted successfully' });
+
+    } catch (error) {
+        console.error('submitReturnRequest error:', error);
+        return res.json({ success: false, message: 'Something went wrong' });
+    }
+};
 
 // ── Helper: fetch remote image as buffer
 async function fetchImageBuffer(url) {

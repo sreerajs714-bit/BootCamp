@@ -187,14 +187,14 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </head>
 
-<body class="min-h-screen flex flex-col font-sans selection:bg-brand-950 selection:text-white pt-16">
+<body class="min-h-screen flex flex-col font-sans selection:bg-brand-950 selection:text-white">
 
     <!-- Navigation -->
     {{>navbar}}
     {{>breadCrumbs}}
 
     <!-- Top Action Bar -->
-    <div class="max-w-7xl mx-auto w-full px-6 flex justify-end pt-16">
+    <div class="max-w-7xl mx-auto w-full px-6 flex justify-end ">
         <button id="download-invoice-btn" onclick="downloadInvoice('{{order._id}}')"
             class="flex items-center gap-3 px-8 py-4 border border-gray-100 rounded-2xl text-[11px] font-bold tracking-widest uppercase hover:bg-gray-50 transition-all premium-shadow">
             <span class="material-symbols-outlined text-[20px]">download</span>
@@ -221,68 +221,286 @@
                 </div>
             </div>
 
-            <!-- Journey Timeline -->
+
+            <!-- Conditional Timeline Section -->
             <section class="mb-20">
-                <h2 class="text-3xl font-serif mb-12">Journey Timeline</h2>
+
+                {{!-- ===== CANCELLED VIEW ===== --}}
+                {{#if (or (eq order.orderStatus 'Cancelled') (eq order.orderStatus 'Canceled'))}}
+                <h2 class="text-3xl font-serif mb-12">Order Status</h2>
                 <div class="max-w-md">
-                    <!-- Step: Awaiting Payment -->
+                    <div class="flex items-start gap-6 p-8 bg-gray-50 rounded-3xl border border-gray-100">
+                        <div class="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-gray-500 text-xl">cancel</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-700 mb-1">Item Cancelled</h3>
+                            <p class="text-[12px] text-gray-400 leading-relaxed">Your order has been cancelled. If a
+                                payment was made, a refund will be processed within 5–7 working days.</p>
+                        </div>
+                    </div>
+                </div> {{!-- ===== REJECTED VIEW ===== --}}
+                {{else if (eq order.returnStatus 'Rejected')}}
+                <h2 class="text-3xl font-serif mb-12">Return Status</h2>
+                <div class="max-w-md">
+                    <div class="flex items-start gap-6 p-8 bg-red-50 rounded-3xl border border-red-100">
+                        <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                            <span class="material-symbols-outlined text-red-500 text-xl">block</span>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-red-700 mb-1">Return Rejected</h3>
+                            <p class="text-[12px] text-red-400 leading-relaxed">Your return request was not approved.
+                                Please contact our support team for more details or further assistance.</p>
+                        </div>
+                    </div>
+                </div> {{!-- ===== RETURN JOURNEY (Expanded) ===== --}}
+                {{else if (or (eq order.orderStatus 'Returned') (eq order.orderStatus 'returned') (eq order.returnStatus
+                'Requested') (eq order.returnStatus 'requested') (eq order.returnStatus 'Approved') (eq
+                order.returnStatus 'approved') (eq order.returnStatus 'Picked Up') (eq order.returnStatus 'picked up')
+                (eq order.returnStatus 'Refunded') (eq order.returnStatus 'refunded'))}}
+                <h2 class="text-3xl font-serif mb-12">Return Journey</h2>
+                <div class="max-w-md">
+
+                    {{!-- Step 0: Delivered (Starting point for return) --}}
+                    <div class="timeline-step">
+                        <div class="timeline-dot completed">
+                            <span class="material-symbols-outlined text-[10px] text-white">inventory_2</span>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-400">Delivered</h3>
+                                <p class="text-[11px] text-gray-300 mt-1 leading-relaxed max-w-[280px]">Your order was
+                                    successfully delivered.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{!-- Step 1: Return Requested --}}
                     <div class="timeline-step">
                         <div class="timeline-dot completed">
                             <span class="material-symbols-outlined text-[10px] text-white">check</span>
                         </div>
-                        <div class="flex flex-col">
-                            <h3 class="text-lg font-medium text-gray-400">Awaiting Payment</h3>
-                            <p class="text-[11px] text-gray-300 mt-1">Payment is currently being processed or awaiting
-                                re-attempt.</p>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-400">Return Requested</h3>
+                                <p class="text-[11px] text-gray-300 mt-1 leading-relaxed max-w-[280px]">Your return
+                                    request has been submitted and is pending approval.</p>
+                            </div>
+                            {{#if order.returnRequestedAt}}
+                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-2">{{formatTime
+                                order.returnRequestedAt}}</span>
+                            {{/if}}
                         </div>
                     </div>
 
-                    <!-- Step: Order Received -->
+
+                    {{!-- Step 2: Approved --}}
                     <div class="timeline-step">
+                        {{#if (or (eq order.returnStatus 'Approved') (eq order.returnStatus 'Picked Up') (eq
+                        order.returnStatus 'Refunded') (eq order.orderStatus 'Returned'))}}
+                        <div class="timeline-dot completed">
+                            <span class="material-symbols-outlined text-[10px] text-white">check</span>
+                        </div>
+                        <div class="flex justify-between items-start text-gray-400">
+                            <h3 class="text-lg font-medium">Approved</h3>
+                            {{#if order.returnApprovedAt}}
+                            <span class="text-[9px] font-bold uppercase tracking-widest mt-2">{{formatTime
+                                order.returnApprovedAt}}</span>
+                            {{/if}}
+                        </div>
+                        {{else}}
+                        <div class="timeline-dot active animate-pulse-custom">
+                            <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-black">Approved</h3>
+                            <p class="text-[11px] text-gray-400 mt-1">Our team is reviewing your request.</p>
+                        </div>
+                        {{/if}}
+                    </div>
+
+                    {{!-- Step 3: Picked Up --}}
+                    <div class="timeline-step">
+                        {{#if (or (eq order.returnStatus 'Picked Up') (eq order.returnStatus 'Refunded') (eq
+                        order.orderStatus 'Returned'))}}
+                        <div class="timeline-dot completed">
+                            <span class="material-symbols-outlined text-[10px] text-white">check</span>
+                        </div>
+                        <div class="flex justify-between items-start text-gray-400">
+                            <h3 class="text-lg font-medium">Picked Up</h3>
+                            {{#if order.pickupDate}}
+                            <span class="text-[9px] font-bold uppercase tracking-widest mt-2">{{formatDate
+                                order.pickupDate}}</span>
+                            {{/if}}
+                        </div>
+                        {{else if (eq order.returnStatus 'Approved')}}
+                        <div class="timeline-dot active animate-pulse-custom">
+                            <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-black">Picked Up</h3>
+                            <p class="text-[11px] text-gray-400 mt-1">A pickup agent will collect your item soon.</p>
+                        </div>
+                        {{else}}
+                        <div class="timeline-dot"></div>
+                        <h3 class="text-lg font-medium text-gray-300">Picked Up</h3>
+                        {{/if}}
+                    </div>
+
+                    {{!-- Step 4: Refund Processed --}}
+                    <div class="timeline-step pb-0">
+                        {{#if (or (eq order.returnStatus 'Refunded') (eq order.orderStatus 'Returned'))}}
                         <div class="timeline-dot active animate-pulse-custom">
                             <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
                         </div>
                         <div class="flex justify-between items-start">
                             <div>
-                                <h3 class="text-lg font-medium text-black">Order Received</h3>
-                                <p class="text-[11px] text-gray-400 mt-1 leading-relaxed max-w-[280px]">BootCamp has
-                                    received your order details and is currently processing them.</p>
+                                <h3 class="text-lg font-medium text-black">Refund Processed</h3>
+                                <p class="text-[11px] text-gray-400 mt-1">Refund has been credited to your BOOTCAMP
+                                    Wallet.
+                                </p>
+                            </div>
+                            {{#if order.refundedAt}}
+                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-2">{{formatTime
+                                order.refundedAt}}</span>
+                            {{/if}}
+                        </div>
+                        {{else}}
+                        <div class="timeline-dot"></div>
+                        <h3 class="text-lg font-medium text-gray-300">Refund Processed</h3>
+                        {{/if}}
+                    </div>
+
+                </div>
+
+                {{!-- ===== REGULAR JOURNEY TIMELINE (active orders) ===== --}}
+                {{else}}
+                <h2 class="text-3xl font-serif mb-12">Journey Timeline</h2>
+                <div class="max-w-md">
+
+                    {{!-- Step 1: Order Received (always completed) --}}
+                    <div class="timeline-step">
+                        <div class="timeline-dot completed">
+                            <span class="material-symbols-outlined text-[10px] text-white">check</span>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-400">Order Received</h3>
+                                <p class="text-[11px] text-gray-300 mt-1 leading-relaxed max-w-[280px]">BootCamp has
+                                    received your order.</p>
                             </div>
                             <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-2">{{formatTime
                                 order.createdAt}}</span>
                         </div>
                     </div>
 
-                    <!-- Step: Confirmed (Future) -->
+                    {{!-- Step 2: Confirmed --}}
                     <div class="timeline-step">
+                        {{#if (or (eq order.orderStatus 'Processing') (eq order.orderStatus 'Shipped') (eq
+                        order.orderStatus 'Delivered'))}}
+                        <div class="timeline-dot completed">
+                            <span class="material-symbols-outlined text-[10px] text-white">check</span>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-400">Confirmed</h3>
+                        {{else if (eq order.orderStatus 'Confirmed')}}
+                        <div class="timeline-dot active animate-pulse-custom">
+                            <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-medium text-black">Confirmed</h3>
+                                <p class="text-[11px] text-gray-400 mt-1">Your order has been confirmed.</p>
+                            </div>
+                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-2">
+                                {{#each order.trackingHistory}}{{#if (eq this.status 'Confirmed')}}{{formatTime
+                                this.time}}{{/if}}{{/each}}
+                            </span>
+                        </div>
+                        {{else}}
                         <div class="timeline-dot"></div>
                         <h3 class="text-lg font-medium text-gray-300">Confirmed</h3>
+                        {{/if}}
                     </div>
 
-                    <!-- Step: Processing (Future) -->
+                    {{!-- Step 3: Processing --}}
                     <div class="timeline-step">
+                        {{#if (or (eq order.orderStatus 'Shipped') (eq order.orderStatus 'Delivered'))}}
+                        <div class="timeline-dot completed">
+                            <span class="material-symbols-outlined text-[10px] text-white">check</span>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-400">Processing</h3>
+                        {{else if (eq order.orderStatus 'Processing')}}
+                        <div class="timeline-dot active animate-pulse-custom">
+                            <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-medium text-black">Processing</h3>
+                                <p class="text-[11px] text-gray-400 mt-1">Your order is being prepared.</p>
+                            </div>
+                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-2">
+                                {{#each order.trackingHistory}}{{#if (eq this.status 'Processing')}}{{formatTime
+                                this.time}}{{/if}}{{/each}}
+                            </span>
+                        </div>
+                        {{else}}
                         <div class="timeline-dot"></div>
                         <h3 class="text-lg font-medium text-gray-300">Processing</h3>
+                        {{/if}}
                     </div>
 
-                    <!-- Step: Shipped (Future) -->
+                    {{!-- Step 4: Shipped --}}
                     <div class="timeline-step">
+                        {{#if (eq order.orderStatus 'Delivered')}}
+                        <div class="timeline-dot completed">
+                            <span class="material-symbols-outlined text-[10px] text-white">check</span>
+                        </div>
+                        <h3 class="text-lg font-medium text-gray-400">Shipped</h3>
+                        {{else if (eq order.orderStatus 'Shipped')}}
+                        <div class="timeline-dot active animate-pulse-custom">
+                            <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-medium text-black">Shipped</h3>
+                                <p class="text-[11px] text-gray-400 mt-1">Your order is on its way.</p>
+                            </div>
+                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-2">
+                                {{#each order.trackingHistory}}{{#if (eq this.status 'Shipped')}}{{formatTime
+                                this.time}}{{/if}}{{/each}}
+                            </span>
+                        </div>
+                        {{else}}
                         <div class="timeline-dot"></div>
                         <h3 class="text-lg font-medium text-gray-300">Shipped</h3>
+                        {{/if}}
                     </div>
 
-                    <!-- Step: Out for Delivery (Future) -->
-                    <div class="timeline-step">
-                        <div class="timeline-dot"></div>
-                        <h3 class="text-lg font-medium text-gray-300">Out for Delivery</h3>
-                    </div>
-
-                    <!-- Step: Delivered (Future) -->
+                    {{!-- Step 5: Delivered --}}
                     <div class="timeline-step pb-0">
+                        {{#if (eq order.orderStatus 'Delivered')}}
+                        <div class="timeline-dot active animate-pulse-custom">
+                            <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h3 class="text-lg font-medium text-black">Delivered</h3>
+                                <p class="text-[11px] text-gray-400 mt-1">Your order has been delivered.</p>
+                            </div>
+                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-2">
+                                {{#each order.trackingHistory}}{{#if (eq this.status 'Delivered')}}{{formatTime
+                                this.time}}{{/if}}{{/each}}
+                            </span>
+                        </div>
+                        {{else}}
                         <div class="timeline-dot"></div>
                         <h3 class="text-lg font-medium text-gray-300">Delivered</h3>
+                        {{/if}}
                     </div>
+
                 </div>
+                {{/if}}
+
             </section>
 
             <!-- Shipping Destination -->
@@ -326,21 +544,27 @@
                 </div>
 
                 <div class="mb-10">
-                    {{#if (eq order.orderStatus 'Delivered')}}
-                    <button onclick="openModal('RETURN', 'ALL')" 
-                        class="w-full py-4 rounded-2xl border border-blue-50 text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 hover:bg-blue-50 transition-all">
+                    {{#if (or (eq order.orderStatus 'Delivered') (eq order.orderStatus 'delivered'))}}
+                    <a href="/users/orderDetail/{{order._id}}/return/ALL"
+                        class="w-full h-[54px] flex items-center justify-center rounded-2xl border border-blue-50 text-[10px] font-black uppercase tracking-[0.2em] text-blue-400 hover:bg-blue-50 transition-all text-center">
                         Return Entire Order
-                    </button>
+                    </a>
                     {{else if (or (eq order.orderStatus 'Returned') (eq order.orderStatus 'returned'))}}
                     <div class="w-full py-4 rounded-2xl bg-blue-50 text-center">
-                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Order Returned</span>
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-blue-400">Order
+                            Returned</span>
                     </div>
-                    {{else if (or (eq order.orderStatus 'Cancelled') (eq order.orderStatus 'Canceled'))}}
+                    {{else if (or (eq order.orderStatus 'Cancelled') (eq order.orderStatus 'Canceled') (eq
+                    order.orderStatus 'cancelled') (eq order.orderStatus 'canceled'))}}
                     <div class="w-full py-4 rounded-2xl bg-red-50 text-center">
-                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-red-400">Order Cancelled</span>
+                        <span class="text-[10px] font-black uppercase tracking-[0.2em] text-red-400">Order
+                            Cancelled</span>
                     </div>
-                    {{else if (and (ne order.orderStatus 'Shipped') (ne order.orderStatus 'Cancelled') (ne order.orderStatus 'Canceled'))}}
-                    <button onclick="openModal('CANCEL', 'ALL')" 
+                    {{else if (and (ne order.orderStatus 'Shipped') (ne order.orderStatus 'shipped') (ne
+                    order.orderStatus 'Cancelled') (ne order.orderStatus 'cancelled') (ne order.orderStatus 'Canceled')
+                    (ne order.orderStatus 'canceled') (ne order.orderStatus 'Delivered') (ne order.orderStatus
+                    'delivered') (ne order.returnStatus 'Requested') (ne order.returnStatus 'requested'))}}
+                    <button onclick="openModal('CANCEL', 'ALL')"
                         class="w-full py-4 rounded-2xl border border-red-50 text-[10px] font-black uppercase tracking-[0.2em] text-red-400 hover:bg-red-50 transition-all">
                         Cancel Entire Order
                     </button>
@@ -352,7 +576,7 @@
                     {{#each order.items}}
                     <div class="flex gap-6">
                         <div class="w-24 h-28 bg-[#fbfbfb] rounded-2xl overflow-hidden flex-shrink-0">
-                            <img src="{{this.product.images.[0]}}" alt="{{this.product.productName}}"
+                            <img src="{{this.product.variants.[0].images.[0]}}" alt="{{this.product.productName}}"
                                 class="w-full h-full object-cover">
                         </div>
                         <div class="flex-grow py-1">
@@ -364,21 +588,37 @@
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Size:
                                 {{this.size}}</p>
                             <div class="flex items-center justify-between">
-                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Qty: {{this.quantity}}</span>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Qty:
+                                    {{this.quantity}}</span>
 
                                 <div class="flex items-center">
-                                    {{#if (or (eq this.status 'Cancelled') (eq this.status 'Canceled'))}}
-                                    <span class="text-[9px] font-black uppercase tracking-[0.15em] text-red-500">Cancelled</span>
+                                    {{#if (eq this.returnStatus 'Requested')}}
+                                    <span
+                                        class="px-5 py-2.5 bg-red-50/50 text-[10px] font-black uppercase tracking-widest text-[#ff8b8b] rounded-full whitespace-nowrap">
+                                        Return Requested
+                                    </span>
+                                    {{else if (or (eq this.status 'Cancelled') (eq this.status 'Canceled') (eq
+                                    this.status 'cancelled') (eq this.status 'canceled'))}}
+                                    <span
+                                        class="text-[9px] font-black uppercase tracking-[0.15em] text-red-500">Cancelled</span>
                                     {{else if (or (eq this.status 'Returned') (eq this.status 'returned'))}}
-                                    <span class="text-[9px] font-black uppercase tracking-[0.15em] text-blue-500">Returned</span>
-                                    {{else}}
-                                        {{#if (eq order.orderStatus 'Delivered')}}
-                                        <button onclick="openModal('RETURN', '{{this._id}}')" 
-                                            class="text-[9px] font-black uppercase tracking-[0.15em] text-blue-500 hover:underline">Return Item</button>
-                                        {{else if (and (ne order.orderStatus 'Shipped') (ne order.orderStatus 'Cancelled') (ne order.orderStatus 'Canceled'))}}
-                                        <button onclick="openModal('CANCEL', '{{this._id}}')" 
-                                            class="text-[9px] font-black uppercase tracking-[0.15em] text-red-500 hover:underline">Cancel Item</button>
-                                        {{/if}}
+                                    <span
+                                        class="text-[9px] font-black uppercase tracking-[0.15em] text-blue-500">Returned</span>
+                                    {{else if (or (eq ../order.orderStatus 'Delivered') (eq ../order.orderStatus
+                                    'delivered') (eq ../order.orderStatus 'Returned') (eq ../order.orderStatus 'returned') (eq ../order.returnStatus 'Requested') (eq ../order.returnStatus
+                                    'requested'))}}
+                                    <a href="/users/orderDetail/{{../order._id}}/return/{{this._id}}"
+                                        class="text-[9px] font-black uppercase tracking-[0.15em] text-blue-500 hover:underline">Return
+                                        Item</a>
+                                    {{else if (and (ne ../order.orderStatus 'Shipped') (ne ../order.orderStatus
+                                    'shipped') (ne ../order.orderStatus 'Cancelled') (ne ../order.orderStatus
+                                    'cancelled') (ne ../order.orderStatus 'Canceled') (ne ../order.orderStatus
+                                    'canceled') (ne ../order.orderStatus 'Delivered') (ne ../order.orderStatus
+                                    'delivered') (ne ../order.orderStatus 'Returned') (ne ../order.orderStatus 'returned') (ne ../order.returnStatus 'Requested') (ne ../order.returnStatus
+                                    'requested'))}}
+                                    <button onclick="openModal('CANCEL', '{{this._id}}')"
+                                        class="text-[9px] font-black uppercase tracking-[0.15em] text-red-500 hover:underline">Cancel
+                                        Item</button>
                                     {{/if}}
                                 </div>
                             </div>

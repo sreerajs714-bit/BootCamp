@@ -274,9 +274,10 @@
                         <button id="time-filter-btn"
                             class="flex items-center gap-3 px-8 py-3.5 bg-white border border-gray-900 rounded-2xl text-[11px] font-black tracking-[0.2em] uppercase hover:bg-black hover:text-white transition-all shadow-sm">
                             <span id="current-filter-label">All Time</span>
-                            <span class="material-symbols-outlined text-[20px] transition-transform duration-300" id="filter-chevron">expand_more</span>
+                            <span class="material-symbols-outlined text-[20px] transition-transform duration-300"
+                                id="filter-chevron">expand_more</span>
                         </button>
-                        
+
                         <div class="filter-dropdown" id="time-filter-dropdown">
                             <button class="filter-option active" data-filter="all-time">All Time</button>
                             <button class="filter-option" data-filter="last-30">Last 30 Days</button>
@@ -312,9 +313,9 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-4 ml-auto">
-                            <span class="status-tag {{this.statusTagClass}}">
+                            <span class="status-tag {{this.statusTagClass}}" data-order-status="{{this.status}}">
                                 <span class="w-1.5 h-1.5 rounded-full {{this.statusDotClass}}"></span>
-                                {{this.status}}
+                                <span class="status-text">{{this.status}}</span>
                             </span>
                             <a href="/users/orderDetail/{{this._id}}"
                                 class="details-btn px-6 py-2.5 rounded-lg text-[11px] font-bold tracking-widest uppercase flex items-center gap-2">
@@ -340,32 +341,25 @@
                                         {{this.size}} | Qty: {{this.quantity}}</p>
 
                                     <div class="flex items-center gap-4 mt-2">
-                                        <!-- Order Level Status -->
-                                        <div
-                                            class="flex items-center gap-2 {{#if ../isDelivered}}text-green-600{{else}}text-gray-400{{/if}}">
+                                        <!-- Unified Item Status (Gray) -->
+                                        <div class="flex items-center gap-2 text-gray-400 item-status-container" data-item-status="{{this.status}}">
                                             <span class="material-symbols-outlined text-[18px]">
-                                                {{#if ../isDelivered}}check_circle{{else}}sync{{/if}}
+                                                {{#if (or (eq this.status 'Cancelled') (eq this.status
+                                                'Canceled'))}}cancel
+                                                {{else if (or (eq this.status 'Returned') (eq this.status
+                                                'returned'))}}replay
+                                                {{else if (or (eq ../status 'Delivered') (eq ../status 'Returned'))}}check_circle
+                                                {{else}}sync{{/if}}
                                             </span>
-                                            <span class="text-[11px] font-bold tracking-widest uppercase">
-                                                {{#if ../isDelivered}}Delivered Successfully{{else}}{{../status}}{{/if}}
+                                            <span class="text-[11px] font-bold tracking-widest uppercase item-status-text">
+                                                {{#if (or (eq this.status 'Cancelled') (eq this.status
+                                                'Canceled'))}}Cancelled
+                                                {{else if (or (eq this.status 'Returned') (eq this.status
+                                                'returned'))}}Returned
+                                                {{else if (or (eq ../status 'Delivered') (eq ../status 'Returned'))}}Delivered Successfully
+                                                {{else}}{{../status}}{{/if}}
                                             </span>
                                         </div>
-
-                                        <!-- Item Level Status -->
-                                        {{#if (or (eq this.status 'Cancelled') (eq this.status 'Canceled'))}}
-                                        <div class="flex items-center gap-2 text-red-500 border-l border-gray-100 pl-4">
-                                            <span class="material-symbols-outlined text-[18px]">cancel</span>
-                                            <span class="text-[11px] font-bold tracking-widest uppercase">Item
-                                                Cancelled</span>
-                                        </div>
-                                        {{else if (or (eq this.status 'Returned') (eq this.status 'returned'))}}
-                                        <div
-                                            class="flex items-center gap-2 text-blue-500 border-l border-gray-100 pl-4">
-                                            <span class="material-symbols-outlined text-[18px]">replay</span>
-                                            <span class="text-[11px] font-bold tracking-widest uppercase">Item
-                                                Returned</span>
-                                        </div>
-                                        {{/if}}
                                     </div>
                                 </div>
 
@@ -479,15 +473,15 @@
             option.addEventListener('click', () => {
                 const filterValue = option.getAttribute('data-filter');
                 if (filterLabel) filterLabel.innerText = option.innerText;
-                
+
                 // Update active state
                 filterOptions.forEach(opt => opt.classList.remove('active'));
                 option.classList.add('active');
-                
+
                 // Close dropdown
                 filterDropdown.classList.remove('active');
                 if (filterChevron) filterChevron.style.transform = 'rotate(0deg)';
-                
+
                 console.log("Filtering by:", filterValue);
             });
         });
@@ -497,6 +491,35 @@
                 filterDropdown.classList.remove('active');
                 if (filterChevron) filterChevron.style.transform = 'rotate(0deg)';
             }
+        });
+
+        // Partial Return Logic Correction
+        document.addEventListener('DOMContentLoaded', () => {
+            const orderCards = document.querySelectorAll('.order-card');
+            orderCards.forEach(card => {
+                const orderStatusPill = card.querySelector('.status-tag');
+                const orderStatusText = card.querySelector('.status-text');
+                const itemStatuses = card.querySelectorAll('.item-status-text');
+                
+                if (orderStatusText && orderStatusText.innerText.trim().toUpperCase() === 'RETURNED') {
+                    let allReturned = true;
+                    itemStatuses.forEach(item => {
+                        const status = item.innerText.trim().toUpperCase();
+                        if (status !== 'RETURNED' && status !== 'CANCELLED') {
+                            allReturned = false;
+                        }
+                    });
+
+                    if (!allReturned) {
+                        orderStatusText.innerText = 'Delivered';
+                        // Keep it green/delivered style if it was yellow/returned
+                        if (orderStatusPill.classList.contains('status-returned') || orderStatusPill.style.backgroundColor) {
+                            // Optionally adjust colors to match status-delivered
+                            // orderStatusPill.className = 'status-tag status-delivered';
+                        }
+                    }
+                }
+            });
         });
     </script>
 </body>

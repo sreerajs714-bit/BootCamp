@@ -35,11 +35,10 @@ export const RegisterUser = async (req, res) => {
 
     if (existingUser) {
 
-      return res.render("users/signup", {
-        message: "User already exists",
-        username,
-        email
-      });
+       return res.status(409).json({
+      success: false,
+      message: "An account with this email already exists."
+     });
     }
 
     // Hash password
@@ -80,27 +79,29 @@ export const RegisterUser = async (req, res) => {
 
     // SAVE SESSION BEFORE RENDER
     req.session.save((err) => {
+      console.log("SESSION SAVE CALLED, err:", err);
 
       if (err) {
 
         console.log("SESSION SAVE ERROR:", err);
-
-        return res.send("Session error");
+       return res.status(500).json({ success: false, message: "Session error. Please try again." });
       }
 
-      return res.render("users/otpVerify", {
-        message: "OTP sent successfully",
-        email: cleanEmail,
-        purpose: "register"
+      return res.status(200).json({ 
+      success: true, 
+      redirectUrl: "/users/otpVerify",
+      message: "OTP sent successfully to your email."
       });
     });
 
   } catch (error) {
+  console.log("REGISTER ERROR:", error.message);
 
-    console.log("REGISTER ERROR:", error.message);
-
-    res.send("Something went wrong");
-  }
+  return res.status(500).json({
+    success: false,
+    message: "Something went wrong. Please try again."
+  });
+}
 };
 
 export const LoginUser = async (req, res) => {
@@ -163,6 +164,18 @@ export const loadHome = async (req, res) => {
         p.variants?.find((v) => v.isActive) ||
         p.variants?.[0];
 
+    let stock_label, stock_icon;
+  if (!variant || variant.stock === 0) {
+    stock_label = "Out of Stock";
+    stock_icon = "cancel";
+  } else if (variant.stock <= 10) {
+    stock_label = `Only ${variant.stock} left`;
+    stock_icon = "schedule";
+  } else {
+    stock_label = "In Stock";
+    stock_icon = "check_circle";
+  }
+
       return {
         id: p._id.toString(),
         productName: p.productName,
@@ -171,6 +184,9 @@ export const loadHome = async (req, res) => {
         images: variant?.images || [],
         isLimitedEdition: p.isLimitedEdition,
         createdAt: p.createdAt,
+        inStock: !!(variant && variant.stock > 0),
+        stock_label,                               
+        stock_icon,
       };
     };
 
@@ -242,9 +258,12 @@ export const resetPassword = async (req, res) => {
   }
 };
 
-export const loadVerifyOtp=(req,res)=>{
-  res.render("users/otpVerify");
-}
+export const loadVerifyOtp = (req, res) => {
+  const email = req.session.otpEmail;
+  const purpose = req.session.otpPurpose;
+  if (!email) return res.redirect('/users/signup');
+  res.render("users/otpVerify", { email, purpose }); 
+};
 
 export const loadSetNew = (req, res) => {
   const email = req.session.otpEmail;

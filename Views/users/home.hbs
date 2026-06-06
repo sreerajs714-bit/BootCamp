@@ -1119,9 +1119,9 @@
                             class="material-symbols-outlined text-[18px] text-gray-600 hover:text-red-500 {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
                     </button>
                     <!-- In Stock -->
-                    <div class="home-stock-badge">
-                        <span class="material-symbols-outlined text-[13px] text-[#10b981] icon-fill">check_circle</span>
-                        <span class="text-[9px] font-bold text-black uppercase tracking-wider">In Stock</span>
+                    <div class="absolute bottom-4 left-4 z-20 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-md border border-gray-100">
+                     <span class="material-symbols-outlined text-[15px] {{#if (eq this.stock_icon 'check_circle')}}text-[#10b981]{{else if (eq this.stock_icon 'schedule')}}text-yellow-500{{else}}text-red-500{{/if}} icon-fill">{{this.stock_icon}}</span>
+                     <span class="text-[10px] font-bold {{#if (eq this.stock_icon 'check_circle')}}text-black{{else if (eq this.stock_icon 'schedule')}}text-yellow-500{{else}}text-red-500{{/if}} uppercase tracking-wider">{{this.stock_label}}</span>
                     </div>
                     {{#each this.images}}
                     <img src="{{this}}" alt="" class="home-carousel-img {{#if @first}}active{{else}}inactive{{/if}}">
@@ -1209,6 +1209,10 @@
                                 <span
                                     class="material-symbols-outlined text-[18px] text-white hover:text-red-400 {{#if this.isWishlisted}}icon-fill text-red-400{{/if}}">favorite</span>
                             </button>
+                            <div class="absolute bottom-4 left-4 z-20 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-md border border-gray-100">
+                             <span class="material-symbols-outlined text-[15px] {{#if (eq this.stock_icon 'check_circle')}}text-[#10b981]{{else if (eq this.stock_icon 'schedule')}}text-yellow-500{{else}}text-red-500{{/if}} icon-fill">{{this.stock_icon}}</span>
+                             <span class="text-[10px] font-bold {{#if (eq this.stock_icon 'check_circle')}}text-black{{else if (eq this.stock_icon 'schedule')}}text-yellow-500{{else}}text-red-500{{/if}} uppercase tracking-wider">{{this.stock_label}}</span>
+                            </div>
                             {{#each this.images}}
                             <img src="{{this}}" alt=""
                                 class="home-carousel-img {{#if @first}}active{{else}}inactive{{/if}}">

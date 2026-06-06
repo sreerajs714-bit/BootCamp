@@ -28,6 +28,15 @@ const productStorage = new CloudinaryStorage({
     },
 });
 
+const returnStorage = new CloudinaryStorage({
+    cloudinary,
+    params: {
+        folder:          "bootcamp/returns",
+        allowed_formats: ["jpg", "jpeg", "png", "webp"],
+        transformation:  [{ width: 1000, height: 1000, crop: "limit" }],
+    },
+});
+
 const fileFilter = (req, file, cb) => {
     const allowedTypes = /jpeg|jpg|png|webp/;
     const isValid = allowedTypes.test(path.extname(file.originalname).toLowerCase()) &&
@@ -43,6 +52,13 @@ export const uploadProfile = multer({
 
 export const uploadProduct = multer({
     storage: productStorage,
+    limits:  { fileSize: 5 * 1024 * 1024 },
+    fileFilter,
+});
+
+
+export const uploadReturn = multer({
+    storage: returnStorage,
     limits:  { fileSize: 5 * 1024 * 1024 },
     fileFilter,
 });
