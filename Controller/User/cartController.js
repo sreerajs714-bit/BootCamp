@@ -328,3 +328,22 @@ export const removeFromCart = async (req, res) => {
         });
     }
 };
+
+export const getCartCount = async (req, res) => {
+    try {
+        const userId = req.session?.user?.id || null;
+
+        if (!userId) {
+            const guestCount = req.session.cart?.length || 0;
+            return res.json({ success: true, count: guestCount });
+        }
+
+        const cart = await Cart.findOne({ userId });
+        const count = cart?.items?.length || 0;
+        return res.json({ success: true, count });
+
+    } catch (error) {
+        console.error('getCartCount error:', error);
+        return res.json({ success: false, count: 0 });
+    }
+};

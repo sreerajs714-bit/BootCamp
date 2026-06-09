@@ -11,7 +11,6 @@ import AdminRoute from "./Routes/Admin.js";
 import { checkUserBlocked } from "./Middleware/userAuth.js";
 import nocache from "nocache";
 import { registerHbsHelpers } from "./config/hbsHelpers.js";
-import { attachCartCount } from "./Middleware/cartCount.js";
 const app = express();
 
 
@@ -42,8 +41,6 @@ app.set("view engine", "hbs");
 app.use(express.urlencoded({extended:true}));
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), "public")));
-
-app.use(attachCartCount);
 
 app.use("/admin",AdminRoute)
 app.use("/users",UserRoute)

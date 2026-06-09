@@ -4,27 +4,30 @@ import mongoose from "mongoose";
 export const loadAddress = async (req, res) => {
   try {
     const userId = req.session.user.id;
-     res.locals.breadcrumbs = [
-       { label: 'Home', url: '/' },
-       { label: "Address" },
-       ];
-
+ 
+    res.locals.breadcrumbs = [
+      { label: 'Home', url: '/' },
+      { label: 'Address' },
+    ];
+ 
     const addresses = await Address.find({ user: userId }).sort({ isDefault: -1, createdAt: -1 });
-
-    res.render("users/address", {
+ 
+    res.render('users/address', {
       addresses,
       hasAddresses: addresses.length > 0,
       user: req.session.user,
     });
-
+ 
   } catch (error) {
     console.error('Load address error:', error);
     res.status(500).send('Something went wrong');
   }
 };
-
+ 
 export const addAddress = async (req, res) => {
   try {
+    const userId = req.session.user.id;
+ 
     const {
       fullName,
       phoneNO,
@@ -34,22 +37,20 @@ export const addAddress = async (req, res) => {
       state,
       pincode,
       addressType,
-      isDefault,
     } = req.body;
-
-    const userId = req.session.user.id; 
-
-    // If new address is set as default, unset all others first
-    if (isDefault) {
-      await Address.updateMany(
-        { user: userId },
-        { $set: { isDefault: false } }
-      );
-    }
-
-    // If this is the user's first address, make it default automatically
+ 
+    // Parse isDefault — frontend sends boolean or string "true"/"false"
+    const isDefault = req.body.isDefault === true || req.body.isDefault === 'true';
+ 
+    // Check if this is the user's first address — auto-make it default
     const existingCount = await Address.countDocuments({ user: userId });
-
+    const shouldBeDefault = existingCount === 0 ? true : isDefault;
+ 
+    // If setting as default, unset all existing defaults first
+    if (shouldBeDefault) {
+      await Address.updateMany({ user: userId }, { $set: { isDefault: false } });
+    }
+ 
     const newAddress = new Address({
       user: userId,
       fullName,
@@ -60,90 +61,116 @@ export const addAddress = async (req, res) => {
       state,
       pincode,
       addressType: addressType || 'Home',
-      isDefault: existingCount === 0 ? true : isDefault || false,
+      isDefault: shouldBeDefault,
     });
-
+ 
     await newAddress.save();
-
-    res.status(201).json({
+ 
+    return res.status(201).json({
       success: true,
       message: 'Address added successfully',
       address: newAddress,
     });
-
+ 
   } catch (error) {
     console.error('Add address error:', error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       message: 'Failed to add address',
       error: error.message,
     });
   }
 };
-
+ 
 export const editAddress = async (req, res) => {
   try {
     if (!req.session?.user) {
       return res.status(401).json({ success: false, message: 'Not authorized' });
     }
-
+ 
     const { id } = req.params;
     const userId = req.session.user.id;
-
+ 
+    // Verify address belongs to this user
     const existingAddress = await Address.findOne({
       _id: new mongoose.Types.ObjectId(id),
       user: new mongoose.Types.ObjectId(userId),
     });
-
+ 
     if (!existingAddress) {
       return res.status(404).json({ success: false, message: 'Address not found' });
     }
-
-    const { fullName, phoneNO, addressLine1, addressLine2, city, state, pincode, addressType, isDefault } = req.body;
-
+ 
+    const {
+      fullName,
+      phoneNO,
+      addressLine1,
+      addressLine2,
+      city,
+      state,
+      pincode,
+      addressType,
+    } = req.body;
+ 
+    // Parse isDefault — frontend sends boolean or string "true"/"false"
+    const isDefault = req.body.isDefault === true || req.body.isDefault === 'true';
+ 
+    // If setting as default, unset all others first
     if (isDefault) {
       await Address.updateMany({ user: userId }, { $set: { isDefault: false } });
     }
-
+ 
     const updatedAddress = await Address.findByIdAndUpdate(
       id,
-      { fullName, phoneNO, addressLine1, addressLine2: addressLine2 || '', city, state, pincode, addressType: addressType || 'Home', isDefault: isDefault || false },
-       { returnDocument: 'after', runValidators: true }
+      {
+        fullName,
+        phoneNO,
+        addressLine1,
+        addressLine2: addressLine2 || '',
+        city,
+        state,
+        pincode,
+        addressType: addressType || 'Home',
+        isDefault,
+      },
+      { returnDocument: 'after', runValidators: true }
     );
-
-    return res.status(200).json({ success: true, message: 'Address updated successfully', address: updatedAddress });
-
+ 
+    return res.status(200).json({
+      success: true,
+      message: 'Address updated successfully',
+      address: updatedAddress,
+    });
+ 
   } catch (error) {
     console.error('Edit address error:', error);
-    return res.status(500).json({ success: false, message: 'Failed to update address', error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update address',
+      error: error.message,
+    });
   }
 };
-
+ 
 export const deleteAddress = async (req, res) => {
   try {
     if (!req.session?.user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Not authorized, please login',
-      });
+      return res.status(401).json({ success: false, message: 'Not authorized, please login' });
     }
-
+ 
     const { id } = req.params;
     const userId = req.session.user.id;
-
-    // Check address belongs to this user
+ 
+    // Verify address belongs to this user
     const existingAddress = await Address.findOne({ _id: id, user: userId });
-
+ 
     if (!existingAddress) {
-      return res.status(404).json({
-        success: false,
-        message: 'Address not found',
-      });
+      return res.status(404).json({ success: false, message: 'Address not found' });
     }
-
+ 
     await Address.findByIdAndDelete(id);
-
-    // If deleted address was default, make the next one default
+ 
+    // If deleted address was default, promote the most recent remaining address
     if (existingAddress.isDefault) {
       const nextAddress = await Address.findOne({ user: userId }).sort({ createdAt: -1 });
       if (nextAddress) {
@@ -151,12 +178,12 @@ export const deleteAddress = async (req, res) => {
         await nextAddress.save();
       }
     }
-
+ 
     return res.status(200).json({
       success: true,
       message: 'Address deleted successfully',
     });
-
+ 
   } catch (error) {
     console.error('Delete address error:', error);
     return res.status(500).json({

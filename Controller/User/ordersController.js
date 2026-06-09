@@ -167,7 +167,6 @@ export const loadOrderDetail = async (req, res) => {
     }
 };
 
-
 export const cancelOrder = async (req, res) => {
     try {
         const { id, orderId, reason, note } = req.body;
@@ -189,33 +188,37 @@ export const cancelOrder = async (req, res) => {
             });
         }
 
-        // ── Cancel Entire Order ──────────────────────────────
-        if (id === 'ALL') {
-            for (const item of order.items) {
-                if (item.status === 'Active') {
-                    const product = await Product.findById(item.product);
-                    if (product) {
-                        const variant = product.variants.find(v =>
-                            v.sizes && v.sizes.map(s => s.toString()).includes(item.size.toString())
-                        );
-                        if (variant) {
-                            variant.stock += item.quantity;
-                            await product.save();
-                        }
-                    }
-                    item.status = 'Cancelled';
-                    item.cancelReason = reason;
-                    item.cancelNote = note || '';
+       // ── Cancel Entire Order ──────────────────────────────
+if (id === 'ALL') {
+    let deductedAmount = 0;  // ← add this
+
+    for (const item of order.items) {
+        if (item.status === 'Active') {
+            const product = await Product.findById(item.product);
+            if (product) {
+                const variant = product.variants.find(v =>
+                    v.sizes && v.sizes.map(s => s.toString()).includes(item.size.toString())
+                );
+                if (variant) {
+                    variant.stock += item.quantity;
+                    await product.save();
                 }
             }
-
-            order.orderStatus = 'Cancelled';
-            order.cancelReason = reason;
-            order.cancelNote = note || '';
-            await order.save();
-
-            return res.json({ success: true, message: "Order cancelled successfully" });
+            item.status = 'Cancelled';
+            item.cancelReason = reason;
+            item.cancelNote = note || '';
+            deductedAmount += item.price * item.quantity;  // ← add this
         }
+    }
+
+    order.orderStatus = 'Cancelled';
+    order.cancelReason = reason;
+    order.cancelNote = note || '';
+    order.totalAmount = Math.max(0, order.totalAmount - deductedAmount);  // ← add this
+    await order.save();
+
+    return res.json({ success: true, message: "Order cancelled successfully" });
+}
 
         // ── Cancel Single Item ───────────────────────────────
         const item = order.items.id(id);
@@ -279,7 +282,8 @@ export const loadReturnPage = async (req, res) => {
         // ✅ Handle full order return
         if (itemId === 'ALL') {
             const returnableItems = order.items.filter(i =>
-                !i.returnRequest?.status || i.returnRequest.status === 'None'
+                i.status !== 'Cancelled' &&
+                (!i.returnRequest?.status || i.returnRequest.status === 'None')
             );
 
             if (returnableItems.length === 0) {
@@ -323,8 +327,11 @@ export const returnRequest = async (req, res) => {
         }
 
         if (itemId === 'ALL') {
-            // FIX: no condition — update ALL items unconditionally
+            let deductedAmount = 0;  // ← add this
+
             order.items.forEach(item => {
+                if (item.status === 'Cancelled') return;  // ← skip cancelled items
+
                 item.returnStatus = 'Requested';
                 item.status       = 'Return Requested';
                 item.returnRequest = {
@@ -335,9 +342,9 @@ export const returnRequest = async (req, res) => {
                     images:      imageUrls,
                     requestedAt: new Date()
                 };
+                deductedAmount += item.price * item.quantity;  // ← add this
             });
-
-            order.isFullReturn = true;  // FIX: mark as full order return
+            order.isFullReturn = true;
 
         } else {
             const item = order.items.find(i => i._id.toString() === itemId);
@@ -357,22 +364,12 @@ export const returnRequest = async (req, res) => {
                 images:      imageUrls,
                 requestedAt: new Date()
             };
-
             order.isFullReturn = false;
         }
 
-        // Always set order-level fields
         order.returnStatus      = 'Requested';
         order.returnRequestedAt = new Date();
         order.orderStatus       = 'Return Requested';
-
-        console.log('itemId:', itemId);
-console.log('isFullReturn:', order.isFullReturn);
-console.log('items after update:', order.items.map(i => ({
-    name: i.product,
-    returnStatus: i.returnStatus,
-    status: i.status
-})));
 
         await order.save();
         return res.json({ success: true, message: 'Return request submitted successfully' });

@@ -876,7 +876,7 @@
                     <span
                         class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">shopping_bag</span>
                     <span id="cart-badge"
-                        class="badge absolute -top-1 -right-1 bg-black text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all {{#unless cartCount}}opacity-0 scale-0{{/unless}}">
+                        class="badge absolute -top-1 -right-1 bg-black text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all {{#if cartCount}}{{else}}opacity-0 scale-0{{/if}}">
                         {{cartCount}}
                     </span>
                 </a>
@@ -931,7 +931,7 @@
                         class="text-white font-sans font-black text-3xl lg:text-4xl tracking-[0.2em] uppercase drop-shadow-2xl">MEN</span>
                 </div>
             </a>
-            <a href="#"
+            <a href="/users/womens"
                 class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5] overflow-hidden cursor-pointer transition-all duration-500">
                 <img src="https://i.pinimg.com/1200x/df/b0/f1/dfb0f1cf2d6ca98cb481b96093227546.jpg"
                     alt="Women's Collection"
@@ -942,58 +942,6 @@
                         class="text-white font-sans font-black text-3xl lg:text-4xl tracking-[0.2em] uppercase drop-shadow-2xl">WOMEN</span>
                 </div>
             </a>
-        </div>
-    </section>
-
-    <!-- Shop By Brand -->
-    <section class="py-18 bg-white text-center">
-        <div class="max-w-7xl mx-auto px-6">
-            <p class="text-[10px] text-gray-400 font-bold tracking-[0.4em] uppercase mb-4">ENGINEERED ALLIANCES</p>
-            <h2 class="font-sans font-black text-4xl uppercase tracking-tighter mb-16">Shop By Brand</h2>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-                <a href="#"
-                    class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5] overflow-hidden cursor-pointer transition-all duration-500">
-                    <img src="https://i.pinimg.com/736x/3c/d0/78/3cd0789a53745584b9d603eca446305e.jpg" alt="Nike Boot"
-                        class="w-[75%] h-[75%] object-contain transition-all duration-700 group-hover:scale-110 group-hover:blur-[4px]">
-                    <div
-                        class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-[2px]">
-                        <span
-                            class="text-white font-sans font-black text-2xl lg:text-3xl tracking-[0.2em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">NIKE</span>
-                    </div>
-                </a>
-                <a href="#"
-                    class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5] overflow-hidden cursor-pointer transition-all duration-500">
-                    <img src="https://i.pinimg.com/1200x/91/41/ae/9141ae5ccfa0ea4ff7b9e9f6afd4305e.jpg"
-                        alt="Adidas Boot"
-                        class="w-[75%] h-[75%] object-contain filter hue-rotate-[90deg] transition-all duration-700 group-hover:scale-110 group-hover:blur-[4px]">
-                    <div
-                        class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-[2px]">
-                        <span
-                            class="text-white font-sans font-black text-2xl lg:text-3xl tracking-[0.2em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">ADIDAS</span>
-                    </div>
-                </a>
-                <a href="#"
-                    class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5] overflow-hidden cursor-pointer transition-all duration-500">
-                    <img src="https://i.pinimg.com/736x/f9/4b/5b/f94b5bd712f3c3590f0dd52bf1c39840.jpg" alt="Puma Boot"
-                        class="w-[75%] h-[75%] object-contain filter hue-rotate-[180deg] transition-all duration-700 group-hover:scale-110 group-hover:blur-[4px]">
-                    <div
-                        class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-[2px]">
-                        <span
-                            class="text-white font-sans font-black text-2xl lg:text-3xl tracking-[0.2em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">PUMA</span>
-                    </div>
-                </a>
-                <a href="#"
-                    class="group relative flex items-center justify-center aspect-square bg-[#f5f5f5] overflow-hidden cursor-pointer transition-all duration-500">
-                    <img src="https://i.pinimg.com/736x/85/59/cb/8559cbec29cae2e8d7267a07cbc6f366.jpg" alt="NB Boot"
-                        class="w-[75%] h-[75%] object-contain filter hue-rotate-[270deg] transition-all duration-700 group-hover:scale-110 group-hover:blur-[4px]">
-                    <div
-                        class="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-[2px]">
-                        <span
-                            class="text-white font-sans font-black text-2xl lg:text-3xl tracking-[0.2em] uppercase drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">NEW
-                            BALANCE</span>
-                    </div>
-                </a>
-            </div>
         </div>
     </section>
 
@@ -1239,7 +1187,7 @@
                     {{/if}}
                 </div>
 
-                <a href="/users/limitedEdition" class="self-end inline-flex items-center gap-4 group text-white">
+                <a href="/users/limited" class="self-end inline-flex items-center gap-4 group text-white">
                     <span
                         class="text-[11px] font-black tracking-[0.3em] uppercase border-b-2 border-white/30 pb-1 group-hover:border-white transition-all">
                         Explore Entire Drop
@@ -1491,7 +1439,8 @@
                     if (res.data.success) {
                         const badge = document.getElementById('cart-badge');
                         if (badge) {
-                            badge.textContent = (parseInt(badge.textContent) || 0) + 1;
+                            const current = parseInt(badge.textContent.trim()) || 0;
+                            badge.textContent = current + 1;
                             badge.classList.remove('opacity-0', 'scale-0');
                         }
                         // Optional: show some feedback

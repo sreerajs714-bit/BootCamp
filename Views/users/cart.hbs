@@ -391,6 +391,7 @@
                 });
 
                 if (response.data.success) {
+                    fetchCartCount();
                     if (itemEl) {
                         itemEl.style.transition = 'all 0.3s ease';
                         itemEl.style.opacity = '0';

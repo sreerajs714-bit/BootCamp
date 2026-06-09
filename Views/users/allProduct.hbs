@@ -642,6 +642,7 @@
                 const response = await axios.post("/users/addCart", { productId, variantId, size, quantity: 1 });
                 if (response.data.success) {
                     showToast("success", "Added to cart");
+                    fetchCartCount();
 
                 } else if (response.data.alreadyInCart) {
                     showToast("error", "Already in cart!");
@@ -673,6 +674,7 @@
             try {
                 const res = await axios.post('/users/addCart', { productId, variantId, size, quantity: 1 });
                 if (res.data.success || res.data.alreadyInCart) {
+                    fetchCartCount();
                     window.location.href = "/users/cart";
                 } else {
                     showToast("error", res.data.message || "Failed to process");

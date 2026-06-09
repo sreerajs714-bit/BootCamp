@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,11 +8,12 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
-    <!-- ✅ SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -33,16 +35,68 @@
         }
     </script>
     <style>
-        body { background-color: #fbfbfb; color: #000000; }
-        .nav-link { position: relative; padding-bottom: 4px; transition: color 0.3s ease; }
-        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 50%; background-color: #000000; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(-50%); }
-        .nav-link:hover::after { width: 100%; }
-        .icon-btn { transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s ease; }
-        .icon-btn:hover { transform: scale(1.15); color: #5d5d5d; }
-        .sidebar-link { transition: all 0.2s ease; }
-        .sidebar-link:hover { color: #000000; }
+        body {
+            background-color: #fbfbfb;
+            color: #000000;
+        }
+
+        .nav-link {
+            position: relative;
+            padding-bottom: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #000000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .icon-btn {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.15);
+            color: #5d5d5d;
+        }
+
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-link:hover {
+            color: #000000;
+        }
+
+        /* Premium Modal Styles */
+        .dark-modal-glass {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes modal-in {
+            from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .animate-modal-in {
+            animation: modal-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
 </head>
+
 <body class="min-h-screen flex flex-col font-sans selection:bg-brand-950 selection:text-white">
 
     <!-- Navigation -->
@@ -56,16 +110,20 @@
         <aside class="w-full lg:w-48 lg:fixed lg:top-32 h-fit mb-10 lg:mb-0 pt-12">
             <h3 class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-8">Account</h3>
             <nav class="flex flex-col space-y-6">
-                <a href="/users/profile" class="sidebar-link flex items-center text-[13px] font-bold text-black tracking-widest uppercase">
+                <a href="/users/profile"
+                    class="sidebar-link flex items-center text-[13px] font-bold text-black tracking-widest uppercase">
                     <span class="material-symbols-outlined mr-4 text-[20px]">person</span>Profile
                 </a>
-                <a href="/users/address" class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                <a href="/users/address"
+                    class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
                     <span class="material-symbols-outlined mr-4 text-[20px]">location_on</span>Address
                 </a>
-                <a href="#" class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                <a href="#"
+                    class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
                     <span class="material-symbols-outlined mr-4 text-[20px]">inventory_2</span>My Orders
                 </a>
-                <a href="#" class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                <a href="#"
+                    class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
                     <span class="material-symbols-outlined mr-4 text-[20px]">account_balance_wallet</span>Wallet
                 </a>
             </nav>
@@ -84,13 +142,15 @@
             <div class="mb-16 flex flex-col sm:flex-row items-start gap-8">
 
                 <!-- ✅ Avatar with correct id -->
-                <div id="photoContainer" class="w-40 h-40 flex-shrink-0 overflow-hidden shadow-sm flex items-center justify-center">
+                <div id="photoContainer"
+                    class="w-40 h-40 flex-shrink-0 overflow-hidden shadow-sm flex items-center justify-center">
                     {{#if user.profilePhoto}}
-                        <img src="{{user.profilePhoto}}" alt="Profile" class="w-full h-full object-cover grayscale">
+                    <img src="{{user.profilePhoto}}" alt="Profile" class="w-full h-full object-cover grayscale">
                     {{else}}
-                        <div class="w-full h-full bg-black text-white flex items-center justify-center text-6xl font-serif font-light">
-                            {{slice user.username 0 1}}
-                        </div>
+                    <div
+                        class="w-full h-full bg-black text-white flex items-center justify-center text-6xl font-serif font-light">
+                        {{slice user.username 0 1}}
+                    </div>
                     {{/if}}
                 </div>
 
@@ -99,9 +159,11 @@
                     <h2 class="text-[13px] font-bold text-gray-800 mb-4">Profile Portrait</h2>
 
                     <!-- Upload -->
-                    <label class="text-[10px] font-bold tracking-[0.1em] text-black underline uppercase hover:text-gray-600 cursor-pointer">
+                    <label
+                        class="text-[10px] font-bold tracking-[0.1em] text-black underline uppercase hover:text-gray-600 cursor-pointer">
                         Upload New
-                        <input type="file" id="profilePhotoInput" name="profilePhoto" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
+                        <input type="file" id="profilePhotoInput" name="profilePhoto"
+                            accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden">
                     </label>
 
                     <!-- ✅ Remove button — always rendered, shown/hidden via JS -->
@@ -124,34 +186,155 @@
             <form action="/users/editProfile" method="POST" enctype="multipart/form-data">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-12 mb-12">
                     <div>
-                        <label for="full_name" class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2 block">Full Name</label>
+                        <label for="full_name"
+                            class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2 block">Full
+                            Name</label>
                         <!-- ✅ correct id for JS to read username -->
-                        <input type="text" id="usernameInput" name="username" value="{{user.username}}" class="w-full border-b border-gray-200 bg-transparent py-3 focus:outline-none focus:border-black text-[15px] font-medium text-gray-700 transition-colors">
+                        <input type="text" id="usernameInput" name="username" value="{{user.username}}"
+                            class="w-full border-b border-gray-200 bg-transparent py-3 focus:outline-none focus:border-black text-[15px] font-medium text-gray-700 transition-colors">
+                        <p id="usernameInput-error"
+                            class="hidden mt-1.5 text-[11px] font-bold text-red-400 tracking-wide"></p>
                     </div>
                     <div>
-                        <label for="email" class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2 block">Email Address</label>
-                        <input type="email" id="email" name="email" value="{{user.email}}" disabled class="w-full border-b border-gray-200 bg-transparent py-3 focus:outline-none text-[15px] font-medium text-gray-400 transition-colors cursor-not-allowed">
+                        <label for="email"
+                            class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2 block">Email
+                            Address</label>
+                        <input type="email" id="email" name="email" value="{{user.email}}" disabled
+                            class="w-full border-b border-gray-200 bg-transparent py-3 focus:outline-none text-[15px] font-medium text-gray-400 transition-colors cursor-not-allowed">
                     </div>
                     <div class="md:col-span-1">
-                        <label for="phone" class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2 block">Phone Number</label>
-                        <input type="tel" id="phone" name="phoneNO" value="{{user.phoneNO}}" class="w-full border-b border-gray-200 bg-transparent py-3 focus:outline-none focus:border-black text-[15px] font-medium text-gray-700 transition-colors">
+                        <label for="phone"
+                            class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2 block">Phone
+                            Number</label>
+                        <input type="tel" id="phone" name="phoneNO" value="{{user.phoneNO}}"
+                            class="w-full border-b border-gray-200 bg-transparent py-3 focus:outline-none focus:border-black text-[15px] font-medium text-gray-700 transition-colors">
+                        <p id="phone-error" class="hidden mt-1.5 text-[11px] font-bold text-red-400 tracking-wide"></p>
                     </div>
                 </div>
 
                 <div class="mt-10 flex items-center space-x-8">
-                    <button type="submit" class="px-10 py-4 bg-black text-white text-[11px] font-bold tracking-[0.15em] uppercase hover:bg-gray-800 transition-colors">
+                    <button type="submit"
+                        class="px-10 py-4 bg-black text-white text-[11px] font-bold tracking-[0.15em] uppercase hover:bg-gray-800 transition-colors">
                         Save Changes
                     </button>
-                    <a href="/users/profile" class="text-[11px] font-bold tracking-[0.15em] text-gray-400 uppercase hover:text-black transition-colors">
+                    <a href="/users/profile"
+                        class="text-[11px] font-bold tracking-[0.15em] text-gray-400 uppercase hover:text-black transition-colors">
                         Cancel
                     </a>
                 </div>
             </form>
-
         </div>
     </main>
 
+    <!-- Generic Backdrop -->
+    <div id="modalBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] hidden opacity-0 transition-opacity duration-500" onclick="closeAllModals()"></div>
+
+    <!-- Custom Premium Modals Container -->
+    <div id="modals-container">
+        <!-- Remove Photo Confirmation Modal (Premium Dark) -->
+        <div id="removePhotoModal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm dark-modal-glass z-[70] hidden opacity-0 transition-all duration-300 p-10 text-center rounded-3xl">
+            <div class="mb-6">
+                <span class="material-symbols-outlined text-white/20 text-6xl">delete_forever</span>
+            </div>
+            <h2 class="text-2xl font-serif text-white mb-2">Remove Portrait?</h2>
+            <p class="text-white/40 text-[11px] font-bold uppercase tracking-widest mb-8">This action will permanently delete your current profile portrait.</p>
+            <div class="flex flex-col gap-3">
+                <button id="confirmRemoveBtn" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-gray-200 transition-all">CONFIRM REMOVAL</button>
+                <button onclick="closeModal('removePhotoModal')" class="w-full py-4 bg-white/5 text-white/40 font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-white/10 hover:text-white transition-all">KEEP PORTRAIT</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+
+        /* =======================
+           HELPER: show/clear errors
+        ======================== */
+        function showError(id, message) {
+            const el = document.getElementById(`${id}-error`);
+            const input = document.getElementById(id);
+            if (el) { el.textContent = message; el.classList.remove('hidden'); }
+            if (input) { input.classList.add('border-red-400'); input.classList.remove('border-gray-200'); }
+        }
+
+        function clearError(id) {
+            const el = document.getElementById(`${id}-error`);
+            const input = document.getElementById(id);
+            if (el) { el.textContent = ''; el.classList.add('hidden'); }
+            if (input) { input.classList.remove('border-red-400'); input.classList.add('border-gray-200'); }
+        }
+
+        /* =======================
+           FORM VALIDATION + SUBMIT
+        ======================== */
+        document.querySelector('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('usernameInput').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+
+            clearError('usernameInput');
+            clearError('phone');
+
+            let isValid = true;
+
+            // Username validations
+            if (!username) {
+                showError('usernameInput', 'Full name is required');
+                isValid = false;
+            } else if (username.length < 3) {
+                showError('usernameInput', 'Name must be at least 3 characters');
+                isValid = false;
+            } else if (username.length > 30) {
+                showError('usernameInput', 'Name cannot exceed 30 characters');
+                isValid = false;
+            } else if (!/^[a-zA-Z\s]+$/.test(username)) {
+                showError('usernameInput', 'Name can only contain letters and spaces');
+                isValid = false;
+            }
+
+            // Phone validations
+            if (!phone) {
+                showError('phone', 'Phone number is required');
+                isValid = false;
+            } else if (!/^\d+$/.test(phone)) {
+                showError('phone', 'Phone number must contain only digits');
+                isValid = false;
+            } else if (phone.length !== 10) {
+                showError('phone', 'Phone number must be exactly 10 digits');
+                isValid = false;
+            }
+
+            if (!isValid) return;
+
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'SAVING...';
+
+            try {
+                const res = await axios.post('/users/editProfile', { username, phoneNO: phone });
+
+                if (res.data.success) {
+                    showToast('success', 'Profile updated successfully');
+                    setTimeout(() => window.location.href = '/users/profile', 1200);
+                } else {
+                    showToast('error', res.data.message || 'Failed to update profile');
+                }
+            } catch (err) {
+                const message = err.response?.data?.message || 'Something went wrong';
+                showToast('error', message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        });
+
+        // Clear errors on input
+        document.getElementById('usernameInput').addEventListener('input', () => clearError('usernameInput'));
+        document.getElementById('phone').addEventListener('input', () => clearError('phone'));
 
         /* =======================
            UPLOAD PHOTO PREVIEW
@@ -162,11 +345,11 @@
 
             const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
             if (!allowedTypes.includes(file.type)) {
-                Swal.fire({ icon: 'error', title: 'Invalid File', text: 'Only JPG, PNG, or WEBP allowed.' });
+                showToast('error', 'Only JPG, PNG, or WEBP allowed');
                 return;
             }
             if (file.size > 2 * 1024 * 1024) {
-                Swal.fire({ icon: 'error', title: 'Too Large', text: 'Image must be under 2MB.' });
+                showToast('error', 'Image must be under 2MB');
                 return;
             }
 
@@ -178,7 +361,6 @@
             };
             reader.readAsDataURL(file);
 
-            // Upload
             const statusEl = document.getElementById('uploadStatus');
             statusEl.textContent = 'Uploading...';
             statusEl.className = 'text-[11px] mt-3 text-gray-500';
@@ -198,66 +380,100 @@
                 if (data.success) {
                     statusEl.textContent = 'Photo updated ✓';
                     statusEl.className = 'text-[11px] mt-3 text-green-600';
-                    // Show remove button after upload
                     document.getElementById('removePhotoBtn').classList.remove('hidden');
+                    showToast('success', 'Profile photo updated');
                     setTimeout(() => statusEl.classList.add('hidden'), 3000);
                 } else {
                     statusEl.textContent = data.message || 'Upload failed';
                     statusEl.className = 'text-[11px] mt-3 text-red-500';
+                    showToast('error', data.message || 'Upload failed');
                 }
             } catch (err) {
                 statusEl.textContent = 'Upload failed. Try again.';
                 statusEl.className = 'text-[11px] mt-3 text-red-500';
+                showToast('error', 'Upload failed. Try again.');
             }
         });
 
+        /* =======================
+           MODAL LOGIC
+        ======================== */
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const backdrop = document.getElementById('modalBackdrop');
+            backdrop.classList.remove('hidden');
+            setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('animate-modal-in');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const backdrop = document.getElementById('modalBackdrop');
+            
+            modal.classList.add('opacity-0');
+            modal.classList.remove('animate-modal-in');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                backdrop.classList.add('opacity-0');
+                setTimeout(() => backdrop.classList.add('hidden'), 500);
+            }, 300);
+        }
+
+        function closeAllModals() {
+            const modals = ['removePhotoModal'];
+            modals.forEach(id => {
+                const modal = document.getElementById(id);
+                if (modal && !modal.classList.contains('hidden')) closeModal(id);
+            });
+        }
 
         /* =======================
-           ✅ REMOVE PHOTO
+           REMOVE PHOTO
         ======================== */
-        document.getElementById('removePhotoBtn').addEventListener('click', async () => {
-            const result = await Swal.fire({
-                title: 'Remove photo?',
-                text: 'Your profile photo will be deleted.',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#000',
-                cancelButtonColor: '#aaa',
-                confirmButtonText: 'Yes, remove it'
-            });
+        document.getElementById('removePhotoBtn').addEventListener('click', () => {
+            openModal('removePhotoModal');
+        });
 
-            if (!result.isConfirmed) return;
-
+        document.getElementById('confirmRemoveBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('confirmRemoveBtn');
+            const originalText = btn.textContent;
+            
             try {
+                btn.disabled = true;
+                btn.textContent = 'REMOVING...';
+                
                 const res = await fetch('/users/removeProfilePhoto', {
                     method: 'POST',
                     credentials: 'include'
                 });
-
                 const data = await res.json();
 
                 if (data.success) {
-                    // ✅ Show first letter of username
-                    const username = document.getElementById('usernameInput').value || 'U';
+                    const username = document.getElementById('usernameInput')?.value || 'U';
                     document.getElementById('photoContainer').innerHTML = `
                         <div class="w-full h-full bg-black text-white flex items-center justify-center text-6xl font-serif font-light">
                             ${username.charAt(0).toUpperCase()}
                         </div>
                     `;
-
-                    // ✅ Hide remove button
                     document.getElementById('removePhotoBtn').classList.add('hidden');
-
-                    Swal.fire({ icon: 'success', title: 'Photo Removed', timer: 1500, showConfirmButton: false });
+                    showToast('success', 'Profile photo removed');
+                    closeModal('removePhotoModal');
                 } else {
-                    Swal.fire({ icon: 'error', title: 'Failed', text: data.message });
+                    showToast('error', data.message || 'Failed to remove photo');
                 }
-
             } catch (err) {
-                Swal.fire({ icon: 'error', title: 'Error', text: 'Something went wrong' });
+                showToast('error', 'Something went wrong');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = originalText;
             }
         });
 
     </script>
 </body>
+
 </html>

@@ -17,14 +17,12 @@ dotenv.config();
 
   export const sendOTPEmail = async (email, otp) => {
   try {
-     console.log("SENDING TO:", email);
     const info= await transporter.sendMail({
       from: process.env.APP_MAIL,
       to: email,
       subject: "OTP Verification",
       text: `Where style meets performance — welcome to BOOT CAMP.Your OTP is ${otp}`,
     });
-    console.log("EMAIL RESPONSE:", info.response);
   } catch (error) {
     console.log("EMAIL ERROR:", error.message);
     throw error;

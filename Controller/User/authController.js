@@ -1,5 +1,6 @@
 import userSchema from "../../Model/userModel.js";
 import Product from "../../Model/productModel.js";
+import Cart from "../../Model/cartModel.js";
 import session from "express-session";
 import { generateOTP }  from "../service/mail.js";
 import { sendOTPEmail } from "../service/mail.js";
@@ -144,6 +145,8 @@ export const LoginUser = async (req, res) => {
 
 export const loadHome = async (req, res) => {
   try {
+    const userId = req.session.user?._id || req.session.user?.id;
+
     const [newArrivals, limitedEdition] = await Promise.all([
       Product.find({ status: "active", isDeleted: false })
         .sort({ createdAt: -1 })
@@ -158,7 +161,14 @@ export const loadHome = async (req, res) => {
         .lean(),
     ]);
 
-    const formatProduct = (p) => {
+    // ── Real cart count from DB ──
+    let cartCount = 0;
+    if (userId) {
+      const cart = await Cart.findOne({ userId }).lean();
+      cartCount = cart?.items?.reduce((sum, i) => sum + (i.quantity || 1), 0) ?? 0;
+    }
+
+     const formatProduct = (p) => {
       const variant =
         p.variants?.find((v) => v.isDefault && v.isActive) ||
         p.variants?.find((v) => v.isActive) ||
@@ -193,11 +203,11 @@ export const loadHome = async (req, res) => {
     const formattedNewArrivals = newArrivals.map(formatProduct);
     const formattedLimited = limitedEdition.map(formatProduct);
 
-
     return res.render("users/home", {
       user: req.session.user || null,
-      products: formattedNewArrivals,       
-      limitedProducts: formattedLimited,     
+      products: formattedNewArrivals,
+      limitedProducts: formattedLimited,
+      cartCount, // ← now real
     });
 
   } catch (error) {

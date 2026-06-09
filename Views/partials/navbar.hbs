@@ -88,6 +88,7 @@
 </style>
 
 <script>
+
     function toggleSearch() {
         const container = document.getElementById('search-container');
         const header = document.getElementById('main-navbar');
@@ -102,4 +103,29 @@
             input.value = ''; 
         }
     }
+
+    function updateCartBadge(count) {
+    const badge = document.getElementById('cart-badge');
+    if (!badge) return;
+    badge.textContent = count;
+    if (count > 0) {
+        badge.classList.remove('opacity-0', 'scale-0');
+    } else {
+        badge.classList.add('opacity-0', 'scale-0');
+    }
+}
+
+async function fetchCartCount() {
+    try {
+        const res = await axios.get('/users/cart/count');
+        if (res.data.success) {
+            updateCartBadge(res.data.count);
+        }
+    } catch (e) {
+        console.error('fetchCartCount error:', e);
+    }
+}
+
+// Fetch on every page load
+fetchCartCount();
 </script>

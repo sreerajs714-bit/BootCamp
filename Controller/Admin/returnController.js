@@ -211,18 +211,24 @@ export const approveReturn = async (req, res) => {
         const order = await Order.findById(id);
         if (!order) return res.json({ success: false, message: 'Order not found' });
 
-        order.returnStatus     = 'Approved';
-        order.returnApprovedAt = new Date();
+        let refundAmount = 0;
 
         order.items.forEach(item => {
             if (item.returnStatus === 'Requested') {
                 item.returnStatus         = 'Approved';
                 item.returnRequest.status = 'Approved';
+                item.status               = 'Returned';
+                refundAmount += item.price * item.quantity;  // ← accumulate refund
             }
         });
 
+        order.totalAmount     = Math.max(0, order.totalAmount - refundAmount);  // ← deduct
+        order.returnStatus     = 'Approved';
+        order.returnApprovedAt = new Date();
+        order.orderStatus      = 'Returned';
+
         await order.save();
-        return res.json({ success: true, message: 'Return approved' });
+        return res.json({ success: true, message: 'Return approved and refund processed' });
 
     } catch (error) {
         console.error('approveReturn error:', error);
@@ -249,10 +255,11 @@ export const rejectReturn = async (req, res) => {
             if (item.returnStatus === 'Requested' || item.returnStatus === 'Approved') {
                 item.returnStatus         = 'Rejected';
                 item.returnRequest.status = 'Rejected';
-                item.status               = 'Active';
+                item.status               = 'Active';  // restore item to active
             }
         });
 
+        // totalAmount stays untouched on rejection
         await order.save();
         return res.json({ success: true, message: 'Return rejected' });
 

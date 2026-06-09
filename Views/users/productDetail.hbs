@@ -467,6 +467,7 @@
                 const response = await axios.post('/users/addCart', data);
                 if (response.data.success) {
                     showToast("success","Added to Cart Successfully");
+                    fetchCartCount();
                     updateBadges();
                 }else if(response.data.alreadyInCart){
                     showToast("error", "Already in cart!"); 

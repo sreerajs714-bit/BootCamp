@@ -167,25 +167,30 @@ export const changeEmail=async (req,res)=>{
 export const editProfile = async (req, res) => {
   try {
     const userId = req.session.user.id;
-
     const { username, phoneNO } = req.body;
 
-     if (req.file) {
-      updateData.profileImage = `/uploads/profiles/${req.file.filename}`;
+    // Basic validation on server side too
+    if (!username || username.trim().length < 3) {
+      return res.status(400).json({ success: false, message: 'Name must be at least 3 characters' });
+    }
+    if (!phoneNO || !/^\d{10}$/.test(phoneNO.trim())) {
+      return res.status(400).json({ success: false, message: 'Phone number must be exactly 10 digits' });
     }
 
     await userSchema.findByIdAndUpdate(userId, {
-      username,
-      phoneNO
+      username: username.trim(),
+      phoneNO: phoneNO.trim()
     });
 
-    // update session
-    req.session.user.username = username;
-    req.session.user.phoneNO = phoneNO;
+    // Update session
+    req.session.user.username = username.trim();
+    req.session.user.phoneNO = phoneNO.trim();
 
-    return res.redirect("/users/profile"); // 🔥 IMPORTANT
+    return res.json({ success: true, message: 'Profile updated successfully' });
+
   } catch (err) {
-    console.log(err);
+    console.error('editProfile error:', err);
+    return res.status(500).json({ success: false, message: 'Server error. Please try again.' });
   }
 };
 

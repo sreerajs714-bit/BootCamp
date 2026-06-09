@@ -1,298 +1,270 @@
 <!DOCTYPE html>
-
-<html class="light" lang="en">
+<html lang="en">
 
 <head>
-    <!-- ✅ Add these meta tags as FIRST things in head -->
-    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>BOOT CAMP | LOGIN</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
-        rel="stylesheet" />
-    <script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "outline": "#777777",
-                        "on-tertiary-fixed-variant": "#e2e2e2",
-                        "surface-container-low": "#f3f3f3",
-                        "secondary-fixed-dim": "#acabab",
-                        "on-error": "#ffffff",
-                        "primary-container": "#3b3b3b",
-                        "tertiary-fixed": "#5e5e5e",
-                        "primary": "#000000",
-                        "primary-fixed": "#5e5e5e",
-                        "secondary-container": "#d6d4d3",
-                        "on-tertiary-fixed": "#ffffff",
-                        "tertiary": "#3b3b3b",
-                        "on-tertiary": "#e2e2e2",
-                        "surface-container-highest": "#e2e2e2",
-                        "primary-fixed-dim": "#474747",
-                        "on-primary": "#e2e2e2",
-                        "inverse-surface": "#2f3131",
-                        "surface-variant": "#e2e2e2",
-                        "tertiary-fixed-dim": "#474747",
-                        "surface-container-lowest": "#ffffff",
-                        "on-primary-fixed": "#ffffff",
-                        "outline-variant": "#c6c6c6",
-                        "surface-tint": "#5e5e5e",
-                        "surface": "#f9f9f9",
-                        "tertiary-container": "#747474",
-                        "surface-dim": "#dadada",
-                        "on-secondary-container": "#1b1c1c",
-                        "on-surface": "#1a1c1c",
-                        "error-container": "#ffdad6",
-                        "surface-container-high": "#e8e8e8",
-                        "on-primary-fixed-variant": "#e2e2e2",
-                        "error": "#ba1a1a",
-                        "inverse-on-surface": "#f1f1f1",
-                        "on-tertiary-container": "#ffffff",
-                        "on-error-container": "#410002",
-                        "secondary": "#5f5e5e",
-                        "inverse-primary": "#c6c6c6",
-                        "surface-container": "#eeeeee",
-                        "on-secondary-fixed-variant": "#3b3b3b",
-                        "on-secondary": "#ffffff",
-                        "background": "#f9f9f9",
-                        "on-secondary-fixed": "#1b1c1c",
-                        "surface-bright": "#f9f9f9",
-                        "secondary-fixed": "#c8c6c6",
-                        "on-surface-variant": "#474747",
-                        "on-primary-container": "#ffffff",
-                        "on-background": "#1a1c1c"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
-                    },
-                    "fontFamily": {
-                        "headline": ["Space Grotesk"],
-                        "body": ["Inter"],
-                        "label": ["Inter"]
-                    }
-                }
-            }
-        }
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bootcamp Login | BOOT CAMP</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Toastify -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
     <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            overflow: hidden;
         }
 
-        .kinetic-monolith-overlay {
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.2) 60%, rgba(0, 0, 0, 0) 100%);
+        .glass {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Animations */
-        @keyframes slideInFromLeft {
-            0% {
-                transform: translateX(-150%);
-                opacity: 0;
-            }
+        @keyframes pulse-glow {
 
-            80% {
-                transform: translateX(10%);
-                opacity: 1;
-            }
-
+            0%,
             100% {
-                transform: translateX(0);
+                opacity: 0.75;
+            }
+
+            50% {
                 opacity: 1;
             }
         }
 
-        .subtitle-anim {
-            opacity: 0;
-            animation: slideInFromLeft 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        .animate-pulse-glow {
+            animation: pulse-glow 5s infinite;
         }
 
-        @keyframes dropInFromTop {
-            0% {
+        @keyframes fadeIn {
+            from {
                 opacity: 0;
-                transform: translateY(-80px);
+                transform: translateY(20px);
             }
 
-            60% {
+            to {
                 opacity: 1;
-                transform: translateY(10px);
-            }
-
-            80% {
-                transform: translateY(-5px);
-            }
-
-            100% {
                 transform: translateY(0);
-                opacity: 1;
             }
         }
 
-        .letter {
-            display: inline-block;
-            opacity: 0;
-            animation: dropInFromTop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        .animate-fadeIn {
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Video Background */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .video-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        video {
+            min-width: 100%;
+            min-height: 100%;
+            object-fit: cover;
+        }
+
+        /* Toggle Switch */
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #9333ea;
+            /* purple-600 */
+        }
+
+        .toggle-checkbox:checked+.toggle-label .toggle-dot {
+            transform: translateX(20px);
+        }
+
+        /* Custom Input focus */
+        .custom-input:focus {
+            border-color: rgba(147, 51, 234, 0.5);
+            outline: none;
+        }
+
+        /* Animation for success */
+        @keyframes success-pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+                background-color: #10b981;
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .animate-success {
+            animation: success-pop 0.5s ease-in-out forwards;
         }
     </style>
 </head>
 
-<body class="bg-surface font-body text-on-surface antialiased overflow-hidden">
-    <!-- Main Content Shell -->
-    <main class="relative h-screen w-full flex flex-col md:flex-row overflow-hidden">
-        <!-- Left Side: Visual Anchor -->
-        <section class="relative w-full md:w-1/2 h-1/3 md:h-full overflow-hidden flex items-end">
-            <div class="absolute inset-0 z-0">
-                <img alt="high-quality close-up of a premium professional football boot on a dark background, dramatic side lighting, moody athletic aesthetic, 8k resolution"
-                    class="w-full h-full object-cover"
-                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuCCWibQefqZyE2luDOWGUOKIWy0hP4ihQ3SufwOfTX8UFeP8lcFo-rE91MskE4OusFA8g0Pk8gMuZaJ4sAwAThnjUFNqbHp46knWiz8kHzE7FStdfoyrwWIJbJ86RSMWOgxyttmsbFruuMYbMdwAAwDeplZGZ3fP36Y4d0YJrEVeP945xfHJs7cBnodcPvUox3QrAgPT6CR2JdAAkNCmX3hfLF3tLOHJoAn2-d_I9V76bSwQUtsb2l3DGQBF-ZJMQFIBqFyzwCLPTk" />
-                <div class="absolute inset-0 kinetic-monolith-overlay z-10"></div>
+<body class="text-white min-h-screen flex items-center justify-center p-4">
+
+    <!-- Video Background -->
+    <div class="video-container" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:0;">
+    <img src="/uploads/images/login.png" alt="" style="width:100%; height:100%; object-fit:cover;">
+</div>
+
+    <!-- Main Container -->
+    <div class="relative z-20 w-full max-w-md animate-fadeIn">
+        <div class="p-8 rounded-2xl glass">
+
+            <!-- Logo/Header Area -->
+            <div class="mb-8 text-center">
+                <h2 class="text-3xl font-bold mb-2 relative group inline-block">
+                    <!-- Glow effect -->
+                    <span
+                        class="absolute -inset-1 bg-gradient-to-r from-purple-600/30 via-pink-500/30 to-blue-500/30 blur-xl opacity-75 group-hover:opacity-100 transition-all duration-500 animate-pulse-glow"></span>
+
+                    <span class="relative inline-block text-3xl font-black tracking-tighter text-white">
+                        BootCamp
+                    </span>
+
+                    <!-- Subtle underline glow -->
+                    <span
+                        class="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300"></span>
+                </h2>
+
+                <div class="mt-4 flex flex-col items-center space-y-1">
+                    <div class="relative group cursor-default">
+                        <span
+                            class="absolute -inset-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+                        <span class="relative inline-block text-white/80 font-medium tracking-wide">Your sports universe
+                            awaits</span>
+                    </div>
+
+                    <span class="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black animate-pulse">
+                        [ Press Enter to Join ]
+                    </span>
+                </div>
             </div>
-            <div class="relative z-20 p-8 md:p-16 mb-8 w-full">
-                <h1 id="main-title"
-                    class="title-anim font-headline font-black text-5xl md:text-8xl text-on-primary tracking-tighter leading-none uppercase">
-                    BOOT CAMP
-                </h1>
-                <p
-                    class="subtitle-anim font-headline font-medium text-lg md:text-xl text-on-primary tracking-[0.2em] mt-4 uppercase">
-                    STEP INTO PERFORMANCE
-                </p>
+
+            <!-- Login Form -->
+            <form id="login-form" class="space-y-6" action="/users/login" method="POST">
+
+                <!-- Email Input -->
+                <div class="relative">
+                    <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+                        <span class="material-symbols-outlined text-[20px]">mail</span>
+                    </div>
+                    <input type="text" id="email" name="email" placeholder="Email address"
+                        class="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 custom-input transition-all duration-300">
+                        <p id="email-error" class="hidden mt-1.5 ml-1 text-[11px] font-bold text-red-400 tracking-wide"></p>
+                </div>
+
+                <!-- Password Input -->
+                <div class="relative">
+                    <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+                        <span class="material-symbols-outlined text-[20px]">lock</span>
+                    </div>
+                    <input type="password" id="password" name="password" placeholder="Password"
+                        class="w-full pl-11 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 custom-input transition-all duration-300">
+                    <button type="button" id="toggle-password"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">visibility</span>
+                    </button>
+                    <p id="password-error" class="hidden mt-1.5 ml-1 text-[11px] font-bold text-red-400 tracking-wide"></p>
+                </div>
+
+                <!-- Remember & Forgot -->
+                <div class="flex justify-end">
+                    <a href="/users/resetPassword"
+                        class="text-[11px] font-black uppercase tracking-widest text-white/50 hover:text-white transition-colors">
+                        Forgot Password?
+                    </a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn"
+                    class="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-black uppercase tracking-widest text-[11px] rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black">
+                    Enter BOOTCAMP
+                </button>
+            </form>
+
+            <!-- Social Logins -->
+            <div class="mt-8">
+                <div class="relative flex items-center justify-center">
+                    <div class="border-t border-white/10 w-full"></div>
+                    <div
+                        class="absolute bg-black/0 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
+                        Quick Access
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-center">
+                    <a href="/users/auth/google"
+                        class="flex items-center justify-center w-fit px-8 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:bg-white/10 hover:text-white transition-all group">
+                        <svg class="w-5 h-5 group-hover:scale-110 transition-transform mr-2" viewBox="0 0 24 24"
+                            fill="currentColor">
+                            <path
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                fill="#4285F4" />
+                            <path
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                fill="#34A853" />
+                            <path
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.27.81-.57z"
+                                fill="#FBBC05" />
+                            <path
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z"
+                                fill="#EA4335" />
+                        </svg>
+                        <span class="text-[11px] font-black uppercase tracking-widest">Sign in with Google</span>
+                    </a>
+                </div>
             </div>
-        </section>
-        <!-- Right Side: Signup Form -->
-        <section
-            class="w-full md:w-1/2 bg-surface-container-lowest flex items-center justify-center p-5 md:p-12 lg:p-24 overflow-y-auto max-h-screen">
-            <div class="w-full max-w-md my-auto">
-                <header class="mb-12">
-                    <h2 class="headline-font text-3xl font-bold text-primary tracking-tight mb-2" style="">LOGIN</h2>
-                    <p class="text-on-surface-variant text-sm" style="">Return to the grind-Your goals are waiting.</p>
-                </header>
-                <form class="space-y-8" action="/users/login" method="post">
-                    <!-- Email Address Field -->
-                    <div class="group">
-                        <input
-                            class="w-full text-[14px] bg-transparent border-0 border-b-2 border-outline-variant py-0 px-0 text-primary placeholder:text-outline focus:ring-0 focus:border-primary transition-all duration-300 font-body"
-                            id="email" name="email" placeholder="EMAIL" type="text">
-                        <p id="email-error" class="text-error text-[11px] mt-1 hidden"></p>
-                    </div>
-                    <!-- Password Field -->
-                    <div class="group">
-                        <div class="relative">
-                            <input
-                                class="w-full text-[14px] bg-transparent border-0 border-b-2 border-outline-variant py-0 px-0 text-primary placeholder:text-outline focus:ring-0 focus:border-primary transition-all duration-300 font-body"
-                                id="password" name="password" placeholder="PASSWORD" type="password">
-                            <button class="absolute right-0 top-1/2 -translate-y-1/2 text-outline hover:text-primary"
-                                type="button" style="">
-                                <span class="material-symbols-outlined" data-icon="visibility" style="font-size: 20px"
-                                    onclick="togglePassword()">visibility</span>
-                            </button>
-                        </div>
-                        <p id="password-error" class="text-error text-[11px] mt-1 hidden"></p>
-                        <div class="flex justify-end mt-2">
-                            <a href="/users/resetPassword"
-                                class="text-[10px] text-outline hover:text-primary font-bold tracking-widest uppercase transition-colors">Forgot
-                                Password?</a>
-                        </div>
-                    </div>
-                    <!-- Action Button -->
-                    <div class="pt-6">
-                        <button
-                            class="w-full bg-primary text-on-primary font-headline font-bold text-sm tracking-widest uppercase py-5 px-8 rounded-lg hover:bg-primary-container transition-all active:scale-95"
-                            type="submit" style="">
-                            Login
-                        </button>
-                    </div>
-                    <div class="flex items-center gap-4 my-6">
-                        <div class="flex-grow h-px bg-outline-variant"></div>
-                        <span class="text-outline text-[10px] font-bold tracking-widest uppercase" style="">OR</span>
-                        <div class="flex-grow h-px bg-outline-variant"></div>
-                    </div>
-                    <div class="mt-4">
-                        <a href="/users/auth/google"
-                            class="w-full bg-white text-primary border border-outline-variant font-headline font-bold text-sm tracking-widest uppercase py-5 px-8 rounded-lg hover:bg-surface-container transition-all active:scale-95 flex items-center justify-center gap-3">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z">
-                                </path>
-                                <path
-                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z">
-                                </path>
-                                <path
-                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z">
-                                </path>
-                                <path
-                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z">
-                                </path>
-                            </svg>
-                            GOOGLE
-                        </a>
-                    </div>
-                </form>
-                <footer class="mt-16 text-center">
-                    <p class="font-body text-xs text-outline tracking-wider">
-                        Don't have an account?
-                        <a class="text-primary font-bold underline underline-offset-4 hover:opacity-80 transition-opacity ml-1"
-                            href="/users/signup">Sign up</a>
-                    </p>
-                </footer>
-        </section>
-    </main>
+
+            <!-- Footer Link -->
+            <p class="mt-8 text-center text-sm text-white/40">
+                Don't have an account?
+                <a href="/users/signup"
+                    class="font-bold text-white hover:text-purple-400 transition-colors uppercase tracking-widest text-[10px]">
+                    Create Account
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Page Footer -->
+    <footer
+        class="absolute bottom-6 left-0 right-0 text-center text-white/20 text-[10px] font-black uppercase tracking-[0.3em] z-20">
+        © 2026 Boot Camp Protocol
+    </footer>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/toast/toast.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const titleElement = document.getElementById('main-title');
-            const text = titleElement.textContent.trim();
-            titleElement.textContent = ''; // Clear existing text
-
-            let words = text.split(' ');
-
-            // Wait 1s for subtitle to finish sliding in, then start animating letters
-            const subtitleDuration = 1000; // 1s
-            const delayBetweenLetters = 100; // 0.1s
-
-            let letterIndex = 0;
-
-            words.forEach((word, wordIdx) => {
-                const wordSpan = document.createElement('span');
-                wordSpan.style.display = 'inline-block';
-                wordSpan.style.whiteSpace = 'nowrap';
-
-                word.split('').forEach(char => {
-                    const span = document.createElement('span');
-                    span.textContent = char;
-                    span.className = 'letter';
-                    // Variables removed since drop animation doesn't need them
-
-                    // Add delay dependent on when the subtitle finishes sliding
-                    span.style.animationDelay = `${subtitleDuration + (letterIndex * delayBetweenLetters)}ms`;
-
-                    wordSpan.appendChild(span);
-                    letterIndex++;
-                });
-
-                titleElement.appendChild(wordSpan);
-
-                // Add space between words
-                if (wordIdx < words.length - 1) {
-                    const space = document.createElement('span');
-                    space.innerHTML = '&nbsp;';
-                    titleElement.appendChild(space);
-                }
-            });
-        });
-
 
         function showError(id, message) {
             const errorElement = document.getElementById(`${id}-error`);
@@ -317,6 +289,12 @@
             // Clear errors on input
             document.getElementById('email').addEventListener('input', () => clearError('email'));
             document.getElementById('password').addEventListener('input', () => clearError('password'));
+
+            // Toggle password listener
+            const toggleBtn = document.getElementById('toggle-password');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', togglePassword);
+            }
         });
 
         async function formValidate(e) {
@@ -330,15 +308,15 @@
             clearError('password');
 
             let isValid = true;
+
             if (!email) {
                 showError('email', 'Email is required');
                 isValid = false;
-            }
-            if (!password) {
+            } 
+             if (!password) {
                 showError('password', 'Password is required');
                 isValid = false;
             }
-
             if (!isValid) return;
 
             const form = e.target;
@@ -357,7 +335,9 @@
                 showToast("success", "Login successful!");
 
                 if (response.data?.redirect) {
-                    window.location.href = response.data.redirect;
+                    setTimeout(() => {
+                        window.location.href = response.data.redirect;
+                    }, 1000);
                 }
 
             } catch (error) {
@@ -375,20 +355,25 @@
         function togglePassword() {
 
             const password = document.getElementById("password");
+            const icon = document.querySelector("#toggle-password span");
 
             if (password.type === "password") {
                 password.type = "text";
+                if(icon) icon.textContent = "visibility_off";
             } else {
                 password.type = "password";
+                if(icon) icon.textContent = "visibility";
             }
 
         }
+
         window.addEventListener("pageshow", (e) => {
             if (e.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
                 window.location.reload();
             }
         });
     </script>
+
 </body>
 
 </html>

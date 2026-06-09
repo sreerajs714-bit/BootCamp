@@ -171,8 +171,6 @@ export const resendOTP = async (req, res) => {
         message: "Session expired"
       });
     }
-
-console.log("RESEND SESSION:", req.session);
     const otp = generateOTP();
 
     const hashedOTP = await bcrypt.hash(otp, 10);
@@ -196,8 +194,6 @@ console.log("RESEND SESSION:", req.session);
     });
 
   } catch (err) {
-
-    console.log("RESEND ERROR:", err);
 
     return res.status(500).json({
       success: false,

@@ -9,9 +9,9 @@ import { changeEmail, changePassword, editProfile, loadEditProfile, loadProfile,
 import { uploadProfile ,uploadReturn } from "../Middleware/multer.js";
 import passport from "../Config/passport.js";
 import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controller/User/addressController.js";
-import { loadAllProducts, loadMens, loadProductDetail } from "../Controller/User/productController.js";
+import { loadAllProducts, loadLimitedEdition, loadMens, loadProductDetail, loadWomens } from "../Controller/User/productController.js";
 import { clearWishlist, loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
-import { addToCart, loadCart, removeFromCart, updateCartQty } from "../Controller/User/cartController.js";
+import { addToCart, getCartCount, loadCart, removeFromCart, updateCartQty } from "../Controller/User/cartController.js";
 import { loadCheckout, loadOrderSuccess, placeOrder } from "../Controller/User/checkoutController.js";
 import { cancelOrder, downloadInvoice, loadMyOrders, loadOrderDetail, loadReturnPage, returnRequest } from "../Controller/User/ordersController.js";
 
@@ -66,6 +66,8 @@ route.delete("/address/:id", checkSession,deleteAddress);
 
 route.get("/allProduct",noCache,loadAllProducts);
 route.get("/mens",noCache,loadMens);
+route.get("/womens",noCache,loadWomens);
+route.get("/limited",noCache,loadLimitedEdition);
 route.get("/productDetail/:id",noCache,loadProductDetail);
 
 route.get("/wishlist",noCache,loadWishlist);
@@ -76,8 +78,10 @@ route.post("/clearWishlist",checkSession,clearWishlist);
 route.get("/cart",noCache,loadCart);
 route.post("/addCart",noCache,checkSession,addToCart);
 route.put("/updateCartQty",checkSession,updateCartQty);
+route.get("/cart/count",checkSession,getCartCount);
 route.delete("/removeFromCart",noCache,checkSession,removeFromCart);
 route.get("/checkout",checkSession,loadCheckout);
+
 
 route.get("/orderSuccess/:id",checkSession,loadOrderSuccess);
 route.post("/orderSuccess",checkSession,placeOrder);

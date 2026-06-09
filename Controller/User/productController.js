@@ -185,79 +185,190 @@ export const loadMens = async (req, res) => {
     }
 };
 
-const loadWomens = async (req, res) => {
-  try {
-    const user = req.session?.user || null;
+export const loadWomens = async (req, res) => {
+    try {
+        const [activeCategories, activeBrands] = await Promise.all([
+            Category.find({ isActive: true, isDeleted: false }).select("_id name").lean(),
+            Brand.find({ isActive: true, isDeleted: false }).select("_id name").lean()
+        ]);
 
-    const products = await Product.aggregate([
-      {
-        $match: {
-          isDeleted: false,
-          gender: "Women", // adjust field/value to match your schema
-        },
-      },
-      {
-        $lookup: {
-          from: "categories",
-          localField: "category",
-          foreignField: "_id",
-          as: "categoryData",
-        },
-      },
-      { $unwind: { path: "$categoryData", preserveNullAndEmpty: true } },
-      {
-        $lookup: {
-          from: "variants",
-          localField: "_id",
-          foreignField: "productId",
-          as: "variants",
-        },
-      },
-      {
-        $match: {
-          "variants.0": { $exists: true }, // only products with variants
-        },
-      },
-      {
-        $addFields: {
-          defaultVariant: { $arrayElemAt: ["$variants", 0] },
-        },
-      },
-      {
-        $project: {
-          productName: 1,
-          brand: 1,
-          images: "$defaultVariant.images",
-          rawPrice: "$defaultVariant.price",
-          variantId: "$defaultVariant._id",
-          defaultSize: { $arrayElemAt: ["$defaultVariant.sizes", 0] },
-          badge: "$categoryData.name",
-        },
-      },
-    ]);
+        const activeCategoryIds = activeCategories.map(c => c._id.toString());
+        const activeBrandIds = activeBrands.map(b => b._id.toString());
 
-    // Attach wishlist status if user is logged in
-    let wishlistedIds = [];
-    if (user) {
-      const wishlist = await Wishlist.findOne({ userId: user._id });
-      wishlistedIds = wishlist?.products?.map((p) => p.toString()) || [];
+        const products = await Product.find({
+            status: "active",
+            isDeleted: false,
+            category: { $in: activeCategoryIds },
+            brand: { $in: activeBrandIds }
+        })
+            .populate("brand", "name brandName")
+            .populate("category", "name categoryName")
+            .lean();
+
+        // ✅ Filter ONLY WOMEN category
+        const womensProducts = products.filter(product => {
+            const categoryName =
+                product.category?.name ||
+                product.category?.categoryName;
+            return categoryName?.toLowerCase() === "women";
+        });
+
+        let wishlistedIds = [];
+        if (req.user) {
+            const user = await User.findById(req.user._id).select('wishlist').lean();
+            wishlistedIds = (user?.wishlist || []).map(id => String(id));
+        }
+
+        const shaped = womensProducts.map(product => {
+            const variant =
+                product.variants?.find(v => v.isDefault && v.isActive) ||
+                product.variants?.find(v => v.isActive) ||
+                product.variants?.[0];
+
+            let stock_label, stock_icon;
+            if (!variant || variant.stock === 0) {
+                stock_label = "Out of Stock";
+                stock_icon = "cancel";
+            } else if (variant.stock <= 10) {
+                stock_label = `Only ${variant.stock} left`;
+                stock_icon = "schedule";
+            } else {
+                stock_label = "In Stock";
+                stock_icon = "check_circle";
+            }
+
+            const brandName =
+                product.brand?.name ||
+                product.brand?.brandName ||
+                "Unknown Brand";
+
+            const categoryName =
+                product.category?.name ||
+                product.category?.categoryName ||
+                "Unknown Category";
+
+            return {
+                id: product._id,
+                productName: product.productName,
+                brand: brandName,
+                category: categoryName,
+                badge: product.isLimitedEdition ? "LIMITED" : "STANDARD",
+                rawPrice: variant?.price || 0,
+                defaultSize: Array.isArray(variant?.sizes)
+                    ? variant.sizes[0]
+                    : variant?.sizes || "",
+                stock_label,
+                stock_icon,
+                images: variant?.images || [],
+                variantId: variant?._id ? String(variant._id) : "",
+                isWishlisted: wishlistedIds.includes(String(product._id))
+            };
+        });
+
+        res.render("users/womensCollection", {
+            breadcrumbs: [
+                { label: 'Home', url: '/' },
+                { label: 'Womens' }
+            ],
+            products: shaped,
+            count: shaped.length,
+            user: req.user || null
+        });
+
+    } catch (error) {
+        console.error("loadWomens error:", error);
+        res.status(500).send("Failed to load womens products");
     }
+};
 
-    const formattedProducts = products.map((p) => ({
-      ...p,
-      id: p._id.toString(),
-      isWishlisted: wishlistedIds.includes(p._id.toString()),
-    }));
+export const loadLimitedEdition = async (req, res) => {
+    try {
+        const [activeCategories, activeBrands] = await Promise.all([
+            Category.find({ isActive: true, isDeleted: false }).select("_id name").lean(),
+            Brand.find({ isActive: true, isDeleted: false }).select("_id name").lean()
+        ]);
 
-    res.render("womens", {
-      user,
-      products: formattedProducts,
-      count: formattedProducts.length,
-    });
-  } catch (error) {
-    console.error("loadWomens error:", error);
-    res.status(500).send("Internal Server Error");
-  }
+        const activeCategoryIds = activeCategories.map(c => c._id.toString());
+        const activeBrandIds = activeBrands.map(b => b._id.toString());
+
+        // ✅ Fetch ONLY limited edition products
+        const products = await Product.find({
+            status: "active",
+            isDeleted: false,
+            isLimitedEdition: true,
+            category: { $in: activeCategoryIds },
+            brand: { $in: activeBrandIds }
+        })
+            .populate("brand", "name brandName")
+            .populate("category", "name categoryName")
+            .lean();
+
+        let wishlistedIds = [];
+        if (req.user) {
+            const user = await User.findById(req.user._id).select('wishlist').lean();
+            wishlistedIds = (user?.wishlist || []).map(id => String(id));
+        }
+
+        const shaped = products.map(product => {
+            const variant =
+                product.variants?.find(v => v.isDefault && v.isActive) ||
+                product.variants?.find(v => v.isActive) ||
+                product.variants?.[0];
+
+            let stock_label, stock_icon;
+            if (!variant || variant.stock === 0) {
+                stock_label = "Out of Stock";
+                stock_icon = "cancel";
+            } else if (variant.stock <= 10) {
+                stock_label = `Only ${variant.stock} left`;
+                stock_icon = "schedule";
+            } else {
+                stock_label = "In Stock";
+                stock_icon = "check_circle";
+            }
+
+            const brandName =
+                product.brand?.name ||
+                product.brand?.brandName ||
+                "Unknown Brand";
+
+            const categoryName =
+                product.category?.name ||
+                product.category?.categoryName ||
+                "Unknown Category";
+
+            return {
+                id: product._id,
+                productName: product.productName,
+                brand: brandName,
+                category: categoryName,
+                badge: "LIMITED",
+                rawPrice: variant?.price || 0,
+                defaultSize: Array.isArray(variant?.sizes)
+                    ? variant.sizes[0]
+                    : variant?.sizes || "",
+                stock_label,
+                stock_icon,
+                images: variant?.images || [],
+                variantId: variant?._id ? String(variant._id) : "",
+                isWishlisted: wishlistedIds.includes(String(product._id))
+            };
+        });
+
+        res.render("users/limitedEdition", {
+            breadcrumbs: [
+                { label: 'Home', url: '/' },
+                { label: 'Limited Edition' }
+            ],
+            products: shaped,
+            count: shaped.length,
+            user: req.user || null
+        });
+
+    } catch (error) {
+        console.error("loadLimitedEdition error:", error);
+        res.status(500).send("Failed to load limited edition products");
+    }
 };
 
 export const loadProductDetail = async (req, res) => {

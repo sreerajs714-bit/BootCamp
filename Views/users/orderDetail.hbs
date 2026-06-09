@@ -780,7 +780,7 @@
                 }, 2000);
 
             } catch (err) {
-                showToast("Failed to prepare invoice", "error");
+                showToast("error","Failed to prepare invoice");
                 btn.classList.remove('btn-loading');
                 text.innerText = 'Download Invoice';
             }
@@ -837,7 +837,7 @@
 
         async function submitAction() {
             if (!selectedReason) {
-                showToast(`Please select a reason for ${currentMode.toLowerCase()}`, "error");
+                showToast("error",`Please select a reason for ${currentMode.toLowerCase()}`);
                 return;
             }
 
@@ -858,18 +858,18 @@
                 });
 
                 if (response.data.success) {
-                    showToast(`${currentMode} successful`, "success");
+                    showToast("success",`${currentMode} successful`);
                     setTimeout(() => {
                         window.location.href = currentMode === 'CANCEL' ? '/users/myOrders' : window.location.href;
                     }, 1500);
                 } else {
-                    showToast(response.data.message || `Failed to ${currentMode.toLowerCase()}`, "error");
+                    showToast("error",response.data.message || `Failed to ${currentMode.toLowerCase()}`);
                     btn.disabled = false;
                     btn.innerText = originalText;
                 }
             } catch (err) {
                 console.error(`${currentMode} error:`, err);
-                showToast("Something went wrong", "error");
+                showToast("error","Something went wrong");
                 btn.disabled = false;
                 btn.innerText = originalText;
             }
