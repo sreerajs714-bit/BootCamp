@@ -1,6 +1,7 @@
-import userSchema from "../../Model/userModel.js";
+import User from "../../Model/userModel.js";
 import Product from "../../Model/productModel.js";
 import Cart from "../../Model/cartModel.js";
+import Wishlist from "../../Model/wishlistModel.js";
 import session from "express-session";
 import { generateOTP }  from "../service/mail.js";
 import { sendOTPEmail } from "../service/mail.js";
@@ -30,7 +31,7 @@ export const RegisterUser = async (req, res) => {
     const cleanEmail = email.trim().toLowerCase();
 
     // Check existing user
-    const existingUser = await userSchema.findOne({
+    const existingUser = await User.findOne({
       email: cleanEmail
     });
 
@@ -109,7 +110,7 @@ export const LoginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const existingUser = await userSchema.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
     if (!existingUser) {
       return res.status(404).json({ message: "User does not exist" });
@@ -147,7 +148,8 @@ export const loadHome = async (req, res) => {
   try {
     const userId = req.session.user?._id || req.session.user?.id;
 
-    const [newArrivals, limitedEdition] = await Promise.all([
+    // ── CHANGE 2: fetch wishlist in parallel alongside products ──
+    const [newArrivals, limitedEdition, wishlist] = await Promise.all([
       Product.find({ status: "active", isDeleted: false })
         .sort({ createdAt: -1 })
         .limit(4)
@@ -159,7 +161,19 @@ export const loadHome = async (req, res) => {
         .limit(2)
         .populate("brand", "name")
         .lean(),
+
+      // only query if logged in, otherwise resolve null
+      userId
+        ? Wishlist.findOne({ userId }).lean()
+        : Promise.resolve(null),
     ]);
+
+    // ── CHANGE 3: build a Set of wishlisted IDs for fast lookup ──
+    const wishlistSet = new Set(
+      wishlist?.products?.map((item) =>
+        item.productId ? item.productId.toString() : item.toString()
+      ) || []
+    );
 
     // ── Real cart count from DB ──
     let cartCount = 0;
@@ -168,46 +182,52 @@ export const loadHome = async (req, res) => {
       cartCount = cart?.items?.reduce((sum, i) => sum + (i.quantity || 1), 0) ?? 0;
     }
 
-     const formatProduct = (p) => {
+    const formatProduct = (p) => {
       const variant =
         p.variants?.find((v) => v.isDefault && v.isActive) ||
         p.variants?.find((v) => v.isActive) ||
         p.variants?.[0];
 
-    let stock_label, stock_icon;
-  if (!variant || variant.stock === 0) {
-    stock_label = "Out of Stock";
-    stock_icon = "cancel";
-  } else if (variant.stock <= 10) {
-    stock_label = `Only ${variant.stock} left`;
-    stock_icon = "schedule";
-  } else {
-    stock_label = "In Stock";
-    stock_icon = "check_circle";
-  }
+      let stock_label, stock_icon;
+      if (!variant || variant.stock === 0) {
+        stock_label = "Out of Stock";
+        stock_icon = "cancel";
+      } else if (variant.stock <= 10) {
+        stock_label = `Only ${variant.stock} left`;
+        stock_icon = "schedule";
+      } else {
+        stock_label = "In Stock";
+        stock_icon = "check_circle";
+      }
 
       return {
         id: p._id.toString(),
         productName: p.productName,
-        brand: p.brand?.name || "",       
+        brand: p.brand?.name || "",
         rawPrice: variant?.price || 0,
         images: variant?.images || [],
         isLimitedEdition: p.isLimitedEdition,
         createdAt: p.createdAt,
         inStock: !!(variant && variant.stock > 0),
-        stock_label,                               
+        stock_label,
         stock_icon,
+        isWishlisted: userId ? wishlistSet.has(p._id.toString()) : false,
+        variantId: variant?._id?.toString() || "", 
       };
     };
 
     const formattedNewArrivals = newArrivals.map(formatProduct);
     const formattedLimited = limitedEdition.map(formatProduct);
 
+    // ── CHANGE 5: add wishlistCount for navbar badge ──
+    const wishlistCount = wishlist?.products?.length ?? 0;
+
     return res.render("users/home", {
       user: req.session.user || null,
       products: formattedNewArrivals,
       limitedProducts: formattedLimited,
-      cartCount, // ← now real
+      cartCount,
+      wishlistCount, // ← CHANGE 5
     });
 
   } catch (error) {
@@ -226,7 +246,7 @@ export const resetPassword = async (req, res) => {
 
     email = email.trim().toLowerCase();
 
-    const existingUser = await userSchema.findOne({ email });
+    const existingUser = await User.findOne({ email });
 
     if (!existingUser) {
       return res.status(404).json({ 
@@ -303,7 +323,7 @@ export const SetNew = async (req, res) => {
       return res.status(400).json({ success: false, message: "Session expired" });
     }
 
-    const user = await userSchema.findOne({ email });
+    const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });

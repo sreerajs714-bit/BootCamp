@@ -147,6 +147,36 @@
      <script src="/toast/toast.js"></script>
 
     <script>
+
+        // Ensures fetchNavCounts is always available even if navbar loads late
+    function safeFetchNavCounts() {
+    if (typeof window.fetchNavCounts === 'function') {
+        window.fetchNavCounts();
+    } else {
+        // Fallback — update directly
+        axios.get('/users/getCounts', { withCredentials: true }).then(res => {
+            const { cartCount, wishlistCount } = res.data;
+
+            const cartBadge = document.getElementById('cart-badge');
+            if (cartBadge) {
+                cartBadge.textContent = cartCount;
+                cartCount > 0
+                    ? cartBadge.classList.remove('opacity-0', 'scale-0')
+                    : cartBadge.classList.add('opacity-0', 'scale-0');
+            }
+
+            const wishlistBadge = document.getElementById('wishlist-badge');
+            if (wishlistBadge) {
+                wishlistBadge.textContent = wishlistCount;
+                wishlistCount > 0
+                    ? wishlistBadge.classList.remove('opacity-0', 'scale-0')
+                    : wishlistBadge.classList.add('opacity-0', 'scale-0');
+            }
+        }).catch(() => {});
+    }
+   }
+
+
         const isLoggedIn = {{#if user}}true{{else }} false{{/if }};
 
         // ── Remove from wishlist ──────────────────────────────
@@ -166,6 +196,7 @@
                         setTimeout(() => {
                             card.remove();
                             if (!silent) showToast("success", "Removed from wishlist");
+                            safeFetchNavCounts()
                             const remaining = document.querySelectorAll('.wishlist-card').length;
                             if (remaining === 0) {
                                 setTimeout(() => window.location.reload(), 500);
@@ -197,6 +228,7 @@
 
                 if (response.data.success) {
                     showToast("success", "Moved to Bag Successfully");
+                   safeFetchNavCounts()
                     await removeFromWishlist(productId, true);
                 } else if (response.data.alreadyInCart) {
                     showToast("info", "Already in Bag");

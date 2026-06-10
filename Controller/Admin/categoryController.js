@@ -22,7 +22,7 @@ export const loadCategory = async (req, res) => {
       dbFilter.isDeleted = false;
       dbFilter.isActive = false;
     } else {
-      // "all" → show everything including deleted
+      dbFilter.isDeleted = false;
     }
 
     if (search) {

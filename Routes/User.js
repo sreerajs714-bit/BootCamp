@@ -11,9 +11,10 @@ import passport from "../Config/passport.js";
 import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controller/User/addressController.js";
 import { loadAllProducts, loadLimitedEdition, loadMens, loadProductDetail, loadWomens } from "../Controller/User/productController.js";
 import { clearWishlist, loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
-import { addToCart, getCartCount, loadCart, removeFromCart, updateCartQty } from "../Controller/User/cartController.js";
+import { addToCart, loadCart, removeFromCart, updateCartQty } from "../Controller/User/cartController.js";
 import { loadCheckout, loadOrderSuccess, placeOrder } from "../Controller/User/checkoutController.js";
 import { cancelOrder, downloadInvoice, loadMyOrders, loadOrderDetail, loadReturnPage, returnRequest } from "../Controller/User/ordersController.js";
+import { getCounts } from "../Controller/User/navController.js";
 
 
 route.get("/auth/google",
@@ -64,6 +65,8 @@ route.post("/address",checkSession,addAddress)
 route.put("/address/:id", checkSession,editAddress);
 route.delete("/address/:id", checkSession,deleteAddress);
 
+route.get("/getCounts",getCounts);
+
 route.get("/allProduct",noCache,loadAllProducts);
 route.get("/mens",noCache,loadMens);
 route.get("/womens",noCache,loadWomens);
@@ -78,7 +81,6 @@ route.post("/clearWishlist",checkSession,clearWishlist);
 route.get("/cart",noCache,loadCart);
 route.post("/addCart",noCache,checkSession,addToCart);
 route.put("/updateCartQty",checkSession,updateCartQty);
-route.get("/cart/count",checkSession,getCartCount);
 route.delete("/removeFromCart",noCache,checkSession,removeFromCart);
 route.get("/checkout",checkSession,loadCheckout);
 

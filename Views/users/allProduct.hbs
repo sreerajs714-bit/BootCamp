@@ -18,7 +18,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
-
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -563,11 +563,40 @@
     </main>
 
     {{>footer}}
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+   
     <script src="/toast/toast.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+
+    function safeFetchNavCounts() {
+    if (typeof window.fetchNavCounts === 'function') {
+        window.fetchNavCounts();
+    } else {
+    
+        axios.get('/users/getCounts', { withCredentials: true }).then(res => {
+            const { cartCount, wishlistCount } = res.data;
+
+            const cartBadge = document.getElementById('cart-badge');
+            if (cartBadge) {
+                cartBadge.textContent = cartCount;
+                cartCount > 0
+                    ? cartBadge.classList.remove('opacity-0', 'scale-0')
+                    : cartBadge.classList.add('opacity-0', 'scale-0');
+            }
+
+            const wishlistBadge = document.getElementById('wishlist-badge');
+            if (wishlistBadge) {
+                wishlistBadge.textContent = wishlistCount;
+                wishlistCount > 0
+                    ? wishlistBadge.classList.remove('opacity-0', 'scale-0')
+                    : wishlistBadge.classList.add('opacity-0', 'scale-0');
+            }
+        }).catch(() => {});
+    }
+}
+
+
         const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
         let originalCards = [];
         const ITEMS_PER_PAGE = 8;
@@ -604,7 +633,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             originalCards = [...document.querySelectorAll('.product-card')];
 
-            // Carousel logic
             originalCards.forEach(card => {
                 const images = card.querySelectorAll('.carousel-img');
                 if (images.length <= 1) return;
@@ -642,7 +670,7 @@
                 const response = await axios.post("/users/addCart", { productId, variantId, size, quantity: 1 });
                 if (response.data.success) {
                     showToast("success", "Added to cart");
-                    fetchCartCount();
+                    safeFetchNavCounts()
 
                 } else if (response.data.alreadyInCart) {
                     showToast("error", "Already in cart!");
@@ -673,8 +701,9 @@
 
             try {
                 const res = await axios.post('/users/addCart', { productId, variantId, size, quantity: 1 });
+                console.log('Full cart response:', response.data); 
                 if (res.data.success || res.data.alreadyInCart) {
-                    fetchCartCount();
+                    safeFetchNavCounts()
                     window.location.href = "/users/cart";
                 } else {
                     showToast("error", res.data.message || "Failed to process");
@@ -701,6 +730,7 @@
                     icon.classList.toggle('icon-fill', response.data.isWishlisted);
                     icon.classList.toggle('text-red-500', response.data.isWishlisted);
                     showToast("success", response.data.isWishlisted ? "Added to wishlist" : "Removed from wishlist");
+                    safeFetchNavCounts()
                 }
             } catch (err) { showToast("error", "Failed to update wishlist"); }
         }

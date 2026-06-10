@@ -91,13 +91,121 @@
             color: #fff;
         }
 
-        .sort-select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            padding-right: 28px !important;
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            transition: all 0.2s;
+        }
+
+        .status-badge.active {
+            background-color: #ecfdf5;
+            color: #10b981;
+        }
+
+        .status-badge.inactive {
+            background-color: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .status-badge.deleted {
+            background-color: #fef2f2;
+            color: #ef4444;
+        }
+
+        .custom-dropdown {
+            position: relative;
+            min-width: 150px;
+        }
+
+        .dropdown-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fdfdfd;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 10px 16px;
             cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-toggle:hover {
+            border-color: #000;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .dropdown-toggle.active {
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 6px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background: #f9fafb;
+            color: #000;
+        }
+
+        .dropdown-item.selected {
+            background: #000;
+            color: #fff;
+        }
+
+        .filter-label {
+            position: absolute;
+            top: -7px;
+            left: 12px;
+            background: white;
+            padding: 0 6px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            z-index: 10;
         }
     </style>
 </head>
@@ -245,34 +353,46 @@
                             {{brands.length}} brands
                         </span>
                     </div>
-                    <div class="flex items-center gap-3 flex-wrap">
+                    <div class="flex items-center gap-5 flex-wrap">
+                        <input type="hidden" id="statusFilter" value="{{filter}}">
+                        <input type="hidden" id="sortSelect"   value="{{sort}}">
 
-                        <!-- Filter -->
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">Filter</span>
-                            <select id="statusFilter"
-                                class="sort-select bg-gray-50 border border-gray-100 rounded-lg py-2 pl-3 text-[12px] font-semibold text-gray-600 outline-none"
-                                onchange="applyFilters()">
-                                <option value="all" {{#if (eq filter 'all' )}}selected{{/if}}>All</option>
-                                <option value="active" {{#if (eq filter 'active' )}}selected{{/if}}>Active</option>
-                                <option value="inactive" {{#if (eq filter 'inactive' )}}selected{{/if}}>Inactive
-                                </option>
-                                <option value="deleted" {{#if (eq filter 'deleted' )}}selected{{/if}}>Deleted</option>
-                            </select>
+                        <!-- Filter Dropdown -->
+                        <div class="custom-dropdown min-w-[140px]">
+                            <span class="filter-label">Filter</span>
+                            <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                                <span class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                                    {{#if (eq filter 'all')}}All Status{{/if}}
+                                    {{#if (eq filter 'active')}}Active{{/if}}
+                                    {{#if (eq filter 'inactive')}}Inactive{{/if}}
+                                    {{#if (eq filter 'deleted')}}Deleted{{/if}}
+                                </span>
+                                <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+                            </div>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item {{#if (eq filter 'all')}}selected{{/if}}" onclick="selectOption('status', 'all', 'All Status')">All Status</div>
+                                <div class="dropdown-item {{#if (eq filter 'active')}}selected{{/if}}" onclick="selectOption('status', 'active', 'Active')">Active</div>
+                                <div class="dropdown-item {{#if (eq filter 'inactive')}}selected{{/if}}" onclick="selectOption('status', 'inactive', 'Inactive')">Inactive</div>
+                                <div class="dropdown-item {{#if (eq filter 'deleted')}}selected{{/if}}" onclick="selectOption('status', 'deleted', 'Deleted')">Deleted</div>
+                            </div>
                         </div>
 
-                        <!-- Sort -->
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] font-bold tracking-widest text-gray-400 uppercase">Sort</span>
-                            <select id="sortSelect"
-                                class="sort-select bg-gray-50 border border-gray-100 rounded-lg py-2 pl-3 text-[12px] font-semibold text-gray-600 outline-none"
-                                onchange="applyFilters()">
-                                <option value="default" {{#if (eq sort 'default' )}}selected{{/if}}>Default</option>
-                                <option value="name-asc" {{#if (eq sort 'name-asc' )}}selected{{/if}}>Newest first
-                                </option>
-                                <option value="name-desc" {{#if (eq sort 'name-desc' )}}selected{{/if}}>Oldest first
-                                </option>
-                            </select>
+                        <!-- Sort Dropdown -->
+                        <div class="custom-dropdown min-w-[160px]">
+                            <span class="filter-label">Sort</span>
+                            <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                                <span class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                                    {{#if (eq sort 'default')}}Default{{/if}}
+                                    {{#if (eq sort 'name-asc')}}Newest first{{/if}}
+                                    {{#if (eq sort 'name-desc')}}Oldest first{{/if}}
+                                </span>
+                                <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+                            </div>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item {{#if (eq sort 'default')}}selected{{/if}}" onclick="selectOption('sort', 'default', 'Default')">Default</div>
+                                <div class="dropdown-item {{#if (eq sort 'name-asc')}}selected{{/if}}" onclick="selectOption('sort', 'name-asc', 'Newest first')">Newest first</div>
+                                <div class="dropdown-item {{#if (eq sort 'name-desc')}}selected{{/if}}" onclick="selectOption('sort', 'name-desc', 'Oldest first')">Oldest first</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -310,14 +430,11 @@
                                 </td>
                                 <td class="py-4 px-6">
                                     {{#if this.isDeleted}}
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase bg-red-50 text-red-600">Deleted</span>
+                                    <span class="status-badge deleted">Deleted</span>
                                     {{else if this.isActive}}
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase bg-black text-white">Active</span>
+                                    <span class="status-badge active">Active</span>
                                     {{else}}
-                                    <span
-                                        class="inline-flex items-center px-3 py-1 rounded-full text-[9px] font-black tracking-widest uppercase bg-gray-200 text-gray-500">Inactive</span>
+                                    <span class="status-badge inactive">Inactive</span>
                                     {{/if}}
                                 </td>
                                 <td class="py-4 px-8 text-right">
@@ -598,35 +715,115 @@
 
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
 
-       function changePage(page) {
-    const search = document.getElementById('searchInput').value || '';  // ← get from input
-    const filter = document.getElementById('statusFilter').value || 'all';
-    const sort = document.getElementById('sortSelect').value || 'default';
-    window.location.href = `/admin/brand?page=${page}&search=${search}&filter=${filter}&sort=${sort}`;
-}
+        // ─── CUSTOM DROPDOWNS ───────────────────────────────────────
+        function toggleDropdown(toggle) {
+            const menu = toggle.nextElementSibling;
+            const isOpen = menu.classList.contains('show');
 
-    function applyFilters() {
-    const search = document.getElementById('searchInput').value || '';  // ← get from input
-    const filter = document.getElementById('statusFilter').value;
-    const sort = document.getElementById('sortSelect').value;
-    window.location.href = `/admin/brand?page=1&filter=${filter}&search=${search}&sort=${sort}`;
-}
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
 
-        //search
-        document.getElementById('searchInput').addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') {
-                applyFilters();
+            if (!isOpen) {
+                menu.classList.add('show');
+                toggle.classList.add('active');
+            }
+        }
+
+        function selectOption(filterId, value, label) {
+            const input = document.getElementById(filterId + (filterId === 'sort' ? 'Select' : 'Filter'));
+            input.value = value;
+
+            // Trigger filters
+            applyFilters();
+        }
+
+        // Close dropdowns on click outside
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.custom-dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+                document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
             }
         });
 
-        // ─── VALIDATION CLEARING ────────────────────────────────────
-        document.getElementById('addBrandInput').addEventListener('input', () => {
-            document.getElementById('addBrandError').classList.add('hidden');
-        });
+        // ─── PAGINATION, FILTER & SORT ──────────────────────────────
+        function changePage(page) {
+            const search = document.getElementById('searchInput').value || '';
+            const filter = document.getElementById('statusFilter').value || 'all';
+            const sort = document.getElementById('sortSelect').value || 'default';
+            window.location.href = `/admin/brand?page=${page}&search=${search}&filter=${filter}&sort=${sort}`;
+        }
 
-        document.getElementById('editBrandName').addEventListener('input', () => {
-            document.getElementById('editBrandError').classList.add('hidden');
-        });
+        function applyFilters() {
+            const search = document.getElementById('searchInput').value || '';
+            const filter = document.getElementById('statusFilter').value;
+            const sort = document.getElementById('sortSelect').value;
+            window.location.href = `/admin/brand?page=1&filter=${filter}&search=${search}&sort=${sort}`;
+        }
+
+// ─── DEBOUNCED SEARCH ────────────────────────────────────────
+let debounceTimer;
+
+document.getElementById('searchInput').addEventListener('input', function () {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        filterTable();
+    }, 300);
+});
+
+    function filterTable() {
+    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    const rows = document.querySelectorAll('.brand-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        const name = row.querySelector('td:nth-child(2)')?.textContent?.toLowerCase() || '';
+        const matches = name.includes(query);
+        row.style.display = matches ? '' : 'none';
+        if (matches) visibleCount++;
+    });
+
+    const badge = document.querySelector('.bg-gray-100.px-2\\.5');
+    if (badge) badge.textContent = `${visibleCount} brands`;
+
+    let emptyRow = document.getElementById('empty-search-row');
+    if (visibleCount === 0) {
+        if (!emptyRow) {
+            emptyRow = document.createElement('tr');
+            emptyRow.id = 'empty-search-row';
+            emptyRow.innerHTML = `<td colspan="5" class="py-12 text-center text-[13px] font-medium text-gray-400">No brands match your search</td>`;
+            document.querySelector('tbody').appendChild(emptyRow);
+        }
+        emptyRow.style.display = '';
+    } else if (emptyRow) {
+        emptyRow.style.display = 'none';
+    }
+    }
+
+// ─── REAL-TIME VALIDATION ────────────────────────────────────
+    document.getElementById('addBrandInput').addEventListener('input', (e) => {
+    const val = e.target.value.trim();
+    const err = document.getElementById('addBrandError');
+    if (!val) { err.classList.add('hidden'); return; }
+    if (/[^a-zA-Z\s]/.test(val)) {
+        err.textContent = 'Only letters are allowed.';
+        err.classList.remove('hidden');
+    } else {
+        err.classList.add('hidden');
+    }
+    });
+
+    document.getElementById('editBrandName').addEventListener('input', (e) => {
+    const val = e.target.value.trim();
+    const err = document.getElementById('editBrandError');
+    if (!val) { err.classList.add('hidden'); return; }
+    if (/[^a-zA-Z\s]/.test(val)) {
+        err.textContent = 'Only letters are allowed.';
+        err.classList.remove('hidden');
+    } else {
+        err.classList.add('hidden');
+    }
+    });
 
         // ─── API HANDLERS ───────────────────────────────────────────
         document.getElementById('submitAddBrand').addEventListener('click', async () => {
@@ -634,12 +831,27 @@
             const isActive = document.getElementById('addBrandStatus').checked;
             const errorEl = document.getElementById('addBrandError');
 
-            if (!name) {
-                errorEl.textContent = 'Brand name is required';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-            errorEl.classList.add('hidden');
+      if (!name) {
+         errorEl.textContent = 'Brand name is required.';
+         errorEl.classList.remove('hidden');
+         return;
+        }
+        if (name.length < 3) {
+           errorEl.textContent = 'Brand name must be at least 3 characters.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+        if (/^\d+$/.test(name)) {
+            errorEl.textContent = 'Brand name cannot be only numbers.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+        if (/[^a-zA-Z\s]/.test(name)) {
+           errorEl.textContent = 'Brand name can only contain letters.';
+            errorEl.classList.remove('hidden');
+            return;
+        }
+        errorEl.classList.add('hidden');
 
             try {
                 const res = await axios.post('/admin/addBrand', {
@@ -673,12 +885,27 @@
             const isActive = document.getElementById('editBrandStatus').checked;
             const errorEl = document.getElementById('editBrandError');
 
-            if (!name) {
-                errorEl.textContent = 'Brand name is required';
-                errorEl.classList.remove('hidden');
-                return;
-            }
-            errorEl.classList.add('hidden');
+     if (!name) {
+    errorEl.textContent = 'Brand name is required.';
+    errorEl.classList.remove('hidden');
+    return;
+    }
+    if (name.length < 3) {
+    errorEl.textContent = 'Brand name must be at least 3 characters.';
+    errorEl.classList.remove('hidden');
+    return;
+    }
+     if (/^\d+$/.test(name)) {
+    errorEl.textContent = 'Brand name cannot be only numbers.';
+    errorEl.classList.remove('hidden');
+    return;
+    }
+     if (/[^a-zA-Z\s]/.test(name)) {
+    errorEl.textContent = 'Brand name can only contain letters.';
+    errorEl.classList.remove('hidden');
+    return;
+    }
+    errorEl.classList.add('hidden');
 
             try {
                 const res = await axios.put(`/admin/editBrand/${id}`, {

@@ -103,6 +103,7 @@ export const loadReturnManagement = async (req, res) => {
         return res.render('admin/returnManagement', {
             returns: paginated,
             stats,
+            
             currentStatus: status,
             currentSearch: search,
             totalFiltered,

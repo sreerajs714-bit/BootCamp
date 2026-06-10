@@ -118,6 +118,96 @@
             width: 320px;
         }
 
+        .custom-dropdown {
+            position: relative;
+            min-width: 150px;
+        }
+
+        .dropdown-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fdfdfd;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-toggle:hover {
+            border-color: #000;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .dropdown-toggle.active {
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 6px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background: #f9fafb;
+            color: #000;
+        }
+
+        .dropdown-item.selected {
+            background: #000;
+            color: #fff;
+        }
+
+        .filter-label {
+            position: absolute;
+            top: -7px;
+            left: 12px;
+            background: white;
+            padding: 0 6px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            z-index: 10;
+        }
+
         .main-bg {
             background-color: #fcfcfc;
         }
@@ -198,16 +288,18 @@
     <main class="flex-1 flex flex-col min-h-screen main-bg">
 
         <!-- Header -->
-        <header class="bg-white border-b border-gray-100 px-10 py-8 flex items-center justify-between sticky top-0 z-10">
+        <header
+            class="bg-white border-b border-gray-100 px-10 py-8 flex items-center justify-between sticky top-0 z-10">
             <div>
                 <h2 class="text-[28px] font-bold tracking-tight text-gray-900">Return Management</h2>
                 <p class="text-[14px] text-gray-400">Review and manage customer return requests</p>
             </div>
 
-            <div class="header-search-container relative w-72 h-11 rounded-full flex items-center px-4">
-                <span class="material-symbols-outlined text-gray-400 text-[20px] mr-3">search</span>
-                <input type="text" id="searchInput" placeholder="Search returns..."
-                    class="w-full bg-transparent text-[13px] font-medium text-gray-700 outline-none placeholder:text-gray-400">
+            <div class="relative w-[360px]">
+                <span
+                    class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[19px] pointer-events-none">search</span>
+                <input id="searchInput" type="text" placeholder="Search categories..." value="{{search}}"
+                    class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-11 pr-10 text-[13px] font-medium text-gray-700 outline-none placeholder-gray-400 focus:bg-white focus:border-gray-300 transition-colors">
             </div>
         </header>
 
@@ -261,18 +353,28 @@
 
             <!-- Filters -->
             <div class="flex items-center justify-between">
-                <div class="relative group">
-                    <div
-                        class="absolute -inset-0.5 bg-gradient-to-r from-gray-100 to-gray-200 rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000 group-hover:duration-200">
+                <input type="hidden" id="statusFilter" value="{{status}}">
+                
+                <!-- Status Dropdown -->
+                <div class="custom-dropdown min-w-[200px]">
+                    <span class="filter-label">Filter</span>
+                    <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                     <span class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                      {{#if status}}
+                        {{#if (eq status 'all')}}Global Status{{else}}{{status}}{{/if}}
+                        {{else}}
+                         Global Status
+                         {{/if}}
+                        </span>
+                        <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
                     </div>
-                    <select id="statusFilter" onchange="filterReturns()"
-                        class="select-filter relative w-64 bg-white border border-gray-100 rounded-xl py-3 px-6 text-[12px] font-bold text-gray-600 outline-none shadow-sm cursor-pointer uppercase tracking-[0.1em]">
-                        <option value="all">Global Status</option>
-                        <option value="Requested">Requested</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Rejected">Rejected</option>
-                        <option value="Refunded">Refunded</option>
-                    </select>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-item {{#if (eq status 'all')}}selected{{/if}}" onclick="selectDropdownOption('all')">Global Status</div>
+                        <div class="dropdown-item {{#if (eq status 'Requested')}}selected{{/if}}" onclick="selectDropdownOption('Requested')">Requested</div>
+                        <div class="dropdown-item {{#if (eq status 'Approved')}}selected{{/if}}" onclick="selectDropdownOption('Approved')">Approved</div>
+                        <div class="dropdown-item {{#if (eq status 'Rejected')}}selected{{/if}}" onclick="selectDropdownOption('Rejected')">Rejected</div>
+                        <div class="dropdown-item {{#if (eq status 'Refunded')}}selected{{/if}}" onclick="selectDropdownOption('Refunded')">Refunded</div>
+                    </div>
                 </div>
             </div>
 
@@ -299,10 +401,6 @@
                                 <td class="py-6 px-10 text-[13px] font-bold text-gray-900">#{{this.requestId}}</td>
                                 <td class="py-6 px-10">
                                     <div class="flex items-center gap-3">
-                                        <div
-                                            class="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-[12px] font-bold text-white uppercase">
-                                            {{initials this.user.name}}
-                                        </div>
                                         <span class="text-[13px] font-bold text-gray-900">{{this.user.name}}</span>
                                     </div>
                                 </td>
@@ -319,11 +417,12 @@
                                 </td>
                                 <td class="py-6 px-10 text-[13px] text-gray-400">{{this.reason}}</td>
                                 <td class="py-6 px-10">
-                                    <span class="status-pill 
-                                    {{#eq this.status 'Requested'}}status-requested{{/eq}}
-                                    {{#eq this.status 'Approved'}}status-approved{{/eq}}
-                                    {{#eq this.status 'Rejected'}}status-rejected{{/eq}}
-                                    {{#eq this.status 'Refunded'}}status-refunded{{/eq}}">
+                                    <span class="status-pill
+                                   {{#if (eq this.status 'Requested')}}status-requested
+                                   {{else if (eq this.status 'Approved')}}status-approved
+                                   {{else if (eq this.status 'Rejected')}}status-rejected
+                                   {{else if (eq this.status 'Refunded')}}status-refunded
+                                   {{/if}}">
                                         {{this.status}}
                                     </span>
                                 </td>
@@ -342,76 +441,78 @@
                 </div>
 
                 <!-- Pagination Footer -->
-<div class="px-10 py-6 border-t border-gray-50 flex items-center justify-between bg-[#fcfcfc]">
-    <p class="text-[12px] text-gray-400 font-medium">
-        Showing <span class="text-gray-900 font-bold">{{returns.length}}</span> of 
-        <span class="text-gray-900 font-bold">{{totalFiltered}}</span> results
-    </p>
-    <div class="flex items-center gap-2 pagination-container">
-        {{#if hasPrev}}
-        <button onclick="goToPage({{prevPage}})"
-            class="w-8 h-8 rounded-lg border border-gray-100 text-[12px] font-bold hover:bg-black hover:text-white transition-all">
-            <span class="material-symbols-outlined text-[16px]">chevron_left</span>
-        </button>
-        {{/if}}
-        {{#each pages}}
-        <button onclick="goToPage({{this.number}})"
-            class="w-8 h-8 rounded-lg text-[12px] font-bold {{#if this.isCurrent}}bg-black text-white{{else}}border border-gray-100 hover:bg-black hover:text-white transition-all{{/if}}">
-            {{this.number}}
-        </button>
-        {{/each}}
-        {{#if hasNext}}
-        <button onclick="goToPage({{nextPage}})"
-            class="w-8 h-8 rounded-lg border border-gray-100 text-[12px] font-bold hover:bg-black hover:text-white transition-all">
-            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-        </button>
-        {{/if}}
-    </div>
-</div>
+                <div class="px-10 py-6 border-t border-gray-50 flex items-center justify-between bg-[#fcfcfc]">
+                    <p class="text-[12px] text-gray-400 font-medium">
+                        Showing <span class="text-gray-900 font-bold">{{returns.length}}</span> of
+                        <span class="text-gray-900 font-bold">{{totalFiltered}}</span> results
+                    </p>
+                    <div class="flex items-center gap-2 pagination-container">
+                       {{#if hasPrev}}
+                  <button onclick="fetchReturns(searchInput.value.trim(), currentStatus, {{prevPage}})"
+                 class="w-8 h-8 rounded-lg border border-gray-100 text-[12px] font-bold hover:bg-black hover:text-white transition-all">
+                <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                </button>
+                {{/if}}
+
+                 {{#each pages}}
+                <button onclick="fetchReturns(document.getElementById('searchInput').value.trim(), currentStatus, {{this.number}})"
+                 class="w-8 h-8 rounded-lg text-[12px] font-bold {{#if this.isCurrent}}bg-black text-white{{else}}border border-gray-100 hover:bg-black hover:text-white transition-all{{/if}}">
+                {{this.number}}
+                 </button>
+                {{/each}}
+
+                   {{#if hasNext}}
+                   <button onclick="fetchReturns(document.getElementById('searchInput').value.trim(), currentStatus, {{nextPage}})"
+                   class="w-8 h-8 rounded-lg border border-gray-100 text-[12px] font-bold hover:bg-black hover:text-white transition-all">
+                   <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                   </button>
+                    {{/if}}
+                    </div>
+                </div>
             </div>
 
         </div>
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-<script>
-    let currentStatus = 'all';
-    let searchTimeout;
+    <script>
+        let currentStatus = 'all';
+        let searchTimeout;
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentSearchInUrl = urlParams.get('search') || '';
-    const currentStatusInUrl = urlParams.get('status') || 'all';
-    currentStatus = currentStatusInUrl;
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentSearchInUrl = urlParams.get('search') || '';
+        const currentStatusInUrl = urlParams.get('status') || 'all';
+        currentStatus = currentStatusInUrl;
 
-    const searchInput = document.getElementById('searchInput');
-    const statusFilter = document.getElementById('statusFilter');
-    const tbody = document.getElementById('returnsTableBody');
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const tbody = document.getElementById('returnsTableBody');
 
-    if (currentSearchInUrl) searchInput.value = currentSearchInUrl;
-    if (currentStatusInUrl !== 'all') statusFilter.value = currentStatusInUrl;
+        if (currentSearchInUrl) searchInput.value = currentSearchInUrl;
+        statusFilter.value = currentStatusInUrl;
 
-    function formatDate(dateStr) {
-        return new Date(dateStr).toLocaleDateString('en-IN', {
-            day: '2-digit', month: 'short', year: 'numeric'
-        });
-    }
-
-    function getStatusClass(status) {
-        const map = {
-            'Requested': 'status-requested',
-            'Approved':  'status-approved',
-            'Rejected':  'status-rejected',
-            'Refunded':  'status-refunded'
-        };
-        return map[status] || '';
-    }
-
-    function renderReturns(returns) {
-        if (returns.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="py-20 text-center text-[12px] font-bold text-gray-300 uppercase tracking-widest">No returns found</td></tr>`;
-            return;
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleDateString('en-IN', {
+                day: '2-digit', month: 'short', year: 'numeric'
+            });
         }
-        tbody.innerHTML = returns.map(r => `
+
+        function getStatusClass(status) {
+            const map = {
+                'Requested': 'status-requested',
+                'Approved': 'status-approved',
+                'Rejected': 'status-rejected',
+                'Refunded': 'status-refunded'
+            };
+            return map[status] || '';
+        }
+
+        function renderReturns(returns) {
+            if (returns.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-20 text-center text-[12px] font-bold text-gray-300 uppercase tracking-widest">No returns found</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = returns.map(r => `
             <tr class="return-row">
                 <td class="py-6 px-10 text-[13px] font-bold text-gray-900">#${r.requestId}</td>
                 <td class="py-6 px-10">
@@ -442,70 +543,121 @@
                 </td>
             </tr>
         `).join('');
-    }
+        }
 
-    function updatePagination(data) {
-        const footer = document.querySelector('.pagination-container');
-        const showingText = footer?.closest('.px-10')?.querySelector('p');
-        if (showingText) showingText.textContent = `Showing ${data.returns.length} of ${data.totalFiltered} results`;
-        if (!footer) return;
+        function updatePagination(data) {
+            const footer = document.querySelector('.pagination-container');
+            const showingText = footer?.closest('.px-10')?.querySelector('p');
+            if (showingText) showingText.textContent = `Showing ${data.returns.length} of ${data.totalFiltered} results`;
+            if (!footer) return;
 
-        let html = '';
-        if (data.hasPrev) {
-            html += `<button onclick="fetchReturns('${searchInput.value.trim()}', '${currentStatus}', ${data.prevPage})"
+            let html = '';
+            if (data.hasPrev) {
+                html += `<button onclick="fetchReturns('${searchInput.value.trim()}', '${currentStatus}', ${data.prevPage})"
                 class="w-8 h-8 rounded-lg border border-gray-100 text-[12px] font-bold hover:bg-black hover:text-white transition-all">
                 <span class="material-symbols-outlined text-[16px]">chevron_left</span></button>`;
-        }
-        for (let i = 1; i <= data.totalPages; i++) {
-            html += `<button onclick="fetchReturns('${searchInput.value.trim()}', '${currentStatus}', ${i})"
+            }
+            for (let i = 1; i <= data.totalPages; i++) {
+                html += `<button onclick="fetchReturns('${searchInput.value.trim()}', '${currentStatus}', ${i})"
                 class="w-8 h-8 rounded-lg text-[12px] font-bold ${i === data.currentPage ? 'bg-black text-white' : 'border border-gray-100 hover:bg-black hover:text-white transition-all'}">
                 ${i}</button>`;
-        }
-        if (data.hasNext) {
-            html += `<button onclick="fetchReturns('${searchInput.value.trim()}', '${currentStatus}', ${data.nextPage})"
+            }
+            if (data.hasNext) {
+                html += `<button onclick="fetchReturns('${searchInput.value.trim()}', '${currentStatus}', ${data.nextPage})"
                 class="w-8 h-8 rounded-lg border border-gray-100 text-[12px] font-bold hover:bg-black hover:text-white transition-all">
                 <span class="material-symbols-outlined text-[16px]">chevron_right</span></button>`;
+            }
+            footer.innerHTML = html;
         }
-        footer.innerHTML = html;
+
+        async function fetchReturns(search, status, page = 1) {
+            const params = { search, status, page };
+            try {
+                const res = await axios.get('/admin/returns', {
+                    params,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = res.data;
+                if (data.success) {
+                    renderReturns(data.returns);
+                    updatePagination(data);
+                    window.history.replaceState({}, '', `/admin/returns?${new URLSearchParams(params).toString()}`);
+                }
+            } catch (err) {
+                console.error('fetchReturns error:', err);
+            }
+        }
+
+        // add this anywhere before the event listeners
+    function goToPage(page) {
+    fetchReturns(searchInput.value.trim(), currentStatus, page);
     }
 
-    async function fetchReturns(search, status, page = 1) {
-        const params = { search, status, page };
-        try {
-            const res = await axios.get('/admin/returns', {
-                params,
-                headers: { 'X-Requested-With': 'XMLHttpRequest' }
-            });
-            const data = res.data;
-            if (data.success) {
-                renderReturns(data.returns);
-                updatePagination(data);
-                window.history.replaceState({}, '', `/admin/returns?${new URLSearchParams(params).toString()}`);
-            }
-        } catch (err) {
-            console.error('fetchReturns error:', err);
+        // ─── CUSTOM DROPDOWNS ───────────────────────────────────────
+    function toggleDropdown(toggle) {
+        const menu = toggle.nextElementSibling;
+        const isOpen = menu.classList.contains('show');
+
+        // Close all other dropdowns
+        document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+        document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+
+        if (!isOpen) {
+            menu.classList.add('show');
+            toggle.classList.add('active');
         }
     }
+
+   function selectDropdownOption(value) {
+    currentStatus = value;
+    document.getElementById('statusFilter').value = value;
+
+    // Update display label
+    const display = value === 'all' ? 'Global Status' : value;
+    document.querySelector('.selected-value').textContent = display;
+
+    // Update selected highlight in dropdown items
+    document.querySelectorAll('.dropdown-item').forEach(item => {
+        item.classList.remove('selected');
+        if (item.getAttribute('onclick').includes(`'${value}'`)) {
+            item.classList.add('selected');
+        }
+    });
+
+    // Close dropdown
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+    document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+
+    fetchReturns(searchInput.value.trim(), currentStatus, 1);
+     }
+
+    // Close dropdowns on click outside
+    document.addEventListener('click', e => {
+        if (!e.target.closest('.custom-dropdown')) {
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+        }
+    });
 
     // Live search
-    searchInput.addEventListener('input', () => {
-        clearTimeout(searchTimeout);
-        const value = searchInput.value.trim();
-        if (value.length === 0 || value.length >= 2) {
-            searchTimeout = setTimeout(() => fetchReturns(value, currentStatus, 1), 400);
-        }
-    });
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            const value = searchInput.value.trim();
+            searchTimeout = setTimeout(() => {
+                fetchReturns(value, currentStatus, 1);
+            }, 300);
+        });
 
-    searchInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { clearTimeout(searchTimeout); fetchReturns(searchInput.value.trim(), currentStatus, 1); }
-    });
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { clearTimeout(searchTimeout); fetchReturns(searchInput.value.trim(), currentStatus, 1); }
+        });
 
-    // Status filter
-    statusFilter.addEventListener('change', () => {
-        currentStatus = statusFilter.value;
-        fetchReturns(searchInput.value.trim(), currentStatus, 1);
-    });
-</script>
+        // Status filter
+        statusFilter.addEventListener('change', () => {
+            currentStatus = statusFilter.value;
+            fetchReturns(searchInput.value.trim(), currentStatus, 1);
+        });
+    </script>
 
 </body>
 

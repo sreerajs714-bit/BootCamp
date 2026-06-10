@@ -26,6 +26,7 @@ export const loadProduct = async (req, res) => {
             filter.status = "inactive";
         } else {
             filter.isDeleted = false;
+            delete filter.status;
         }
 
         if (search) {
@@ -38,7 +39,7 @@ export const loadProduct = async (req, res) => {
         if (category !== "all") filter.category = category;
         if (brand !== "all") filter.brand = brand;
 
-        const [products, totalProducts, categories, brands] = await Promise.all([
+        const [products, totalProducts, categories, brands,activeCount, lowStockCount] = await Promise.all([
             Product.find(filter)
                 .populate("category", "name")
                 .populate("brand", "name")
@@ -47,9 +48,10 @@ export const loadProduct = async (req, res) => {
                 .limit(limit),
 
             Product.countDocuments(filter),
-
             Category.find({ isDeleted: false, isActive: true }).select("name"),
             Brand.find({ isDeleted: false }).select("name"),
+            Product.countDocuments({ isDeleted: false, status: "active" }),
+            Product.countDocuments({ isDeleted: false, "variants.stock": { $lte: 10 } }),
         ]);
 
         // ⭐ IMPORTANT FIX: attach defaultVariant
@@ -80,6 +82,8 @@ export const loadProduct = async (req, res) => {
             category,
             brand,
             status,
+            activeCount,
+            lowStockCount,
             hasPrevPage: page > 1,
             hasNextPage: page < totalPages,
             prevPage: page - 1,

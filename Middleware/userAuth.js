@@ -3,6 +3,12 @@ import userSchema from "../Model/userModel.js"
 
 export const checkSession = (req, res, next) => {
   if (!req.session.user) {
+    if (
+      req.headers["content-type"]?.includes("application/json") ||
+      req.xhr
+    ) {
+      return res.status(401).json({ success: false, message: "login_required" });
+    }
     return res.redirect("/users/login");
   }
   next();

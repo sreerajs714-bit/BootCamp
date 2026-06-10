@@ -88,44 +88,46 @@
 </style>
 
 <script>
-
     function toggleSearch() {
         const container = document.getElementById('search-container');
         const header = document.getElementById('main-navbar');
         const input = document.getElementById('search-input');
-        
         container.classList.toggle('search-active');
         header.classList.toggle('search-open-state');
-        
         if (container.classList.contains('search-active')) {
             setTimeout(() => input.focus(), 300);
         } else {
-            input.value = ''; 
+            input.value = '';
         }
     }
 
-    function updateCartBadge(count) {
-    const badge = document.getElementById('cart-badge');
-    if (!badge) return;
-    badge.textContent = count;
-    if (count > 0) {
-        badge.classList.remove('opacity-0', 'scale-0');
-    } else {
-        badge.classList.add('opacity-0', 'scale-0');
-    }
-}
+    window.fetchNavCounts = async function () {
+        if (typeof axios === 'undefined') return;
+        try {
+            const res = await axios.get('/users/getCounts', { withCredentials: true });
+            if (!res.data) return;
 
-async function fetchCartCount() {
-    try {
-        const res = await axios.get('/users/cart/count');
-        if (res.data.success) {
-            updateCartBadge(res.data.count);
+            const { cartCount, wishlistCount } = res.data;
+
+            const cartBadge = document.getElementById('cart-badge');
+            if (cartBadge) {
+                cartBadge.textContent = cartCount;
+                cartCount > 0
+                    ? cartBadge.classList.remove('opacity-0', 'scale-0')
+                    : cartBadge.classList.add('opacity-0', 'scale-0');
+            }
+
+            const wishlistBadge = document.getElementById('wishlist-badge');
+            if (wishlistBadge) {
+                wishlistBadge.textContent = wishlistCount;
+                wishlistCount > 0
+                    ? wishlistBadge.classList.remove('opacity-0', 'scale-0')
+                    : wishlistBadge.classList.add('opacity-0', 'scale-0');
+            }
+        } catch (err) {
+            console.error('fetchNavCounts error:', err);
         }
-    } catch (e) {
-        console.error('fetchCartCount error:', e);
-    }
-}
+    };
 
-// Fetch on every page load
-fetchCartCount();
+    window.addEventListener('load', fetchNavCounts);
 </script>

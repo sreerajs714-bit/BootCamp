@@ -98,6 +98,7 @@ export const loadOrders = async (req, res) => {
             pendingOrdersCount,
             completedOrdersCount,
             totalFiltered,
+            status: req.query.status || 'all',
             currentPage:    safePage,
             totalPages,
             pages,

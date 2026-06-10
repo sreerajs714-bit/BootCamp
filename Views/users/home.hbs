@@ -36,7 +36,7 @@
             }
         }
     </script>
-
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <style>
         @layer base {
             body {
@@ -1055,7 +1055,7 @@
             {{#if products}}
             {{#each products}}
             <div class="home-card flex flex-col cursor-pointer" 
-                onclick="window.location.href='/users/productDetail/{{this.id}}'"
+                data-href="/users/productDetail/{{this.id}}"
                 onmouseenter="startCarousel(this)" onmouseleave="stopCarousel(this)" data-brand="{{this.brand}}"
                 data-price="{{this.rawPrice}}" data-name="{{this.productName}}" data-variant="{{this.variantId}}">
 
@@ -1150,7 +1150,7 @@
                     {{#if limitedProducts}}
                     {{#each limitedProducts}}
                     <div class="home-card home-card-dark flex flex-col cursor-pointer"
-                        onclick="window.location.href='/users/productDetail/{{this.id}}'"
+                        data-href='/users/productDetail/{{this.id}}' data-variant="{{this.variantId}}"
                         onmouseenter="startCarousel(this)" onmouseleave="stopCarousel(this)">
                         <div class="home-card-img-box">
                             <button onclick="toggleWishlist(event, '{{this.id}}', this)" class="home-wish-btn">
@@ -1281,74 +1281,40 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-[#f9f9f9] pt-24 pb-12 px-6 md:px-12 border-t border-gray-100">
-        <div class="max-w-[1800px] mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-24">
-                <div class="md:col-span-1">
-                    <h3 class="font-sans font-black text-2xl tracking-tighter uppercase mb-8">BOOT CAMP</h3>
-                    <div class="space-y-1">
-                        <p class="text-[11px] text-gray-400 font-medium tracking-widest uppercase">© 2026 BOOT CAMP.</p>
-                        <p class="text-[11px] text-gray-400 font-medium tracking-widest uppercase">ENGINEERED FOR
-                            PERFORMANCE.</p>
-                    </div>
-                </div>
-                <div>
-                    <h4 class="text-[11px] font-bold tracking-[0.2em] uppercase mb-8">CATEGORIES</h4>
-                    <ul class="space-y-4">
-                        <li><a href="#"
-                                class="text-[13px] text-gray-400 hover:text-black transition-colors underline decoration-gray-300 underline-offset-4">Men</a>
-                        </li>
-                        <li><a href="#"
-                                class="text-[13px] text-gray-400 hover:text-black transition-colors underline decoration-gray-300 underline-offset-4">Women</a>
-                        </li>
-                        <li><a href="#"
-                                class="text-[13px] text-gray-400 hover:text-black transition-colors underline decoration-gray-300 underline-offset-4">Limited
-                                Edition</a></li>
-                        <li><a href="#"
-                                class="text-[13px] text-gray-400 hover:text-black transition-colors underline decoration-gray-300 underline-offset-4">Brands</a>
-                        </li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-[11px] font-bold tracking-[0.2em] uppercase mb-8">SUPPORT</h4>
-                    <ul class="space-y-4">
-                        <li><a href="#" class="text-[13px] text-gray-400 hover:text-black transition-colors">Shipping
-                                Info</a></li>
-                        <li><a href="#" class="text-[13px] text-gray-400 hover:text-black transition-colors">Returns &
-                                Exchanges</a></li>
-                        <li><a href="#" class="text-[13px] text-gray-400 hover:text-black transition-colors">Size
-                                Guide</a></li>
-                        <li><a href="#" class="text-[13px] text-gray-400 hover:text-black transition-colors">Track
-                                Order</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="text-[11px] font-bold tracking-[0.2em] uppercase mb-8">SOCIAL</h4>
-                    <div class="flex space-x-3">
-                        <a href="#"
-                            class="w-10 h-10 border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white transition-all">
-                            <span class="material-symbols-outlined text-lg">public</span>
-                        </a>
-                        <a href="#"
-                            class="w-10 h-10 border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white transition-all">
-                            <span class="material-symbols-outlined text-lg">alternate_email</span>
-                        </a>
-                        <a href="#"
-                            class="w-10 h-10 border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white transition-all">
-                            <span class="material-symbols-outlined text-lg">share</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <div class="border-t border-gray-200 pt-12 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-[10px] text-gray-400 tracking-[0.2em] font-bold uppercase mb-4 md:mb-0">DESIGNED BY
-                    PERFORMANCE STUDIO</p>
-                <p class="text-[10px] text-gray-400 tracking-[0.2em] font-bold uppercase">ALL RIGHTS RESERVED 2026</p>
-            </div>
-        </div>
-    </footer>
-
+   {{>footer}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/toast/toast.js"></script>
     <script>
+
+
+    function safeFetchNavCounts() {
+    if (typeof window.fetchNavCounts === 'function') {
+        window.fetchNavCounts();
+    } else {
+        // Fallback — update directly
+        axios.get('/users/getCounts', { withCredentials: true }).then(res => {
+            const { cartCount, wishlistCount } = res.data;
+
+            const cartBadge = document.getElementById('cart-badge');
+            if (cartBadge) {
+                cartBadge.textContent = cartCount;
+                cartCount > 0
+                    ? cartBadge.classList.remove('opacity-0', 'scale-0')
+                    : cartBadge.classList.add('opacity-0', 'scale-0');
+            }
+
+            const wishlistBadge = document.getElementById('wishlist-badge');
+            if (wishlistBadge) {
+                wishlistBadge.textContent = wishlistCount;
+                wishlistCount > 0
+                    ? wishlistBadge.classList.remove('opacity-0', 'scale-0')
+                    : wishlistBadge.classList.add('opacity-0', 'scale-0');
+            }
+        }).catch(() => {});
+    }
+   }
+
+
         document.addEventListener("DOMContentLoaded", () => {
             const navbar = document.getElementById("main-navbar");
 
@@ -1383,6 +1349,15 @@
             }, { threshold: 0.1 });
             document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
 
+
+          document.querySelectorAll('.home-card').forEach(card => {
+              card.addEventListener('click', function (e) {
+               if (!e.target.closest('button')) {
+                    window.location.href = this.dataset.href;
+                }
+            });
+        });
+
             // ── Image carousel for product cards ──────────────────
             window.startCarousel = function (card) {
                 const imgs = card.querySelectorAll('.home-carousel-img');
@@ -1406,56 +1381,147 @@
                 });
             };
 
-            // ── Wishlist toggle (Axios) ───────────────────────
-            window.toggleWishlist = async function (e, productId, btn) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                const icon = btn.querySelector('.material-symbols-outlined');
-                const isWishlisted = icon.classList.contains('icon-fill');
+    const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
 
-                try {
-                    const url = isWishlisted ? '/users/removeFromWishlist' : '/users/toggleWishlist';
-                    const res = await axios.post(url, { productId }, { withCredentials: true });
+     // ── Add to Cart ───────────────────────────────────────
+    window.addToCart = async function (e, productId) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
 
-                    if (res.data.success) {
-                        icon.classList.toggle('icon-fill');
-                        icon.classList.toggle('text-red-500');
-                    }
-                } catch (err) { console.error('Wishlist error:', err); }
-            };
+    if (!isLoggedIn) {
+        showToast("error", "Please login to continue");
+        return;
+    }
 
-            // ── Add to Cart (Axios) ───────────────────────────
-            window.addToCart = async function (e, productId) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                try {
-                    const res = await axios.post('/users/addCart',
-                        { productId, quantity: 1 },
-                        { withCredentials: true }
-                    );
+    const card = e.currentTarget.closest('[data-variant]');
+    const variantId = card?.dataset?.variant;
 
-                    if (res.data.success) {
-                        const badge = document.getElementById('cart-badge');
-                        if (badge) {
-                            const current = parseInt(badge.textContent.trim()) || 0;
-                            badge.textContent = current + 1;
-                            badge.classList.remove('opacity-0', 'scale-0');
-                        }
-                        // Optional: show some feedback
-                    }
-                } catch (err) { console.error('Cart error:', err); }
-            };
+    if (!variantId) {
+        showToast("error", "Variant missing for this product");
+        return;
+    }
 
-            // ── Buy Now ──────────────────────────────
-            window.buyNow = function (e, productId) {
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                window.location.href = '/users/productDetail/' + productId;
-            };
-        });
+    const btn = e.currentTarget;
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">progress_activity</span> Adding...';
+    btn.disabled = true;
+
+    try {
+        const res = await axios.post('/users/addCart',
+            { productId, variantId, quantity: 1 },
+            { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
+        );
+
+        console.log('Home cart response:', res.data); // ← check this
+
+        const data = res.data;
+
+        if (data.alreadyInCart) {
+            showToast("error", "Already in your cart");
+        } else if (data.cartLimit) {
+            showToast("error", "Cart is full! Maximum 10 items allowed.");
+        } else if (data.outOfStock) {
+            showToast("error", "This product is out of stock");
+        } else if (data.success) {
+            showToast("success", "Added to cart!");
+            safeFetchNavCounts()
+        } else {
+        
+            showToast("success", "Added to cart!");
+            safeFetchNavCounts()
+        }
+
+    } catch (err) {
+        if (err.response?.status === 401) {
+            showToast("error", "Please login to continue");
+            setTimeout(() => window.location.href = '/users/login', 1500);
+            return;
+        }
+        const data = err.response?.data;
+        if (data?.alreadyInCart) showToast("error", "Already in your cart");
+        else if (data?.cartLimit) showToast("error", "Cart is full! Maximum 10 items allowed.");
+        else if (data?.outOfStock) showToast("error", "This product is out of stock!");
+        else showToast("error", data?.message || "Something went wrong");
+    } finally {
+        btn.innerHTML = originalHTML;
+        btn.disabled = false;
+    }
+};
+
+    // ── Wishlist toggle ───────────────────────────────────
+    window.toggleWishlist = async function (e, productId, btn) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    if (!isLoggedIn) {
+        showToast("error", "Please login to continue");
+        return;
+    }
+
+    const icon = btn.querySelector('.material-symbols-outlined');
+    const isWishlisted = icon.classList.contains('icon-fill');
+
+    try {
+        const res = await axios.post('/users/toggleWishlist',
+            { productId },
+            { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
+        );
+
+        if (res.data.success) {
+            if (res.data.isWishlisted) {
+                icon.classList.add('icon-fill', 'text-red-500');
+                showToast("success", "Added to wishlist!");
+            } else {
+                icon.classList.remove('icon-fill', 'text-red-500');
+                showToast("success", "Removed from wishlist");
+            }
+            safeFetchNavCounts()
+        }
+    } catch (err) {
+        if (err.response?.status === 401) {
+            showToast("error", "Please login to continue");
+            return;
+        }
+        showToast("error", "Failed to update wishlist");
+    }
+};
+
+    // ── Buy Now ──────────────────────────────────────────
+    window.buyNow = async function (e, productId) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+
+    if (!isLoggedIn) {
+        showToast("error", "Please login to continue");
+        return;
+    }
+
+    const card = e.currentTarget.closest('[data-variant]');
+    const variantId = card?.dataset?.variant;
+
+    try {
+        const res = await axios.post('/users/addCart',
+            { productId, variantId, quantity: 1 },
+            { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
+        );
+        if (res.data.success || res.data.alreadyInCart) {
+            window.location.href = '/users/cart';
+        } else {
+            showToast("error", res.data.message || "Failed to process");
+        }
+    } catch (err) {
+        if (err.response?.status === 401) {
+            showToast("error", "Please login to continue");
+            return;
+        }
+        if (err.response?.data?.outOfStock) showToast("error", "This product is out of stock!");
+        else window.location.href = '/users/cart';
+    }
+  };
+});
     </script>
 </body>
 
