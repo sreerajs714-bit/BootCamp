@@ -1,6 +1,7 @@
 import PDFDocument from "pdfkit";
 import Order from "../../Model/orderModel.js";
 import Product from "../../Model/productModel.js";
+import Wallet from "../../Model/walletModel.js";
 import axios from "axios";
 
 
@@ -95,6 +96,26 @@ export const loadOrderDetail = async (req, res) => {
         if (!order) {
             return res.redirect("/users/myOrders");
         }
+        
+    if (
+    order.paymentMethod === 'razorpay' &&
+    order.paymentStatus === 'Pending' &&
+    order.paymentExpiresAt &&
+    new Date() > order.paymentExpiresAt
+    ) {
+    // ✅ Use updateOne instead of order.save() — works with lean queries too
+    await Order.findByIdAndUpdate(order._id, {
+        paymentStatus: 'Failed',
+        orderStatus: 'Cancelled',
+        paymentExpiresAt: null,
+        $push: { trackingHistory: { status: 'Cancelled', time: new Date() } }
+    });
+
+    // Update the local object too so the page renders correctly
+    order.paymentStatus = 'Failed';
+    order.orderStatus = 'Cancelled';
+    order.paymentExpiresAt = null;
+    }
 
         const items = order.items.map(item => {
             const product = item.product;
@@ -188,37 +209,61 @@ export const cancelOrder = async (req, res) => {
             });
         }
 
-       // ── Cancel Entire Order ──────────────────────────────
-if (id === 'ALL') {
-    let deductedAmount = 0;  // ← add this
+        // ── Cancel Entire Order ──────────────────────────────
+        if (id === 'ALL') {
+            let refundAmount = 0;
 
-    for (const item of order.items) {
-        if (item.status === 'Active') {
-            const product = await Product.findById(item.product);
-            if (product) {
-                const variant = product.variants.find(v =>
-                    v.sizes && v.sizes.map(s => s.toString()).includes(item.size.toString())
-                );
-                if (variant) {
-                    variant.stock += item.quantity;
-                    await product.save();
+            for (const item of order.items) {
+                if (item.status === 'Active') {
+                    const product = await Product.findById(item.product);
+                    if (product) {
+                        const variant = product.variants.find(v =>
+                            v.sizes && v.sizes.map(s => s.toString()).includes(item.size.toString())
+                        );
+                        if (variant) {
+                            variant.stock += item.quantity;
+                            await product.save();
+                        }
+                    }
+                    item.status = 'Cancelled';
+                    item.cancelReason = reason;
+                    item.cancelNote = note || '';
+                    refundAmount += item.price * item.quantity;
                 }
             }
-            item.status = 'Cancelled';
-            item.cancelReason = reason;
-            item.cancelNote = note || '';
-            deductedAmount += item.price * item.quantity;  // ← add this
+
+            order.orderStatus = 'Cancelled';
+            order.cancelReason = reason;
+            order.cancelNote = note || '';
+            order.totalAmount = Math.max(0, order.totalAmount - refundAmount);
+            await order.save();
+
+            // ── Wallet Refund ────────────────────────────────
+            if (['wallet', 'razorpay'].includes(order.paymentMethod) && refundAmount > 0) {
+                let wallet = await Wallet.findOne({ userId });
+                if (!wallet) {
+                    wallet = await Wallet.create({ userId, balance: 0, transactions: [] });
+                }
+
+                wallet.balance += refundAmount;
+                wallet.transactions.push({
+                    transactionId: `REFUND-${order._id}`,
+                    type: 'credit',
+                    amount: refundAmount,
+                    description: 'Order Cancellation Refund',
+                    orderId: order._id,
+                    date: new Date()
+                });
+                await wallet.save();
+            }
+
+            return res.json({
+                success: true,
+                message: ['wallet', 'razorpay'].includes(order.paymentMethod)
+                    ? `Order cancelled. ₹${refundAmount} refunded to your wallet.`
+                    : "Order cancelled successfully"
+            });
         }
-    }
-
-    order.orderStatus = 'Cancelled';
-    order.cancelReason = reason;
-    order.cancelNote = note || '';
-    order.totalAmount = Math.max(0, order.totalAmount - deductedAmount);  // ← add this
-    await order.save();
-
-    return res.json({ success: true, message: "Order cancelled successfully" });
-}
 
         // ── Cancel Single Item ───────────────────────────────
         const item = order.items.id(id);
@@ -231,7 +276,6 @@ if (id === 'ALL') {
             return res.status(400).json({ success: false, message: "Item already cancelled" });
         }
 
-        // Restore stock by size
         const product = await Product.findById(item.product);
         if (product) {
             const variant = product.variants.find(v =>
@@ -243,11 +287,12 @@ if (id === 'ALL') {
             }
         }
 
+        const itemRefund = item.price * item.quantity;
+
         item.status = 'Cancelled';
         item.cancelReason = reason;
         item.cancelNote = note || '';
-
-        order.totalAmount = Math.max(0, order.totalAmount - (item.price * item.quantity));
+        order.totalAmount = Math.max(0, order.totalAmount - itemRefund);
 
         const allCancelled = order.items.every(i => i.status === 'Cancelled');
         if (allCancelled) {
@@ -257,7 +302,31 @@ if (id === 'ALL') {
 
         await order.save();
 
-        return res.json({ success: true, message: "Item cancelled successfully" });
+        // ── Wallet Refund ────────────────────────────────────
+        if (['wallet', 'razorpay'].includes(order.paymentMethod) && itemRefund > 0) {
+            let wallet = await Wallet.findOne({ userId });
+            if (!wallet) {
+                wallet = await Wallet.create({ userId, balance: 0, transactions: [] });
+            }
+
+            wallet.balance += itemRefund;
+            wallet.transactions.push({
+                transactionId: `REFUND-${order._id}-${id}`,  // unique per item
+                type: 'credit',
+                amount: itemRefund,
+                description: `Item Cancellation Refund`,
+                orderId: order._id,
+                date: new Date()
+            });
+            await wallet.save();
+        }
+
+        return res.json({
+            success: true,
+            message: ['wallet', 'razorpay'].includes(order.paymentMethod)
+                ? `Item cancelled. ₹${itemRefund} refunded to your wallet.`
+                : "Item cancelled successfully"
+        });
 
     } catch (error) {
         console.error("cancelOrder error:", error);

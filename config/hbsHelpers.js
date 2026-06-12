@@ -12,6 +12,11 @@ hbs.registerHelper("slice", function (text, start, end) {
     return text.toString().slice(start, end);
 });
 
+hbs.registerHelper('slice', function(str, start) {
+    if (!str) return '';
+    return String(str).slice(start);
+});
+
 hbs.registerHelper("addIndex", (index, currentPage, limit) => {
     return (currentPage - 1) * limit + index + 1;
 });

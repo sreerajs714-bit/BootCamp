@@ -84,7 +84,15 @@ const orderSchema = new mongoose.Schema({
         resolvedAt:  Date
     },
     
-     isFullReturn: { type: Boolean, default: false },
+     isFullReturn: { 
+        type: Boolean,
+        default: false 
+    },
+    paymentExpiresAt: {
+        type: Date,
+        default: null 
+    },
+
 
 }, { timestamps: true });
 

@@ -1,6 +1,7 @@
 import Order from "../../Model/orderModel.js";
 import Product from "../../Model/productModel.js";
 import User from "../../Model/userModel.js";
+import Wallet from "../../Model/walletModel.js";
 
 
 export const loadReturnManagement = async (req, res) => {
@@ -309,21 +310,16 @@ export const processRefund = async (req, res) => {
         const order = await Order.findById(id).populate('items.product');
         if (!order) return res.json({ success: false, message: 'Order not found' });
 
-       // Replace the entire stockUpdates map with this:
-const stockUpdates = order.items
-    .filter(item => item.returnStatus === 'Picked Up')
-    .map(async item => {
-        const product = await Product.findById(item.product._id || item.product);
-        if (!product) return;
-
-        const variant = product.variants?.[0];
-        if (!variant) return;
-
-        // FIX: your schema has one stock number on variant, not per-size
-        variant.stock = (variant.stock || 0) + (item.quantity || 1);
-
-        await product.save();
-    });
+        const stockUpdates = order.items
+            .filter(item => item.returnStatus === 'Picked Up')
+            .map(async item => {
+                const product = await Product.findById(item.product._id || item.product);
+                if (!product) return;
+                const variant = product.variants?.[0];
+                if (!variant) return;
+                variant.stock = (variant.stock || 0) + (item.quantity || 1);
+                await product.save();
+            });
 
         await Promise.all(stockUpdates);
 
@@ -341,13 +337,33 @@ const stockUpdates = order.items
         order.orderStatus  = 'Returned';
         order.refundedAt   = new Date();
 
-        // Step 4: Credit wallet
+        // Step 4: Calculate refund amount
         const refundAmount = order.items
-            .filter(item => item.status === 'Returned')
+            .filter(item => item.returnStatus === 'Refunded')
             .reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
 
         await order.save();
-        return res.json({ success: true, message: 'Refund processed and stock restored' });
+
+        // Step 5: Credit wallet  ← now BEFORE return
+        if (refundAmount > 0) {
+            let wallet = await Wallet.findOne({ userId: order.user });
+            if (!wallet) {
+                wallet = await Wallet.create({ userId: order.user, balance: 0, transactions: [] });
+            }
+
+            wallet.balance += refundAmount;
+            wallet.transactions.push({
+                transactionId: `REFUND-${order._id}-${Date.now()}`,
+                type: 'credit',
+                amount: refundAmount,
+                description: 'Order Return Refund',
+                orderId: order._id,
+                date: new Date()
+            });
+            await wallet.save();
+        }
+
+        return res.json({ success: true, message: 'Refund processed and stock restored' }); // ← moved here
 
     } catch (error) {
         console.error('processRefund error:', error);

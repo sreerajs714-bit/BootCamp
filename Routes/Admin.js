@@ -8,6 +8,7 @@ import { addBrand, deleteBrand, editBrand, loadBrand, restoreBrand } from "../Co
 import { uploadProduct } from "../Middleware/multer.js";
 import { loadOrderDetail, loadOrders,updateOrderStatus } from "../Controller/Admin/orderController.js";
 import { approveReturn, loadReturnDetail, loadReturnManagement, processRefund, rejectReturn, schedulePickup } from "../Controller/Admin/returnController.js";
+import { loadCoupon } from "../Controller/Admin/couponController.js";
 const route=express.Router();
 
 route.get("/",loadLogin);
@@ -56,6 +57,8 @@ route.put("/returns/:id/approve",isAdmin,approveReturn);
 route.put("/returns/:id/reject",isAdmin,rejectReturn);
 route.put("/returns/:id/pickup",isAdmin,schedulePickup);
 route.put("/returns/:id/refund",isAdmin,processRefund);
+
+route.get("/coupon",loadCoupon);
 
 
 export default route;

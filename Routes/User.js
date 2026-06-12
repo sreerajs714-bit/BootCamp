@@ -12,9 +12,10 @@ import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controll
 import { loadAllProducts, loadLimitedEdition, loadMens, loadProductDetail, loadWomens } from "../Controller/User/productController.js";
 import { clearWishlist, loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
 import { addToCart, loadCart, removeFromCart, updateCartQty } from "../Controller/User/cartController.js";
-import { loadCheckout, loadOrderSuccess, placeOrder } from "../Controller/User/checkoutController.js";
+import { createRazorpayOrder, loadCheckout, loadOrderSuccess, loadPaymentFailed, placeOrder, retryRazorpayPayment, verifyRazorpayPayment } from "../Controller/User/checkoutController.js";
 import { cancelOrder, downloadInvoice, loadMyOrders, loadOrderDetail, loadReturnPage, returnRequest } from "../Controller/User/ordersController.js";
 import { getCounts } from "../Controller/User/navController.js";
+import { createWalletOrder, loadWallet, verifyWalletPayment } from "../Controller/User/walletController.js";
 
 
 route.get("/auth/google",
@@ -87,6 +88,10 @@ route.get("/checkout",checkSession,loadCheckout);
 
 route.get("/orderSuccess/:id",checkSession,loadOrderSuccess);
 route.post("/orderSuccess",checkSession,placeOrder);
+route.post("/razorpayOrder",checkSession,createRazorpayOrder);
+route.post("/verifyRazorpay",checkSession,verifyRazorpayPayment);
+route.get("/paymentFailed",loadPaymentFailed);
+route.post("/retryPayment",checkSession,retryRazorpayPayment);
 route.get("/myOrders",checkSession,loadMyOrders);
 route.get("/orderDetail/:id",checkSession,loadOrderDetail);
 route.get("/invoice/:id",checkSession,downloadInvoice);
@@ -94,6 +99,8 @@ route.post("/orderDetail/cancel",checkSession,cancelOrder);
 route.get("/orderDetail/:id/return/:itemId",checkSession,loadReturnPage);
 route.post("/orderDetail/return-request",checkSession, uploadReturn.array('images', 3),returnRequest);
 
-
+route.get("/wallet",checkSession,loadWallet);
+route.post("/wallet/addFund",checkSession,createWalletOrder);
+route.post("/wallet/verify",checkSession,verifyWalletPayment)
 
 export default route;

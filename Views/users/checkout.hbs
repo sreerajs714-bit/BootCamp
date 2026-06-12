@@ -378,7 +378,9 @@
                     <div class="flex flex-col gap-3" id="payment-options">
 
                         <!-- Wallet -->
-                        <div class="payment-card opacity-50 cursor-not-allowed filter grayscale" id="pay-wallet">
+                        <div class="payment-card {{#if walletInsufficient}}opacity-50 cursor-not-allowed filter grayscale{{/if}}" 
+                          id="pay-wallet" 
+                           {{#unless walletInsufficient}}onclick="selectPayment('wallet')"{{/unless}}>
                             <div class="payment-radio">
                                 <div class="payment-radio-dot"></div>
                             </div>
@@ -387,7 +389,7 @@
                                     class="material-symbols-outlined text-[18px] text-gray-600">account_balance_wallet</span>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-[13px] font-semibold text-[#1a1a1a]">Wallet Balance (Unavailable)</p>
+                                <p class="text-[13px] font-semibold text-[#1a1a1a]">Wallet Balance</p>
                                 <p class="text-[11px] text-gray-400">Available: <span
                                         class="font-bold text-[#1a1a1a]">₹{{walletBalance}}</span></p>
                             </div>
@@ -397,7 +399,7 @@
                         </div>
 
                         <!-- Razorpay -->
-                        <div class="payment-card opacity-50 cursor-not-allowed filter grayscale" id="pay-razorpay">
+                        <div class="payment-card" id="pay-razorpay" onclick="selectPayment('razorpay')">
                             <div class="payment-radio">
                                 <div class="payment-radio-dot"></div>
                             </div>
@@ -405,7 +407,7 @@
                                 <span class="material-symbols-outlined text-[18px] rzp-blue">credit_card</span>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <p class="text-[13px] font-semibold rzp-blue">Razorpay Online (Disabled)</p>
+                                <p class="text-[13px] font-semibold rzp-blue">Razorpay Online</p>
                                 <p class="text-[11px] text-gray-400">Cards, UPI, Net Banking</p>
                             </div>
                         </div>
@@ -743,7 +745,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/toast/toast.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
         // ─── State ─────────────────────────────────────────────────
         let selectedAddressId = '{{defaultAddress._id}}';
@@ -988,60 +990,67 @@
             }
         }
 
-        // ─── Razorpay ─────────────────────────────────────────────
-        async function initiateRazorpay(orderData) {
-            try {
-                // Create Razorpay order on backend
-                const res = await axios.post('/users/createRazorpayOrder', orderData, { withCredentials: true });
-                if (!res.data.success) {
-                    showToast( 'error',res.data.message || 'Payment initiation failed');
-                    return;
-                }
-
-                const options = {
-                    key: res.data.razorpayKey,
-                    amount: res.data.amount,
-                    currency: 'INR',
-                    name: 'BOOT CAMP',
-                    description: 'Order Payment',
-                    order_id: res.data.razorpayOrderId,
-                    handler: async function (response) {
-                        // Verify payment
-                        const verifyRes = await axios.post('/users/verifyRazorpayPayment', {
-                            ...orderData,
-                            razorpay_payment_id: response.razorpay_payment_id,
-                            razorpay_order_id: response.razorpay_order_id,
-                            razorpay_signature: response.razorpay_signature,
-                        }, { withCredentials: true });
-
-                        if (verifyRes.data.success) {
-                            showToast('success','Payment successful! Order placed.');
-                            setTimeout(() => {
-                                window.location.href = verifyRes.data.redirectUrl || '/users/orders';
-                            }, 1000);
-                        } else {
-                            showToast( 'error',verifyRes.data.message || 'Payment verification failed');
-                        }
-                    },
-                    prefill: {
-                        name: '{{user.username}}',
-                        email: '{{user.email}}',
-                    },
-                    theme: { color: '#1a1a1a' },
-                    modal: {
-                        ondismiss: function () {
-                            showToast('error','Payment cancelled');
-                        }
-                    }
-                };
-
-                const rzp = new Razorpay(options);
-                rzp.open();
-
-            } catch (err) {
-                showToast('error',err.response?.data?.message || 'Payment failed');
-            }
+    // ─── Razorpay ─────────────────────────────────────────────
+    async function initiateRazorpay(orderData) {
+    try {
+        const res = await axios.post('/users/razorpayOrder', orderData, { withCredentials: true });
+        if (!res.data.success) {
+            showToast('error', res.data.message || 'Payment initiation failed');
+            return;
         }
+
+        const options = {
+            key: res.data.razorpayKey,
+            amount: res.data.amount,
+            currency: 'INR',
+            name: 'BOOT CAMP',
+            description: 'Order Payment',
+            order_id: res.data.razorpayOrderId,
+            handler: async function (response) {
+                const verifyRes = await axios.post('/users/verifyRazorpay', {
+                    ...orderData,
+                    orderId: res.data.orderId,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature,
+                }, { withCredentials: true });
+
+                if (verifyRes.data.success) {
+                    showToast('success', 'Payment successful! Order placed.');
+                    setTimeout(() => {
+                        window.location.href = verifyRes.data.redirectUrl || '/users/orders';
+                    }, 1000);
+                } else {
+                    
+                   window.location.href = `/users/paymentFailed?orderId=${res.data.orderId}`;
+                }
+            },
+            prefill: {
+                name: '{{user.username}}',
+                email: '{{user.email}}',
+            },
+            theme: { color: '#1a1a1a' },
+            modal: {
+                ondismiss: function () {
+                    // User closed Razorpay — redirect to failure page
+                    window.location.href = `/users/paymentFailed?orderId=${res.data.orderId}`;
+                }
+            }
+        };
+
+        const rzp = new Razorpay(options);
+
+        // Handle payment failure from Razorpay itself
+        rzp.on('payment.failed', function(response) {
+            window.location.href = `/users/paymentFailed?orderId=${res.data.orderId}`;
+        });
+
+        rzp.open();
+
+    } catch (err) {
+        showToast('error', err.response?.data?.message || 'Payment failed');
+    }
+}
 
         // ─── Back Button Guard ────────────────────────────────────
         window.addEventListener('pageshow', (e) => {
