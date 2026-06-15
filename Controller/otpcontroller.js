@@ -1,14 +1,15 @@
 import OTP from "../Model/otpModel.js";
 import { generateOTP } from "./service/mail.js";
 import { sendOTPEmail } from "./service/mail.js";
-import userSchema from "../Model/userModel.js"
+import { generateReferralCode } from "../config/referalCode.js";
+import User from "../Model/userModel.js"
+import Wallet from "../Model/walletModel.js";
 import bcrypt from "bcrypt"
 
 export const verifyOTP = async (req, res) => {
     try {
         let { email, otp, purpose } = req.body;
 
-        // Fallback to session if body values are missing
         if (!email || email.trim() === '') {
             email = req.session.otpEmail;
         }
@@ -62,46 +63,106 @@ export const verifyOTP = async (req, res) => {
             });
         }
 
-        // DELETE USED OTP
         await OTP.deleteOne({ _id: otpRecord._id });
 
         // ================= REGISTER =================
-        if (purpose === "register") {
 
-            if (!req.session.pendingUser) {
-                return res.status(400).json({
-                    success: false,
-                    message: "Registration session expired"
-                });
-            }
+       if (purpose === "register") {
 
-            const { username, password } = req.session.pendingUser;
+    if (!req.session.pendingUser) {
+        return res.status(400).json({
+            success: false,
+            message: "Registration session expired"
+        });
+    }
 
-            const newUser = new userSchema({
-                username,
-                email,
-                password
-            });
+    const {
+        username,
+        password,
+        referralCode: enteredReferralCode
+    } = req.session.pendingUser;
 
-            await newUser.save();
+    let referredBy = null;
+    let referrer = null;
 
-            req.session.user = {
-                id: newUser._id,
-                username: newUser.username,
-                email: newUser.email
-            };
-
-            delete req.session.pendingUser;
-            delete req.session.otpEmail;
-            delete req.session.otpPurpose;
-
-            await req.session.save();
-
-            return res.json({
-                success: true,
-                redirectUrl: "/users/home"
-            });
+    if (enteredReferralCode) {
+        referrer = await User.findOne({ referralCode: enteredReferralCode });
+        if (referrer) {
+            referredBy = referrer._id;
         }
+    }
+
+    // Generate unique referral code for new user
+    let myReferralCode;
+    let exists = true;
+    while (exists) {
+        myReferralCode = generateReferralCode();
+        exists = await User.findOne({ referralCode: myReferralCode });
+    }
+
+    const newUser = new User({
+        username,
+        email,
+        password,
+        referralCode: myReferralCode,
+        referredBy
+    });
+
+    await newUser.save();
+
+    // ── Referral Reward on Signup ────────────────────────────
+    if (referrer) {
+        // Credit referrer ₹100
+        let referrerWallet = await Wallet.findOne({ userId: referrer._id });
+        if (!referrerWallet) {
+            referrerWallet = new Wallet({ userId: referrer._id, balance: 0, transactions: [] });
+        }
+        referrerWallet.balance += 100;
+        referrerWallet.transactions.push({
+            type: 'credit',
+            amount: 100,
+            description: 'Referral Bonus - Friend joined',
+            date: new Date()
+        });
+         await User.findByIdAndUpdate(newUser._id, { referralRewardGiven: true })
+
+        // Credit new user ₹50
+        let userWallet = await Wallet.findOne({ userId: newUser._id });
+        if (!userWallet) {
+            userWallet = new Wallet({ userId: newUser._id, balance: 0, transactions: [] });
+        }
+        userWallet.balance += 50;
+        userWallet.transactions.push({
+            type: 'credit',
+            amount: 50,
+            description: 'Referral Signup Bonus',
+            date: new Date()
+        });
+        await userWallet.save();
+
+        // Mark reward as given
+        newUser.referralRewardGiven = true;
+        await newUser.save();
+    }
+    // ─────────────────────────────────────────────────────────
+
+    req.session.user = {
+        id: newUser._id,
+        username: newUser.username,
+        email: newUser.email
+    };
+
+    delete req.session.pendingUser;
+    delete req.session.otpEmail;
+    delete req.session.otpPurpose;
+
+    await req.session.save();
+
+    return res.json({
+        success: true,
+        redirectUrl: "/users/home"
+    });
+}
 
         // ================= RESET PASSWORD =================
         if (purpose === "reset") {
@@ -129,7 +190,7 @@ export const verifyOTP = async (req, res) => {
 
             const userId = req.session.user.id;
 
-            await userSchema.findByIdAndUpdate(userId, {
+            await User.findByIdAndUpdate(userId, {
                 email: req.session.newEmail
             });
 

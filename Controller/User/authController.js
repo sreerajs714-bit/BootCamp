@@ -26,7 +26,7 @@ export const RegisterUser = async (req, res) => {
 
   try {
 
-    const { username, email, password } = req.body;
+    const { username, email, password,referralCode } = req.body;
 
     const cleanEmail = email.trim().toLowerCase();
 
@@ -50,7 +50,8 @@ export const RegisterUser = async (req, res) => {
     req.session.pendingUser = {
       username,
       email: cleanEmail,
-      password: hashedPassword
+      password: hashedPassword,
+      referralCode: referralCode || req.session.referralCode || null
     };
 
     req.session.otpEmail = cleanEmail;
@@ -81,11 +82,8 @@ export const RegisterUser = async (req, res) => {
 
     // SAVE SESSION BEFORE RENDER
     req.session.save((err) => {
-      console.log("SESSION SAVE CALLED, err:", err);
 
       if (err) {
-
-        console.log("SESSION SAVE ERROR:", err);
        return res.status(500).json({ success: false, message: "Session error. Please try again." });
       }
 
@@ -97,7 +95,6 @@ export const RegisterUser = async (req, res) => {
     });
 
   } catch (error) {
-  console.log("REGISTER ERROR:", error.message);
 
   return res.status(500).json({
     success: false,

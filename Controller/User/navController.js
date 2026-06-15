@@ -4,6 +4,10 @@ import Wishlist from "../../Model/wishlistModel.js";
 
 export const getCounts= async (req, res) => {
     try {
+        if (!req.session.user) {
+        return res.status(200).json({ cartCount: 0, wishlistCount: 0 });
+    }
+
         const userId = req.session.user?._id || req.session.user?.id;
         
         if (!userId) {

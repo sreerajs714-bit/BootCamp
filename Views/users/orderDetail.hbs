@@ -637,23 +637,32 @@
                 </div>
 
                 <!-- Totals -->
-                <div class="space-y-4 pt-10 border-t border-gray-50">
-                    <div class="flex justify-between items-center text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em]">
-                        <span>Order Subtotal</span>
-                        <span class="text-black font-black">₹{{order.totalAmount}}</span>
-                    </div>
-                    <div class="flex justify-between items-center text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em]">
-                        <span>Shipping Fee</span>
-                        <span class="text-green-500 font-black">FREE</span>
-                    </div>
-                    <div class="pt-6 flex justify-between items-end">
-                        <div>
-                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Total Settlement</p>
-                            <p class="text-[9px] font-bold text-gray-300 uppercase tracking-widest">{{order.paymentMethod}}</p>
-                        </div>
-                        <span class="text-4xl font-serif tracking-tighter">₹{{order.totalAmount}}</span>
-                    </div>
-                </div>
+<div class="space-y-4 pt-10 border-t border-gray-50">
+    <div class="flex justify-between items-center text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em]">
+        <span>Order Subtotal</span>
+        <span class="text-black font-black">₹{{order.subtotal}}</span>
+    </div>
+
+    {{#if order.couponCode}}
+    <div class="flex justify-between items-center text-[11px] font-bold uppercase tracking-[0.15em]">
+        <span class="text-emerald-500">Coupon ({{order.couponCode}})</span>
+        <span class="text-emerald-500 font-black">-₹{{order.couponDiscount}}</span>
+    </div>
+    {{/if}}
+
+    <div class="flex justify-between items-center text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em]">
+        <span>Shipping Fee</span>
+        <span class="text-green-500 font-black">FREE</span>
+    </div>
+
+    <div class="pt-6 flex justify-between items-end">
+        <div>
+            <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-1">Total Settlement</p>
+            <p class="text-[9px] font-bold text-gray-300 uppercase tracking-widest">{{order.paymentMethod}}</p>
+        </div>
+        <span class="text-4xl font-serif tracking-tighter">₹{{order.totalAmount}}</span>
+    </div>
+</div>
             </div>
 
             <!-- Returns Card -->

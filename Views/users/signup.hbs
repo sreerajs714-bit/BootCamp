@@ -33,8 +33,15 @@
         }
 
         @keyframes pulse-glow {
-            0%, 100% { opacity: 0.75; }
-            50% { opacity: 1; }
+
+            0%,
+            100% {
+                opacity: 0.75;
+            }
+
+            50% {
+                opacity: 1;
+            }
         }
 
         .animate-pulse-glow {
@@ -42,8 +49,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .animate-fadeIn {
@@ -85,10 +99,20 @@
 
         /* Animation for success */
         @keyframes success-pop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); background-color: #10b981; }
-            100% { transform: scale(1); }
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+                background-color: #10b981;
+            }
+
+            100% {
+                transform: scale(1);
+            }
         }
+
         .animate-success {
             animation: success-pop 0.5s ease-in-out forwards;
         }
@@ -97,6 +121,7 @@
         .overflow-y-auto::-webkit-scrollbar {
             display: none;
         }
+
         .overflow-y-auto {
             -ms-overflow-style: none;
             scrollbar-width: none;
@@ -108,25 +133,27 @@
 
     <!-- Video Background -->
     <div class="video-container" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:0;">
-    <img src="/uploads/images/signup.png" alt="" style="width:100%; height:100%; object-fit:cover;">
+        <img src="/uploads/images/signup.png" alt="" style="width:100%; height:100%; object-fit:cover;">
     </div>
 
     <!-- Main Container -->
     <div class="relative z-20 w-full max-w-md animate-fadeIn my-auto">
         <div class="p-8 rounded-2xl glass max-h-[90vh] overflow-y-auto">
-            
+
             <!-- Logo/Header Area -->
             <div class="mb-8 text-center">
                 <h2 class="text-3xl font-bold mb-2 relative group inline-block">
-                    <span class="absolute -inset-1 bg-gradient-to-r from-purple-600/30 via-pink-500/30 to-blue-500/30 blur-xl opacity-75 group-hover:opacity-100 transition-all duration-500 animate-pulse-glow"></span>
+                    <span
+                        class="absolute -inset-1 bg-gradient-to-r from-purple-600/30 via-pink-500/30 to-blue-500/30 blur-xl opacity-75 group-hover:opacity-100 transition-all duration-500 animate-pulse-glow"></span>
                     <span class="relative inline-block text-3xl font-black tracking-tighter text-white">
                         BootCamp
                     </span>
                 </h2>
-                
+
                 <div class="mt-4 flex flex-col items-center space-y-1">
                     <div class="relative group cursor-default">
-                        <span class="relative inline-block text-white/80 font-medium tracking-wide">Your sports universe awaits</span>
+                        <span class="relative inline-block text-white/80 font-medium tracking-wide">Your sports universe
+                            awaits</span>
                     </div>
                     <span class="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black">
                         Create your profile
@@ -136,35 +163,40 @@
 
             <!-- Signup Form -->
             <form id="signup-form" class="space-y-5" action="/users/signup" method="POST">
-                
+
                 <!-- Full Name -->
                 <div class="group">
                     <div class="relative">
-                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-purple-400">
+                        <div
+                            class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-purple-400">
                             <span class="material-symbols-outlined text-[20px]">person</span>
                         </div>
                         <input type="text" id="username" name="username" placeholder="Full Name"
                             class="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 custom-input transition-all duration-300">
                     </div>
-                    <p id="username-error" class="text-red-400 text-[10px] mt-1 hidden uppercase tracking-wider font-bold"></p>
+                    <p id="username-error"
+                        class="text-red-400 text-[10px] mt-1 hidden uppercase tracking-wider font-bold"></p>
                 </div>
 
                 <!-- Email Input -->
                 <div class="group">
                     <div class="relative">
-                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-purple-400">
+                        <div
+                            class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-purple-400">
                             <span class="material-symbols-outlined text-[20px]">mail</span>
                         </div>
                         <input type="text" id="email" name="email" placeholder="Email address"
                             class="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 custom-input transition-all duration-300">
                     </div>
-                    <p id="email-error" class="text-red-400 text-[10px] mt-1 hidden uppercase tracking-wider font-bold"></p>
+                    <p id="email-error" class="text-red-400 text-[10px] mt-1 hidden uppercase tracking-wider font-bold">
+                    </p>
                 </div>
 
                 <!-- Password Input -->
                 <div class="group">
                     <div class="relative">
-                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-purple-400">
+                        <div
+                            class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-purple-400">
                             <span class="material-symbols-outlined text-[20px]">lock</span>
                         </div>
                         <input type="password" id="password" name="password" placeholder="Password"
@@ -174,10 +206,12 @@
                             <span class="material-symbols-outlined text-[20px]">visibility</span>
                         </button>
                     </div>
-                    <p id="password-error" class="text-red-400 text-[10px] mt-1 hidden uppercase tracking-wider font-bold"></p>
-                    
+                    <p id="password-error"
+                        class="text-red-400 text-[10px] mt-1 hidden uppercase tracking-wider font-bold"></p>
+
                     <!-- Password Requirements Checklist -->
-                    <div id="password-requirements" class="hidden mt-4 grid grid-cols-2 gap-2 text-[9px] font-black uppercase tracking-widest text-white/30">
+                    <div id="password-requirements"
+                        class="hidden mt-4 grid grid-cols-2 gap-2 text-[9px] font-black uppercase tracking-widest text-white/30">
                         <div class="flex items-center gap-2 requirement" data-req="length">
                             <span class="material-symbols-outlined text-[14px]">circle</span> 8+ Characters
                         </div>
@@ -199,7 +233,8 @@
                 <!-- Confirm Password -->
                 <div class="group">
                     <div class="relative">
-                        <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-purple-400">
+                        <div
+                            class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-purple-400">
                             <span class="material-symbols-outlined text-[20px]">verified_user</span>
                         </div>
                         <input type="password" id="cfmpassword" name="cfmpassword" placeholder="Confirm Password"
@@ -209,7 +244,24 @@
                             <span class="material-symbols-outlined text-[20px]">visibility</span>
                         </button>
                     </div>
-                    <p id="cfmpassword-error" class="text-red-400 text-[10px] mt-1 hidden uppercase tracking-wider font-bold"></p>
+                    <p id="cfmpassword-error"
+                        class="text-red-400 text-[10px] mt-1 hidden uppercase tracking-wider font-bold"></p>
+                <!-- Referral Code Toggle -->
+                <div class="group">
+                    <button type="button" id="referral-toggle" class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/40 hover:text-white transition-all mb-1 ml-1 px-1 py-4">
+                        <span class="material-symbols-outlined text-[16px] transition-transform duration-300" id="referral-icon">add_circle</span>
+                        <span id="referral-text">Have a referral code?</span>
+                    </button>
+                    
+                    <div id="referral-input-container" class="hidden opacity-0 transition-all duration-300 max-h-0 overflow-hidden">
+                        <div class="relative mt-2 pb-1">
+                            <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-purple-400">
+                                <span class="material-symbols-outlined text-[20px]">loyalty</span>
+                            </div>
+                            <input type="text" id="referralCode" name="referralCode" placeholder="Enter Referral Code"
+                                class="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 custom-input transition-all duration-300 uppercase font-mono tracking-widest text-sm">
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Submit Button -->
@@ -222,17 +274,19 @@
             <!-- Footer Link -->
             <p class="mt-8 text-center text-sm text-white/40">
                 Already have an account?
-                <a href="/users/login" class="font-bold text-white hover:text-purple-400 transition-colors uppercase tracking-widest text-[10px] ml-1">
+                <a href="/users/login"
+                    class="font-bold text-white hover:text-purple-400 transition-colors uppercase tracking-widest text-[10px] ml-1">
                     Sign In
                 </a>
             </p>
         </div>
-    </div>
 
-    <!-- Page Footer -->
-    <footer class="absolute bottom-6 left-0 right-0 text-center text-white/20 text-[10px] font-black uppercase tracking-[0.3em] z-20 hidden md:block">
-        © 2026 Boot Camp Protocol
-    </footer>
+        <!-- Page Footer -->
+        <footer
+            class="mt-8 text-center text-white/20 text-[10px] font-black uppercase tracking-[0.3em] hidden md:block">
+            © 2026 Boot Camp Protocol
+        </footer>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/toast/toast.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -249,6 +303,36 @@
         }
         setupVisibility('toggle-password', 'password');
         setupVisibility('toggle-cfmpassword', 'cfmpassword');
+
+        // Referral Toggle Logic
+        const referralToggle = document.getElementById('referral-toggle');
+        const referralContainer = document.getElementById('referral-input-container');
+        const referralIcon = document.getElementById('referral-icon');
+        const referralText = document.getElementById('referral-text');
+
+        referralToggle.addEventListener('click', () => {
+            const isHidden = referralContainer.classList.contains('hidden');
+            if (isHidden) {
+                referralContainer.classList.remove('hidden');
+                referralContainer.style.maxHeight = '100px';
+                setTimeout(() => referralContainer.classList.remove('opacity-0'), 10);
+                referralIcon.textContent = 'do_not_disturb_on';
+                referralIcon.style.transform = 'rotate(180deg)';
+                referralText.textContent = 'Remove referral code';
+                referralToggle.classList.add('text-white/60');
+            } else {
+                referralContainer.classList.add('opacity-0');
+                referralContainer.style.maxHeight = '0';
+                referralIcon.style.transform = 'rotate(0deg)';
+                setTimeout(() => {
+                    referralContainer.classList.add('hidden');
+                    referralIcon.textContent = 'add_circle';
+                    referralText.textContent = 'Have a referral code?';
+                    referralToggle.classList.remove('text-white/60');
+                    document.getElementById('referralCode').value = '';
+                }, 300);
+            }
+        });
 
         // Validation Helpers
         function showError(id, message) {
@@ -314,11 +398,12 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const username = document.getElementById("username").value.trim();
             const email = document.getElementById("email").value.trim();
             const password = passwordInput.value;
             const cfmpassword = document.getElementById("cfmpassword").value;
+            const referralCode = document.getElementById("referralCode").value.trim();
 
             // Final Validation
             let isValid = true;
@@ -345,13 +430,13 @@
             submitBtn.innerText = 'Initializing...';
 
             try {
-                const response = await axios.post(form.action, { username, email, password });
-                
+                const response = await axios.post(form.action, { username, email, password, referralCode });
+
                 if (response.data.success || response.status === 200) {
                     submitBtn.classList.add('animate-success');
                     submitBtn.innerText = 'Profile Created';
                     showToast("success", response.data.message || "Welcome to the Elite.");
-                    
+
                     setTimeout(() => {
                         window.location.href = '/users/otpVerify';
                     }, 1500);

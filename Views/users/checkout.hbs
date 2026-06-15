@@ -291,6 +291,79 @@
         .savings-green {
             color: #1b9a67;
         }
+
+        /* Coupon Modal Specifics */
+        #coupon-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            backdrop-filter: blur(8px);
+            transition: all 0.3s ease;
+        }
+
+        #coupon-modal-backdrop.open {
+            display: flex;
+        }
+
+        .coupon-modal-content {
+            background: white;
+            width: 95%;
+            max-width: 500px;
+            border-radius: 32px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            animation: modalPop 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalPop {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .coupon-list-item {
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s;
+        }
+
+        .coupon-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .coupon-list-item:hover {
+            background: #f9fafb;
+        }
+
+        .coupon-code-pill {
+            background: #f0fdf4;
+            color: #16a34a;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            border: 1px solid #dcfce7;
+        }
+
+        .apply-btn-sm {
+            padding: 6px 16px;
+            background: #1a1a1a;
+            color: white;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+        }
+
+        .apply-btn-sm:hover {
+            background: #000;
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 
@@ -378,9 +451,8 @@
                     <div class="flex flex-col gap-3" id="payment-options">
 
                         <!-- Wallet -->
-                        <div class="payment-card {{#if walletInsufficient}}opacity-50 cursor-not-allowed filter grayscale{{/if}}" 
-                          id="pay-wallet" 
-                           {{#unless walletInsufficient}}onclick="selectPayment('wallet')"{{/unless}}>
+                        <div class="payment-card {{#if walletInsufficient}}opacity-50 cursor-not-allowed filter grayscale{{/if}}"
+                            id="pay-wallet" {{#unless walletInsufficient}}onclick="selectPayment('wallet')" {{/unless}}>
                             <div class="payment-radio">
                                 <div class="payment-radio-dot"></div>
                             </div>
@@ -413,7 +485,9 @@
                         </div>
 
                         <!-- Cash on Delivery -->
-                        <div class="payment-card selected" id="pay-cod" onclick="selectPayment('cod')">
+                        <div class="payment-card {{#if codUnavailable}}opacity-50 cursor-not-allowed filter grayscale{{/if}} {{#unless codUnavailable}}selected{{/unless}}" 
+                             id="pay-cod" 
+                                {{#unless codUnavailable}}onclick="selectPayment('cod')"{{/unless}}>
                             <div class="payment-radio">
                                 <div class="payment-radio-dot"></div>
                             </div>
@@ -423,6 +497,9 @@
                             <div class="flex-1 min-w-0">
                                 <p class="text-[13px] font-semibold text-[#1a1a1a]">Cash on Delivery</p>
                                 <p class="text-[11px] text-gray-400">Pay with cash at your doorstep</p>
+                                       {{#if codUnavailable}}
+                                       <span class="insuff-badge">Not Available</span>
+                                    {{/if}}
                             </div>
                         </div>
 
@@ -475,14 +552,14 @@
                         <div class="coupon-wrap">
                             <input type="text" id="coupon-input" placeholder="Enter coupon code"
                                 value="{{#if appliedCoupon}}{{appliedCoupon}}{{/if}}" style="text-transform:uppercase;">
-                            <button class="coupon-btn" onclick="applyCoupon()">Apply</button>
+                            <button class="coupon-btn" id="coupon-action-btn" onclick="handleCouponAction()">Apply</button>
                         </div>
                         <div class="flex items-center gap-2 mt-2.5">
                             <span class="material-symbols-outlined text-[14px] text-gray-400">local_offer</span>
-                            <a href="#"
+                            <button type="button" onclick="openCouponModal()"
                                 class="text-[10px] font-bold uppercase tracking-[0.1em] text-gray-400 hover:text-black transition-colors underline underline-offset-2">
                                 View all available coupons
-                            </a>
+                            </button>
                         </div>
                         <div class="flex items-start gap-2 mt-1.5">
                             <span class="material-symbols-outlined text-[13px] text-gray-300 mt-0.5">info</span>
@@ -742,6 +819,42 @@
         </div>
     </div>
 
+    <!-- Available Coupons Modal -->
+    <div id="coupon-modal-backdrop" class="modal-backdrop">
+        <div class="coupon-modal-content">
+            <div class="p-8 border-b border-gray-100 flex items-center justify-between">
+                <div>
+                    <h3 class="text-[18px] font-black uppercase tracking-tight">Available Coupons</h3>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Select a code to apply</p>
+                </div>
+                <button onclick="closeCouponModal()" class="w-10 h-10 flex items-center justify-center text-gray-300 hover:text-black transition-colors">
+                    <span class="material-symbols-outlined text-[24px]">close</span>
+                </button>
+            </div>
+            
+            <div id="coupon-list-container" class="max-h-[400px] overflow-y-auto">
+                <!-- Skeleton Loader -->
+                <div id="coupon-skeleton" class="p-8 space-y-4">
+                    <div class="h-16 bg-gray-50 animate-pulse rounded-2xl"></div>
+                    <div class="h-16 bg-gray-50 animate-pulse rounded-2xl"></div>
+                    <div class="h-16 bg-gray-50 animate-pulse rounded-2xl"></div>
+                </div>
+                <!-- Real items will be injected here -->
+                <div id="coupon-items-list" class="hidden"></div>
+                
+                <!-- Empty State -->
+                <div id="coupon-empty" class="hidden p-12 text-center">
+                    <span class="material-symbols-outlined text-[40px] text-gray-200 mb-2">confirmation_number</span>
+                    <p class="text-[12px] font-bold text-gray-400 uppercase tracking-widest">No available coupons found</p>
+                </div>
+            </div>
+            
+            <div class="p-8 bg-gray-50/50">
+                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed text-center">Coupons cannot be combined with other offers. Terms and conditions apply.</p>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/toast/toast.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -749,10 +862,17 @@
     <script>
         // ─── State ─────────────────────────────────────────────────
         let selectedAddressId = '{{defaultAddress._id}}';
-        let selectedPaymentMethod = 'cod';
+        let selectedPaymentMethod = {{#if codUnavailable}}'razorpay'{{else}}'cod'{{/if}};
+        // Auto-select razorpay if COD unavailable
+        window.addEventListener('DOMContentLoaded', () => {
+        {{#if codUnavailable}}
+        document.getElementById('pay-cod').classList.remove('selected');
+        document.getElementById('pay-razorpay').classList.add('selected');
+        {{/if}}
+        });
         let appliedCouponCode = '{{#if appliedCoupon}}{{appliedCoupon}}{{/if}}';
         let currentTotal = {{ total }};
-        let currentCouponDiscount = {{#if couponDiscount}}{{ couponDiscount }} {{else }} 0{{/if }};
+        let currentCouponDiscount = {{#if couponDiscount }}{{ couponDiscount }} {{else }} 0{{/if }};
 
         // ─── Payment Selection ─────────────────────────────────────
         function selectPayment(method) {
@@ -884,10 +1004,10 @@
                 }, { withCredentials: true });
 
                 if (res.data.success) {
-                    showToast('success','Address added successfully!');
+                    showToast('success', 'Address added successfully!');
                     setTimeout(() => window.location.reload(), 1000);
                 } else {
-                    showToast('error',res.data.message || 'Failed to add address');
+                    showToast('error', res.data.message || 'Failed to add address');
                 }
             } catch (err) {
                 showToast('error', err.response?.data?.message || 'Something went wrong');
@@ -897,40 +1017,195 @@
             }
         }
 
-        // ─── Apply Coupon ─────────────────────────────────────────
-        async function applyCoupon() {
-            const code = document.getElementById('coupon-input').value.trim().toUpperCase();
-            if (!code) {
-                showToast('error','Please enter a coupon code');
-                return;
-            }
+       function handleCouponAction() {
+    if (appliedCouponCode) {
+        removeCoupon();
+    } else {
+        applyCoupon();
+    }
+}
+
+function updateCouponBtn() {
+    const btn = document.getElementById('coupon-action-btn');
+    if (appliedCouponCode) {
+        btn.textContent = 'Remove';
+        btn.style.background = '#dc2626';  // red for remove
+    } else {
+        btn.textContent = 'Apply';
+        btn.style.background = '#1a1a1a';  // default black
+    }
+}
+
+async function applyCoupon() {
+    // Block if a coupon is already applied
+    if (appliedCouponCode) {
+        showToast('error', 'Remove the current coupon before applying a new one');
+        return;
+    }
+
+    const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+    if (!code) {
+        showToast('error', 'Please enter a coupon code');
+        return;
+    }
+
+    const btn = document.getElementById('coupon-action-btn');
+    btn.textContent = '...';
+    btn.disabled = true;
+
+    try {
+        const res = await axios.post('/users/applyCoupon', { couponCode: code }, { withCredentials: true });
+
+        if (res.data.success) {
+            appliedCouponCode = code;
+            const discount = res.data.discount || 0;
+            const newTotal = res.data.newTotal;
+
+            document.getElementById('coupon-row').style.display = 'flex';
+            document.getElementById('disp-coupon').textContent = `-₹${discount.toLocaleString('en-IN')}`;
+
+            currentTotal = newTotal;
+            document.getElementById('disp-total').textContent = `₹ ${newTotal.toLocaleString('en-IN')}`;
+            document.getElementById('btn-total').textContent = newTotal.toLocaleString('en-IN');
+
+            updateCouponBtn();
+            showToast('success', res.data.message || 'Coupon applied!');
+        } else {
+            showToast('error', res.data.message || 'Invalid coupon');
+            updateCouponBtn();
+        }
+    } catch (err) {
+        showToast('error', err.response?.data?.message || 'Failed to apply coupon');
+        updateCouponBtn();
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+async function removeCoupon() {
+    const btn = document.getElementById('coupon-action-btn');
+    btn.textContent = '...';
+    btn.disabled = true;
+
+    try {
+        const res = await axios.post('/users/removeCoupon', {}, { withCredentials: true });
+
+        if (res.data.success) {
+            appliedCouponCode = '';
+            document.getElementById('coupon-input').value = '';
+            document.getElementById('coupon-row').style.display = 'none';
+            document.getElementById('disp-coupon').textContent = '';
+
+            const newTotal = res.data.newTotal;
+            currentTotal = newTotal;
+            document.getElementById('disp-total').textContent = `₹ ${newTotal.toLocaleString('en-IN')}`;
+            document.getElementById('btn-total').textContent = newTotal.toLocaleString('en-IN');
+
+            updateCouponBtn();
+            showToast('success', 'Coupon removed');
+        } else {
+            showToast('error', res.data.message || 'Failed to remove coupon');
+            updateCouponBtn();
+        }
+    } catch (err) {
+        showToast('error', err.response?.data?.message || 'Failed to remove coupon');
+        updateCouponBtn();
+    } finally {
+        btn.disabled = false;
+    }
+}
+
+        // ─── Coupon Modal ──────────────────────────────────────────
+        async function openCouponModal() {
+            const modal = document.getElementById('coupon-modal-backdrop');
+            const skeleton = document.getElementById('coupon-skeleton');
+            const itemsList = document.getElementById('coupon-items-list');
+            const emptyState = document.getElementById('coupon-empty');
+            
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('open'), 10);
+            document.body.style.overflow = 'hidden';
+
+            // Show skeleton, hide others
+            skeleton.classList.remove('hidden');
+            itemsList.classList.add('hidden');
+            emptyState.classList.add('hidden');
 
             try {
-                const res = await axios.post('/users/applyCoupon', { couponCode: code }, { withCredentials: true });
-                if (res.data.success) {
-                    appliedCouponCode = code;
-                    const discount = res.data.discount || 0;
-                    currentCouponDiscount = discount;
-
-                    // Show coupon row
-                    const couponRow = document.getElementById('coupon-row');
-                    couponRow.style.display = 'flex';
-                    document.getElementById('disp-coupon').textContent = `-₹${discount}`;
-
-                    // Update total
-                    const newTotal = res.data.newTotal || (currentTotal - discount);
-                    currentTotal = newTotal;
-                    document.getElementById('disp-total').textContent = `₹ ${newTotal.toLocaleString('en-IN')}`;
-                    document.getElementById('btn-total').textContent = newTotal.toLocaleString('en-IN');
-
-                    showToast('success',res.data.message || 'Coupon applied!');
+                // Fetch available coupons
+                const res = await axios.get('/users/coupons', { withCredentials: true });
+                console.log('Coupons response:', res.data);
+                
+                if (res.data.success && res.data.coupons && res.data.coupons.length > 0) {
+                    renderCoupons(res.data.coupons);
+                    skeleton.classList.add('hidden');
+                    itemsList.classList.remove('hidden');
                 } else {
-                    showToast('error',res.data.message || 'Invalid coupon');
+                    skeleton.classList.add('hidden');
+                    emptyState.classList.remove('hidden');
                 }
             } catch (err) {
-                showToast( 'error',err.response?.data?.message || 'Failed to apply coupon');
+                console.error("Fetch coupons error:", err);
+                skeleton.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                showToast('error', 'Failed to load coupons');
             }
         }
+
+        function closeCouponModal() {
+            const modal = document.getElementById('coupon-modal-backdrop');
+            modal.classList.remove('open');
+            setTimeout(() => modal.style.display = 'none', 300);
+            document.body.style.overflow = '';
+        }
+
+        function renderCoupons(coupons) {
+    const container = document.getElementById('coupon-items-list');
+    container.innerHTML = coupons.map(c => {
+        const discountLabel = c.discountType === 'percentage'
+            ? `${c.discountValue}% OFF`
+            : `₹${c.discountValue} OFF`;
+
+        const expiry = c.expiryDate
+            ? new Date(c.expiryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+            : null;
+
+        const isApplied = appliedCouponCode === c.code;
+
+        return `
+        <div class="coupon-list-item p-6 flex items-center justify-between gap-4 ${isApplied ? 'bg-green-50' : ''}">
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-3 mb-1.5 flex-wrap">
+                    <span class="coupon-code-pill">${c.code}</span>
+                    <span class="text-[14px] font-black text-gray-900">${discountLabel}</span>
+                    ${isApplied ? `<span class="text-[9px] font-black uppercase tracking-widest bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Applied</span>` : ''}
+                </div>
+                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+                    ${c.minOrder ? `Min Order: ₹${c.minOrder}` : 'No minimum order'}
+                    ${c.maxDiscount ? ` • Max Discount: ₹${c.maxDiscount}` : ''}
+                    ${expiry ? ` • Expires: ${expiry}` : ''}
+                </p>
+                ${c.description ? `<p class="text-[11px] text-gray-500 mt-1">${c.description}</p>` : ''}
+            </div>
+            <button onclick="selectCoupon('${c.code}')"
+                class="apply-btn-sm flex-shrink-0 ${isApplied ? 'opacity-50 cursor-not-allowed' : ''}"
+                ${isApplied ? 'disabled' : ''}>
+                ${isApplied ? 'Applied' : 'Apply'}
+            </button>
+        </div>`;
+    }).join('');
+}
+
+        function selectCoupon(code) {
+            document.getElementById('coupon-input').value = code;
+            closeCouponModal();
+            applyCoupon();
+        }
+
+        // Close on backdrop click
+        document.getElementById('coupon-modal-backdrop').addEventListener('click', function (e) {
+            if (e.target === this) closeCouponModal();
+        });
 
         // ─── Place Order ──────────────────────────────────────────
         async function placeOrder() {
@@ -945,7 +1220,7 @@
             });
 
             if (!selectedAddressId) {
-                showToast('error','Please select a delivery address');
+                showToast('error', 'Please select a delivery address');
                 return;
             }
 
@@ -970,12 +1245,12 @@
 
                 if (res.data.success) {
                     console.log('redirectUrl:', res.data.redirectUrl);
-                    showToast('success','Order placed successfully!');
+                    showToast('success', 'Order placed successfully!');
                     setTimeout(() => {
                         window.location.href = res.data.redirectUrl || '/users/orderSuccess';
                     }, 1000);
                 } else {
-                    showToast( 'error',res.data.message || 'Failed to place order');
+                    showToast('error', res.data.message || 'Failed to place order');
                     btn.disabled = false;
                     btn.innerHTML = `Complete Order — ₹<span id="btn-total">${currentTotal.toLocaleString('en-IN')}</span>`;
                 }
@@ -983,74 +1258,74 @@
                 console.log('Full error:', err);
                 console.log('Response data:', err.response?.data);
                 console.log('Status:', err.response?.status);
-                showToast( 'error',err.response?.data?.message || 'Something went wrong');
+                showToast('error', err.response?.data?.message || 'Something went wrong');
                 const btn = document.querySelector('.order-btn');
                 btn.disabled = false;
                 btn.innerHTML = `Complete Order — ₹<span id="btn-total">${currentTotal.toLocaleString('en-IN')}</span>`;
             }
         }
 
-    // ─── Razorpay ─────────────────────────────────────────────
-    async function initiateRazorpay(orderData) {
-    try {
-        const res = await axios.post('/users/razorpayOrder', orderData, { withCredentials: true });
-        if (!res.data.success) {
-            showToast('error', res.data.message || 'Payment initiation failed');
-            return;
-        }
-
-        const options = {
-            key: res.data.razorpayKey,
-            amount: res.data.amount,
-            currency: 'INR',
-            name: 'BOOT CAMP',
-            description: 'Order Payment',
-            order_id: res.data.razorpayOrderId,
-            handler: async function (response) {
-                const verifyRes = await axios.post('/users/verifyRazorpay', {
-                    ...orderData,
-                    orderId: res.data.orderId,
-                    razorpay_payment_id: response.razorpay_payment_id,
-                    razorpay_order_id: response.razorpay_order_id,
-                    razorpay_signature: response.razorpay_signature,
-                }, { withCredentials: true });
-
-                if (verifyRes.data.success) {
-                    showToast('success', 'Payment successful! Order placed.');
-                    setTimeout(() => {
-                        window.location.href = verifyRes.data.redirectUrl || '/users/orders';
-                    }, 1000);
-                } else {
-                    
-                   window.location.href = `/users/paymentFailed?orderId=${res.data.orderId}`;
+        // ─── Razorpay ─────────────────────────────────────────────
+        async function initiateRazorpay(orderData) {
+            try {
+                const res = await axios.post('/users/razorpayOrder', orderData, { withCredentials: true });
+                if (!res.data.success) {
+                    showToast('error', res.data.message || 'Payment initiation failed');
+                    return;
                 }
-            },
-            prefill: {
-                name: '{{user.username}}',
-                email: '{{user.email}}',
-            },
-            theme: { color: '#1a1a1a' },
-            modal: {
-                ondismiss: function () {
-                    // User closed Razorpay — redirect to failure page
+
+                const options = {
+                    key: res.data.razorpayKey,
+                    amount: res.data.amount,
+                    currency: 'INR',
+                    name: 'BOOT CAMP',
+                    description: 'Order Payment',
+                    order_id: res.data.razorpayOrderId,
+                    handler: async function (response) {
+                        const verifyRes = await axios.post('/users/verifyRazorpay', {
+                            ...orderData,
+                            orderId: res.data.orderId,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_signature: response.razorpay_signature,
+                        }, { withCredentials: true });
+
+                        if (verifyRes.data.success) {
+                            showToast('success', 'Payment successful! Order placed.');
+                            setTimeout(() => {
+                                window.location.href = verifyRes.data.redirectUrl || '/users/orders';
+                            }, 1000);
+                        } else {
+
+                            window.location.href = `/users/paymentFailed?orderId=${res.data.orderId}`;
+                        }
+                    },
+                    prefill: {
+                        name: '{{user.username}}',
+                        email: '{{user.email}}',
+                    },
+                    theme: { color: '#1a1a1a' },
+                    modal: {
+                        ondismiss: function () {
+                            // User closed Razorpay — redirect to failure page
+                            window.location.href = `/users/paymentFailed?orderId=${res.data.orderId}`;
+                        }
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+
+                // Handle payment failure from Razorpay itself
+                rzp.on('payment.failed', function (response) {
                     window.location.href = `/users/paymentFailed?orderId=${res.data.orderId}`;
-                }
+                });
+
+                rzp.open();
+
+            } catch (err) {
+                showToast('error', err.response?.data?.message || 'Payment failed');
             }
-        };
-
-        const rzp = new Razorpay(options);
-
-        // Handle payment failure from Razorpay itself
-        rzp.on('payment.failed', function(response) {
-            window.location.href = `/users/paymentFailed?orderId=${res.data.orderId}`;
-        });
-
-        rzp.open();
-
-    } catch (err) {
-        showToast('error', err.response?.data?.message || 'Payment failed');
-    }
-}
+        }
 
         // ─── Back Button Guard ────────────────────────────────────
         window.addEventListener('pageshow', (e) => {
@@ -1058,6 +1333,8 @@
                 window.location.reload();
             }
         });
+
+        updateCouponBtn();
     </script>
 
 </body>

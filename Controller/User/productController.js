@@ -26,10 +26,12 @@ export const loadAllProducts = async (req, res) => {
             .lean();
 
         // rest of your code stays exactly the same...
-        let wishlistedIds = [];
-        if (req.user) {
-            const user = await User.findById(req.user._id).select('wishlist').lean();
-            wishlistedIds = (user?.wishlist || []).map(id => String(id));
+       let wishlistedIds = [];
+       const sessionUser = req.session?.user;
+       if (sessionUser) {
+        const userId = sessionUser._id || sessionUser.id;
+        const user = await User.findById(userId).select('wishlist').lean();
+        wishlistedIds = (user?.wishlist || []).map(id => String(id));
         }
 
         const shaped = products.map(product => {
@@ -76,7 +78,7 @@ export const loadAllProducts = async (req, res) => {
             products: shaped,
             categories: activeCategories,  // ← use already fetched active ones
             brands: activeBrands,          // ← use already fetched active ones
-            user: req.user || null
+            user: req.session?.user || null
         });
 
     } catch (error) {
@@ -116,10 +118,12 @@ export const loadMens = async (req, res) => {
         });
 
         // ✅ Get wishlist IDs if user is logged in
-        let wishlistedIds = [];
-        if (req.user) {
-            const user = await User.findById(req.user._id).select('wishlist').lean();
-            wishlistedIds = (user?.wishlist || []).map(id => String(id));
+         let wishlistedIds = [];
+         const sessionUser = req.session?.user;
+        if (sessionUser) {
+         const userId = sessionUser._id || sessionUser.id;
+         const user = await User.findById(userId).select('wishlist').lean();
+         wishlistedIds = (user?.wishlist || []).map(id => String(id));
         }
 
         // ✅ Shape data for frontend
@@ -176,7 +180,7 @@ export const loadMens = async (req, res) => {
             ],
             products: shaped,
             count: shaped.length,
-            user: req.user || null
+            user: req.session?.user || null
         });
 
     } catch (error) {
@@ -214,10 +218,12 @@ export const loadWomens = async (req, res) => {
         });
 
         let wishlistedIds = [];
-        if (req.user) {
-            const user = await User.findById(req.user._id).select('wishlist').lean();
-            wishlistedIds = (user?.wishlist || []).map(id => String(id));
-        }
+         const sessionUser = req.session?.user;
+       if (sessionUser) {
+       const userId = sessionUser._id || sessionUser.id;
+       const user = await User.findById(userId).select('wishlist').lean();
+       wishlistedIds = (user?.wishlist || []).map(id => String(id));
+       }
 
         const shaped = womensProducts.map(product => {
             const variant =
@@ -272,7 +278,7 @@ export const loadWomens = async (req, res) => {
             ],
             products: shaped,
             count: shaped.length,
-            user: req.user || null
+            user: req.session?.user || null
         });
 
     } catch (error) {
@@ -303,11 +309,13 @@ export const loadLimitedEdition = async (req, res) => {
             .populate("category", "name categoryName")
             .lean();
 
-        let wishlistedIds = [];
-        if (req.user) {
-            const user = await User.findById(req.user._id).select('wishlist').lean();
-            wishlistedIds = (user?.wishlist || []).map(id => String(id));
-        }
+       let wishlistedIds = [];
+       const sessionUser = req.session?.user;
+     if (sessionUser) {
+    const userId = sessionUser._id || sessionUser.id;
+    const user = await User.findById(userId).select('wishlist').lean();
+    wishlistedIds = (user?.wishlist || []).map(id => String(id));
+    }
 
         const shaped = products.map(product => {
             const variant =
@@ -362,7 +370,7 @@ export const loadLimitedEdition = async (req, res) => {
             ],
             products: shaped,
             count: shaped.length,
-            user: req.user || null
+            user: req.session?.user || null
         });
 
     } catch (error) {

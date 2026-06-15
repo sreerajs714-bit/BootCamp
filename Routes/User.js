@@ -12,10 +12,11 @@ import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controll
 import { loadAllProducts, loadLimitedEdition, loadMens, loadProductDetail, loadWomens } from "../Controller/User/productController.js";
 import { clearWishlist, loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
 import { addToCart, loadCart, removeFromCart, updateCartQty } from "../Controller/User/cartController.js";
-import { createRazorpayOrder, loadCheckout, loadOrderSuccess, loadPaymentFailed, placeOrder, retryRazorpayPayment, verifyRazorpayPayment } from "../Controller/User/checkoutController.js";
+import { applyCoupon, createRazorpayOrder, getAvailableCoupons, loadCheckout, loadOrderSuccess, loadPaymentFailed, placeOrder, removeCoupon, retryRazorpayPayment, verifyRazorpayPayment } from "../Controller/User/checkoutController.js";
 import { cancelOrder, downloadInvoice, loadMyOrders, loadOrderDetail, loadReturnPage, returnRequest } from "../Controller/User/ordersController.js";
 import { getCounts } from "../Controller/User/navController.js";
 import { createWalletOrder, loadWallet, verifyWalletPayment } from "../Controller/User/walletController.js";
+import { loadReferal } from "../Controller/User/referalController.js";
 
 
 route.get("/auth/google",
@@ -85,6 +86,10 @@ route.put("/updateCartQty",checkSession,updateCartQty);
 route.delete("/removeFromCart",noCache,checkSession,removeFromCart);
 route.get("/checkout",checkSession,loadCheckout);
 
+route.get("/coupons",checkSession,getAvailableCoupons);
+route.post("/applyCoupon",checkSession,applyCoupon);
+route.post("/removeCoupon",checkSession,removeCoupon);
+
 
 route.get("/orderSuccess/:id",checkSession,loadOrderSuccess);
 route.post("/orderSuccess",checkSession,placeOrder);
@@ -102,5 +107,7 @@ route.post("/orderDetail/return-request",checkSession, uploadReturn.array('image
 route.get("/wallet",checkSession,loadWallet);
 route.post("/wallet/addFund",checkSession,createWalletOrder);
 route.post("/wallet/verify",checkSession,verifyWalletPayment)
+
+route.get("/referal",checkSession,loadReferal)
 
 export default route;

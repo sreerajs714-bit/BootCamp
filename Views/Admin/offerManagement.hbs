@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offers Management | Admin | BOOTCAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/material_blue.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #fcfcfc;
+            color: #111827;
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .sidebar-item {
+            transition: all 0.18s ease;
+        }
+
+        .sidebar-item:hover:not(.active) {
+            background-color: #f9fafb;
+        }
+
+        .sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .stats-card {
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+        }
+
+        .stats-card .stats-label {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            text-align: right;
+        }
+
+        .stats-card .stats-label p {
+            font-size: 9px;
+            font-weight: 900;
+            line-height: 1.4;
+            letter-spacing: 0.12em;
+            color: #d1d5db;
+        }
+
+        .stats-card h3 {
+            font-size: 32px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            color: #000;
+        }
+
+        .table-container {
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        }
+
+        .header-search {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 340px;
+        }
+
+        .header-search input {
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            font-weight: 600;
+            color: #000;
+            width: 100%;
+        }
+
+        .header-search input::placeholder {
+            color: #9ca3af;
+            font-weight: 500;
+        }
+
+        .offer-row {
+            transition: background 0.12s;
+        }
+
+        .offer-row:hover {
+            background: #f9fafb;
+        }
+
+        .custom-dropdown {
+            position: relative;
+        }
+
+        .dropdown-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fff;
+            border: 1.5px solid #000;
+            border-radius: 12px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 40px;
+            min-width: 140px;
+        }
+
+        .dropdown-toggle:hover {
+            background: #fcfcfc;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            width: 180px;
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 16px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+            padding: 6px;
+            z-index: 100;
+            display: none;
+            visibility: hidden;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+            visibility: visible;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: #f9fafb;
+            color: #000;
+        }
+
+        .dropdown-item.selected {
+            background: #000;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-label {
+            position: absolute;
+            top: -6px;
+            left: 16px;
+            background: white;
+            padding: 0 6px;
+            font-size: 8px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #9ca3af;
+            z-index: 10;
+        }
+
+        .header-search {
+            background: white;
+            border: 1.5px solid #f3f3f3;
+            border-radius: 20px;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            width: 480px;
+            transition: all 0.3s ease;
+        }
+
+        .header-search:focus-within {
+            border-color: #000;
+            background: #fff;
+        }
+
+        .header-search .material-symbols-outlined {
+            color: #8b8fb9;
+            font-size: 22px;
+        }
+
+        .header-search input {
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            font-weight: 500;
+            color: #000;
+            width: 100%;
+        }
+
+        .header-search input::placeholder {
+            color: #9da3bb;
+            font-weight: 400;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 50;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(2px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: white;
+            border-radius: 32px;
+            width: 100%;
+            max-width: 680px;
+            padding: 2.5rem;
+            transform: scale(0.95);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .input-pill {
+            width: 100%;
+            background-color: #f9fafb;
+            border: 1px solid #f3f4f6;
+            padding: 1rem 1.5rem;
+            border-radius: 1rem;
+            font-size: 14px;
+            font-weight: 700;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .input-pill:focus {
+            background-color: white;
+            border-color: #000;
+        }
+
+        /* Toggle Button (Applicable To / Discount Mode) */
+        .toggle-group {
+            display: flex;
+            background: #f9fafb;
+            padding: 4px;
+            border-radius: 14px;
+            border: 1px solid #f3f4f6;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #9ca3af;
+        }
+
+        .toggle-btn.active {
+            background: white;
+            color: #000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Custom Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .input-pill.error {
+            background: #fff7f7;
+            border-color: #e24b4a;
+        }
+        .err-msg {
+            display: none;
+            margin-top: 6px;
+            padding: 0 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: #e24b4a;
+            letter-spacing: 0.02em;
+            align-items: center;
+            gap: 5px;
+        }
+        .err-msg.show { display: flex; }
+
+        .toggle-group.error {
+            border-color: #e24b4a;
+            background: #fff7f7;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #f1f1f1;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #10b981;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        @font-face {
+            font-family: 'NexusHeading';
+            src: local('Outfit Bold'), local('Outfit-Bold');
+        }
+    </style>
+</head>
+
+<body class="antialiased min-h-screen flex bg-white font-sans">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+        <div class="h-24 flex flex-col justify-center px-8 border-b border-gray-100">
+            <h1 class="font-sans font-black text-2xl tracking-tight uppercase text-black">BOOTCAMP</h1>
+            <span class="text-[10px] font-bold tracking-widest text-emerald-500 mt-1 uppercase">SYSTEM ADMIN</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <a href="/admin/dashboard"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard</a>
+            <a href="/admin/productManagement"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">sports_soccer</span>Products</a>
+            <a href="/admin/category"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">category</span>Categories</a>
+            <a href="/admin/orders"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">shopping_bag</span>Orders</a>
+            <a href="/admin/offers"
+                class="sidebar-item active flex items-center px-4 py-3 text-[13px] font-bold uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">local_offer</span>Offers</a>
+            <a href="/admin/coupons"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">confirmation_number</span>Coupons</a>
+            <a href="/admin/usermanagement"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">group</span>Users</a>
+            <a href="/admin/returns"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">assignment_return</span>Returns</a>
+            <a href="/admin/reviews"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">reviews</span>Review</a>
+            <a href="/admin/brands"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">sell</span>Brand</a>
+        </nav>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="flex-1 flex flex-col min-h-screen">
+        <header
+            class="h-[120px] px-12 flex items-center justify-between bg-white border-b border-gray-50/50 sticky top-0 z-10">
+            <div>
+                <h2 class="text-[20px] font-black uppercase tracking-tight text-black font-sans">Offers Management</h2>
+                <p class="text-[12px] text-gray-400 font-medium mt-1">Manage and organize your product promotional
+                    architecture.</p>
+            </div>
+            <div class="relative w-[360px]">
+                <span
+                    class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[19px] pointer-events-none">search</span>
+                <input id="offerSearch" type="text" placeholder="Search by offername..." value="{{search}}"
+                    class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-11 pr-10 text-[13px] font-medium text-gray-700 outline-none placeholder-gray-400 focus:bg-white focus:border-gray-300 transition-colors">
+            </div>
+        </header>
+
+        <div class="flex-1 p-10 space-y-10 bg-[#fcfcfc]">
+
+            <!-- Action Area -->
+            <div class="flex justify-end">
+                <button onclick="openCreateModal()"
+                    class="bg-black text-white px-6 py-2.5 rounded-xl text-[11px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-zinc-800 transition-all shadow-xl shadow-black/10">
+                    <span class="material-symbols-outlined text-[18px]">add</span> Add Offer
+                </button>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="grid grid-cols-3 gap-8">
+                <!-- Total -->
+                <div class="stats-card group">
+                    <div class="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-gray-400 text-[22px]">auto_awesome_motion</span>
+                    </div>
+                    <h3 id="totalOffersCount">0</h3>
+                    <div class="stats-label">
+                        <p>TOTAL<br>OFFERS</p>
+                    </div>
+                </div>
+
+                <!-- Active -->
+                <div class="stats-card group">
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-emerald-500 text-[22px]">check_circle</span>
+                    </div>
+                    <div>
+                        <h3 id="activeOffersCount">0</h3>
+                        <div
+                            class="flex items-center gap-2 mt-4 text-[12px] font-black text-emerald-500 uppercase tracking-widest">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Active offers
+                        </div>
+                    </div>
+                    <div class="stats-label">
+                        <p>ACTIVE<br>OFFERS</p>
+                    </div>
+                </div>
+
+                <!-- Inactive -->
+                <div class="stats-card group">
+                    <div class="w-12 h-12 rounded-xl bg-red-50 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-red-400 text-[22px]">visibility_off</span>
+                    </div>
+                    <div>
+                        <h3 id="inactiveOffersCount">0</h3>
+                        <div class="mt-4 text-[12px] font-black text-red-400 uppercase tracking-widest">
+                            Inactive offers
+                        </div>
+                    </div>
+                    <div class="stats-label">
+                        <p>INACTIVE<br>OFFERS</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Section -->
+            <div class="table-container bg-white">
+                <div class="px-10 py-8 border-b border-gray-50 flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <h4 class="text-[17px] font-black text-black uppercase">All Offers</h4>
+                        <span
+                            class="px-3 py-1 bg-gray-100 rounded text-[11px] font-black text-gray-400 uppercase tracking-widest"><span
+                                id="resultsCount">0</span> Offers</span>
+                    </div>
+
+                    <div class="flex items-center gap-5">
+                        <div class="custom-dropdown min-w-[160px]">
+                            <span class="filter-label">Filter</span>
+                            <div class="dropdown-toggle" onclick="toggleDropdown('typeMenu')">
+                                <span class="text-[11px] font-black uppercase tracking-widest" id="activeType">All
+                                    Types</span>
+                                <span class="material-symbols-outlined text-gray-300 text-[18px]">expand_more</span>
+                            </div>
+                            <div id="typeMenu" class="dropdown-menu">
+                                <div class="dropdown-item selected" onclick="setType('all', 'All Types')">All Types
+                                </div>
+                                <div class="dropdown-item" onclick="setType('product', 'Product')">Product</div>
+                                <div class="dropdown-item" onclick="setType('category', 'Category')">Category</div>
+                            </div>
+                        </div>
+
+                        <div class="custom-dropdown min-w-[160px]">
+                            <span class="filter-label">Sort</span>
+                            <div class="dropdown-toggle" onclick="toggleDropdown('statusMenu')">
+                                <span class="text-[11px] font-black uppercase tracking-widest" id="activeStatus">All
+                                    Status</span>
+                                <span class="material-symbols-outlined text-gray-300 text-[18px]">expand_more</span>
+                            </div>
+                            <div id="statusMenu" class="dropdown-menu">
+                                <div class="dropdown-item selected" onclick="setStatus('all', 'All Status')">All Status</div>
+                                <div class="dropdown-item" onclick="setStatus('active', 'Active')">Active</div>
+                                <div class="dropdown-item" onclick="setStatus('inactive', 'Inactive')">Inactive</div>
+                                <div class="dropdown-item" onclick="setStatus('expired', 'Expired')">Expired</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead>
+                            <tr class="bg-gray-50/50 border-b border-gray-100">
+                                <th class="py-5 px-8 text-[11px] font-black tracking-widest text-gray-400 uppercase">
+                                    SL.NO</th>
+                                <th class="py-5 px-8 text-[11px] font-black tracking-widest text-gray-400 uppercase">
+                                    Offer Name</th>
+                                <th
+                                    class="py-5 px-8 text-[11px] font-black tracking-widest text-gray-400 uppercase text-center">
+                                    Type</th>
+                                <th
+                                    class="py-5 px-8 text-[11px] font-black tracking-widest text-gray-400 uppercase text-center">
+                                    Discount</th>
+                                <th
+                                    class="py-5 px-8 text-[11px] font-black tracking-widest text-gray-400 uppercase text-center">
+                                    Status</th>
+                                <th
+                                    class="py-5 px-8 text-[11px] font-black tracking-widest text-gray-400 uppercase text-right">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="offerTableBody" class="divide-y divide-gray-50/50">
+                            <!-- Example Row -->
+                            <tr class="offer-row group">
+                                <td class="py-6 px-8">
+                                    <div class="text-[14px] font-black text-black">Onam Offers</div>
+                                    <div class="text-[11px] text-gray-400 mt-1">Applied to: <span
+                                            class="text-gray-900 font-bold">Regular Fit Oxford shirt</span></div>
+                                </td>
+                                <td class="py-6 px-8 text-center">
+                                    <span
+                                        class="px-3 py-1.5 bg-amber-50 text-amber-500 rounded text-[10px] font-black uppercase tracking-wider">Product</span>
+                                </td>
+                                <td class="py-6 px-8 text-center">
+                                    <div class="text-[14px] font-black text-black">15% Off</div>
+                                    <div class="text-[9px] font-bold text-gray-300 uppercase tracking-wider">Percentage
+                                    </div>
+                                </td>
+                                <td class="py-6 px-8 text-center">
+                                    <span class="text-gray-300">—</span>
+                                </td>
+                                <td class="py-6 px-8 text-center tabular-nums">
+                                    <div class="text-[12px] font-black text-gray-600">03 Jun — 08 Jun, 2026</div>
+                                </td>
+                                <td class="py-6 px-8 text-center">
+                                    <span
+                                        class="px-2.5 py-1 bg-gray-50 text-gray-400 rounded text-[9px] font-black uppercase tracking-widest border border-gray-100">Expired</span>
+                                </td>
+                                <td class="py-6 px-8 text-right">
+                                    <div class="flex items-center justify-end gap-5">
+                                        <button onclick="editOffer('1')"
+                                            class="text-gray-300 hover:text-black transition-colors"><span
+                                                class="material-symbols-outlined text-[19px]">edit</span></button>
+                                        <button onclick="deleteOffer('1')"
+                                            class="text-gray-300 hover:text-red-500 transition-colors"><span
+                                                class="material-symbols-outlined text-[19px]">delete</span></button>
+                                        <label class="switch">
+                                            <input type="checkbox" checked onchange="toggleStatus('1')">
+                                            <span class="slider"></span>
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="px-8 py-5 border-t border-gray-50 flex items-center justify-between">
+                    <p class="text-[11px] text-gray-400 font-bold uppercase tracking-[0.1em]">Showing <span
+                            id="showingCount">1–1</span> of <span id="totalCount">1</span> results</p>
+                    <div class="flex items-center gap-1.5" id="pagination">
+                        <button disabled
+                            class="w-8 h-8 rounded border border-gray-100 flex items-center justify-center text-gray-200"><span
+                                class="material-symbols-outlined text-[16px]">chevron_left</span></button>
+                        <button class="w-8 h-8 rounded border bg-black text-white text-[11px] font-bold">1</button>
+                        <button disabled
+                            class="w-8 h-8 rounded border border-gray-100 flex items-center justify-center text-gray-200"><span
+                                class="material-symbols-outlined text-[16px]">chevron_right</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== CREATE OFFER MODAL ===== -->
+    <div id="offerModal" class="modal-overlay">
+        <div class="modal-content relative max-h-[95vh]">
+            <button onclick="closeModal()"
+                class="absolute top-8 right-10 text-gray-300 hover:text-black transition-all">
+                <span class="material-symbols-outlined text-[28px]">close</span>
+            </button>
+
+            <div class="mb-10">
+                <h2 id="modalTitle" class="text-[28px] font-black tracking-tight text-gray-900 font-sans">Create Offer
+                </h2>
+                <p class="text-[13px] text-gray-400 font-medium">Set up a new discount promotion.</p>
+            </div>
+
+            <form id="offerForm" class="overflow-y-auto pr-2 space-y-8">
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Offer
+                        Label</label>
+                    <input type="text" name="label" placeholder="e.g. Seasonal Sale" class="input-pill">
+                    <p class="err-msg" id="err_label">⚠ Offer label is required</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <label
+                            class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Applicable
+                            To</label>
+                        <div class="toggle-group" id="scopeToggle">
+                            <div class="toggle-btn active" data-value="product" onclick="toggleScope('product')">Product
+                            </div>
+                            <div class="toggle-btn" data-value="category" onclick="toggleScope('category')">Category
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2"
+                            id="targetLabel">Target Product</label>
+                        <select name="target" id="targetSelect" class="input-pill appearance-none">
+                            <option value="">Select a product...</option>
+                        </select>
+                        <p class="err-msg" id="err_target">⚠ Please select a target</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <label
+                            class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Discount
+                            Mode</label>
+                        <div class="toggle-group" id="modeToggle">
+                            <div class="toggle-btn active" data-value="percentage" onclick="toggleMode('percentage')">
+                                Percentage</div>
+                            <div class="toggle-btn" data-value="flat" onclick="toggleMode('flat')">Flat</div>
+                        </div>
+                    </div>
+                    <div>
+                        <label
+                            class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Discount
+                            Amount</label>
+                        <div class="relative">
+                            <input type="number" name="amount" placeholder="0.00" class="input-pill pr-12">
+                            <span id="amountUnit"
+                                class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 font-black">%</span>
+                                <p class="err-msg" id="err_amount"><span id="err_amount_txt">Enter a valid discount (1–100%)</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-8">
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Max Cap
+                            <span class="lowercase">(optional)</span></label>
+                        <div class="relative">
+                            <span class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300 font-black">₹</span>
+                            <input type="number" name="maxCap" placeholder="0.00" class="input-pill pl-12">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Min
+                            Order <span class="lowercase">(optional)</span></label>
+                        <div class="relative">
+                            <span class="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300 font-black">₹</span>
+                            <input type="number" name="minOrder" placeholder="0.00" class="input-pill pl-12">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Promotion
+                        Window</label>
+                    <div class="flex items-center gap-4">
+                        <input type="text" id="startDate" name="startDate" placeholder="START DATE"
+                            class="input-pill text-center">
+                            <p class="err-msg" id="err_start">⚠ Start date is required</p>
+                        <span class="text-gray-300">—</span>
+                        <input type="text" id="endDate" name="endDate" placeholder="END DATE"
+                            class="input-pill text-center">
+                            <p class="err-msg" id="err_end">⚠ End date is required</p>
+                    </div>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-black text-white py-5 rounded-[20px] text-[13px] font-black uppercase tracking-[0.2em] hover:bg-zinc-800 transition-all shadow-xl shadow-black/10">
+                    Create Offer
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/toast/toast.js"></script>
+    <script>
+    // ── Flatpickr
+    const fpStart = flatpickr("#startDate", {
+        dateFormat: "d/m/Y",
+        minDate: "today",
+        onChange: (sd) => fpEnd.set("minDate", sd[0])
+    });
+    const fpEnd = flatpickr("#endDate", {
+        dateFormat: "d/m/Y",
+        minDate: "today"
+    });
+
+    // ── State
+    let editId = null;
+    let selectedScope = 'product';
+    let selectedMode = 'percentage';
+    let currentSearch = '';
+    let currentType = 'all';
+    let currentStatus = 'all';
+    let currentPage = 1;
+    let products = [];
+    let categories = [];
+
+    // ══════════════════════════════════════════
+    // VALIDATION HELPERS
+    // ══════════════════════════════════════════
+
+    const ERR_ICON = `<svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0">
+        <circle cx="6" cy="6" r="5.5" stroke="#e24b4a"/>
+        <path d="M6 3.5V6.5" stroke="#e24b4a" stroke-width="1.2" stroke-linecap="round"/>
+        <circle cx="6" cy="8.5" r=".6" fill="#e24b4a"/>
+    </svg>`;
+
+    function showErr(field, msg) {
+        let el = document.getElementById('err_' + field);
+
+        // Auto-create the <p> if it doesn't exist yet
+        if (!el) {
+            el = document.createElement('p');
+            el.id = 'err_' + field;
+            el.style.cssText = 'display:none;margin-top:6px;padding:0 4px;font-size:11px;font-weight:700;color:#e24b4a;letter-spacing:0.02em;align-items:center;gap:5px;';
+
+            const anchor = document.getElementById(field)
+                || document.querySelector(`[name="${field}"]`)
+                || document.getElementById(field + 'Select');
+
+            if (anchor && anchor.parentNode) {
+                anchor.parentNode.insertBefore(el, anchor.nextSibling);
+            }
+        }
+
+        el.innerHTML = ERR_ICON + `<span>${msg}</span>`;
+        el.style.display = 'flex';
+
+        // Red border on the relevant input / toggle
+        const inp = document.getElementById(field)
+            || document.querySelector(`[name="${field}"]`)
+            || document.getElementById(field + 'Select')
+            || document.getElementById(field + 'Toggle');
+
+        if (inp) {
+            inp.style.borderColor = '#e24b4a';
+            inp.style.background = '#fff7f7';
+        }
+    }
+
+    function clearErr(field) {
+        const el = document.getElementById('err_' + field);
+        if (el) el.style.display = 'none';
+
+        const inp = document.getElementById(field)
+            || document.querySelector(`[name="${field}"]`)
+            || document.getElementById(field + 'Select')
+            || document.getElementById(field + 'Toggle');
+
+        if (inp) {
+            inp.style.borderColor = '';
+            inp.style.background = '';
+        }
+    }
+
+    function clearAllErrors() {
+        ['label', 'target', 'amount', 'startDate', 'endDate'].forEach(f => clearErr(f));
+    }
+
+    // Live-clear errors as user types / changes
+    function attachLiveClear() {
+        const fieldMap = {
+            'label':     () => document.querySelector('[name="label"]'),
+            'amount':    () => document.querySelector('[name="amount"]'),
+            'target':    () => document.getElementById('targetSelect'),
+            'startDate': () => document.getElementById('startDate'),
+            'endDate':   () => document.getElementById('endDate'),
+        };
+
+        Object.entries(fieldMap).forEach(([field, getEl]) => {
+            const el = getEl();
+            if (!el) return;
+            ['input', 'change'].forEach(evt => {
+                el.addEventListener(evt, () => {
+                    if (el.value && el.value.trim() !== '') clearErr(field);
+                });
+            });
+        });
+
+        // Flatpickr fires onChange, not native 'change', so hook via config callbacks
+        fpStart.config.onChange.push(() => clearErr('startDate'));
+        fpEnd.config.onChange.push(() => clearErr('endDate'));
+    }
+
+    function validateOfferForm(f) {
+        let ok = true;
+
+        // Offer Label
+        if (!f.label.value.trim()) {
+            showErr('label', 'Offer label is required');
+            ok = false;
+        } else {
+            clearErr('label');
+        }
+
+        // Target product / category
+        if (!f.target.value) {
+            const scopeLabel = selectedScope === 'product' ? 'product' : 'category';
+            showErr('target', `Please select a ${scopeLabel}`);
+            ok = false;
+        } else {
+            clearErr('target');
+        }
+
+        // Discount amount
+        const amt = parseFloat(f.amount.value);
+        if (!f.amount.value || isNaN(amt) || amt <= 0) {
+            const msg = selectedMode === 'percentage'
+                ? 'Enter a valid discount (1–100%)'
+                : 'Enter a valid flat amount';
+            showErr('amount', msg);
+            ok = false;
+        } else if (selectedMode === 'percentage' && amt > 100) {
+            showErr('amount', 'Percentage discount cannot exceed 100%');
+            ok = false;
+        } else {
+            clearErr('amount');
+        }
+
+        // Start date
+        if (!f.startDate.value) {
+            showErr('startDate', 'Start date is required');
+            ok = false;
+        } else {
+            clearErr('startDate');
+        }
+
+        // End date
+        if (!f.endDate.value) {
+            showErr('endDate', 'End date is required');
+            ok = false;
+        } else {
+            clearErr('endDate');
+        }
+
+        return ok;
+    }
+
+    // ══════════════════════════════════════════
+    // FETCH & RENDER
+    // ══════════════════════════════════════════
+
+    async function fetchOffers(page = 1) {
+        currentPage = page;
+        try {
+            const res = await axios.get('/admin/offers', {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                params: {
+                    search: currentSearch,
+                    type: currentType,
+                    status: currentStatus,
+                    page: currentPage
+                }
+            });
+
+            if (res.data.success) {
+                render(res.data.offers);
+                updatePagination(res.data.pagination);
+
+                const stats = res.data.stats || { total: 0, active: 0, inactive: 0 };
+                document.getElementById('totalOffersCount').innerText = stats.total;
+                document.getElementById('activeOffersCount').innerText = stats.active;
+                document.getElementById('inactiveOffersCount').innerText = stats.inactive;
+                document.getElementById('resultsCount').innerText = res.data.pagination.totalResults || 0;
+            }
+        } catch (err) {
+            console.error("Fetch error:", err);
+            showToast("error", "Failed to load offers");
+        }
+    }
+
+    async function fetchMetadata() {
+        try {
+            const [pRes, cRes] = await Promise.all([
+                axios.get('/admin/products/metadata'),
+                axios.get('/admin/categories/metadata')
+            ]);
+            products = pRes.data.products || [];
+            categories = cRes.data.categories || [];
+        } catch (err) {
+            console.error("Metadata fetch error:", err);
+        }
+    }
+
+    function render(data) {
+        const b = document.getElementById('offerTableBody');
+        if (!data || data.length === 0) {
+            b.innerHTML = `<tr><td colspan="6" class="py-12 text-center text-[11px] font-black text-gray-200 uppercase tracking-[0.3em]">No offers found</td></tr>`;
+            return;
+        }
+        b.innerHTML = data.map((o, index) => `
+        <tr class="offer-row group">
+            <td class="py-6 px-8 text-[13px] font-black text-gray-400 tabular-nums">
+                ${(currentPage - 1) * 10 + (index + 1)}
+            </td>
+            <td class="py-6 px-8">
+                <div class="text-[14px] font-black text-black uppercase tracking-tight">${o.label}</div>
+            </td>
+            <td class="py-6 px-8 text-center text-[13px] font-black text-black uppercase">
+                ${o.applicableTo}
+            </td>
+            <td class="py-6 px-8 text-center">
+                <div class="text-[14px] font-black text-black">${o.discountValue}${o.discountType === 'percentage' ? '%' : '₹'}</div>
+            </td>
+            <td class="py-6 px-8 text-center">
+                <div class="flex flex-col items-center gap-3">
+                    <span class="px-3 py-1.5 ${o.isActive ? 'bg-emerald-50 text-emerald-500' : 'bg-red-50 text-red-400'} rounded text-[10px] font-black uppercase tracking-widest">
+                        ${o.isActive ? 'Active' : 'Inactive'}
+                    </span>
+                    <label class="switch">
+                        <input type="checkbox" ${o.isActive ? 'checked' : ''} onchange="toggleStatus('${o._id}')">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </td>
+            <td class="py-6 px-8 text-right">
+                <div class="flex items-center justify-end gap-5">
+                    <button onclick="editOffer('${o._id}')" class="text-gray-300 hover:text-black transition-colors">
+                        <span class="material-symbols-outlined text-[19px]">edit</span>
+                    </button>
+                    <button onclick="deleteOffer('${o._id}')" class="text-gray-300 hover:text-red-500 transition-colors">
+                        <span class="material-symbols-outlined text-[19px]">delete</span>
+                    </button>
+                </div>
+            </td>
+        </tr>
+        `).join('');
+    }
+
+    function updatePagination(p) {
+        const pg = document.getElementById('pagination');
+        pg.innerHTML = '';
+        if (p.totalPages <= 1) return;
+
+        const btn = (label, page, disabled = false, active = false) => {
+            const b = document.createElement('button');
+            b.className = `w-8 h-8 rounded border flex items-center justify-center transition-all ${active ? 'bg-black text-white' : 'border-gray-100 text-gray-400 hover:bg-gray-50'}`;
+            b.innerHTML = label;
+            b.disabled = disabled;
+            if (!disabled) b.onclick = () => fetchOffers(page);
+            return b;
+        };
+
+        pg.appendChild(btn('<span class="material-symbols-outlined text-[16px]">chevron_left</span>', p.currentPage - 1, !p.hasPrev));
+        for (let i = 1; i <= p.totalPages; i++) {
+            pg.appendChild(btn(i, i, false, i === p.currentPage));
+        }
+        pg.appendChild(btn('<span class="material-symbols-outlined text-[16px]">chevron_right</span>', p.currentPage + 1, !p.hasNext));
+    }
+
+    // ══════════════════════════════════════════
+    // MODAL LOGIC
+    // ══════════════════════════════════════════
+
+    function openCreateModal() {
+        editId = null;
+        document.getElementById('modalTitle').innerText = 'Create Offer';
+        document.getElementById('offerForm').reset();
+        document.querySelector('button[type="submit"]').innerText = 'Create Offer';
+        toggleScope('product');
+        toggleMode('percentage');
+        fpStart.clear();
+        fpEnd.clear();
+        clearAllErrors();
+        document.getElementById('offerModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('offerModal').classList.remove('active');
+        clearAllErrors();
+    }
+
+    function toggleScope(scope) {
+        selectedScope = scope;
+        const btns = document.querySelectorAll('#scopeToggle .toggle-btn');
+        btns.forEach(b => b.classList.toggle('active', b.dataset.value === scope));
+        document.getElementById('targetLabel').innerText = scope === 'product' ? 'Target Product' : 'Target Category';
+
+        const select = document.getElementById('targetSelect');
+        select.innerHTML = `<option value="">Select a ${scope}...</option>`;
+        const items = scope === 'product' ? products : categories;
+        items.forEach(item => {
+            select.innerHTML += `<option value="${item._id}">${item.name}</option>`;
+        });
+
+        // Clear target error when scope changes
+        clearErr('target');
+    }
+
+    function toggleMode(mode) {
+        selectedMode = mode;
+        const btns = document.querySelectorAll('#modeToggle .toggle-btn');
+        btns.forEach(b => b.classList.toggle('active', b.dataset.value === mode));
+        document.getElementById('amountUnit').innerText = mode === 'percentage' ? '%' : '₹';
+
+        // Re-validate amount live if already entered
+        const amt = parseFloat(document.querySelector('[name="amount"]')?.value);
+        if (amt > 0) clearErr('amount');
+    }
+
+    // ══════════════════════════════════════════
+    // DROPDOWNS
+    // ══════════════════════════════════════════
+
+    function toggleDropdown(id) {
+        const m = document.getElementById(id);
+        const open = m.classList.contains('show');
+        document.querySelectorAll('.dropdown-menu').forEach(x => x.classList.remove('show'));
+        if (!open) m.classList.add('show');
+    }
+
+    function setType(val, label) {
+        currentType = val;
+        document.getElementById('activeType').innerText = label;
+        document.querySelectorAll('#typeMenu .dropdown-item').forEach(i => i.classList.toggle('selected', i.innerText === label));
+        document.querySelectorAll('.dropdown-menu').forEach(x => x.classList.remove('show'));
+        fetchOffers(1);
+    }
+
+    function setStatus(val, label) {
+        currentStatus = val;
+        document.getElementById('activeStatus').innerText = label;
+        document.querySelectorAll('#statusMenu .dropdown-item').forEach(i => i.classList.toggle('selected', i.innerText === label));
+        document.querySelectorAll('.dropdown-menu').forEach(x => x.classList.remove('show'));
+        fetchOffers(1);
+    }
+
+    window.onclick = (e) => {
+        if (!e.target.closest('.custom-dropdown'))
+            document.querySelectorAll('.dropdown-menu').forEach(x => x.classList.remove('show'));
+    };
+
+    // ══════════════════════════════════════════
+    // API ACTIONS
+    // ══════════════════════════════════════════
+
+    document.getElementById('offerForm').onsubmit = async (e) => {
+        e.preventDefault();
+
+        // Run validation first — stop if invalid
+        if (!validateOfferForm(e.target)) return;
+
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.innerText = 'SAVING...';
+
+        try {
+            const data = Object.fromEntries(new FormData(e.target).entries());
+            data.applicableTo = selectedScope;
+            data.discountType = selectedMode;
+
+            const url = editId ? `/admin/offers/edit/${editId}` : '/admin/offers/add';
+            const method = editId ? 'put' : 'post';
+
+            const res = await axios[method](url, data);
+            if (res.data.success) {
+                showToast("success", `Offer ${editId ? 'updated' : 'created'} successfully`);
+                closeModal();
+                fetchOffers(currentPage);
+            }
+        } catch (err) {
+            showToast("error", err.response?.data?.message || "Something went wrong");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = editId ? 'Update Offer' : 'Create Offer';
+        }
+    };
+
+    async function toggleStatus(id) {
+        try {
+            const res = await axios.patch(`/admin/offers/toggle/${id}`);
+            if (res.data.success) {
+                showToast("success", "Status updated successfully");
+                fetchOffers(currentPage);
+            }
+        } catch (err) {
+            showToast("error", "Failed to update status");
+        }
+    }
+
+    function deleteOffer(id) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This offer will be deleted permanently!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#000',
+            cancelButtonColor: '#f3f4f6',
+            confirmButtonText: 'Yes, delete it!',
+            customClass: {
+                title: 'font-black tracking-tight uppercase text-[20px]',
+                popup: 'rounded-[24px]',
+                confirmButton: 'rounded-xl px-10 py-4 text-[11px] font-black uppercase tracking-widest',
+                cancelButton: 'rounded-xl px-10 py-4 text-[11px] font-black uppercase tracking-widest text-gray-500'
+            }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const res = await axios.delete(`/admin/offers/delete/${id}`);
+                    if (res.data.success) {
+                        showToast("success", "Offer deleted");
+                        fetchOffers(currentPage);
+                    }
+                } catch (err) {
+                    showToast("error", "Failed to delete offer");
+                }
+            }
+        });
+    }
+
+    async function editOffer(id) {
+        try {
+            const res = await axios.get(`/admin/offers/${id}`);
+            if (res.data.success) {
+                const o = res.data.offer;
+                editId = id;
+                document.getElementById('modalTitle').innerText = 'Edit Offer';
+                document.querySelector('button[type="submit"]').innerText = 'Update Offer';
+
+                const f = document.getElementById('offerForm');
+                f.label.value = o.label;
+                f.amount.value = o.discountValue;
+                f.maxCap.value = o.maxCap || '';
+                f.minOrder.value = o.minOrder || '';
+
+                toggleScope(o.applicableTo);
+                f.target.value = o.targetId;
+                toggleMode(o.discountType);
+
+                fpStart.setDate(o.startDate);
+                fpEnd.setDate(o.expiryDate);
+
+                clearAllErrors();
+                document.getElementById('offerModal').classList.add('active');
+            }
+        } catch (err) {
+            showToast("error", "Failed to load offer data");
+        }
+    }
+
+    // ── Search
+    let sTimeout;
+    document.getElementById('offerSearch').oninput = (e) => {
+        clearTimeout(sTimeout);
+        currentSearch = e.target.value;
+        sTimeout = setTimeout(() => fetchOffers(1), 400);
+    };
+
+    // ── Init
+    fetchMetadata().then(() => {
+        fetchOffers(1);
+        attachLiveClear();   // attach live-clear after DOM is ready
+    });
+</script>
+</body>
+
+</html>

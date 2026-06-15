@@ -168,6 +168,9 @@ export const loadOrderDetail = async (req, res) => {
                 totalPrice: order.totalAmount.toLocaleString("en-IN"),
                 paymentMethod: order.paymentMethod,
                 paymentStatus: order.paymentStatus,
+                subtotal: order.subtotal || order.totalAmount,
+                couponCode: order.couponCode || null,
+                couponDiscount: order.couponDiscount || 0,
                 address: {
                     name: order.address.fullName,
                     phone: order.address.phoneNO,
@@ -809,39 +812,51 @@ export const downloadInvoice = async (req, res) => {
         // — Totals —
         const totY = y + 12;
 
-        // Subtotal row — ── FIX: use INR() helper ──────────────────────────────
-        doc.fontSize(9).font("Helvetica").fillColor(C.gray600)
-            .text("Subtotal", TOT_LBL, totY);
-        doc.fontSize(9).font("Helvetica-Bold").fillColor(C.black)
-            .text(INR(order.totalAmount), 0, totY, { align: "right", width: TOT_VAL });
+// Subtotal row
+doc.fontSize(9).font("Helvetica").fillColor(C.gray600)
+    .text("Subtotal", TOT_LBL, totY);
+doc.fontSize(9).font("Helvetica-Bold").fillColor(C.black)
+    .text(INR(order.subtotal || order.totalAmount), 0, totY, { align: "right", width: TOT_VAL });
 
-        // Shipping row
-        doc.fontSize(9).font("Helvetica").fillColor(C.gray600)
-            .text("Shipping fee", TOT_LBL, totY + 20);
-        doc.fontSize(9).font("Helvetica-Bold").fillColor(C.green)
-            .text("FREE", 0, totY + 20, { align: "right", width: TOT_VAL });
+// Coupon discount row — only if coupon was applied
+let totalsOffset = 0;
+if (order.couponCode && order.couponDiscount > 0) {
+    totalsOffset = 20;
 
-        // Divider
-        rule(doc, TOT_X, W - PAD, totY + 38, C.gray200, 1);
+    // Coupon label with code
+    doc.fontSize(9).font("Helvetica").fillColor(C.green)
+        .text(`Coupon (${order.couponCode})`, TOT_LBL, totY + 20);
+    doc.fontSize(9).font("Helvetica-Bold").fillColor(C.green)
+        .text(`- ${INR(order.couponDiscount)}`, 0, totY + 20, { align: "right", width: TOT_VAL });
+}
 
-        // Total settlement box — ── FIX: use INR() helper ─────────────────────
-        doc.rect(TOT_X, totY + 46, W - PAD - TOT_X, 52).fill(C.accentLight);
-        doc.fontSize(10).font("Helvetica-Bold").fillColor(C.accent)
-            .text("TOTAL SETTLEMENT", TOT_LBL + 10, totY + 56);
-        doc.fontSize(8).font("Helvetica").fillColor(C.gray400)
-            .text("Incl. GST & all taxes", TOT_LBL + 10, totY + 70);
-        doc.fontSize(22).font("Helvetica-Bold").fillColor(C.accent)
-            .text(INR(order.totalAmount), 0, totY + 54, {
-                align: "right", width: TOT_VAL - 10,
-            });
+// Shipping row
+doc.fontSize(9).font("Helvetica").fillColor(C.gray600)
+    .text("Shipping fee", TOT_LBL, totY + 20 + totalsOffset);
+doc.fontSize(9).font("Helvetica-Bold").fillColor(C.green)
+    .text("FREE", 0, totY + 20 + totalsOffset, { align: "right", width: TOT_VAL });
+
+// Divider
+rule(doc, TOT_X, W - PAD, totY + 38 + totalsOffset, C.gray200, 1);
+
+// Total settlement box
+doc.rect(TOT_X, totY + 46 + totalsOffset, W - PAD - TOT_X, 52).fill(C.accentLight);
+doc.fontSize(10).font("Helvetica-Bold").fillColor(C.accent)
+    .text("TOTAL SETTLEMENT", TOT_LBL + 10, totY + 56 + totalsOffset);
+doc.fontSize(8).font("Helvetica").fillColor(C.gray400)
+    .text("Incl. GST & all taxes", TOT_LBL + 10, totY + 70 + totalsOffset);
+doc.fontSize(22).font("Helvetica-Bold").fillColor(C.accent)
+    .text(INR(order.totalAmount), 0, totY + 54 + totalsOffset, {
+        align: "right", width: TOT_VAL - 10,
+    });
 
         // ══════════════════════════════════════════════════════════════════════
         // SECTION 6 — IMPORTANT INFORMATION
         // ══════════════════════════════════════════════════════════════════════
         const infoY = Math.max(
-            TL_Y_START + timelineStatuses.length * STEP_H + 20,
-            totY + 110
-        );
+    TL_Y_START + timelineStatuses.length * STEP_H + 20,
+    totY + 110 + totalsOffset   // ✅ adds space when coupon row exists
+);
 
         rule(doc, PAD, W - PAD, infoY, C.gray200, 1);
 

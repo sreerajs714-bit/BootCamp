@@ -8,7 +8,8 @@ import { addBrand, deleteBrand, editBrand, loadBrand, restoreBrand } from "../Co
 import { uploadProduct } from "../Middleware/multer.js";
 import { loadOrderDetail, loadOrders,updateOrderStatus } from "../Controller/Admin/orderController.js";
 import { approveReturn, loadReturnDetail, loadReturnManagement, processRefund, rejectReturn, schedulePickup } from "../Controller/Admin/returnController.js";
-import { loadCoupon } from "../Controller/Admin/couponController.js";
+import { createCoupon, deleteCoupon, getCouponById, loadCoupon, toggleCouponStatus, updateCoupon } from "../Controller/Admin/couponController.js";
+import { createOffer, deleteOffer, getCategoriesMetadata, getOfferById, getProductsMetadata, loadOffer, toggleOfferStatus, updateOffer } from "../Controller/Admin/offerController.js";
 const route=express.Router();
 
 route.get("/",loadLogin);
@@ -58,7 +59,23 @@ route.put("/returns/:id/reject",isAdmin,rejectReturn);
 route.put("/returns/:id/pickup",isAdmin,schedulePickup);
 route.put("/returns/:id/refund",isAdmin,processRefund);
 
-route.get("/coupon",loadCoupon);
+route.get("/coupons",loadCoupon);
+route.post("/coupons/add",createCoupon);
+route.put("/coupons/edit/:id",updateCoupon);
+route.patch("/coupons/toggle/:id",toggleCouponStatus);
+route.delete("/coupons/delete/:id",deleteCoupon);
+route.get("/coupons/:id",getCouponById);
+
+route.get("/products/metadata", getProductsMetadata);
+route.get("/categories/metadata", getCategoriesMetadata);
+
+route.get("/offers",loadOffer);
+route.post("/offers/add",createOffer);
+route.put("/offers/edit/:id",updateOffer);
+route.patch("/offers/toggle/:id",toggleOfferStatus);
+route.delete("/offers/delete/:id",deleteOffer);
+route.get("/offers/:id",getOfferById);
+
 
 
 export default route;

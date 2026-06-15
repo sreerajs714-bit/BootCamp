@@ -33,7 +33,26 @@ googleId: {
   isBlocked: {
     type: Boolean,
     default: false,
-  }
+  },
+  referralCode: {
+    type: String,
+    unique: true,
+  },
+
+  referredBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  },
+
+  referralRewardGiven: {
+    type: Boolean,
+    default: false,
+  },
+  wallet: {
+  type: Number,
+  default: 0
+}
 },{ timestamps: true });
 
   export  default  mongoose.model("User", userSchema);
