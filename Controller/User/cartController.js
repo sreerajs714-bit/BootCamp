@@ -3,27 +3,30 @@ import User from "../../Model/userModel.js";
 import Cart from "../../Model/cartModel.js";
 import Wishlist from "../../Model/wishlistModel.js";
 
+import { getActiveOffers, calculateOfferPrice } from "../../utils/offer.js";
+
 
 export const loadCart = async (req, res) => {
     try {
-        
-
         const userId = req.session?.user?.id;
 
-       res.locals.breadcrumbs = [
-       { label: 'Home', url: '/' },
-       { label: "Cart" },
-       ];
+        res.locals.breadcrumbs = [
+            { label: 'Home', url: '/' },
+            { label: "Cart" },
+        ];
 
-        const cart = await Cart.findOne({ userId })
-            .populate({
-                path: "items.productId",
-                populate: {
-                    path: "brand",
-                    model: "Brand"
-                }
-            })
-            .lean();
+        const [cart, activeOffers] = await Promise.all([
+            Cart.findOne({ userId })
+                .populate({
+                    path: "items.productId",
+                    populate: [
+                        { path: "brand", model: "Brand" },
+                        { path: "category", model: "Category" }
+                    ]
+                })
+                .lean(),
+            getActiveOffers(),
+        ]);
 
         if (!cart || cart.items.length === 0) {
             return res.render("users/cart", {
@@ -35,7 +38,8 @@ export const loadCart = async (req, res) => {
             });
         }
 
-        let subtotal = 0;
+        let subtotal = 0;   // sum of original prices (qty applied)
+        let total = 0;      // sum of discounted prices (qty applied)
 
         const cartItems = cart.items.map(item => {
 
@@ -46,35 +50,53 @@ export const loadCart = async (req, res) => {
                 v => v._id.toString() === item.variantId?.toString()
             ) || product.variants?.[0];
 
-            const price = item.price || variant?.price || 0;
+            const originalPrice = item.price || variant?.price || 0;
             const qty = item.quantity || 1;
 
-            subtotal += price * qty;
+            const isUnavailable = product.isDeleted || product.status !== "active" || variant?.stock === 0;
 
-           return {
-            _id: item._id, 
-    productId: {
-        _id: product._id,
-        name: product.productName,
-        brand: product.brand?.name || product.brand?.brandName || "Brand",
-        images: variant?.images || []
-    },
-    variantId: item.variantId,
-    color: variant?.color || "",
-    size: item.size || "",
-    quantity: qty,
-    price,
-    stock: variant?.stock || 0,
-    isUnavailable: product.isDeleted || product.status !== "active" || variant?.stock === 0 
-};
+            // ── Offer pricing ──
+            const pricing = calculateOfferPrice(originalPrice, product, activeOffers);
+            const finalPrice = pricing.hasOffer ? pricing.discountedPrice : originalPrice;
+
+            if (!isUnavailable) {
+                subtotal += originalPrice * qty;
+                total += finalPrice * qty;
+            }
+
+            return {
+                _id: item._id,
+                productId: {
+                    _id: product._id,
+                    name: product.productName,
+                    brand: product.brand?.name || product.brand?.brandName || "Brand",
+                    images: variant?.images || [],
+                    price: pricing.hasOffer ? originalPrice : null // for strikethrough display
+                },
+                variantId: item.variantId,
+                color: variant?.color || "",
+                size: item.size || "",
+                quantity: qty,
+                price: finalPrice,
+                hasOffer: pricing.hasOffer,
+                offerPercentage: pricing.offer
+                    ? pricing.offer.discountType === 'percentage'
+                        ? pricing.offer.discountValue
+                        : Math.round((pricing.discount / originalPrice) * 100)
+                    : 0,
+                stock: variant?.stock || 0,
+                isUnavailable
+            };
         });
+
+        const savings = subtotal - total;
 
         return res.render("users/cart", {
             cartItems,
             subtotal,
-            total: subtotal,
-            savings: 0,
-            bagCount: cartItems.length
+            total,
+            savings,
+            bagCount: cartItems.filter(i => !i.isUnavailable).length
         });
 
     } catch (err) {

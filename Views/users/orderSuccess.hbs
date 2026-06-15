@@ -308,12 +308,30 @@
           <span>Shipping</span>
           <span>{{order.shippingCost}}</span>
         </div>
-        {{#if order.discount}}
-        <div class="totals-row">
-          <span>Discount</span>
-          <span style="color:var(--accent);">–{{order.discount}}</span>
-        </div>
-        {{/if}}
+       {{#if order.offerDiscount}}
+<div class="totals-row">
+  <span>Offer Discount</span>
+  <span style="color:var(--accent);">–{{order.offerDiscount}}</span>
+</div>
+{{/if}}
+
+{{#if order.couponDiscount}}
+<div class="totals-row">
+  {{#if order.couponCode}}
+    <span>Coupon ({{order.couponCode}})</span>
+  {{else}}
+    <span>Coupon Discount</span>
+  {{/if}}
+  <span style="color:var(--accent);">–{{order.couponDiscount}}</span>
+</div>
+{{/if}}
+
+{{#if order.totalDiscount}}
+<div class="totals-row" style="font-weight:600; color:var(--accent);">
+  <span>Total Savings</span>
+  <span>–{{order.totalDiscount}}</span>
+</div>
+{{/if}}
         <div class="totals-row grand">
           <span>Total Paid</span>
           <div style="text-align:right;">

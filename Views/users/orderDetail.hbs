@@ -636,12 +636,22 @@
                     {{/each}}
                 </div>
 
-                <!-- Totals -->
+       <!-- Totals -->
 <div class="space-y-4 pt-10 border-t border-gray-50">
     <div class="flex justify-between items-center text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em]">
         <span>Order Subtotal</span>
         <span class="text-black font-black">₹{{order.subtotal}}</span>
     </div>
+
+    {{!-- ADD THIS BLOCK --}}
+    {{#if order.offerSavings}}
+    {{#if (gt order.offerSavings 0)}}
+    <div class="flex justify-between items-center text-[11px] font-bold uppercase tracking-[0.15em]">
+        <span class="text-orange-500">Offer Discount</span>
+        <span class="text-orange-500 font-black">-₹{{order.offerSavings}}</span>
+    </div>
+    {{/if}}
+    {{/if}}
 
     {{#if order.couponCode}}
     <div class="flex justify-between items-center text-[11px] font-bold uppercase tracking-[0.15em]">

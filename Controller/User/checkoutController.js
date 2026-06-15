@@ -8,6 +8,7 @@ import Coupon from "../../Model/couponModel.js";
 import crypto from "crypto";
 import Razorpay from "razorpay";
 
+import { getActiveOffers, calculateOfferPrice } from "../../utils/offer.js";
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -18,17 +19,23 @@ const razorpay = new Razorpay({
 export const loadCheckout = async (req, res) => {
     try {
 
-     const userId =
-      req.session?.user?.id ||
-      req.session?.user?._id ||
-      req.user?._id;
+        const userId =
+            req.session?.user?.id ||
+            req.session?.user?._id ||
+            req.user?._id;
 
         const user = await User.findById(userId).lean();
         if (!user) return res.redirect('/users/login');
 
-        const cart = await Cart.findOne({ userId })
-            .populate('items.productId')
-            .lean();
+        const [cart, activeOffers] = await Promise.all([
+            Cart.findOne({ userId })
+                .populate({
+                    path: 'items.productId',
+                    populate: { path: 'category', model: 'Category' }
+                })
+                .lean(),
+            getActiveOffers(),
+        ]);
 
         if (!cart || cart.items.length === 0) {
             return res.redirect('/users/cart');
@@ -53,13 +60,25 @@ export const loadCheckout = async (req, res) => {
                 (v) => v._id.toString() === item.variantId.toString()
             );
 
-            const variantPrice = variant?.price ?? item.price ?? 0;
+            const originalPrice = variant?.price ?? item.price ?? 0;
 
-            subtotal += variantPrice * item.quantity;
+            // ── Offer pricing ──
+            const pricing = calculateOfferPrice(originalPrice, product, activeOffers);
+            const finalPrice = pricing.hasOffer ? pricing.discountedPrice : originalPrice;
+
+            subtotal += originalPrice * item.quantity;
+            offerSavings += (originalPrice - finalPrice) * item.quantity;
 
             return {
                 ...item,
-                price: variantPrice,
+                price: finalPrice,
+                originalPrice,
+                hasOffer: pricing.hasOffer,
+                offerPercentage: pricing.offer
+                    ? pricing.offer.discountType === 'percentage'
+                        ? pricing.offer.discountValue
+                        : Math.round((pricing.discount / originalPrice) * 100)
+                    : 0,
                 // Use variant images if available, fallback to first variant
                 images: variant?.images || product.variants[0]?.images || [],
             };
@@ -94,12 +113,12 @@ export const loadCheckout = async (req, res) => {
 
         const total = Math.max(0, effectiveSubtotal - couponDiscount);
 
-       // ── Addresses ─────────────────────────────────────────────────────
-       const addresses = await Address.find({ user: userId }).lean();
-       const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0] || null;
+        // ── Addresses ─────────────────────────────────────────────────────
+        const addresses = await Address.find({ user: userId }).lean();
+        const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0] || null;
 
         // ── Wallet ────────────────────────────────────────────────────────
-       const wallet = await Wallet.findOne({ userId });
+        const wallet = await Wallet.findOne({ userId });
         const walletBalance = wallet?.balance || 0;
 
         return res.render('users/checkout', {
@@ -141,7 +160,14 @@ export const placeOrder = async (req, res) => {
 
         const user = await User.findById(userId);
 
-        const cart = await Cart.findOne({ userId }).populate("items.productId");
+        const [cart, activeOffers] = await Promise.all([
+            Cart.findOne({ userId })
+                .populate({
+                    path: 'items.productId',
+                    populate: { path: 'category', model: 'Category' }
+                }),
+            getActiveOffers(),
+        ]);
 
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ success: false, message: "Cart is empty" });
@@ -153,6 +179,7 @@ export const placeOrder = async (req, res) => {
         }
 
         let subtotal = 0;
+        let offerSavings = 0;
         const orderItems = [];
 
         for (const item of cart.items) {
@@ -171,15 +198,25 @@ export const placeOrder = async (req, res) => {
                 return res.status(400).json({ success: false, message: `${product.name} is out of stock` });
             }
 
-            subtotal += variant.price * item.quantity;
+            const originalPrice = variant.price;
+
+            // ── Offer pricing ──
+            const pricing = calculateOfferPrice(originalPrice, product, activeOffers);
+            const finalPrice = pricing.hasOffer ? pricing.discountedPrice : originalPrice;
+
+            subtotal += originalPrice * item.quantity;
+            offerSavings += (originalPrice - finalPrice) * item.quantity;
 
             orderItems.push({
                 product: product._id,
                 quantity: item.quantity,
-                price: variant.price,
+                price: finalPrice,
+                originalPrice,
                 size: item.size
             });
         }
+
+        const effectiveSubtotal = subtotal - offerSavings;
 
         // ── Apply coupon ──────────────────────────────────────────────────
         let couponDiscount = 0;
@@ -192,12 +229,12 @@ export const placeOrder = async (req, res) => {
             const coupon = await Coupon.findOne({
                 code: couponToApply.toUpperCase().trim(),
                 isActive: true,
-                expiryDate: { $gte: new Date() },  // ✅ fixed: was expiresAt
+                expiryDate: { $gte: new Date() },
             });
 
             if (coupon) {
                 // Check min order
-                if (coupon.minOrder && subtotal < coupon.minOrder) {
+                if (coupon.minOrder && effectiveSubtotal < coupon.minOrder) {
                     return res.status(400).json({
                         success: false,
                         message: `Minimum order of ₹${coupon.minOrder} required`
@@ -206,7 +243,7 @@ export const placeOrder = async (req, res) => {
 
                 // Calculate discount
                 if (coupon.discountType === 'percentage') {
-                    couponDiscount = Math.round((subtotal * coupon.discountValue) / 100);
+                    couponDiscount = Math.round((effectiveSubtotal * coupon.discountValue) / 100);
                     if (coupon.maxDiscount && couponDiscount > coupon.maxDiscount) {
                         couponDiscount = coupon.maxDiscount;
                     }
@@ -214,7 +251,7 @@ export const placeOrder = async (req, res) => {
                     couponDiscount = coupon.discountValue;
                 }
 
-                couponDiscount = Math.min(couponDiscount, subtotal);
+                couponDiscount = Math.min(couponDiscount, effectiveSubtotal);
                 appliedCoupon = coupon.code;
 
                 // ✅ Mark coupon as used
@@ -225,10 +262,10 @@ export const placeOrder = async (req, res) => {
             }
         }
 
-        const totalAmount = Math.max(0, subtotal - couponDiscount);
-        
+        const totalAmount = Math.max(0, effectiveSubtotal - couponDiscount);
+
         if (paymentMethod === 'cod' && totalAmount > 10000) {
-           return res.status(400).json({
+            return res.status(400).json({
                 success: false,
                 message: 'Cash on Delivery is not available for orders above ₹10,000'
             });
@@ -258,9 +295,10 @@ export const placeOrder = async (req, res) => {
                 addressType: address.addressType
             },
             paymentMethod,
-            subtotal,                   // ✅ save subtotal separately
-            couponCode: appliedCoupon,  // ✅ save which coupon was used
-            couponDiscount,             // ✅ save discount amount
+            subtotal,                   // original subtotal before any discount
+            offerSavings,                // ✅ new: offer discount total
+            couponCode: appliedCoupon,
+            couponDiscount,
             totalAmount,
             orderStatus: "Confirmed",
             paymentStatus: paymentMethod === "cod" ? "Pending" : "Paid",
@@ -330,6 +368,8 @@ export const loadOrderSuccess = async (req, res) => {
             .populate('items.product')
             .lean();
 
+            console.log("order items:", JSON.stringify(order.items[0], null, 2));
+
         if (!order) {
             return res.redirect('/users/home');
         }
@@ -339,7 +379,6 @@ export const loadOrderSuccess = async (req, res) => {
         deliveryStart.setDate(deliveryStart.getDate() + 3);
         deliveryEnd.setDate(deliveryEnd.getDate() + 7);
 
-        // Map orderStatus from DB to tracker step
         const statusStepMap = {
             'pending':    0,
             'processing': 1,
@@ -347,34 +386,58 @@ export const loadOrderSuccess = async (req, res) => {
             'delivered':  3,
         };
 
-    const currentStep = statusStepMap[order.orderStatus?.toLowerCase()] ?? 0;
+        const currentStep = statusStepMap[order.orderStatus?.toLowerCase()] ?? 0;
 
-    const formattedOrder = {
-    orderNumber: order._id.toString().slice(-8).toUpperCase(),
+    const offerDiscount = order.items.reduce((acc, item) => {
+    const product = item.product;
+    const variant = product?.variants?.[0];
 
-    deliveryStart: deliveryStart.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
-    deliveryEnd: deliveryEnd.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+    const mrp = variant?.price ?? 0;          // ← was: variant?.mrp ?? item.mrp ?? 0
+    const sellingPrice = item.price ?? 0;     // ← was: item.price ?? variant?.sellingPrice ?? 0
 
-    tracking: {
-        currentStep,
-        progressPercent: (currentStep / 3) * 100
-    },
+    const discountPerUnit = Math.max(0, mrp - sellingPrice);
+    return acc + discountPerUnit * item.quantity;
+    }, 0);
 
-    items: order.items.map(item => ({
-        name: item.product?.productName || item.product?.name || 'Product',
-        variant: `Qty: ${item.quantity}`,
-        price: `₹${item.price}`,
-        imageUrl: item.product?.variants?.[0]?.images?.[0] || '/images/product-placeholder.jpg'
-    })),
+        const couponDiscount = order.couponDiscount ?? 0;
 
-    subtotal: `₹${order.subtotal || order.totalAmount}`,
-    shippingCost: 'Free',
-    // ✅ now shows coupon discount if applied
-    couponCode: order.couponCode || null,
-    discount: order.couponDiscount ? `₹${order.couponDiscount}` : null,
-    total: `₹${order.totalAmount}`,
-    paymentMethod: order.paymentMethod?.toUpperCase()
-};
+        // ✅ Total savings = offer discount + coupon discount
+        const totalDiscount = offerDiscount + couponDiscount;
+
+        const formattedOrder = {
+            orderNumber: order._id.toString().slice(-8).toUpperCase(),
+
+            deliveryStart: deliveryStart.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+            deliveryEnd: deliveryEnd.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }),
+
+            tracking: {
+                currentStep,
+                progressPercent: (currentStep / 3) * 100
+            },
+
+            items: order.items.map(item => ({
+                name: item.product?.productName || item.product?.name || 'Product',
+                variant: `Qty: ${item.quantity}`,
+                price: `₹${item.price}`,
+                imageUrl: item.product?.variants?.[0]?.images?.[0] || '/images/product-placeholder.jpg'
+            })),
+
+            subtotal: `₹${order.subtotal || order.totalAmount}`,
+            shippingCost: 'Free',
+
+            // ✅ Offer discount line (only show if > 0)
+            offerDiscount: offerDiscount > 0 ? `₹${offerDiscount}` : null,
+
+            // ✅ Coupon discount line (only show if applied)
+            couponCode: order.couponCode || null,
+            couponDiscount: couponDiscount > 0 ? `₹${couponDiscount}` : null,
+
+            // ✅ Combined total savings
+            totalDiscount: totalDiscount > 0 ? `₹${totalDiscount}` : null,
+
+            total: `₹${order.totalAmount}`,
+            paymentMethod: order.paymentMethod?.toUpperCase()
+        };
 
         res.render('users/orderSuccess', {
             storeName: 'BOOT CAMP',
@@ -728,44 +791,55 @@ export const applyCoupon = async (req, res) => {
             return res.status(400).json({ success: false, message: 'You have already used this coupon' });
         }
 
-        // ── Check global usage limit ───────────────────────────────────
+        // ── Check global usage limit ──────────────────────────────────
         if (coupon.usageLimit && (coupon.usedCount || 0) >= coupon.usageLimit) {
             return res.status(400).json({ success: false, message: 'Coupon usage limit reached' });
         }
 
-        // ── Get cart and calculate subtotal ───────────────────────────
-        const cart = await Cart.findOne({ userId })
-            .populate('items.productId')
-            .lean();
+        // ── Get cart + active offers ──────────────────────────────────
+        const [cart, activeOffers] = await Promise.all([
+            Cart.findOne({ userId })
+                .populate({ path: 'items.productId', populate: { path: 'category', model: 'Category' } })
+                .lean(),
+            getActiveOffers(),
+        ]);
 
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ success: false, message: 'Your cart is empty' });
         }
 
         let cartSubtotal = 0;
+        let offerSavings = 0;
+
         cart.items.forEach(item => {
             if (!item.productId || item.productId.isDeleted) return;
             const variant = item.productId.variants?.find(
                 v => v._id.toString() === item.variantId?.toString()
             );
-            const price = variant?.price ?? item.price ?? 0;
-            cartSubtotal += price * item.quantity;
+            const originalPrice = variant?.price ?? item.price ?? 0;
+
+            const pricing = calculateOfferPrice(originalPrice, item.productId, activeOffers);
+            const finalPrice = pricing.hasOffer ? pricing.discountedPrice : originalPrice;
+
+            cartSubtotal += originalPrice * item.quantity;
+            offerSavings += (originalPrice - finalPrice) * item.quantity;
         });
 
-        // ── Check minimum order requirement ───────────────────────────
-        if (coupon.minOrder && cartSubtotal < coupon.minOrder) {
+        const effectiveSubtotal = cartSubtotal - offerSavings;
+
+        // ── Check minimum order ───────────────────────────────────────
+        if (coupon.minOrder && effectiveSubtotal < coupon.minOrder) {
             return res.status(400).json({
                 success: false,
                 message: `Minimum order of ₹${coupon.minOrder} required for this coupon`
             });
         }
 
-        // ── Calculate discount ────────────────────────────────────────
+        // ── Calculate discount on effectiveSubtotal ───────────────────
         let discount = 0;
 
         if (coupon.discountType === 'percentage') {
-            discount = Math.round((cartSubtotal * coupon.discountValue) / 100);
-            // Apply max discount cap if set
+            discount = Math.round((effectiveSubtotal * coupon.discountValue) / 100);
             if (coupon.maxDiscount && discount > coupon.maxDiscount) {
                 discount = coupon.maxDiscount;
             }
@@ -773,10 +847,9 @@ export const applyCoupon = async (req, res) => {
             discount = coupon.discountValue;
         }
 
-        // Discount cannot exceed cart total
-        discount = Math.min(discount, cartSubtotal);
+        discount = Math.min(discount, effectiveSubtotal);
 
-        const newTotal = cartSubtotal - discount;
+        const newTotal = effectiveSubtotal - discount;
 
         // ── Save to session ───────────────────────────────────────────
         req.session.appliedCoupon = coupon.code;
@@ -800,39 +873,47 @@ export const removeCoupon = async (req, res) => {
     try {
         const userId = req.session?.user?.id || req.session?.user?._id || req.user?._id;
 
-        // Check if any coupon is actually applied in session
         if (!req.session.appliedCoupon) {
             return res.status(400).json({ success: false, message: 'No coupon applied' });
         }
 
-        // Get cart to recalculate original total
-        const cart = await Cart.findOne({ userId })
-            .populate('items.productId')
-            .lean();
+        // ── Get cart + active offers ──────────────────────────────────
+        const [cart, activeOffers] = await Promise.all([
+            Cart.findOne({ userId })
+                .populate({ path: 'items.productId', populate: { path: 'category', model: 'Category' } })
+                .lean(),
+            getActiveOffers(),
+        ]);
 
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ success: false, message: 'Cart is empty' });
         }
 
-        // Recalculate subtotal exactly like applyCoupon does
         let cartSubtotal = 0;
+        let offerSavings = 0;
+
         cart.items.forEach(item => {
             if (!item.productId || item.productId.isDeleted) return;
             const variant = item.productId.variants?.find(
                 v => v._id.toString() === item.variantId?.toString()
             );
-            const price = variant?.price ?? item.price ?? 0;
-            cartSubtotal += price * item.quantity;
+            const originalPrice = variant?.price ?? item.price ?? 0;
+
+            const pricing = calculateOfferPrice(originalPrice, item.productId, activeOffers);
+            const finalPrice = pricing.hasOffer ? pricing.discountedPrice : originalPrice;
+
+            cartSubtotal += originalPrice * item.quantity;
+            offerSavings += (originalPrice - finalPrice) * item.quantity;
         });
 
-        // Clear coupon from session
+        // ── Clear session ─────────────────────────────────────────────
         req.session.appliedCoupon = null;
         req.session.couponDiscount = 0;
 
         return res.status(200).json({
             success: true,
             message: 'Coupon removed successfully',
-            newTotal: cartSubtotal,
+            newTotal: cartSubtotal - offerSavings,
         });
 
     } catch (err) {

@@ -169,6 +169,7 @@ export const loadOrderDetail = async (req, res) => {
                 paymentMethod: order.paymentMethod,
                 paymentStatus: order.paymentStatus,
                 subtotal: order.subtotal || order.totalAmount,
+                offerSavings: order.offerSavings || 0,
                 couponCode: order.couponCode || null,
                 couponDiscount: order.couponDiscount || 0,
                 address: {
@@ -818,16 +819,24 @@ doc.fontSize(9).font("Helvetica").fillColor(C.gray600)
 doc.fontSize(9).font("Helvetica-Bold").fillColor(C.black)
     .text(INR(order.subtotal || order.totalAmount), 0, totY, { align: "right", width: TOT_VAL });
 
-// Coupon discount row — only if coupon was applied
 let totalsOffset = 0;
-if (order.couponCode && order.couponDiscount > 0) {
-    totalsOffset = 20;
 
-    // Coupon label with code
+// ── Offer savings row ─────────────────────────────────────────────────
+if (order.offerSavings && order.offerSavings > 0) {
+    doc.fontSize(9).font("Helvetica").fillColor("#EA580C")
+        .text("Offer Discount", TOT_LBL, totY + 20);
+    doc.fontSize(9).font("Helvetica-Bold").fillColor("#EA580C")
+        .text(`- ${INR(order.offerSavings)}`, 0, totY + 20, { align: "right", width: TOT_VAL });
+    totalsOffset += 20;
+}
+
+// ── Coupon discount row ───────────────────────────────────────────────
+if (order.couponCode && order.couponDiscount > 0) {
     doc.fontSize(9).font("Helvetica").fillColor(C.green)
-        .text(`Coupon (${order.couponCode})`, TOT_LBL, totY + 20);
+        .text(`Coupon (${order.couponCode})`, TOT_LBL, totY + 20 + totalsOffset);
     doc.fontSize(9).font("Helvetica-Bold").fillColor(C.green)
-        .text(`- ${INR(order.couponDiscount)}`, 0, totY + 20, { align: "right", width: TOT_VAL });
+        .text(`- ${INR(order.couponDiscount)}`, 0, totY + 20 + totalsOffset, { align: "right", width: TOT_VAL });
+    totalsOffset += 20;
 }
 
 // Shipping row

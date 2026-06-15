@@ -1057,10 +1057,15 @@
             <div class="home-card flex flex-col cursor-pointer" 
                 data-href="/users/productDetail/{{this.id}}"
                 onmouseenter="startCarousel(this)" onmouseleave="stopCarousel(this)" data-brand="{{this.brand}}"
-                data-price="{{this.rawPrice}}" data-name="{{this.productName}}" data-variant="{{this.variantId}}">
+                data-price="{{#if this.hasOffer}}{{this.discountedPrice}}{{else}}{{this.rawPrice}}{{/if}}" data-name="{{this.productName}}" data-variant="{{this.variantId}}">
 
                 <!-- IMAGE CAROUSEL -->
                 <div class="home-card-img-box">
+                    {{#if this.hasOffer}}
+                    <div class="absolute top-3 left-3 z-20 bg-red-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-md">
+                    {{this.offerPercentage}}% OFF
+                    </div>
+                    {{/if}}
                     <!-- Wishlist -->
                     <button onclick="toggleWishlist(event, '{{this.id}}', this)" class="home-wish-btn">
                         <span
@@ -1093,8 +1098,17 @@
                         <span class="text-[10px] text-gray-400">({{this.reviewCount}})</span>
                     </div>
                     <p class="text-[12px] text-gray-500 font-medium mb-2">{{this.brand}}</p>
-                    <div class="text-[18px] font-black mb-3">₹{{this.rawPrice}}</div>
-
+                    {{#if this.hasOffer}}
+<div class="flex items-center gap-2 mb-6 flex-wrap">
+    <div class="text-[20px] font-black text-black">₹{{this.discountedPrice}}</div>
+    <div class="text-[13px] font-bold text-gray-400 line-through">₹{{this.rawPrice}}</div>
+    <div class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+        {{this.offerPercentage}}% OFF
+    </div>
+</div>
+{{else}}
+<div class="text-[20px] font-black text-black mb-6">₹{{this.rawPrice}}</div>
+{{/if}}
                     <!-- ACTIONS -->
                     <div class="home-card-actions">
                         <button onclick="addToCart(event, '{{this.id}}')" class="home-btn-primary">
@@ -1153,6 +1167,11 @@
                         data-href='/users/productDetail/{{this.id}}' data-variant="{{this.variantId}}"
                         onmouseenter="startCarousel(this)" onmouseleave="stopCarousel(this)">
                         <div class="home-card-img-box">
+                            {{#if this.hasOffer}}
+                            <div class="absolute top-3 left-3 z-20 bg-red-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-md">
+                             {{this.offerPercentage}}% OFF
+                            </div>
+                            {{/if}}
                             <button onclick="toggleWishlist(event, '{{this.id}}', this)" class="home-wish-btn">
                                 <span
                                     class="material-symbols-outlined text-[18px] text-white hover:text-red-400 {{#if this.isWishlisted}}icon-fill text-red-400{{/if}}">favorite</span>
@@ -1170,7 +1189,17 @@
                             <div class="text-[10px] text-white/50 font-bold uppercase tracking-[0.1em] mb-1">LIMITED
                             </div>
                             <h3 class="font-bold text-[15px] text-white mb-0.5 leading-tight">{{this.productName}}</h3>
+                            {{#if this.hasOffer}}
+                            <div class="flex items-center gap-2 mb-3 flex-wrap">
+                               <div class="text-[18px] font-black text-white">₹{{this.discountedPrice}}</div>
+                               <div class="text-[12px] font-bold text-white/40 line-through">₹{{this.rawPrice}}</div>
+                               <div class="text-[10px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">
+                               {{this.offerPercentage}}% OFF
+                               </div>
+                                </div>
+                               {{else}}
                             <div class="text-[18px] font-black text-white mb-3">₹{{this.rawPrice}}</div>
+                            {{/if}}
                             <div class="home-card-actions">
                                 <button onclick="addToCart(event, '{{this.id}}')"
                                     class="home-btn-primary bg-white text-black">Add to Cart</button>

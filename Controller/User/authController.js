@@ -9,6 +9,8 @@ import OTP from "../../Model/otpModel.js"
 import bcrypt from "bcrypt";
 const saltround=10;
 
+import { getActiveOffers, calculateOfferPrice } from "../../utils/offer.js";
+
 
 export const loadRegister=(req,res)=>{
     res.render("users/signup")
@@ -145,27 +147,30 @@ export const loadHome = async (req, res) => {
   try {
     const userId = req.session.user?._id || req.session.user?.id;
 
-    // ── CHANGE 2: fetch wishlist in parallel alongside products ──
-    const [newArrivals, limitedEdition, wishlist] = await Promise.all([
+    const [newArrivals, limitedEdition, wishlist, activeOffers] = await Promise.all([
       Product.find({ status: "active", isDeleted: false })
         .sort({ createdAt: -1 })
         .limit(4)
         .populate("brand", "name")
+        .populate("category", "name")
         .lean(),
 
       Product.find({ status: "active", isDeleted: false, isLimitedEdition: true })
         .sort({ createdAt: -1 })
         .limit(2)
         .populate("brand", "name")
+        .populate("category", "name")
         .lean(),
 
       // only query if logged in, otherwise resolve null
       userId
         ? Wishlist.findOne({ userId }).lean()
         : Promise.resolve(null),
+
+      getActiveOffers(),
     ]);
 
-    // ── CHANGE 3: build a Set of wishlisted IDs for fast lookup ──
+    // ── build a Set of wishlisted IDs for fast lookup ──
     const wishlistSet = new Set(
       wishlist?.products?.map((item) =>
         item.productId ? item.productId.toString() : item.toString()
@@ -197,11 +202,23 @@ export const loadHome = async (req, res) => {
         stock_icon = "check_circle";
       }
 
+      const rawPrice = variant?.price || 0;
+
+      // ── Offer pricing ──
+      const pricing = calculateOfferPrice(rawPrice, p, activeOffers);
+
       return {
         id: p._id.toString(),
         productName: p.productName,
         brand: p.brand?.name || "",
-        rawPrice: variant?.price || 0,
+        rawPrice,
+        discountedPrice: pricing.discountedPrice,
+        hasOffer: pricing.hasOffer,
+        offerPercentage: pricing.offer
+          ? pricing.offer.discountType === 'percentage'
+            ? pricing.offer.discountValue
+            : Math.round((pricing.discount / rawPrice) * 100)
+          : 0,
         images: variant?.images || [],
         isLimitedEdition: p.isLimitedEdition,
         createdAt: p.createdAt,
@@ -209,14 +226,13 @@ export const loadHome = async (req, res) => {
         stock_label,
         stock_icon,
         isWishlisted: userId ? wishlistSet.has(p._id.toString()) : false,
-        variantId: variant?._id?.toString() || "", 
+        variantId: variant?._id?.toString() || "",
       };
     };
 
     const formattedNewArrivals = newArrivals.map(formatProduct);
     const formattedLimited = limitedEdition.map(formatProduct);
 
-    // ── CHANGE 5: add wishlistCount for navbar badge ──
     const wishlistCount = wishlist?.products?.length ?? 0;
 
     return res.render("users/home", {
@@ -224,7 +240,7 @@ export const loadHome = async (req, res) => {
       products: formattedNewArrivals,
       limitedProducts: formattedLimited,
       cartCount,
-      wishlistCount, // ← CHANGE 5
+      wishlistCount,
     });
 
   } catch (error) {

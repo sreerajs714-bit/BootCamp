@@ -475,11 +475,16 @@
             {{#each products}}
             <a href="/users/productDetail/{{this.id}}"
                 class="product-card block border border-gray-100 rounded-[24px] p-3.5 flex flex-col bg-white hover:no-underline text-inherit"
-                data-brand="{{this.brand}}" data-price="{{this.rawPrice}}" data-category="{{this.category.name}}"
+                data-brand="{{this.brand}}" data-price="{{#if this.hasOffer}}{{this.discountedPrice}}{{else}}{{this.rawPrice}}{{/if}}" data-category="{{this.category.name}}"
                 data-name="{{this.productName}}" data-variant="{{this.variantId}}" data-size="{{this.defaultSize}}">
 
                 <!-- IMAGE -->
                 <div class="relative bg-gray-100 rounded-[16px] aspect-square overflow-hidden mb-5">
+                    {{#if this.hasOffer}}
+                    <div class="absolute top-3 left-3 z-20 bg-red-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-md">
+                    {{this.offerPercentage}}% OFF
+                    </div>
+                    {{/if}}
                     <button onclick="toggleWishlist(event, '{{this.id}}', this)"
                         class="absolute top-3 right-3 z-20 bg-white w-[38px] h-[38px] rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition">
                         <span
@@ -518,7 +523,17 @@
                         </div>
                         <p class="text-[12px] text-gray-500 font-medium mb-4">{{this.brand}}</p>
                         
+                        {{#if this.hasOffer}}
+                        <div class="flex items-center gap-2 mb-6 flex-wrap">
+                         <div class="text-[20px] font-black text-black">₹{{this.discountedPrice}}</div>
+                        <div class="text-[13px] font-bold text-gray-400 line-through">₹{{this.rawPrice}}</div>
+                        <div class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                        {{this.offerPercentage}}% OFF
+                         </div>
+                        </div>
+                        {{else}}
                         <div class="text-[20px] font-black text-black mb-6">₹{{this.rawPrice}}</div>
+                        {{/if}}
                     </div>
                     
                     <div class="mt-auto flex flex-col gap-2">
