@@ -234,10 +234,6 @@
                 class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
                 <span class="material-symbols-outlined mr-3.5 text-[20px]">assignment_return</span>Returns
             </a>
-            <a href="/admin/reviews"
-                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-                <span class="material-symbols-outlined mr-3.5 text-[20px]">reviews</span>Review
-            </a>
             <a href="/admin/brand"
                 class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
                 <span class="material-symbols-outlined mr-3.5 text-[20px]">sell</span>Brand
@@ -490,57 +486,62 @@
         }
 
         // Render table rows from JSON
-        function renderOrders(orders) {
-            if (orders.length === 0) {
-                tbody.innerHTML = `
-                <tr>
-                    <td colspan="8" class="py-20 text-center text-[12px] font-bold text-gray-300 uppercase tracking-widest">
-                        No orders found
-                    </td>
-                </tr>`;
-                return;
-            }
+       function renderOrders(orders) {
+        if (orders.length === 0) {
+        tbody.innerHTML = `
+        <tr>
+            <td colspan="8" class="py-20 text-center text-[12px] font-bold text-gray-300 uppercase tracking-widest">
+                No orders found
+            </td>
+        </tr>`;
+        return;
+    }
 
-            tbody.innerHTML = orders.map(o => `
-            <tr class="order-row group">
-                <td class="py-6 px-8 text-[12px] font-bold text-black uppercase">#${o._id.slice(16, 24)}</td>
-                <td class="py-6 px-8">
-                    <p class="text-[13px] font-bold text-black leading-tight">${o.user.username}</p>
-                </td>
-                <td class="py-6 px-8">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-gray-50 rounded p-1 flex-shrink-0">
-                            ${o.items[0].product.variants[0].images[0]
-                    ? `<img src="${o.items[0].product.variants[0].images[0]}" class="w-full h-full object-contain" alt="">`
-                    : `<span class="material-symbols-outlined text-gray-300 text-[24px]">image_not_supported</span>`
-                }
-                        </div>
-                        <div class="max-w-[200px]">
-                            <p class="text-[12px] font-medium text-gray-900 truncate">${o.items[0].product.productName}</p>
-                            ${o.items.length > 1
-                    ? `<p class="text-[10px] font-bold uppercase mt-0.5 text-gray-400">+${o.items.length - 1} more</p>`
-                    : ''
-                }
-                        </div>
+    tbody.innerHTML = orders.map(o => {
+        const image = o.items?.[0]?.product?.variants?.[0]?.images?.[0] || '';
+        const productName = o.items?.[0]?.product?.productName || '—';
+        const username = o.user?.username || '—';
+
+        return `
+        <tr class="order-row group">
+            <td class="py-6 px-8 text-[12px] font-bold text-black uppercase">#${o._id.toString().slice(16, 24)}</td>
+            <td class="py-6 px-8">
+                <p class="text-[13px] font-bold text-black leading-tight">${username}</p>
+            </td>
+            <td class="py-6 px-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gray-50 rounded p-1 flex-shrink-0">
+                        ${image
+                            ? `<img src="${image}" class="w-full h-full object-contain" alt="">`
+                            : `<span class="material-symbols-outlined text-gray-300 text-[24px]">image_not_supported</span>`
+                        }
                     </div>
-                </td>
-                <td class="py-6 px-8 text-[13px] font-medium text-gray-600">${formatDate(o.createdAt)}</td>
-                <td class="py-6 px-8 text-[14px] font-black text-black">₹${o.totalAmount}</td>
-                <td class="py-6 px-8 text-[11px] font-bold text-gray-400 uppercase tracking-widest">${o.paymentMethod}</td>
-                <td class="py-6 px-8">
-                    <span class="status-pill ${getStatusClass(o.orderStatus)}">
-                        <span class="w-1.5 h-1.5 rounded-full ${getDotClass(o.orderStatus)}"></span>
-                        ${o.orderStatus}
-                    </span>
-                </td>
-                <td class="py-6 px-8 text-right">
-                    <a href="/admin/orderDetail/${o._id}" class="text-gray-400 hover:text-black transition-colors">
-                        <span class="material-symbols-outlined text-[20px]">visibility</span>
-                    </a>
-                </td>
-            </tr>
-        `).join('');
-        }
+                    <div class="max-w-[200px]">
+                        <p class="text-[12px] font-medium text-gray-900 truncate">${productName}</p>
+                        ${o.items.length > 1
+                            ? `<p class="text-[10px] font-bold uppercase mt-0.5 text-gray-400">+${o.items.length - 1} more</p>`
+                            : ''
+                        }
+                    </div>
+                </div>
+            </td>
+            <td class="py-6 px-8 text-[13px] font-medium text-gray-600">${formatDate(o.createdAt)}</td>
+            <td class="py-6 px-8 text-[14px] font-black text-black">₹${o.totalAmount}</td>
+            <td class="py-6 px-8 text-[11px] font-bold text-gray-400 uppercase tracking-widest">${o.paymentMethod}</td>
+            <td class="py-6 px-8">
+                <span class="status-pill ${getStatusClass(o.orderStatus)}">
+                    <span class="w-1.5 h-1.5 rounded-full ${getDotClass(o.orderStatus)}"></span>
+                    ${o.orderStatus}
+                </span>
+            </td>
+            <td class="py-6 px-8 text-right">
+                <a href="/admin/orderDetail/${o._id}" class="text-gray-400 hover:text-black transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">visibility</span>
+                </a>
+            </td>
+        </tr>`;
+    }).join('');
+}
 
         async function fetchOrders(search, status, page = 1) {
             const params = { search, status, page };
@@ -559,6 +560,10 @@
                 console.error('fetchOrders error:', err);
             }
         }
+
+        function goToPage(page) {
+        fetchOrders(searchInput.value.trim(), currentStatus, page);
+}
 
         function updatePagination(data) {
             const showingText = document.querySelector('.pagination-container')

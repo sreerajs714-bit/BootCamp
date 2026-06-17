@@ -368,8 +368,6 @@ export const loadOrderSuccess = async (req, res) => {
             .populate('items.product')
             .lean();
 
-            console.log("order items:", JSON.stringify(order.items[0], null, 2));
-
         if (!order) {
             return res.redirect('/users/home');
         }

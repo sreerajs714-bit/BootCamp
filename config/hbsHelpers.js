@@ -36,10 +36,12 @@ hbs.registerHelper('and', function(...args) {
     const values = args.slice(0, -1);
     return values.every(Boolean);
 });
+
 hbs.registerHelper('or', function(...args) {
     const values = args.slice(0, -1);
     return values.some(Boolean);
 });
+
 hbs.registerHelper('not', (a) => !a);
 hbs.registerHelper('includes', (arr, val) => Array.isArray(arr) && arr.map(String).includes(String(val)));
 hbs.registerHelper('eq', (a, b) => String(a) === String(b));
@@ -49,6 +51,7 @@ hbs.registerHelper("sub", (a, b) => a - b);
 hbs.registerHelper("mul", (a, b) => a * b);
 hbs.registerHelper('json', (context) => JSON.stringify(context));
 hbs.registerHelper('selected', (a, b) => a && b && a.toString() === b.toString() ? 'selected' : '');
+hbs.registerHelper('json', (context) => JSON.stringify(context));
 
 hbs.registerHelper('initials', function (fullName) {
     if (!fullName || typeof fullName !== 'string') return '';
@@ -79,4 +82,5 @@ hbs.registerHelper("formatTime", function (date) {
     });
 });
 
-}    
+} 
+

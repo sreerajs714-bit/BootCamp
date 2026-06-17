@@ -434,10 +434,6 @@
                 class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
                 <span class="material-symbols-outlined mr-3.5 text-[19px]">assignment_return</span>Returns
             </a>
-            <a href="/admin/reviews"
-                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
-                <span class="material-symbols-outlined mr-3.5 text-[19px]">reviews</span>Review
-            </a>
             <a href="/admin/brand"
                 class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
                 <span class="material-symbols-outlined mr-3.5 text-[19px]">sell</span>Brand
@@ -849,7 +845,14 @@
         const pg = document.getElementById('pagination');
         pg.innerHTML = '';
 
-        if (p.totalPages <= 1) return;
+        if (p.totalPages <= 1) {
+    // Still show page 1 button even with single page
+       const btn = document.createElement('button');
+       btn.className = 'w-8 h-8 rounded border flex items-center justify-center text-[11px] font-bold bg-black text-white border-black';
+       btn.innerText = '1';
+      pg.appendChild(btn);
+      return;
+      }
 
         const btn = (label, page, disabled = false, active = false) => {
             const b = document.createElement('button');

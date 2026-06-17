@@ -17,7 +17,7 @@ export const loadOffer = async (req, res) => {
   try {
     const { search = "", type = "all", status = "all", page = 1 } = req.query;
 
-    const LIMIT = 10;
+    const LIMIT = 5;
     const currentPage = Math.max(1, parseInt(page));
     const now = new Date();
 

@@ -67,30 +67,32 @@ export const loadOrders = async (req, res) => {
         }));
 
         // FIX: return JSON for AJAX requests
-        if (isAjax) {
-            return res.json({
-                success: true,
-                orders: orders.map(o => ({
-                    _id:         o._id,
-                    idSuffix:    o._id.toString().slice(16, 24).toUpperCase(),
-                    username:    o.user?.username || '—',
-                    productName: o.items?.[0]?.product?.productName || '—',
-                    productImage: o.items?.[0]?.product?.variants?.[0]?.images?.[0] || '',
-                    extraItems:  o.items.length - 1,
-                    createdAt:   o.createdAt,
-                    totalAmount: o.totalAmount,
-                    paymentMethod: o.paymentMethod,
-                    orderStatus: o.orderStatus
-                })),
-                totalFiltered,
-                totalPages,
-                currentPage: safePage,
-                hasPrev:  safePage > 1,
-                hasNext:  safePage < totalPages,
-                prevPage: safePage - 1,
-                nextPage: safePage + 1
-            });
-        }
+       if (isAjax) {
+        return res.json({
+        success: true,
+        orders: orders.map(o => ({
+            _id: o._id,
+            user: { username: o.user?.username || '—' },
+            items: o.items.map(i => ({
+                product: {
+                    productName: i.product?.productName || '—',
+                    variants: i.product?.variants || [{ images: [] }]
+                }
+            })),
+            createdAt: o.createdAt,
+            totalAmount: o.totalAmount,
+            paymentMethod: o.paymentMethod,
+            orderStatus: o.orderStatus
+        })),
+        totalFiltered,
+        totalPages,
+        currentPage: safePage,
+        hasPrev:  safePage > 1,
+        hasNext:  safePage < totalPages,
+        prevPage: safePage - 1,
+        nextPage: safePage + 1
+    });
+}
 
         return res.render('admin/orderManagement', {
             orders,

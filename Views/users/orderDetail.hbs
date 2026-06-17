@@ -583,7 +583,7 @@
                     </div>
 
                     {{!-- Pending payment: hide cancel --}}
-                    {{else if (eq order.paymentStatus 'Pending')}}
+                    {{else if (and (eq order.paymentMethod 'razorpay') (eq order.paymentStatus 'Pending'))}}
                     {{!-- No action buttons for pending payment orders --}}
 
                     {{!-- Active orders: show Cancel --}}
@@ -625,7 +625,19 @@
                                     <a href="/users/orderDetail/{{../order._id}}/return/{{this._id}}"
                                         class="text-[9px] font-black uppercase tracking-[0.15em] text-blue-500 hover:underline">Return Item</a>
 
-                                    {{else if (and (ne ../order.paymentStatus 'Pending') (ne ../order.orderStatus 'Cancelled') (ne ../order.orderStatus 'cancelled') (ne ../order.orderStatus 'Canceled') (ne ../order.orderStatus 'canceled') (ne ../order.orderStatus 'Delivered') (ne ../order.orderStatus 'delivered') (ne ../order.orderStatus 'Returned') (ne ../order.orderStatus 'returned') (ne ../order.returnStatus 'Requested') (ne ../order.returnStatus 'requested'))}}
+                                    {{else if (and 
+                                    (or (ne ../order.paymentMethod 'razorpay') (ne ../order.paymentStatus 'Pending'))
+                                    (ne ../order.orderStatus 'Cancelled') 
+                                    (ne ../order.orderStatus 'cancelled') 
+                                    (ne ../order.orderStatus 'Canceled') 
+                                    (ne ../order.orderStatus 'canceled') 
+                                    (ne ../order.orderStatus 'Delivered') 
+                                    (ne ../order.orderStatus 'delivered') 
+                                    (ne ../order.orderStatus 'Returned') 
+                                    (ne ../order.orderStatus 'returned') 
+                                    (ne ../order.returnStatus 'Requested') 
+                                    (ne ../order.returnStatus 'requested')
+                                     )}}
                                     <button onclick="openModal('CANCEL', '{{this._id}}')"
                                         class="text-[9px] font-black uppercase tracking-[0.15em] text-red-500 hover:underline">Cancel Item</button>
                                     {{/if}}

@@ -1,5 +1,5 @@
 import express from "express"
-import { Adminlogin, adminLogout, loadDashboard, loadLogin } from "../Controller/Admin/authController.js";
+import { Adminlogin, adminLogout, loadDasboard, loadLogin } from "../Controller/Admin/authController.js";
 import { blockUser, loadUsers, unblockUser } from "../Controller/Admin/userManagementController.js";
 import { isAdmin } from "../Middleware/adminAuth.js";
 import { addCategory, deleteCategory, editCategory, loadCategory, restoreCategory } from "../Controller/Admin/categoryController.js";
@@ -10,13 +10,20 @@ import { loadOrderDetail, loadOrders,updateOrderStatus } from "../Controller/Adm
 import { approveReturn, loadReturnDetail, loadReturnManagement, processRefund, rejectReturn, schedulePickup } from "../Controller/Admin/returnController.js";
 import { createCoupon, deleteCoupon, getCouponById, loadCoupon, toggleCouponStatus, updateCoupon } from "../Controller/Admin/couponController.js";
 import { createOffer, deleteOffer, getCategoriesMetadata, getOfferById, getProductsMetadata, loadOffer, toggleOfferStatus, updateOffer } from "../Controller/Admin/offerController.js";
+import { exportSalesReportExcel, exportSalesReportPDF, loadSalesReport, loadSalesReportPage } from "../Controller/Admin/salesReportController.js";
 const route=express.Router();
 
 route.get("/",loadLogin);
 route.post("/login",Adminlogin);
 route.get("/login", loadLogin);
-route.get("/dashboard",isAdmin,loadDashboard)
+route.get("/dashboard",isAdmin,loadDasboard);
 route.get('/logout', adminLogout);
+
+route.get("/dashboardData",isAdmin,loadDasboard);
+route.get("/salesReport",isAdmin,loadSalesReportPage);
+route.get("/salesReportData",isAdmin,loadSalesReport)
+route.get("/salesReport/export/excel",exportSalesReportExcel);
+route.get("/salesReport/export/pdf",exportSalesReportPDF);
 
 route.get("/userManagement",isAdmin,loadUsers);
 route.patch('/userManagement/block/:id',isAdmin, blockUser);

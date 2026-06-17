@@ -102,15 +102,6 @@ export const loadAllProducts = async (req, res) => {
 
         const shaped = products.map(p => shapeProduct(p, wishlistedIds, activeOffers));
 
-        console.log('Sample product:', JSON.stringify({
-    name: shaped[0]?.productName,
-    hasOffer: shaped[0]?.hasOffer,
-    rawPrice: shaped[0]?.rawPrice,
-    discountedPrice: shaped[0]?.discountedPrice,
-    offerPercentage: shaped[0]?.offerPercentage,
-}, null, 2));
-
-
         res.render("users/allProduct", {
             breadcrumbs: [
                 { label: 'Home', url: '/' },

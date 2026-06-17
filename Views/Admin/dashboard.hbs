@@ -1,46 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>BOOT CAMP | DASHBOARD</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        fontFamily: {
-          headline: ['Space Grotesk', 'sans-serif'],
-          body: ['Inter', 'sans-serif'],
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Admin | BOOTCAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
         }
-      }
-    }
-  }
-</script>
-<style>
-  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  .anim-1 { animation: fadeUp 0.7s 0s    cubic-bezier(0.25,1,0.5,1) both; }
-  .anim-2 { animation: fadeUp 0.7s 0.15s cubic-bezier(0.25,1,0.5,1) both; }
-  .anim-3 { animation: fadeIn 0.5s 0.3s  both; }
-  .anim-4 { animation: fadeUp 0.7s 0.3s  cubic-bezier(0.25,1,0.5,1) both; }
-</style>
+
+        body {
+            background-color: #f7f8fa;
+            color: #111827;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+
+        .font-display {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .sidebar-item {
+            transition: all 0.18s ease;
+        }
+
+        .sidebar-item:hover:not(.active) {
+            background-color: #f9fafb;
+        }
+
+        .sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-item.active .material-symbols-outlined {
+            color: #fff;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            border: 1px solid #f1f3f5;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 28px;
+            flex: 1;
+            border: 1px solid #f1f3f5;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.01);
+        }
+
+        .stat-icon {
+            width: 44px;
+            height: 44px;
+            background: #000;
+            color: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        .order-status-dark {
+            background: #1a1c23;
+            color: white;
+            border-radius: 24px;
+            padding: 28px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #f1f3f5;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #000;
+            border-radius: 4px;
+        }
+
+        .inventory-box {
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .out-of-stock {
+            background: #fff5f5;
+            border: 1px solid #ffe3e3;
+        }
+
+        .low-stock {
+            background: #fffcf0;
+            border: 1px solid #fff3bf;
+        }
+
+        .pill-btn {
+            padding: 8px 24px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 800;
+            border: 1px solid #e5e7eb;
+            transition: all 0.2s;
+        }
+
+        .pill-btn:hover {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        /* Custom Table Styling */
+        .nexus-table th {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #9ca3af;
+            padding: 16px 24px;
+            border-bottom: 1px solid #f8fafc;
+        }
+
+        .nexus-table td {
+            font-size: 13px;
+            padding: 16px 24px;
+            color: #1f2937;
+            border-bottom: 1px solid #f8fafc;
+        }
+
+        .nexus-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .show-period {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+        }
+    </style>
 </head>
-<body class="bg-gray-100 font-body">
 
-<div class="flex h-screen overflow-hidden">
+<body class="antialiased min-h-screen flex bg-[#f7f8fa]">
 
-  <!-- ───── SIDEBAR ───── -->
-  <aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+    <!-- ===== SIDEBAR ===== -->
+     <aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
 
     <!-- Logo -->
     <div class="h-24 flex flex-col justify-center px-8 border-b border-gray-100">
@@ -62,10 +197,10 @@
       <a href="/admin/orders" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
         <span class="material-symbols-outlined mr-4 text-[20px]">shopping_bag</span>Orders
       </a>
-      <a href="#" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+      <a href="/admin/offers" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
         <span class="material-symbols-outlined mr-4 text-[20px]">local_offer</span>Offers
       </a>
-      <a href="#" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+      <a href="/admin/coupons" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
         <span class="material-symbols-outlined mr-4 text-[20px]">confirmation_number</span>Coupons
       </a>
       <a href="/admin/userManagement" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
@@ -74,9 +209,6 @@
       <a href="/admin/returns" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
         <span class="material-symbols-outlined mr-4 text-[20px]">assignment_return</span>Returns
       </a>
-      <a href="#" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
-        <span class="material-symbols-outlined mr-4 text-[20px]">reviews</span>Review
-      </a>
       <a href="/admin/brand" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
         <span class="material-symbols-outlined mr-4 text-[20px]">sell</span>Brand
       </a>
@@ -84,178 +216,565 @@
 
     <!-- Logout -->
 <div class="px-4 py-4 border-t border-gray-100">
-  <a href="#"
-   id="logoutBtn"
-   class="flex items-center px-4 py-3 text-[13px] font-bold text-red-500 uppercase tracking-wide rounded-md hover:bg-red-50 transition-all">
-
-  <span class="material-symbols-outlined mr-4 text-[20px]">logout</span>
-  Logout
-
-</a>
+    <button
+        onclick="openLogoutModal()"
+        class="w-full flex items-center px-4 py-3 text-[13px] font-bold text-red-500 uppercase tracking-wide rounded-md hover:bg-red-50 transition-all">
+        <span class="material-symbols-outlined mr-4 text-[20px]">logout</span>
+        Logout
+    </button>
 </div>
   </aside>
 
-  <!-- ───── MAIN ───── -->
-  <div class="flex flex-col flex-1 overflow-hidden">
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="flex-1 flex flex-col min-h-screen">
+        <header class="h-24 px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-10">
+            <div>
+                <h2 class="text-[20px] font-black uppercase tracking-tight text-gray-900 font-display">Dashboard</h2>
+                <p class="text-[12px] text-gray-400 font-medium tracking-wide">Welcome back to BOOTCAMP admin.</p>
+            </div>
 
-    <!-- TOPBAR -->
-    <header class="bg-white border-b border-gray-200 flex items-center justify-between px-7 py-4 sticky top-0 z-40">
-      <div class="flex items-center gap-2 bg-gray-100 rounded-lg px-4 py-2 w-72">
-        <span class="material-symbols-outlined text-[18px] text-gray-400">search</span>
-        <input type="text" placeholder="Search anything..."
-          class="bg-transparent border-none outline-none text-[13px] text-gray-800 placeholder-gray-400 w-full font-body"/>
-      </div>
-      <div class="flex items-center gap-2 cursor-pointer px-3 py-2 rounded-lg hover:bg-gray-100 transition-all">
-        <div class="w-8 h-8 bg-black rounded-full flex items-center justify-center text-white text-[13px] font-bold font-headline">A</div>
-        <span class="text-[12px] font-semibold tracking-widest uppercase text-gray-800">Admin Root</span>
-        <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
-      </div>
-    </header>
+            <div class="flex items-center gap-4">
+                <!-- Sales Report Button -->
+                <a href="/admin/salesReport" class="flex items-center gap-3 px-8 py-3 bg-[#111827] text-white rounded-full text-[11px] font-black uppercase tracking-[0.15em] hover:bg-black transition-all shadow-lg shadow-gray-200/50">
+                    <span class="material-symbols-outlined text-[18px]">pie_chart</span>
+                    Sales Report
+                </a>
 
-    <!-- PAGE CONTENT -->
-    <main class="flex-1 overflow-y-auto flex items-center justify-center px-12 py-16">
-      <div class="text-center max-w-xl w-full">
+                <!-- Analysis Period Dropdown -->
+                <div class="relative custom-dropdown" id="analysis-dropdown">
+                    <button class="flex items-center gap-3 px-8 py-3 bg-[#111827] text-white rounded-full text-[11px] font-black uppercase tracking-[0.15em] hover:bg-black transition-colors" onclick="toggleAnalysisDropdown()">
+                        <span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                        <span id="selected-period">Month</span>
+                        <span class="material-symbols-outlined text-[16px] transition-transform duration-300" id="dropdown-arrow">expand_more</span>
+                    </button>
+                    
+                    <div class="dropdown-menu absolute top-full right-0 mt-3 w-60 bg-white rounded-[24px] shadow-2xl border border-gray-50 p-2 opacity-0 invisible translate-y-2 transition-all duration-300 z-50 overflow-hidden" id="analysis-menu">
+                        <div class="px-6 py-4 border-b border-gray-50">
+                            <p class="text-[9px] font-black text-gray-300 uppercase tracking-[0.2em]">Analysis Period</p>
+                        </div>
+                        <div class="py-2">
+                            <button onclick="selectPeriod('Today')" class="period-btn w-full text-left px-6 py-3.5 text-[12px] font-bold text-gray-600 hover:bg-gray-50 hover:text-black transition-colors flex items-center justify-between group">
+                                Today
+                                <span class="indicator w-1.5 h-1.5 rounded-full bg-black opacity-0 group-[.selected]:opacity-100"></span>
+                            </button>
+                            <button onclick="selectPeriod('Week')" class="period-btn w-full text-left px-6 py-3.5 text-[12px] font-bold text-gray-600 hover:bg-gray-50 hover:text-black transition-colors flex items-center justify-between group">
+                                Week
+                                <span class="indicator w-1.5 h-1.5 rounded-full bg-black opacity-0 group-[.selected]:opacity-100"></span>
+                            </button>
+                            <button onclick="selectPeriod('Month')" class="period-btn w-full text-left px-6 py-3.5 text-[12px] font-bold text-black bg-gray-50 flex items-center justify-between group selected">
+                                Month
+                                <span class="indicator w-1.5 h-1.5 rounded-full bg-black opacity-100"></span>
+                            </button>
+                            <button onclick="selectPeriod('Year')" class="period-btn w-full text-left px-6 py-3.5 text-[12px] font-bold text-gray-600 hover:bg-gray-50 hover:text-black transition-colors flex items-center justify-between group">
+                                Year
+                                <span class="indicator w-1.5 h-1.5 rounded-full bg-black opacity-0 group-[.selected]:opacity-100"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
 
-        <div class="anim-1 w-[72px] h-[72px] bg-black rounded-2xl flex items-center justify-center mx-auto mb-7">
-          <span class="material-symbols-outlined text-white text-[36px]">sports_soccer</span>
+        <div class="p-10 space-y-10">
+            <!-- Row 1: Quick Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Total Earnings -->
+                <div class="stat-card">
+                    <div class="stat-icon"><span class="material-symbols-outlined">payments</span></div>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Total Earnings</p>
+                    <h3 class="text-[32px] font-black tracking-tight" id="disp-earnings">₹ 0.00</h3>
+                </div>
+                <!-- Total Orders -->
+                <div class="stat-card">
+                    <div class="stat-icon"><span class="material-symbols-outlined">shopping_cart</span></div>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Total Orders</p>
+                    <h3 class="text-[32px] font-black tracking-tight" id="disp-orders">0</h3>
+                </div>
+                <!-- Active Users -->
+                <div class="stat-card">
+                    <div class="stat-icon"><span class="material-symbols-outlined">person_add</span></div>
+                    <p class="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-2">Active Users</p>
+                    <h3 class="text-[32px] font-black tracking-tight" id="disp-users">0</h3>
+                </div>
+            </div>
+
+            <!-- Row 2: Sales Activity & Order Status -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Sales Activity (Spline Area) -->
+                <div class="lg:col-span-2 dashboard-card">
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h4 class="text-[15px] font-black uppercase tracking-tight flex items-center gap-2">
+                                <span class="w-1.5 h-1.5 rounded-full bg-black"></span> Sales Activity
+                            </h4>
+                            <p class="text-[11px] text-gray-400 font-medium mt-1">Current performance breakdown</p>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Order Status (Donut) -->
+                <div class="order-status-dark">
+                    <div class="mb-8">
+                        <h4 class="text-[15px] font-black uppercase tracking-tight">Order Status</h4>
+                        <p class="text-[11px] text-gray-500 font-medium mt-1">Distribution breakdown</p>
+                    </div>
+                    <div class="relative h-48 mb-10 flex items-center justify-center">
+                        <canvas id="orderDonut"></canvas>
+                        <div class="absolute flex flex-col items-center">
+                            <span class="text-3xl font-black" id="donut-total">0</span>
+                            <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Orders</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-2 text-[11px] font-bold text-gray-400">
+                                <span class="w-2 h-2 rounded-full bg-white"></span> Delivered
+                            </span>
+                            <span class="text-[11px] font-black" id="stat-delivered">0</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-2 text-[11px] font-bold text-gray-400">
+                                <span class="w-2 h-2 rounded-full bg-gray-600"></span> Pending
+                            </span>
+                            <span class="text-[11px] font-black" id="stat-pending">0</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-2 text-[11px] font-bold text-gray-400">
+                                <span class="w-2 h-2 rounded-full bg-red-500"></span> Cancelled
+                            </span>
+                            <span class="text-[11px] font-black" id="stat-cancelled">0</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="flex items-center gap-2 text-[11px] font-bold text-gray-400">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Returned
+                            </span>
+                            <span class="text-[11px] font-black" id="stat-returned">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 3: Best Categories & Inventory Alerts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Best Categories -->
+                <div class="dashboard-card">
+                    <div class="flex items-center justify-between mb-8">
+                        <h4 class="text-[15px] font-black uppercase tracking-tight flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-black"></span> Best Categories
+                        </h4>
+                        <a href="/admin/category" class="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1 hover:text-black">
+                            View All <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                        </a>
+                    </div>
+                    <div class="space-y-8" id="categories-list">
+                        <!-- Items will be injected -->
+                    </div>
+                </div>
+
+                <!-- Inventory Alerts -->
+                <div class="space-y-8 flex flex-col justify-between p-0">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                        <h4 class="text-[15px] font-black uppercase tracking-tight">Inventory Alerts</h4>
+                    </div>
+                    <div class="flex gap-8 flex-1">
+                        <div class="inventory-box out-of-stock flex flex-col items-center justify-center">
+                            <p class="text-[10px] font-extrabold text-red-400 uppercase tracking-widest mb-4">Out of Stock</p>
+                            <h3 class="text-5xl font-black text-red-600 mb-6" id="count-out-of-stock">0</h3>
+                            <p class="text-[9px] font-bold text-red-300 uppercase tracking-widest mb-6">Need Restock</p>
+                            <button onclick="window.location.href='/admin/productManagement'" class="pill-btn bg-white hover:bg-red-500 hover:text-white border-red-100 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[16px]">visibility</span> View
+                            </button>
+                        </div>
+                        <div class="inventory-box low-stock flex flex-col items-center justify-center">
+                            <p class="text-[10px] font-extrabold text-amber-500 uppercase tracking-widest mb-4">Low Stock</p>
+                            <h3 class="text-5xl font-black text-amber-600 mb-6" id="count-low-stock">0</h3>
+                            <p class="text-[9px] font-bold text-amber-400 uppercase tracking-widest mb-6">Running Low</p>
+                            <button onclick="window.location.href='/admin/productManagement'" class="pill-btn bg-white hover:bg-amber-500 hover:text-white border-amber-100 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[16px]">visibility</span> View
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Row 4: Recent Acquisitions & Most Popular -->
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <!-- Recent Acquisitions -->
+                <div class="lg:col-span-3 dashboard-card">
+                    <div class="flex items-center justify-between mb-8">
+                        <h4 class="text-[15px] font-black uppercase tracking-tight flex items-center gap-2 text-[#111827]">
+                            Recent Acquisitions
+                        </h4>
+                        <a href="/admin/usermanagement" class="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1 hover:text-black">
+                            View All Registry <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                        </a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full nexus-table">
+                            <thead>
+                                <tr>
+                                    <th>Order ID</th>
+                                    <th>Client</th>
+                                    <th class="text-right">Activity</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-acquisitions-body">
+                                <!-- Data injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Most Popular -->
+                <div class="lg:col-span-2 dashboard-card">
+                    <div class="flex items-center justify-between mb-8">
+                        <h4 class="text-[15px] font-black uppercase tracking-tight flex items-center gap-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-black"></span> Most Popular
+                        </h4>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full nexus-table">
+                            <thead>
+                                <tr>
+                                    <th>Product</th>
+                                    <th class="text-center">Sold</th>
+                                    <th class="text-right">Link</th>
+                                </tr>
+                            </thead>
+                            <tbody id="popular-products-body">
+                                <!-- Data injected -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div class="anim-1">
-          <h1 class="font-headline font-black text-5xl text-black tracking-tight uppercase leading-tight">
-            Welcome Back,<br/>Admin
-          </h1>
-        </div>
-
-        <div class="anim-2">
-          <p class="mt-4 text-sm text-gray-400 tracking-wide leading-relaxed">
-            You're logged in to the BootCamp admin panel.<br/>
-            Manage your store from the sidebar.
-          </p>
-        </div>
-
-        <div class="anim-3 w-14 h-[3px] bg-black mx-auto my-8"></div>
-
-      </div>
     </main>
+    <!-- Logout Confirmation Modal -->
+<div id="logout-modal" class="fixed inset-0 z-50 flex items-center justify-center opacity-0 invisible transition-all duration-300">
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeLogoutModal()"></div>
+    
+    <!-- Modal Card -->
+    <div id="logout-modal-card" class="relative bg-white rounded-[28px] p-10 w-full max-w-sm mx-4 shadow-2xl scale-95 opacity-0 transition-all duration-300">
+        <!-- Icon -->
+        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+            <span class="material-symbols-outlined text-red-500 text-[28px]">logout</span>
+        </div>
 
-    <!-- Footer -->
-    <footer class="border-t border-gray-200 py-4 text-center">
-      <p class="text-[10px] tracking-widest text-gray-300 uppercase">
-        BootCamp Analytics Engine V1.0 · Authorized Personnel Only
-      </p>
-    </footer>
+        <!-- Text -->
+        <h3 class="text-[18px] font-black text-center text-gray-900 mb-2 uppercase tracking-tight">Log Out?</h3>
+        <p class="text-[12px] text-gray-400 text-center font-medium mb-8 leading-relaxed">
+            You'll be signed out of the BOOTCAMP admin panel. Any unsaved changes will be lost.
+        </p>
 
-  </div>
-</div>
-
-<!-- LOGOUT MODAL -->
-<div id="logoutModal"
-     class="fixed inset-0 hidden bg-black/50 z-[9999] items-center justify-center">
-
-  <div class="bg-white w-[400px] rounded-2xl shadow-2xl overflow-hidden">
-
-    <div class="h-1.5 bg-red-500"></div>
-
-    <div class="p-8">
-
-      <div class="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mb-5">
-        <span class="material-symbols-outlined text-red-500 text-[30px]">
-          logout
-        </span>
-      </div>
-
-      <h2 class="text-2xl font-black uppercase tracking-tight">
-        Confirm Logout
-      </h2>
-
-      <p class="mt-3 text-sm text-gray-500 leading-relaxed">
-        Are you sure you want to logout from the admin dashboard?
-      </p>
-
-      <div class="flex justify-end gap-3 mt-8">
-
-        <button id="cancelLogout"
-          class="px-5 py-3 rounded-xl border border-gray-200 bg-gray-100 hover:bg-gray-200 text-[12px] font-bold uppercase tracking-widest">
-          Cancel
-        </button>
-
-        <a href="/admin/logout"
-          class="px-5 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-[12px] font-bold uppercase tracking-widest">
-          Logout
-        </a>
-
-      </div>
-
+        <!-- Buttons -->
+        <div class="flex gap-3">
+            <button 
+                onclick="closeLogoutModal()" 
+                class="flex-1 py-3.5 rounded-2xl border border-gray-200 text-[12px] font-black uppercase tracking-wide text-gray-500 hover:bg-gray-50 transition-all">
+                Cancel
+            </button>
+            <a 
+                href="/admin/logout" 
+                class="flex-1 py-3.5 rounded-2xl bg-black text-white text-[12px] font-black uppercase tracking-wide text-center hover:bg-red-600 transition-all duration-300">
+                Log Out
+            </a>
+        </div>
     </div>
-  </div>
 </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
+    // ── Server-rendered initial data ──────────────────────────────
+    const DASHBOARD = {
+        totalEarnings:       {{totalEarnings}},
+        totalOrders:         {{totalOrders}},
+        activeUsersCount:    {{activeUsersCount}},
+        salesData:           {{{json salesData}}},
+        orderStats:          {{{json orderStats}}},
+        bestCategories:      {{{json bestCategories}}},
+        outOfStockCount:     {{outOfStockCount}},
+        lowStockCount:       {{lowStockCount}},
+        recentAcquisitions:  {{{json recentAcquisitions}}},
+        mostPopularProducts: {{{json mostPopularProducts}}}
+    };
 
-  // ACTIVE SIDEBAR
-  const path = window.location.pathname;
+    // ── Chart instances ───────────────────────────────────────────
+    let salesChart, orderDonut;
 
-  document.querySelectorAll('.sidebar-item').forEach(link => {
+    document.addEventListener('DOMContentLoaded', () => {
+        initSalesChart();
+        initOrderDonut();
+        renderDashboard(DASHBOARD);
+    });
 
-    if (link.getAttribute('href') === path) {
+    // ── Init Sales Line Chart ─────────────────────────────────────
+    function initSalesChart() {
+    const ctx = document.getElementById('salesChart').getContext('2d');
 
-      link.classList.add('bg-black', 'text-white');
+    // Store ctx reference globally for gradient recreation
+    window._salesCtx = ctx;
 
-      link.classList.remove(
-        'text-gray-500',
-        'hover:bg-gray-100'
-      );
+    salesChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Revenue',
+                data: [0, 0, 0, 0],
+                borderColor: '#000',
+                backgroundColor: createGradient(ctx),  // static on init
+                fill: true,
+                tension: 0.4,
+                borderWidth: 2,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#000',
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: { color: '#f8fafc', drawBorder: false },
+                    ticks: { font: { size: 10, weight: 'bold' }, color: '#9ca3af' }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: { font: { size: 10, weight: 'bold' }, color: '#9ca3af' }
+                }
+            }
+        }
+    });
+}
+
+function createGradient(ctx) {
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, 'rgba(0,0,0,0.08)');
+    gradient.addColorStop(1, 'rgba(0,0,0,0)');
+    return gradient;
+}
+
+    // ── Init Order Donut Chart ────────────────────────────────────
+    function initOrderDonut() {
+        const ctx = document.getElementById('orderDonut').getContext('2d');
+        orderDonut = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Delivered', 'Pending', 'Cancelled', 'Returned'],
+                datasets: [{
+                    data: [0, 0, 0, 0],
+                    backgroundColor: ['#fff', '#4a4a4a', '#ef4444', '#10b981'],
+                    borderWidth: 0,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                cutout: '85%',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } }
+            }
+        });
     }
-  });
 
-  // MODAL ELEMENTS
-  const logoutBtn = document.getElementById('logoutBtn');
+    // ── Render all dashboard sections ─────────────────────────────
+    function renderDashboard(data, period) {
+    period = (period || document.getElementById('selected-period').innerText).toLowerCase();
 
-  const logoutModal = document.getElementById('logoutModal');
+    // Stats
+    document.getElementById('disp-earnings').innerText = `₹ ${data.totalEarnings.toLocaleString('en-IN')}`;
+    document.getElementById('disp-orders').innerText   = data.totalOrders;
+    document.getElementById('disp-users').innerText    = data.activeUsersCount;
 
-  const cancelLogout = document.getElementById('cancelLogout');
+    // Sales Chart labels
+    const labelMap = {
+    today: ['6AM', '12PM', '6PM', '12AM'],
+    week:  ['Day 1-2', 'Day 3-4', 'Day 5-6', 'Day 7'],
+    month: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+    year:  ['Q1', 'Q2', 'Q3', 'Q4']
+    };
 
-  // OPEN MODAL
-  logoutBtn.addEventListener('click', function(e) {
+    salesChart.data.labels = labelMap[period] || labelMap.month;
+    salesChart.data.datasets[0].data = data.salesData;
+    salesChart.data.datasets[0].backgroundColor = createGradient(window._salesCtx);
+    salesChart.update('active');
 
-    e.preventDefault();
+        // Order Donut
+        const o = data.orderStats;
+        orderDonut.data.datasets[0].data = [o.delivered, o.pending, o.cancelled, o.returned];
+        orderDonut.update();
+        document.getElementById('donut-total').innerText    = o.total;
+        document.getElementById('stat-delivered').innerText = o.delivered;
+        document.getElementById('stat-pending').innerText   = o.pending;
+        document.getElementById('stat-cancelled').innerText = o.cancelled;
+        document.getElementById('stat-returned').innerText  = o.returned;
 
-    logoutModal.classList.remove('hidden');
+        // Best Categories
+        const catList = document.getElementById('categories-list');
+        catList.innerHTML = data.bestCategories.length
+            ? data.bestCategories.map(c => `
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-[11px] font-black uppercase text-gray-800">${c.name}</span>
+                        <span class="text-[10px] font-bold text-gray-400">${c.count} sold</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${c.percentage}%"></div>
+                    </div>
+                </div>
+            `).join('')
+            : `<p class="text-[11px] text-gray-400 font-medium">No category data available.</p>`;
 
-    logoutModal.classList.add('flex');
-  });
+        // Inventory
+        document.getElementById('count-out-of-stock').innerText = data.outOfStockCount;
+        document.getElementById('count-low-stock').innerText    = data.lowStockCount;
 
-  // CLOSE MODAL
-  cancelLogout.addEventListener('click', function() {
+        // Recent Acquisitions
+        const acqBody = document.getElementById('recent-acquisitions-body');
+        acqBody.innerHTML = data.recentAcquisitions.length
+            ? data.recentAcquisitions.map(a => `
+                <tr>
+                    <td class="font-bold">#${a.orderId}</td>
+                    <td>
+                        <div class="flex items-center gap-2">
+                            <div class="w-6 h-6 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold">
+                                ${a.client.charAt(0).toUpperCase()}
+                            </div>
+                            <span class="font-medium">${a.client}</span>
+                        </div>
+                    </td>
+                    <td class="text-right">
+                        <button onclick="window.location.href='/admin/orderDetail/${a._id}'"
+                            class="material-symbols-outlined text-gray-300 hover:text-black">
+                            visibility
+                        </button>
+                    </td>
+                </tr>
+            `).join('')
+            : `<tr><td colspan="3" class="text-center text-[11px] text-gray-400 py-6">No recent orders.</td></tr>`;
 
-    logoutModal.classList.add('hidden');
-
-    logoutModal.classList.remove('flex');
-  });
-
-  // BACKDROP CLOSE
-  logoutModal.addEventListener('click', function(e) {
-
-    if (e.target === logoutModal) {
-
-      logoutModal.classList.add('hidden');
-
-      logoutModal.classList.remove('flex');
+        // Most Popular Products
+        const popularBody = document.getElementById('popular-products-body');
+        popularBody.innerHTML = data.mostPopularProducts.length
+            ? data.mostPopularProducts.map(p => `
+                <tr>
+                    <td>
+                        <div class="flex items-center gap-3">
+                            <img src="${p.image}" class="w-8 h-8 rounded-lg object-cover"
+                                onerror="this.src='/images/placeholder.jpg'">
+                            <span class="font-medium line-clamp-1">${p.name}</span>
+                        </div>
+                    </td>
+                    <td class="text-center font-bold">${p.soldCount}</td>
+                    <td class="text-right">
+                        <button onclick="window.location.href='/admin/productManagement?id=${p._id}'"
+                            class="material-symbols-outlined text-gray-300 hover:text-black">
+                            open_in_new
+                        </button>
+                    </td>
+                </tr>
+            `).join('')
+            : `<tr><td colspan="3" class="text-center text-[11px] text-gray-400 py-6">No products found.</td></tr>`;
     }
-  });
 
-  // ESC CLOSE
-  document.addEventListener('keydown', function(e) {
-
-    if (e.key === 'Escape') {
-
-      logoutModal.classList.add('hidden');
-
-      logoutModal.classList.remove('flex');
+    // ── Period switcher (axios for dynamic reload) ────────────────
+   async function loadDashboardData(period = 'month') {
+    try {
+        const res = await axios.get(`/admin/dashboardData?period=${period}`);
+        if (res.data.success) {
+            renderDashboard(res.data.data, period);
+        }
+    } catch (err) {
+        console.error('Dashboard reload failed:', err);
     }
-  });
+  }
 
+    // ── Analysis Dropdown ─────────────────────────────────────────
+    function toggleAnalysisDropdown() {
+        const menu  = document.getElementById('analysis-menu');
+        const arrow = document.getElementById('dropdown-arrow');
+        const isOpen = menu.classList.contains('show-period');
+
+        if (isOpen) {
+            menu.classList.remove('show-period');
+            arrow.style.transform = 'rotate(0deg)';
+        } else {
+            menu.classList.add('show-period');
+            arrow.style.transform = 'rotate(180deg)';
+        }
+    }
+
+    async function selectPeriod(period) {
+        document.getElementById('selected-period').innerText = period;
+
+        // Update selected state on buttons
+        document.querySelectorAll('.period-btn').forEach(btn => {
+            const isSelected = btn.innerText.trim() === period;
+            btn.classList.toggle('selected',   isSelected);
+            btn.classList.toggle('bg-gray-50', isSelected);
+            btn.classList.toggle('text-black', isSelected);
+            btn.classList.toggle('text-gray-600', !isSelected);
+            btn.querySelector('.indicator').classList.toggle('opacity-100', isSelected);
+            btn.querySelector('.indicator').classList.toggle('opacity-0',   !isSelected);
+        });
+
+        toggleAnalysisDropdown();
+        await loadDashboardData(period.toLowerCase());
+    }
+
+    // ── Close dropdown on outside click ──────────────────────────
+    window.addEventListener('click', (e) => {
+        if (!e.target.closest('#analysis-dropdown')) {
+            const menu  = document.getElementById('analysis-menu');
+            const arrow = document.getElementById('dropdown-arrow');
+            if (menu?.classList.contains('show-period')) {
+                menu.classList.remove('show-period');
+                arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+    });
+
+    // ── Logout Modal ──────────────────────────────────────────────
+    function openLogoutModal() {
+    const modal = document.getElementById('logout-modal');
+    const card  = document.getElementById('logout-modal-card');
+
+    modal.classList.remove('opacity-0', 'invisible');
+    // Small delay so transition fires after display
+    requestAnimationFrame(() => {
+        card.classList.remove('scale-95', 'opacity-0');
+        card.classList.add('scale-100', 'opacity-100');
+    });
+  }
+
+    function closeLogoutModal() {
+    const modal = document.getElementById('logout-modal');
+    const card  = document.getElementById('logout-modal-card');
+
+    card.classList.remove('scale-100', 'opacity-100');
+    card.classList.add('scale-95', 'opacity-0');
+
+    setTimeout(() => {
+        modal.classList.add('opacity-0', 'invisible');
+    }, 280);
+}
+
+// Close on Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLogoutModal();
+});
 </script>
-
 </body>
+
 </html>
