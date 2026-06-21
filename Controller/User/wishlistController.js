@@ -6,7 +6,7 @@ import Cart from "../../Model/cartModel.js";
 export const loadWishlist = async (req, res) => {
     try {
         const isLoggedIn = !!req.session?.user;
- 
+
         if (!isLoggedIn) {
             return res.render("users/wishlist", {
                 wishlistItems: [],
@@ -14,14 +14,14 @@ export const loadWishlist = async (req, res) => {
                 isLoggedIn: false
             });
         }
- 
+
         const userId = req.session.user.id;
 
-         res.locals.breadcrumbs = [
-       { label: 'Home', url: '/' },
-       { label: "Wishlist" },
-       ];
- 
+        res.locals.breadcrumbs = [
+            { label: 'Home', url: '/' },
+            { label: "Wishlist" },
+        ];
+
         const wishlist = await Wishlist.findOne({ userId })
             .populate({
                 path: "products.productId",
@@ -31,7 +31,7 @@ export const loadWishlist = async (req, res) => {
                 }
             })
             .lean();
- 
+
         if (!wishlist || wishlist.products.length === 0) {
             return res.render("users/wishlist", {
                 wishlistItems: [],
@@ -39,59 +39,79 @@ export const loadWishlist = async (req, res) => {
                 isLoggedIn: true
             });
         }
- 
-        // ✅ Get cart items to check isInCart
+
+        // ✅ Split items into "valid" vs "blocked/deleted/missing"
+        const idsToRemove = [];
+        const validProducts = [];
+
+        wishlist.products.forEach(item => {
+            const product = item.productId;
+            const isBlockedOrDeleted = !product || product.isDeleted || product.status !== "active";
+
+            if (isBlockedOrDeleted) {
+                idsToRemove.push(product?._id || item.productId);
+            } else {
+                validProducts.push(item);
+            }
+        });
+
+        // ✅ Permanently purge blocked/deleted items from this user's wishlist
+        if (idsToRemove.length > 0) {
+            await Wishlist.updateOne(
+                { userId },
+                { $pull: { products: { productId: { $in: idsToRemove } } } }
+            );
+        }
+
+        if (validProducts.length === 0) {
+            return res.render("users/wishlist", {
+                wishlistItems: [],
+                count: 0,
+                isLoggedIn: true
+            });
+        }
+
         const cart = await Cart.findOne({ userId }).lean();
         const cartProductIds = (cart?.items || []).map(i => i.productId.toString());
- 
-       const wishlistItems = wishlist.products
-        .filter(item => item.productId) // only filter out null/deleted refs
-        .map(item => {
-        const product = item.productId;
 
-        const isInactive = product.isDeleted || product.status !== "active";  // ← flag
+        const wishlistItems = validProducts.map(item => {
+            const product = item.productId;
 
-        const variant = product.variants?.find(
-            v => v._id.toString() === item.variantId?.toString()
-        ) || product.variants?.[0];
+            const variant = product.variants?.find(
+                v => v._id.toString() === item.variantId?.toString()
+            ) || product.variants?.[0];
 
-        const rawImages = variant?.images || [];
-        const images = rawImages.map(img => {
-            if (typeof img === "string") return img;
-            return img.url || img.path || img.src || "";
-        }).filter(Boolean);
+            const rawImages = variant?.images || [];
+            const images = rawImages.map(img => {
+                if (typeof img === "string") return img;
+                return img.url || img.path || img.src || "";
+            }).filter(Boolean);
 
-        return {
-            id: product._id,
-            productName: product.productName,
-            brand: product.brand?.name || product.brand?.brandName || "Brand",
-            rawPrice: variant?.price || 0,
-            price: `₹${(variant?.price || 0).toLocaleString("en-IN")}`,
-            variantId: variant?._id,
-            size: item.size || variant?.sizes?.[0] || '',
-            images,
-            color: variant?.color || "",
-            badge: product.category || "",
-            isLimitedEdition: product.isLimitedEdition || false,
-            stock: variant?.stock || 0,
-            isOutOfStock: (variant?.stock || 0) === 0,
-            isInCart: cartProductIds.includes(product._id.toString()),
-            isInactive,   // ← added
-        };
-    });
- 
-        res.locals.breadcrumbs = [
-            { label: 'Home', url: '/' },
-            { label: 'Wishlist' }
-        ];
- 
+            return {
+                id: product._id,
+                productName: product.productName,
+                brand: product.brand?.name || product.brand?.brandName || "Brand",
+                rawPrice: variant?.price || 0,
+                price: `₹${(variant?.price || 0).toLocaleString("en-IN")}`,
+                variantId: variant?._id,
+                size: item.size || variant?.sizes?.[0] || '',
+                images,
+                color: variant?.color || "",
+                badge: product.category || "",
+                isLimitedEdition: product.isLimitedEdition || false,
+                stock: variant?.stock || 0,
+                isOutOfStock: (variant?.stock || 0) === 0,
+                isInCart: cartProductIds.includes(product._id.toString()),
+            };
+        });
+
         return res.render("users/wishlist", {
             wishlistItems,
             count: wishlistItems.length,
             isLoggedIn: true,
             user: req.session.user
         });
- 
+
     } catch (error) {
         console.error("loadWishlist error:", error);
         return res.render("users/wishlist", {

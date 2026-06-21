@@ -317,7 +317,7 @@
                 <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between gap-4 flex-wrap">
                     <div class="flex items-center gap-3">
                         <h3 class="text-[15px] font-black text-black">Product Inventory</h3>
-                        <span
+                        <span id="itemsBadge"
                             class="text-[10px] font-bold tracking-widest text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full uppercase">
                             {{products.length}} items shown
                         </span>
@@ -404,9 +404,9 @@
                                 <th class="py-4 px-8 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase text-right w-44">Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
+                        <tbody id="productsTbody" class="divide-y divide-gray-100">
                             {{#each products}}
-                            <tr class="product-row group">
+                            <tr class="product-row group" data-id="{{this._id}}">
                                 <td class="py-5 px-8 text-[13px] font-medium text-gray-400">
                                     {{addIndex @index ../currentPage 5}}
                                 </td>
@@ -490,11 +490,11 @@
 
                 <!-- Pagination -->
                 <div class="px-8 py-5 border-t border-gray-100 flex items-center justify-between bg-white">
-                    <div class="text-[11px] font-medium text-gray-500">
+                    <div id="showingText" class="text-[11px] font-medium text-gray-500">
                         Showing <span class="font-bold text-black">{{products.length}}</span> of <span
-                            class="font-bold text-black">{{totalProducts}}</span> products
+                        class="font-bold text-black">{{totalProducts}}</span> products
                     </div>
-                    <div class="flex items-center gap-1.5">
+                    <div id="paginationWrap" class="flex items-center gap-1.5">
                         {{#if hasPrevPage}}
                         <button onclick="changePage({{prevPage}})"
                             class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-400 hover:text-black">
@@ -643,91 +643,138 @@
             }
         }
 
-    function selectOption(filterId, value, label) {
+    let currentParams = {
+    page: {{currentPage}},
+    search: "{{search}}",
+    category: "{{category}}",
+    brand: "{{brand}}",
+    status: "{{status}}"
+};
+
+function selectOption(filterId, value, label) {
     document.getElementById(filterId + 'Filter').value = value;
 
-    // Update the toggle label
-    const allToggles = document.querySelectorAll('.custom-dropdown');
-    allToggles.forEach(dropdown => {
+    document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
         const menu = dropdown.querySelector('.dropdown-menu');
         if (menu && menu.contains(event.target)) {
             dropdown.querySelector('.selected-value').textContent = label;
         }
     });
 
-    // Close all dropdowns
     document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
     document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
 
-    navigateWithFilters();
-    }
+    fetchProducts(1);
+}
 
-    function navigateWithFilters(page = 1) {
-    const search = document.getElementById('searchInput').value.trim();
-    const category = document.getElementById('categoryFilter').value;
-    const brand = document.getElementById('brandFilter').value;
-    const status = document.getElementById('statusFilter').value;
-    window.location.href = `/admin/productManagement?page=${page}&search=${encodeURIComponent(search)}&category=${category}&brand=${brand}&status=${status}`;
-    }
+async function fetchProducts(page = 1) {
+    currentParams.page     = page;
+    currentParams.search   = document.getElementById('searchInput').value.trim();
+    currentParams.category = document.getElementById('categoryFilter').value;
+    currentParams.brand    = document.getElementById('brandFilter').value;
+    currentParams.status   = document.getElementById('statusFilter').value;
 
-        // Close dropdowns on click outside
-        document.addEventListener('click', e => {
-            if (!e.target.closest('.custom-dropdown')) {
-                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
-                document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
-            }
+    try {
+        const res = await axios.get('/admin/productManagement', {
+            params: { ...currentParams, ajax: 'true' }
         });
-
-        // ─── PAGINATION ─────────────────────────────────────────────
-        function changePage(page) {
-            const search = document.getElementById('searchInput').value.trim();
-            const category = document.getElementById('categoryFilter').value;
-            const brand = document.getElementById('brandFilter').value;
-            const status = document.getElementById('statusFilter').value;
-            window.location.href = `/admin/productManagement?page=${page}&search=${encodeURIComponent(search)}&category=${category}&brand=${brand}&status=${status}`;
+        const data = res.data;
+        if (data.success) {
+            renderTable(data);
+            renderPagination(data);
+            history.replaceState(null, '', `/admin/productManagement?${new URLSearchParams(currentParams)}`);
         }
+    } catch (err) {
+        console.error('fetchProducts error:', err);
+        showToast('error', 'Failed to load products');
+    }
+}
 
-    // ─── DEBOUNCED SEARCH (no reload) ─────────────────────────────
-    let debounceTimer;
+function changePage(page) { fetchProducts(page); }
 
-    document.getElementById('searchInput').addEventListener('input', function () {
+let debounceTimer;
+document.getElementById('searchInput').addEventListener('input', function () {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-        filterTable();
-    }, 300);
+    debounceTimer = setTimeout(() => fetchProducts(1), 400);
+});
+
+function statusBadge(p) {
+    if (p.isDeleted) return `<span class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase bg-red-50 text-red-600">Deleted</span>`;
+    if (p.status === 'active') return `<span class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase bg-emerald-50 text-emerald-600">Active</span>`;
+    return `<span class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase bg-gray-100 text-gray-500">Inactive</span>`;
+}
+
+function stockCell(stock) {
+    const dot = stock <= 10 ? 'bg-red-500 animate-pulse' : 'bg-emerald-400';
+    const txt = stock <= 10 ? 'text-red-500' : 'text-black';
+    return `<div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full ${dot}"></span><span class="text-[13px] font-bold ${txt}">${stock}</span></div>`;
+}
+
+function escAttr(str = '') { return String(str).replace(/'/g, "\\'"); }
+
+function actionsCell(p) {
+    const img = p.defaultVariant?.images?.[0] || '';
+    if (p.isDeleted) {
+        return `<button onclick="openRestoreModal('${escAttr(p.productName)}', '${p._id}', '${img}')" class="text-emerald-500 hover:text-emerald-600 transition-colors flex items-center gap-1.5" title="Restore">
+                    <span class="material-symbols-outlined text-[18px]">settings_backup_restore</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider">Restore</span>
+                </button>`;
+    }
+    return `<a href="/admin/productView/${p._id}" class="text-gray-400 hover:text-black transition-colors" title="View"><span class="material-symbols-outlined text-[18px]">visibility</span></a>
+            <a href="/admin/editProduct/${p._id}" class="text-gray-400 hover:text-black transition-colors" title="Edit"><span class="material-symbols-outlined text-[18px]">edit</span></a>
+            <button onclick="openDeleteModal('${escAttr(p.productName)}', '${p._id}', '${img}')" class="text-red-300 hover:text-red-500 transition-colors" title="Delete"><span class="material-symbols-outlined text-[18px]">delete</span></button>`;
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('productsTbody');
+
+    if (!data.products.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-[13px] font-medium text-gray-400">No products found</td></tr>`;
+    } else {
+        tbody.innerHTML = data.products.map((p, idx) => {
+            const v = p.defaultVariant || {};
+            const serial = (data.currentPage - 1) * 5 + idx + 1;
+            return `<tr class="product-row group" data-id="${p._id}">
+                <td class="py-5 px-8 text-[13px] font-medium text-gray-400">${serial}</td>
+                <td class="py-5 px-4">
+                    <div class="w-12 h-12 bg-gray-50 flex items-center justify-center p-1 border border-gray-100 rounded-lg overflow-hidden group-hover:border-gray-200 transition-colors">
+                        ${v.images?.[0] ? `<img src="${v.images[0]}" alt="${p.productName}" class="max-w-full max-h-full object-contain" />` : `<span class="material-symbols-outlined text-gray-300 text-[20px]">image</span>`}
+                    </div>
+                </td>
+                <td class="py-5 px-6">
+                    <div class="text-[14px] font-bold text-black leading-tight">${p.productName}</div>
+                    <div class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">${v.sku || ''}</div>
+                </td>
+                <td class="py-5 px-6"><span class="text-[11px] font-bold text-black uppercase tracking-wider bg-gray-50 px-2 py-1 rounded">${p.category?.name || ''}</span></td>
+                <td class="py-5 px-6"><div class="text-[14px] font-black text-black tracking-tight">₹${v.price ?? ''}</div></td>
+                <td class="py-5 px-6">${stockCell(v.stock ?? 0)}</td>
+                <td class="py-5 px-6"><div class="flex items-center">${statusBadge(p)}</div></td>
+                <td class="py-5 px-8 text-right"><div class="flex items-center justify-end gap-4">${actionsCell(p)}</div></td>
+            </tr>`;
+        }).join('');
+    }
+
+    document.getElementById('itemsBadge').textContent = `${data.products.length} items shown`;
+    document.getElementById('showingText').innerHTML =
+        `Showing <span class="font-bold text-black">${data.products.length}</span> of <span class="font-bold text-black">${data.totalProducts}</span> products`;
+}
+
+function renderPagination(data) {
+    const wrap = document.getElementById('paginationWrap');
+    let html = data.hasPrevPage
+        ? `<button onclick="changePage(${data.prevPage})" class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-400 hover:text-black"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>`
+        : `<button disabled class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-200 cursor-not-allowed"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>`;
+
+    data.pageNumbers.forEach(n => {
+        html += `<button onclick="changePage(${n})" class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-[12px] font-bold ${n === data.currentPage ? 'current' : 'text-gray-600'}">${n}</button>`;
     });
 
-    function filterTable() {
-    const query = document.getElementById('searchInput').value.trim().toLowerCase();
-    const rows = document.querySelectorAll('.product-row');
-    let visibleCount = 0;
+    html += data.hasNextPage
+        ? `<button onclick="changePage(${data.nextPage})" class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-400 hover:text-black"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>`
+        : `<button disabled class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-200 cursor-not-allowed"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>`;
 
-    rows.forEach(row => {
-        const name = row.querySelector('td:nth-child(3)')?.textContent?.toLowerCase() || '';
-        const sku  = row.querySelector('td:nth-child(3) .text-gray-400')?.textContent?.toLowerCase() || '';
-        const matches = name.includes(query) || sku.includes(query);
-        row.style.display = matches ? '' : 'none';
-        if (matches) visibleCount++;
-    });
-
-    // Update the "items shown" badge
-    const badge = document.querySelector('.bg-gray-100.px-2\\.5');
-    if (badge) badge.textContent = `${visibleCount} items shown`;
-
-    // Show empty state if nothing matches
-    let emptyRow = document.getElementById('empty-search-row');
-    if (visibleCount === 0) {
-        if (!emptyRow) {
-            emptyRow = document.createElement('tr');
-            emptyRow.id = 'empty-search-row';
-            emptyRow.innerHTML = `<td colspan="8" class="py-12 text-center text-[13px] font-medium text-gray-400">No products match your search</td>`;
-            document.querySelector('tbody').appendChild(emptyRow);
-        }
-        emptyRow.style.display = '';
-    } else if (emptyRow) {
-        emptyRow.style.display = 'none';
-    }
-    }
+    wrap.innerHTML = html;
+}
 
         // ─── DELETE PRODUCT ──────────────────────────────────────────
         document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
@@ -739,7 +786,7 @@
                     showToast('success', data.message || 'Product deleted successfully');
                     setTimeout(() => {
                         closeModals();
-                        location.reload();
+                        fetchProducts(currentParams.page);
                     }, 500);
                 } else {
                     showToast('error', data.message || 'Failed to delete product.');

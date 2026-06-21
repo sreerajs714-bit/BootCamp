@@ -26,7 +26,6 @@ export const loadProduct = async (req, res) => {
             filter.status = "inactive";
         } else {
             filter.isDeleted = false;
-            delete filter.status;
         }
 
         if (search) {
@@ -39,14 +38,13 @@ export const loadProduct = async (req, res) => {
         if (category !== "all") filter.category = category;
         if (brand !== "all") filter.brand = brand;
 
-        const [products, totalProducts, categories, brands,activeCount, lowStockCount] = await Promise.all([
+        const [products, totalProducts, categories, brands, activeCount, lowStockCount] = await Promise.all([
             Product.find(filter)
                 .populate("category", "name")
                 .populate("brand", "name")
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit),
-
             Product.countDocuments(filter),
             Category.find({ isDeleted: false, isActive: true }).select("name"),
             Brand.find({ isDeleted: false }).select("name"),
@@ -54,24 +52,18 @@ export const loadProduct = async (req, res) => {
             Product.countDocuments({ isDeleted: false, "variants.stock": { $lte: 10 } }),
         ]);
 
-        // ⭐ IMPORTANT FIX: attach defaultVariant
         const formattedProducts = products.map(p => {
             const product = p.toObject();
-
             const defaultVariant =
                 product.variants.find(v => v.isDefault) ||
                 product.variants[0] ||
                 null;
-
-            return {
-                ...product,
-                defaultVariant,
-            };
+            return { ...product, defaultVariant };
         });
 
-        const totalPages = Math.ceil(totalProducts / limit);
+        const totalPages = Math.ceil(totalProducts / limit) || 1;
 
-        res.render("Admin/productManagement", {
+        const payload = {
             products: formattedProducts,
             categories,
             brands,
@@ -89,10 +81,20 @@ export const loadProduct = async (req, res) => {
             prevPage: page - 1,
             nextPage: page + 1,
             pageNumbers: Array.from({ length: totalPages }, (_, i) => i + 1),
-        });
+        };
+
+        // ✅ AJAX call -> JSON, no render
+        if (req.query.ajax === "true") {
+            return res.json({ success: true, ...payload });
+        }
+
+        res.render("Admin/productManagement", payload);
 
     } catch (error) {
         console.error("loadProduct error:", error);
+        if (req.query.ajax === "true") {
+            return res.status(500).json({ success: false, message: "Something went wrong" });
+        }
         res.redirect("/admin/dashboard");
     }
 };

@@ -7,19 +7,10 @@ const __dirname = path.dirname(__filename);
 
 export const registerHbsHelpers = () => {
 
-hbs.registerHelper("slice", function (text, start, end) {
-    if (!text) return "";
-    return text.toString().slice(start, end);
-});
-
-hbs.registerHelper('slice', function(str, start) {
+hbs.registerHelper('slice', function (str, start, end) {
     if (!str) return '';
-    return String(str).slice(start);
-});
-
-hbs.registerHelper('slice', (str, start, end) => {
-    if (!str) return '';
-    return str.toString().slice(start, end);
+    str = str.toString();
+    return typeof end === 'number' ? str.slice(start, end) : str.slice(start);
 });
 
 hbs.registerHelper("addIndex", (index, currentPage, limit) => {

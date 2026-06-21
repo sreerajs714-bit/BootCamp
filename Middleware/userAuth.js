@@ -38,7 +38,7 @@ export const checkUserBlocked = async (req, res, next) => {
 
     if (!user || user.isBlocked) {
       req.session.destroy(() => {
-        res.clearCookie("connect.sid");
+        res.clearCookie("user.sid");
         return res.redirect("/users/login?message=blocked");
       });
       return;

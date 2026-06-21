@@ -134,7 +134,49 @@
 
 <body class="antialiased min-h-screen flex bg-[#f7f8fa]">
 
-    <main class="flex-1 flex flex-col min-h-screen">
+     <!-- ===== SIDEBAR ===== -->
+     <aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+
+    <!-- Logo -->
+    <div class="h-24 flex flex-col justify-center px-8 border-b border-gray-100">
+      <h1 class="font-headline font-black text-2xl tracking-tight uppercase text-black">BOOTCAMP</h1>
+      <span class="text-[10px] font-bold tracking-widest text-[#10b981] mt-1">SYSTEM ADMIN</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+        <a href="/admin/dashboard"
+            class="sidebar-item active flex items-center px-4 py-3 text-[13px] font-bold uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard</a>
+        </a>
+      <a href="/admin/productManagement" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">sports_soccer</span>Products
+      </a>
+      <a href="/admin/category" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">category</span>Categories
+      </a>
+      <a href="/admin/orders" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">shopping_bag</span>Orders
+      </a>
+      <a href="/admin/offers" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">local_offer</span>Offers
+      </a>
+      <a href="/admin/coupons" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">confirmation_number</span>Coupons
+      </a>
+      <a href="/admin/userManagement" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">group</span>Users
+      </a>
+      <a href="/admin/returns" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">assignment_return</span>Returns
+      </a>
+      <a href="/admin/brand" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-md hover:bg-gray-100">
+        <span class="material-symbols-outlined mr-4 text-[20px]">sell</span>Brand
+      </a>
+    </nav>
+     </aside>
+
+    <main class="flex-1 flex flex-col min-h-screen">        
         <!-- Header -->
         <header class="h-24 px-10 flex items-center justify-between border-b border-gray-100 bg-white sticky top-0 z-10 transition-all duration-300">
             <div>

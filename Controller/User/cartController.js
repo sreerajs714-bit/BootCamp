@@ -10,6 +10,10 @@ export const loadCart = async (req, res) => {
     try {
         const userId = req.session?.user?.id;
 
+        // NEW — pick up any stock notice left by loadCheckout, then clear it
+        const cartNotice = req.session.cartNotice || null;
+        delete req.session.cartNotice;
+
         res.locals.breadcrumbs = [
             { label: 'Home', url: '/' },
             { label: "Cart" },
@@ -34,18 +38,17 @@ export const loadCart = async (req, res) => {
                 subtotal: 0,
                 total: 0,
                 savings: 0,
-                bagCount: 0
+                bagCount: 0,
+                cartNotice // NEW — also needed in the empty-cart branch
             });
         }
 
-        let subtotal = 0;   // sum of original prices (qty applied)
-        let total = 0;      // sum of discounted prices (qty applied)
+        let subtotal = 0;
+        let total = 0;
 
         const cartItems = cart.items.map(item => {
-
             const product = item.productId;
 
-            // Match the exact variant used when added to cart, fallback to first
             const variant = product.variants?.find(
                 v => v._id.toString() === item.variantId?.toString()
             ) || product.variants?.[0];
@@ -55,7 +58,6 @@ export const loadCart = async (req, res) => {
 
             const isUnavailable = product.isDeleted || product.status !== "active" || variant?.stock === 0;
 
-            // ── Offer pricing ──
             const pricing = calculateOfferPrice(originalPrice, product, activeOffers);
             const finalPrice = pricing.hasOffer ? pricing.discountedPrice : originalPrice;
 
@@ -71,7 +73,7 @@ export const loadCart = async (req, res) => {
                     name: product.productName,
                     brand: product.brand?.name || product.brand?.brandName || "Brand",
                     images: variant?.images || [],
-                    price: pricing.hasOffer ? originalPrice : null // for strikethrough display
+                    price: pricing.hasOffer ? originalPrice : null
                 },
                 variantId: item.variantId,
                 color: variant?.color || "",
@@ -96,7 +98,8 @@ export const loadCart = async (req, res) => {
             subtotal,
             total,
             savings,
-            bagCount: cartItems.filter(i => !i.isUnavailable).length
+            bagCount: cartItems.filter(i => !i.isUnavailable).length,
+            cartNotice // NEW
         });
 
     } catch (err) {

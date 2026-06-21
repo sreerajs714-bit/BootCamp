@@ -354,12 +354,11 @@
             document.getElementById('total-display').textContent = '₹' + subtotal.toLocaleString('en-IN');
 
             // Update bag count — only count available items
-            let totalItems = 0;
+        let totalItems = 0;
             document.querySelectorAll('.cart-item').forEach(item => {
-                if (item.dataset.unavailable === 'true') return;
-                const itemId = item.dataset.id;
-                totalItems += parseInt(document.getElementById(`qty-${itemId}`).value);
-            });
+            if (item.dataset.unavailable === 'true') return;
+            totalItems += 1; // count the item itself, not its quantity
+        });
             const bagEl = document.getElementById('bag-count-text');
             if (bagEl) bagEl.textContent = `${totalItems} ITEMS IN YOUR BAG`;
         }
@@ -419,6 +418,16 @@
             }
         }
     </script>
+    {{#if cartNotice}}
+     <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const messages = {{{ json cartNotice }}};
+        messages.forEach((msg, i) => {
+            setTimeout(() => showToast("error", msg), i * 400);
+        });
+       });
+    </script>
+    {{/if}}
 </body>
 
 </html>

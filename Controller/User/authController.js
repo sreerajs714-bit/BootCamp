@@ -12,6 +12,8 @@ const saltround=10;
 import { getActiveOffers, calculateOfferPrice } from "../../utils/offer.js";
 
 
+
+
 export const loadRegister=(req,res)=>{
     res.render("users/signup")
 }
@@ -380,7 +382,7 @@ export const Logout = (req, res) => {
       return res.redirect("/users/home");
     }
 
-    res.clearCookie("connect.sid"); // important
+    res.clearCookie("user.sid"); // important
     return res.redirect("/users/home");
   });
 };

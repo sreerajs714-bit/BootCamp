@@ -838,7 +838,9 @@ const stock       = document.getElementById('stock').value.trim();
     showError('stockError', null);
 
     // Images & Sizes
-    showError('imagesError', uploadedFiles.length < MAX_IMAGES ? 'Minimum 3 images are required.' : null);
+    // ✅ Replace with
+    const totalImages = existingImageUrls.length + uploadedFiles.length;
+    showError('imagesError', totalImages < MAX_IMAGES ? 'Minimum 3 images are required.' : null);
     showError('sizesError',  selectedSizes.size === 0          ? 'Please select at least one size.' : null);
 
     if (!valid) return;

@@ -12,7 +12,7 @@ export const loadSalesReport = async (req, res) => {
 
     const currentOrders = await Order.find({
       createdAt: { $gte: start, $lte: end },
-      orderStatus: { $nin: ['Cancelled', 'Failed'] },
+      orderStatus: { $nin: ['Cancelled', 'Failed','Returned'] },
     }).sort({ createdAt: -1 }).lean();
 
     const previousOrders = await Order.find({
@@ -35,15 +35,13 @@ export const loadSalesReport = async (req, res) => {
     .filter(i => i.status === 'Active')
     .reduce((si, i) => si + (i.quantity || 1), 0), 0);
 
-    // ✅ FIX: use totalAmount for previous period too
+    
     const prevRevenue = previousOrders.reduce((s, o) => s + calcFinal(o), 0);
 
 
-    // ✅ FIX: pass totalAmount field name to buildChartData
     const { labels: chartLabels, data: chartData } = buildChartData(currentOrders, period, start, end);
     const couponUsage = buildCouponUsage(currentOrders);
 
-    // ✅ FIX: field is 'user' not 'userId'/'customerId'
     const top5 = currentOrders.slice(0, 5);
     const userIds = [...new Set(top5.map(o => o.user).filter(Boolean))];
     let userMap = {};
@@ -59,7 +57,7 @@ export const loadSalesReport = async (req, res) => {
     date:        fmtDate(new Date(o.createdAt)),
     userName:    userMap[o.user?.toString()] || 'Unknown',
     method:      o.paymentMethod || 'N/A',
-    finalAmount: calcFinal(o),  // ← was o.totalAmount
+    finalAmount: calcFinal(o),  
     }));
 
     return res.json({
@@ -92,9 +90,9 @@ export const exportSalesReportExcel = async (req, res) => {
   const { period = 'month', startDate, endDate } = req.query;
   const { start, end, label } = getDateRange(period, startDate, endDate);
 
+  // No orderStatus filter — fetch ALL orders, including Cancelled/Returned/Failed
   const orders = await Order.find({
     createdAt: { $gte: start, $lte: end },
-    orderStatus: { $nin: ['Cancelled', 'Failed'] },
   }).populate('user', 'name email username').lean();
 
   const calcFinal = (o) => {
@@ -111,13 +109,15 @@ export const exportSalesReportExcel = async (req, res) => {
   const summary = wb.addWorksheet('Summary');
   summary.columns = [{ width: 30 }, { width: 20 }];
 
-  const totalRevenue = orders.reduce((s, o) => s + calcFinal(o), 0);
-  const totalOrders  = orders.length;
-  const totalSold    = orders.reduce((s, o) =>
+  // Summary totals only count valid (non-cancelled/returned/failed) orders
+  const validOrders = orders.filter(o => !['Cancelled', 'Failed', 'Returned'].includes(o.orderStatus));
+
+  const totalRevenue = validOrders.reduce((s, o) => s + calcFinal(o), 0);
+  const totalOrders  = validOrders.length;
+  const totalSold    = validOrders.reduce((s, o) =>
     s + (o.items || []).filter(i => i.status === 'Active')
       .reduce((si, i) => si + (i.quantity || 1), 0), 0);
 
-  // Add rows WITHOUT chaining .font on addRow
   summary.addRow(['BOOTCAMP — Sales Report']);
   summary.addRow([`Period: ${label}`]);
   summary.addRow([]);
@@ -125,7 +125,6 @@ export const exportSalesReportExcel = async (req, res) => {
   summary.addRow(['Total Orders',        totalOrders]);
   summary.addRow(['Total Products Sold', totalSold]);
 
-  // Style after adding
   summary.getRow(1).getCell(1).font = { bold: true, size: 16 };
   summary.getRow(2).getCell(1).font = { color: { argb: 'FF6B7280' }, size: 10 };
   [4, 5, 6].forEach(r => {
@@ -133,12 +132,13 @@ export const exportSalesReportExcel = async (req, res) => {
     summary.getRow(r).getCell(2).font = { bold: true, size: 11 };
   });
 
-  // ── Sheet 2: Orders ───────────────────────────────────────────
+  // ── Sheet 2: Orders (includes ALL statuses) ────────────────────
   const sheet = wb.addWorksheet('Orders');
   sheet.columns = [
     { header: 'Order ID',       key: 'id',       width: 16 },
     { header: 'Date',           key: 'date',     width: 14 },
     { header: 'Customer',       key: 'customer', width: 20 },
+    { header: 'Status',         key: 'status',   width: 14 },
     { header: 'Payment Method', key: 'method',   width: 16 },
     { header: 'Coupon',         key: 'coupon',   width: 12 },
     { header: 'Discount (Rs.)', key: 'disc',     width: 16 },
@@ -156,6 +156,7 @@ export const exportSalesReportExcel = async (req, res) => {
       id:       o._id.toString().slice(-8).toUpperCase(),
       date:     fmtDate(new Date(o.createdAt)),
       customer: o.user?.name || o.user?.username || o.user?.email || 'Unknown',
+      status:   o.orderStatus || 'N/A',
       method:   (o.paymentMethod || 'N/A').toUpperCase(),
       coupon:   o.couponCode || '—',
       disc:     o.couponDiscount || 0,
@@ -202,10 +203,10 @@ export const exportSalesReportPDF = async (req, res) => {
   const { period = 'month', startDate, endDate } = req.query;
   const { start, end, label } = getDateRange(period, startDate, endDate);
 
+  // No orderStatus filter — includes Cancelled, Returned, Failed, everything
   const orders = await Order.find({
     createdAt: { $gte: start, $lte: end },
-    orderStatus: { $nin: ['Cancelled', 'Failed'] },
-  }).populate('user', 'name email').lean();
+  }).populate('user', 'fullName name email').lean();
 
   const calcFinal = (o) => {
     const subtotal = (o.items || [])
@@ -214,7 +215,9 @@ export const exportSalesReportPDF = async (req, res) => {
     return Math.max(0, subtotal - (o.couponDiscount || 0));
   };
 
-  const totalRevenue = orders.reduce((s, o) => s + calcFinal(o), 0);
+  // Summary totals only count valid (non-cancelled/returned/failed) orders
+  const validOrders = orders.filter(o => !['Cancelled', 'Failed', 'Returned'].includes(o.orderStatus));
+  const totalRevenue = validOrders.reduce((s, o) => s + calcFinal(o), 0);
 
   const doc = new PDFDocument({ margin: 50, size: 'A4' });
   res.setHeader('Content-Type', 'application/pdf');
@@ -230,8 +233,8 @@ export const exportSalesReportPDF = async (req, res) => {
   doc.fillColor('#111827');
   const stats = [
     ['TOTAL REVENUE', `Rs. ${totalRevenue.toLocaleString('en-IN')}`],
-    ['TOTAL ORDERS', orders.length],
-    ['PRODUCTS SOLD', orders.reduce((s, o) =>
+    ['TOTAL ORDERS', validOrders.length],
+    ['PRODUCTS SOLD', validOrders.reduce((s, o) =>
       s + (o.items || []).filter(i => i.status === 'Active').reduce((si, i) => si + i.quantity, 0), 0)],
   ];
   stats.forEach(([title, value], idx) => {
@@ -242,28 +245,37 @@ export const exportSalesReportPDF = async (req, res) => {
   });
 
   // Orders table
-  doc.fontSize(11).font('Helvetica-Bold').fillColor('#111827').text('Recent Orders', 50, 200);
+  doc.fontSize(11).font('Helvetica-Bold').fillColor('#111827').text('All Orders', 50, 200);
   doc.moveTo(50, 218).lineTo(545, 218).strokeColor('#E5E7EB').stroke();
 
-  const cols = [50, 130, 210, 320, 410, 545];
-  const headers = ['Order #', 'Date', 'Customer', 'Method', 'Amount'];
+  const cols = [50, 115, 175, 260, 320, 380, 545];
+  const headers = ['Order #', 'Date', 'Customer', 'Status', 'Method', 'Amount'];
 
-  // Table header
-  doc.rect(50, 224, 495, 22).fillColor('#111827').fill();
-  headers.forEach((h, i) => {
-    doc.fontSize(7).font('Helvetica-Bold').fillColor('#FFFFFF')
-      .text(h, cols[i] + 4, 230, { width: cols[i + 1] - cols[i] - 8 });
-  });
+  const drawTableHeader = (yPos) => {
+    doc.rect(50, yPos, 495, 22).fillColor('#111827').fill();
+    headers.forEach((h, i) => {
+      doc.fontSize(7).font('Helvetica-Bold').fillColor('#FFFFFF')
+        .text(h, cols[i] + 4, yPos + 6, { width: cols[i + 1] - cols[i] - 8 });
+    });
+  };
 
-  // Table rows
+  drawTableHeader(224);
+
+  // Table rows — ALL orders, no slice limit
   let y = 246;
-  orders.slice(0, 20).forEach((o, idx) => {
-    if (y > 750) { doc.addPage(); y = 50; }
+  orders.forEach((o, idx) => {
+    if (y > 750) {
+      doc.addPage();
+      y = 50;
+      drawTableHeader(y);
+      y += 22;
+    }
     if (idx % 2 === 0) doc.rect(50, y, 495, 20).fillColor('#F9FAFB').fill();
     const row = [
       '#' + o._id.toString().slice(-8).toUpperCase(),
       fmtDate(new Date(o.createdAt)),
-      (o.user?.name || 'Unknown').slice(0, 14),
+      (o.user?.fullName || o.user?.name || o.user?.email || 'Guest').slice(0, 14),
+      o.orderStatus || 'N/A',
       o.paymentMethod || 'N/A',
       'Rs. ' + calcFinal(o).toLocaleString('en-IN'),
     ];
@@ -274,9 +286,9 @@ export const exportSalesReportPDF = async (req, res) => {
     y += 20;
   });
 
-  // Footer
+  // Footer — fixed safe position, no margin mutation
   doc.fontSize(7).fillColor('#9CA3AF')
-    .text(`Generated on ${new Date().toLocaleDateString('en-IN')} — BOOTCAMP Admin`, 50, 800, { align: 'center' });
+    .text(`Generated on ${new Date().toLocaleDateString('en-IN')} — BOOTCAMP Admin`, 50, 770, { align: 'center' });
 
   doc.end();
 };

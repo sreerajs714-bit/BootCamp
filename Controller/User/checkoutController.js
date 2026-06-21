@@ -42,17 +42,55 @@ export const loadCheckout = async (req, res) => {
         }
 
         // Filter invalid/deleted items
-        const cartItems = cart.items.filter(
-            (item) => item.productId && !item.productId.isDeleted
+const cartItems = cart.items.filter(
+    (item) => item.productId && !item.productId.isDeleted
+);
+
+if (cartItems.length === 0) return res.redirect('/users/cart');
+
+// ── Stock validation (before checkout) ──────────────────────────────────
+const stockIssues = [];
+const validItems = [];
+
+for (const item of cartItems) {
+    const product = item.productId;
+    const variant = product.variants.find(
+        (v) => v._id.toString() === item.variantId.toString()
+    );
+
+    if (!variant || !variant.isActive || variant.stock <= 0) {
+        stockIssues.push(`${product.productName} is out of stock and was removed from your cart.`);
+        await Cart.updateOne(
+            { userId },
+            { $pull: { items: { _id: item._id } } }
         );
+        continue;
+    }
 
-        if (cartItems.length === 0) return res.redirect('/users/cart');
+    if (item.quantity > variant.stock) {
+        stockIssues.push(
+            `Only ${variant.stock} unit(s) of ${product.productName} (${variant.color || 'default'}) are available — your quantity has been updated.`
+        );
+        await Cart.updateOne(
+            { userId, 'items._id': item._id },
+            { $set: { 'items.$.quantity': variant.stock } }
+        );
+        item.quantity = variant.stock; // so pricing below reflects the new qty
+    }
 
-        // ── Price breakdown ───────────────────────────────────────────────
-        let subtotal = 0;
-        let offerSavings = 0;
+    validItems.push(item);
+}
 
-        const enrichedItems = cartItems.map((item) => {
+if (stockIssues.length > 0) {
+    req.session.cartNotice = stockIssues;
+    return res.redirect('/users/cart');
+}
+
+// ── Price breakdown ───────────────────────────────────────────────────
+let subtotal = 0;
+let offerSavings = 0;
+
+        const enrichedItems = validItems.map((item) => {
             const product = item.productId;
 
             // Find the matching variant using variantId from cart
@@ -94,7 +132,7 @@ export const loadCheckout = async (req, res) => {
             const coupon = await Coupon.findOne({
                 code: req.session.appliedCoupon,
                 isActive: true,
-                expiresAt: { $gte: new Date() },
+                expiryDate: { $gte: new Date() },
             }).lean();
 
             if (coupon) {
@@ -459,7 +497,11 @@ export const createRazorpayOrder = async (req, res) => {
 
         const { addressId, couponCode } = req.body;
 
-        const cart = await Cart.findOne({ userId }).populate('items.productId');
+        const [cart, activeOffers] = await Promise.all([
+            Cart.findOne({ userId }).populate('items.productId'),
+            getActiveOffers(),
+        ]);
+
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ success: false, message: 'Cart is empty' });
         }
@@ -470,42 +512,69 @@ export const createRazorpayOrder = async (req, res) => {
         }
 
         let subtotal = 0;
+        let offerSavings = 0;
         const orderItems = [];
 
         for (const item of cart.items) {
             const product = item.productId;
             if (!product || product.isDeleted) continue;
+
             const variant = product.variants.find(
                 v => v._id.toString() === item.variantId.toString()
             );
             if (!variant) continue;
-            subtotal += variant.price * item.quantity;
+
+            const originalPrice = variant.price;
+
+            // ── Offer pricing — was completely missing before ──
+            const pricing = calculateOfferPrice(originalPrice, product, activeOffers);
+            const finalPrice = pricing.hasOffer ? pricing.discountedPrice : originalPrice;
+
+            subtotal += originalPrice * item.quantity;
+            offerSavings += (originalPrice - finalPrice) * item.quantity;
+
             orderItems.push({
                 product: product._id,
                 quantity: item.quantity,
-                price: variant.price,
+                price: finalPrice,
+                originalPrice,
                 size: item.size
             });
         }
 
+        const effectiveSubtotal = subtotal - offerSavings;
+
+        // ── Coupon — now applied on effectiveSubtotal, not raw subtotal ──
         let couponDiscount = 0;
+        let appliedCoupon = null;
+
         if (couponCode) {
             const coupon = await Coupon.findOne({
-                code: couponCode,
+                code: couponCode.toUpperCase().trim(),
                 isActive: true,
-                expiresAt: { $gte: new Date() }
+                expiryDate: { $gte: new Date() }
             });
             if (coupon) {
+                if (coupon.minOrder && effectiveSubtotal < coupon.minOrder) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Minimum order of ₹${coupon.minOrder} required`
+                    });
+                }
+
                 couponDiscount = coupon.discountType === 'percentage'
-                    ? Math.round((subtotal * coupon.discountValue) / 100)
+                    ? Math.round((effectiveSubtotal * coupon.discountValue) / 100)
                     : coupon.discountValue;
+
                 if (coupon.maxDiscount && couponDiscount > coupon.maxDiscount) {
                     couponDiscount = coupon.maxDiscount;
                 }
+                couponDiscount = Math.min(couponDiscount, effectiveSubtotal);
+                appliedCoupon = coupon.code;
             }
         }
 
-        const totalAmount = Math.max(0, subtotal - couponDiscount);
+        const totalAmount = Math.max(0, effectiveSubtotal - couponDiscount);
 
         // Create Razorpay order
         const razorpayOrder = await razorpay.orders.create({
@@ -530,6 +599,10 @@ export const createRazorpayOrder = async (req, res) => {
             },
             paymentMethod: 'razorpay',
             razorpayOrderId: razorpayOrder.id,
+            subtotal,
+            offerSavings,
+            couponCode: appliedCoupon,
+            couponDiscount,
             totalAmount,
             orderStatus: 'Pending',
             paymentStatus: 'Pending',
@@ -540,7 +613,7 @@ export const createRazorpayOrder = async (req, res) => {
         return res.json({
             success: true,
             razorpayOrderId: razorpayOrder.id,
-            orderId: order._id,          // 👈 MongoDB order ID
+            orderId: order._id,
             amount: razorpayOrder.amount,
             razorpayKey: process.env.RAZORPAY_KEY_ID,
         });

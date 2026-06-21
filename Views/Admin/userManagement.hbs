@@ -250,7 +250,7 @@
                 class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
                 <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard
             </a>
-            <a href="/admin/product"
+            <a href="/admin/productManagement"
                 class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
                 <span class="material-symbols-outlined mr-3.5 text-[19px]">sports_soccer</span>Products
             </a>
@@ -650,8 +650,9 @@
             const { userId, action } = pendingAction;
 
             try {
+
                 const res = await axios.patch(
-                    `/admin/usermanagement/${action}/${userId}`
+                    `/admin/userManagement/${action}/${userId}`
                 );
 
                 const data = res.data;

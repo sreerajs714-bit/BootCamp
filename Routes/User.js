@@ -4,7 +4,7 @@ import { loadHome, loadRegister, loadResetPassword, loadSetNew, loadVerifyOtp, L
 import { loadLogin } from "../Controller/User/authController.js";
 import { RegisterUser } from "../Controller/User/authController.js";
 import { resendOTP, verifyOTP } from "../Controller/otpcontroller.js";
-import { checkSession, islogin, noCache } from "../Middleware/userAuth.js";
+import { checkSession, checkUserBlocked, islogin, noCache } from "../Middleware/userAuth.js";
 import { changeEmail, changePassword, editProfile, loadEditProfile, loadProfile, removeProfilePhoto, uploadProfilePhoto } from "../Controller/User/profileController.js";
 import { uploadProfile ,uploadReturn } from "../Middleware/multer.js";
 import passport from "../Config/passport.js";
@@ -37,6 +37,9 @@ route.get("/auth/google/callback",
     });
   }
 );
+
+route.use(checkUserBlocked);
+
 
 route.get("/",loadHome)
 route.get("/signup",islogin,loadRegister)

@@ -85,11 +85,11 @@ export const loadDasboard = async (req, res) => {
         }
 
         const dateFilter  = { createdAt: { $gte: startDate, $lte: now } };
-        const activeMatch = { ...dateFilter, orderStatus: { $nin: ['Cancelled'] } }; // ✅ reusable
+        const activeMatch = { ...dateFilter, orderStatus: { $nin: ['Cancelled','Returned'] } }; 
 
         // ── 1. Total Earnings & Orders ───────────────────────────────
         const orderAgg = await Order.aggregate([
-            { $match: activeMatch }, // ✅ fixed
+            { $match: activeMatch }, 
             {
                 $group: {
                     _id: null,
@@ -138,7 +138,7 @@ export const loadDasboard = async (req, res) => {
         } else {
             const totalMs   = now - startDate;
             const sliceMs   = totalMs / 4;
-            const allOrders = await Order.find(activeMatch) // ✅ fixed
+            const allOrders = await Order.find(activeMatch) 
                 .select('createdAt totalAmount');
 
             allOrders.forEach(o => {
@@ -158,7 +158,7 @@ export const loadDasboard = async (req, res) => {
         statusAgg.forEach(s => { statusMap[s._id] = s.count; });
 
         const orderStats = {
-            delivered: statusMap['Delivered']                                            ?? 0,
+            delivered: statusMap['Delivered']  ?? 0,
             pending:  (statusMap['Pending']    ?? 0) + (statusMap['Confirmed']   ?? 0) +
                       (statusMap['Processing'] ?? 0) + (statusMap['Shipped']     ?? 0),
             cancelled: statusMap['Cancelled']                                            ?? 0,
@@ -168,7 +168,7 @@ export const loadDasboard = async (req, res) => {
 
         // ── 5. Best Categories ───────────────────────────────────────
         const categoryAgg = await Order.aggregate([
-            { $match: activeMatch }, // ✅ fixed
+            { $match: activeMatch }, 
             { $unwind: '$items' },
             {
                 $lookup: {
@@ -230,7 +230,7 @@ export const loadDasboard = async (req, res) => {
 
         // ── 8. Most Popular Products ─────────────────────────────────
         const popularAgg = await Order.aggregate([
-            { $match: activeMatch }, // ✅ fixed
+            { $match: activeMatch }, 
             { $unwind: '$items' },
             {
                 $group: {
@@ -298,7 +298,7 @@ export const adminLogout = async (req, res) => {
             }
 
             // CLEAR COOKIE
-            res.clearCookie('connect.sid');
+            res.clearCookie('admin.sid');
 
             return res.redirect('/admin/');
         });

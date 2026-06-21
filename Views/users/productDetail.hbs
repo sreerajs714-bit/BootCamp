@@ -132,11 +132,16 @@
                 </h1>
 
                 <div class="flex items-baseline gap-3 mb-6">
-                    <span id="product-price" class="text-2xl font-black">₹{{product.price}}</span>
-                    {{#if product.oldPrice}}
-                    <span class="text-sm text-gray-400 line-through">₹{{product.oldPrice}}</span>
-                    {{/if}}
-                </div>
+    <span id="product-price" class="text-2xl font-black">
+        ₹{{#if product.hasOffer}}{{product.discountedPrice}}{{else}}{{product.price}}{{/if}}
+    </span>
+    <span id="product-old-price" class="text-sm text-gray-400 line-through {{#unless product.hasOffer}}hidden{{/unless}}">
+        ₹{{product.price}}
+    </span>
+    <span id="product-offer-badge" class="text-xs font-black text-green-600 {{#unless product.hasOffer}}hidden{{/unless}}">
+        {{#if product.offerLabel}}{{product.offerLabel}}{{else}}{{product.offerPercentage}}% OFF{{/if}}
+    </span>
+</div>
 
                 <div class="inline-flex bg-gray-100 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest mb-8 self-start">
                     {{product.badge}}
@@ -241,7 +246,12 @@
                     <div class="px-1 flex-1 flex flex-col pt-1">
                         <div class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{{this.badge}}</div>
                         <h3 class="text-[15px] font-black text-gray-900 mb-1">{{this.productName}}</h3>
-                        <div class="text-lg font-black text-gray-900 mb-6">₹{{this.price}}</div>
+                        <div class="text-lg font-black text-gray-900 mb-1 flex items-baseline gap-2">
+                        <span>₹{{#if this.hasOffer}}{{this.discountedPrice}}{{else}}{{this.price}}{{/if}}</span>
+                         {{#if this.hasOffer}}
+                         <span class="text-xs text-gray-400 line-through">₹{{this.price}}</span>
+                         {{/if}}
+                         </div>
 
                         <div class="mt-auto flex flex-col gap-2">
                             <button onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{this.id}}', true)" 
@@ -399,22 +409,34 @@
         }
 
         function selectVariant(id, el) {
-            const variant = productVariants.find(v => v.id === id);
-            if (!variant) return;
+    const variant = productVariants.find(v => v.id === id);
+    if (!variant) return;
 
-            selectedVariantId = id;
-            selectedSize = null; // Reset size on variant change
+    selectedVariantId = id;
+    selectedSize = null;
 
-            // Visual feedback for color
-            document.querySelectorAll('#color-container button').forEach(btn => {
-                btn.classList.remove('ring-black');
-                btn.classList.add('ring-transparent');
-            });
-            el.classList.add('ring-black');
-            el.classList.remove('ring-transparent');
+    document.querySelectorAll('#color-container button').forEach(btn => {
+        btn.classList.remove('ring-black');
+        btn.classList.add('ring-transparent');
+    });
+    el.classList.add('ring-black');
+    el.classList.remove('ring-transparent');
 
-            // PRICE
-            document.getElementById('product-price').innerText = `₹${variant.price}`;
+    // PRICE + OFFER
+    const priceEl    = document.getElementById('product-price');
+    const oldPriceEl = document.getElementById('product-old-price');
+    const badgeEl    = document.getElementById('product-offer-badge');
+
+    if (variant.hasOffer) {
+        priceEl.innerText = `₹${variant.discountedPrice}`;
+        oldPriceEl.innerText = `₹${variant.price}`;
+        oldPriceEl.classList.remove('hidden');
+        badgeEl.classList.remove('hidden');
+    } else {
+        priceEl.innerText = `₹${variant.price}`;
+        oldPriceEl.classList.add('hidden');
+        badgeEl.classList.add('hidden');
+    }
 
             // SIZES
             const sizeContainer = document.getElementById('size-container');
