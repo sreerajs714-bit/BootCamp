@@ -570,12 +570,31 @@ export const addVariant = async (req, res) => {
             return res.status(400).json({ success: false, message: "Minimum 3 images required." });
         }
 
-        const imagePaths = req.files.map(file => file.secure_url || file.path);
-
         const product = await Product.findById(id);
         if (!product) {
             return res.status(404).json({ success: false, message: "Product not found." });
         }
+
+        const normalizedColor = color.trim().toLowerCase();
+        const sortedNewSizes = [...parsedSizes].sort();
+
+        const isDuplicate = product.variants.some(v => {
+            const sameColor = v.color.trim().toLowerCase() === normalizedColor;
+            const sortedExistingSizes = [...v.sizes].map(Number).sort();
+            const sameSizes =
+                sortedExistingSizes.length === sortedNewSizes.length &&
+                sortedExistingSizes.every((s, i) => s === sortedNewSizes[i]);
+            return sameColor && sameSizes;
+        });
+
+        if (isDuplicate) {
+            return res.status(400).json({
+                success: false,
+                message: "A variant with this color and size already exists for this product."
+            });
+        }
+
+        const imagePaths = req.files.map(file => file.secure_url || file.path);
 
         product.variants.push({
             color: color.trim(),

@@ -87,50 +87,70 @@ export const loadCoupon = async (req, res) => {
 
 export const createCoupon = async (req, res) => {
   try {
-    const { code, discountType, value, startDate, endDate, limit, minOrder, isActive } = req.body;
- 
+    const { code, discountType, value, startDate, endDate, limit, minOrder, isActive, maxDiscount } = req.body;
+
     // Basic validations
     if (!code || !discountType || !value || !startDate || !endDate) {
       return res.status(400).json({ success: false, message: "All required fields must be filled" });
     }
- 
+
     const upperCode = code.trim().toUpperCase();
- 
-    // Check duplicate
+
     const existing = await Coupon.findOne({ code: upperCode });
     if (existing) {
       return res.status(409).json({ success: false, message: "Coupon code already exists" });
     }
- 
-    // Parse dates (frontend sends dd/mm/yyyy from flatpickr)
+
     const parsedStart = parseDMY(startDate);
     const parsedEnd = parseDMY(endDate);
- 
+
     if (!parsedStart || !parsedEnd) {
       return res.status(400).json({ success: false, message: "Invalid date format" });
     }
- 
+
     if (parsedEnd <= parsedStart) {
       return res.status(400).json({ success: false, message: "End date must be after start date" });
     }
- 
-    // Percentage cap
-    if (discountType === "percentage" && Number(value) > 100) {
+
+    const numericValue = Number(value);
+    const numericMinOrder = minOrder ? Number(minOrder) : 0;
+
+    if (discountType === "percentage" && numericValue > 100) {
       return res.status(400).json({ success: false, message: "Percentage discount cannot exceed 100%" });
     }
- 
+
+    // ---- NEW: min order must exceed the discount amount ----
+    if (discountType === "flat") {
+      if (numericMinOrder <= numericValue) {
+        return res.status(400).json({
+          success: false,
+          message: "Minimum order must be greater than the discount amount"
+        });
+      }
+    } else if (discountType === "percentage") {
+      const numericMaxDiscount = maxDiscount ? Number(maxDiscount) : null;
+      if (numericMaxDiscount && numericMinOrder <= numericMaxDiscount) {
+        return res.status(400).json({
+          success: false,
+          message: "Minimum order must be greater than the max discount cap"
+        });
+      }
+    }
+    // ---- END NEW ----
+
     const coupon = await Coupon.create({
       code: upperCode,
       discountType,
-      discountValue: Number(value),
+      discountValue: numericValue,
       startDate: parsedStart,
       expiryDate: parsedEnd,
       usageLimit: limit ? Number(limit) : null,
-      minOrder: minOrder ? Number(minOrder) : 0,
+      minOrder: numericMinOrder,
+      maxDiscount: discountType === "percentage" && maxDiscount ? Number(maxDiscount) : undefined,
       isActive: isActive === true || isActive === "true" || isActive === "on",
       usedCount: 0,
     });
- 
+
     return res.status(201).json({ success: true, coupon, message: "Coupon created successfully" });
   } catch (err) {
     console.error("createCoupon error:", err);

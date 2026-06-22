@@ -780,12 +780,19 @@
             showErr('minOrder', 'Min order must be 0 or more'); valid = false;
         }
 
-        // Max discount — only for percentage, optional but must be ≥ 1 if filled
-        if (discountType === 'percentage') {
-            const maxDiscount = data.get('maxDiscount');
-            if (maxDiscount && (isNaN(parseFloat(maxDiscount)) || parseFloat(maxDiscount) < 1)) {
-                showErr('maxDiscount', 'Max discount must be at least ₹1'); valid = false;
-            }
+        const minOrderVal = parseFloat(minOrder) || 0;
+
+        if (discountType === 'flat') {
+            if (value && minOrderVal <= value) {
+            showErr('minOrder', 'Min order must be greater than the discount amount');
+            valid = false;
+        }
+        } else if (discountType === 'percentage') {
+            const maxDiscountVal = parseFloat(data.get('maxDiscount'));
+            if (maxDiscountVal && minOrderVal <= maxDiscountVal) {
+            showErr('minOrder', 'Min order must be greater than the max discount cap');
+            valid = false;
+        }
         }
 
         return valid;

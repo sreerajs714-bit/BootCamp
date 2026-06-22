@@ -317,7 +317,7 @@
                         <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center mb-3">
                             <span class="material-symbols-outlined text-gray-600 text-[20px]">group</span>
                         </div>
-                        <div class="text-[36px] font-black text-black tracking-tight leading-none">{{stats.totalAll}}
+                        <div id="totalAllCount" class="text-[36px] font-black text-black tracking-tight leading-none">{{stats.totalAll}}
                         </div>
                     </div>
                     <div class="text-[10px] font-bold tracking-[0.15em] text-gray-300 uppercase self-start mt-1">
@@ -330,7 +330,7 @@
                         <div class="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center mb-3">
                             <span class="material-symbols-outlined text-emerald-500 text-[20px]">person</span>
                         </div>
-                        <div class="text-[36px] font-black text-black tracking-tight leading-none">{{stats.totalActive}}
+                        <div id="totalActiveCount" class="text-[36px] font-black text-black tracking-tight leading-none">{{stats.totalActive}}
                         </div>
                         <div class="flex items-center gap-1.5 mt-2">
                             <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -347,7 +347,7 @@
                         <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center mb-3">
                             <span class="material-symbols-outlined text-red-400 text-[20px]">block</span>
                         </div>
-                        <div class="text-[36px] font-black text-black tracking-tight leading-none">
+                        <div  id="totalBlockedCount" class="text-[36px] font-black text-black tracking-tight leading-none">
                             {{stats.totalBlocked}}</div>
                         <div class="text-[11px] font-bold text-red-400 mt-2">Blocked users</div>
                     </div>
@@ -364,7 +364,7 @@
                     <div class="flex items-center gap-3">
                         <h3 class="text-[15px] font-black text-black">User Directory</h3>
                         <span
-                            class="text-[10px] font-bold tracking-widest text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full uppercase">
+                            id="filteredCountBadge" class="text-[10px] font-bold tracking-widest text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full uppercase">
                             {{pagination.totalFiltered}} users
                         </span>
                     </div>
@@ -374,31 +374,32 @@
                     <div class="custom-dropdown min-w-[150px]">
                         <span class="filter-label">Filter</span>
                         <div class="dropdown-toggle" onclick="toggleDropdown(this)">
-                            <span class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                            <span id="filterSelectedLabel" class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
                                 {{#if filters.isAll}}All Status{{else if filters.isActive}}Active{{else if filters.isBlocked}}Blocked{{else}}All Status{{/if}}
                             </span>
                             <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
                         </div>
-                        <div class="dropdown-menu">
-                            <div class="dropdown-item {{#if filters.isAll}}selected{{/if}}" onclick="selectDropdownOption('filter', 'all')">All Status</div>
-                            <div class="dropdown-item {{#if filters.isActive}}selected{{/if}}" onclick="selectDropdownOption('filter', 'active')">Active</div>
-                            <div class="dropdown-item {{#if filters.isBlocked}}selected{{/if}}" onclick="selectDropdownOption('filter', 'blocked')">Blocked</div>
+                        <div id="filterMenu" class="dropdown-menu">
+                           <div class="dropdown-item {{#if filters.isAll}}selected{{/if}}" onclick="setFilter('all', 'All Status')">All Status</div>
+                           <div class="dropdown-item {{#if filters.isActive}}selected{{/if}}" onclick="setFilter('active', 'Active')">Active</div>
+                           <div class="dropdown-item {{#if filters.isBlocked}}selected{{/if}}" onclick="setFilter('blocked', 'Blocked')">Blocked</div>
                         </div>
                     </div>
 
                     <!-- Sort Dropdown -->
                     <div class="custom-dropdown min-w-[160px]">
                         <span class="filter-label">Sort</span>
+                        <!-- Sort Dropdown — change this span -->
                         <div class="dropdown-toggle" onclick="toggleDropdown(this)">
-                            <span class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
-                                {{#if (eq filters.sort 'default')}}Default{{else if (eq filters.sort 'date-desc')}}Newest first{{else if (eq filters.sort 'date-asc')}}Oldest first{{else}}Default{{/if}}
+                            <span id="sortSelectedLabel" class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                            {{#if (eq filters.sort 'default')}}Default{{else if (eq filters.sort 'date-desc')}}Newest first{{else if (eq filters.sort 'date-asc')}}Oldest first{{else}}Default{{/if}}
                             </span>
-                            <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+                             <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
                         </div>
-                        <div class="dropdown-menu">
-                            <div class="dropdown-item {{#if (eq filters.sort 'default')}}selected{{/if}}" onclick="selectDropdownOption('sort', 'default')">Default</div>
-                            <div class="dropdown-item {{#if (eq filters.sort 'date-desc')}}selected{{/if}}" onclick="selectDropdownOption('sort', 'date-desc')">Newest first</div>
-                            <div class="dropdown-item {{#if (eq filters.sort 'date-asc')}}selected{{/if}}" onclick="selectDropdownOption('sort', 'date-asc')">Oldest first</div>
+                        <div id="sortMenu" class="dropdown-menu">
+                            <div class="dropdown-item {{#if (eq filters.sort 'default')}}selected{{/if}}" onclick="setSort('default', 'Default')">Default</div>
+                            <div class="dropdown-item {{#if (eq filters.sort 'date-desc')}}selected{{/if}}" onclick="setSort('date-desc', 'Newest first')">Newest first</div>
+                            <div class="dropdown-item {{#if (eq filters.sort 'date-asc')}}selected{{/if}}" onclick="setSort('date-asc', 'Oldest first')">Oldest first</div>
                         </div>
                     </div>
 
@@ -431,7 +432,7 @@
                                     Actions</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-100">
+                        <tbody id="usersTableBody" class="divide-y divide-gray-100">
                             {{#each users}}
                             <tr class="user-row {{#if isBlocked}}blocked-row{{/if}} group">
                                 <td class="py-4 px-8 text-[12px] font-medium text-gray-300">{{slNo}}</td>
@@ -506,10 +507,9 @@
                 <!-- Pagination -->
                 <div class="px-8 py-4 border-t border-gray-100 flex items-center justify-between bg-white">
                     <div class="text-[10px] font-bold tracking-[0.12em] text-gray-400 uppercase">
-                        Showing {{pagination.totalFiltered}} users — Page {{pagination.currentPage}} of
-                        {{pagination.totalPages}}
+                        Showing <span id="showingCount">{{pagination.totalFiltered}}</span> users — Page <span id="currentPageLabel">{{pagination.currentPage}}</span> of <span id="totalPagesLabel">{{pagination.totalPages}}</span>
                     </div>
-                    <div class="flex items-center gap-1">
+                    <div id="paginationContainer" class="flex items-center gap-1">
                         {{#if pagination.hasPrev}}
                         <a href="/admin/usermanagement?page={{pagination.prevPage}}&filter={{filters.filter}}&search={{filters.search}}&sort={{filters.sort}}"
                             class="page-btn w-8 h-8 rounded-lg flex items-center justify-center">
@@ -594,14 +594,184 @@
             }
         }
 
-        function selectDropdownOption(type, value) {
-            if (type === 'filter') {
-                document.getElementById('hiddenFilter').value = value;
-            } else if (type === 'sort') {
-                document.getElementById('hiddenSort').value = value;
+        // ─── STATE (seeded from the initial server render) ────────────
+let currentPage   = {{pagination.currentPage}};
+let currentSearch = '{{filters.search}}';
+let currentFilter = '{{filters.filter}}';
+let currentSort   = '{{filters.sort}}';
+
+// ─── FETCH (AJAX, no reload) ───────────────────────────────────
+async function fetchUsers(page = 1) {
+    currentPage = page;
+    try {
+        const res = await axios.get('/admin/usermanagement', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            params: {
+                search: currentSearch,
+                filter: currentFilter,
+                sort: currentSort,
+                page: currentPage
             }
-            document.getElementById('dropdownForm').submit();
+        });
+
+        if (res.data.success) {
+            renderUsers(res.data.users);
+            updateStats(res.data.stats);
+            updatePagination(res.data.pagination);
         }
+    } catch (err) {
+        console.error('fetchUsers error:', err);
+        showToast('error', 'Failed to load users');
+    }
+}
+
+// ─── RENDER TABLE ───────────────────────────────────────────────
+function renderUsers(users) {
+    const tbody = document.getElementById('usersTableBody');
+
+    if (!users || users.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="py-16 text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                        <span class="material-symbols-outlined text-gray-400 text-[28px]">manage_search</span>
+                    </div>
+                    <p class="text-[14px] font-bold text-gray-400">No users found</p>
+                    <p class="text-[12px] text-gray-300 mt-1">Try a different search or filter</p>
+                </td>
+            </tr>`;
+        return;
+    }
+
+    tbody.innerHTML = users.map(u => `
+        <tr class="user-row ${u.isBlocked ? 'blocked-row' : ''} group">
+            <td class="py-4 px-8 text-[12px] font-medium text-gray-300">${u.slNo}</td>
+            <td class="py-4 px-6">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                        ${u.profilePhoto
+                            ? `<img src="${u.profilePhoto}" alt="${u.username}" class="w-full h-full object-cover ${u.isBlocked ? 'grayscale' : ''}">`
+                            : `<span class="text-[12px] font-black text-gray-500">${u.initials}</span>`}
+                    </div>
+                    <div>
+                        <div class="text-[13px] font-bold text-black">${u.username}</div>
+                        <div class="text-[11px] text-gray-400 mt-0.5">${u.email}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="py-4 px-6">
+                <span class="px-2.5 py-1 bg-gray-50 text-gray-400 rounded-md text-[11px] font-medium border border-gray-100">${u.shortId}</span>
+            </td>
+            <td class="py-4 px-6">
+                ${u.isBlocked ? `<span class="status-badge blocked">Blocked</span>` : `<span class="status-badge active">Active</span>`}
+            </td>
+            <td class="py-4 px-6">
+                <div class="text-[13px] font-bold text-black">${u.dateLabel}</div>
+                <div class="text-[10px] text-gray-400 font-bold tracking-wider mt-1 uppercase">${u.timeLabel}</div>
+            </td>
+            <td class="py-4 px-8 text-right">
+                <div class="flex items-center justify-end gap-2.5">
+                    ${u.isBlocked
+                        ? `<button onclick="openModal('${u._id}', 'unblock', '${u.username}', '${u.email}')" class="w-8 h-8 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-black transition-colors" title="Unblock user"><span class="material-symbols-outlined text-[16px]">check_circle</span></button>`
+                        : `<button onclick="openModal('${u._id}', 'block', '${u.username}', '${u.email}')" class="w-8 h-8 flex items-center justify-center rounded-md bg-red-50 text-red-400 hover:bg-red-100 transition-colors" title="Block user"><span class="material-symbols-outlined text-[16px]">block</span></button>`}
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ─── STATS & PAGINATION ─────────────────────────────────────────
+function updateStats(stats) {
+    document.getElementById('totalAllCount').textContent = stats.totalAll;
+    document.getElementById('totalActiveCount').textContent = stats.totalActive;
+    document.getElementById('totalBlockedCount').textContent = stats.totalBlocked;
+}
+
+function updatePagination(p) {
+    document.getElementById('filteredCountBadge').textContent = `${p.totalFiltered} users`;
+    document.getElementById('showingCount').textContent = p.totalFiltered;
+    document.getElementById('currentPageLabel').textContent = p.currentPage;
+    document.getElementById('totalPagesLabel').textContent = p.totalPages;
+
+    const container = document.getElementById('paginationContainer');
+    container.innerHTML = '';
+
+    if (p.hasPrev) {
+        const prev = document.createElement('button');
+        prev.className = 'page-btn w-8 h-8 rounded-lg flex items-center justify-center';
+        prev.innerHTML = '<span class="material-symbols-outlined text-[18px]">chevron_left</span>';
+        prev.onclick = () => fetchUsers(p.currentPage - 1);
+        container.appendChild(prev);
+    }
+
+    p.pages.forEach(pg => {
+        const btn = document.createElement('button');
+        btn.className = `page-btn w-8 h-8 rounded-lg flex items-center justify-center text-[12px] font-bold ${pg.isCurrent ? 'current' : 'text-gray-600'}`;
+        btn.textContent = pg.num;
+        btn.onclick = () => fetchUsers(pg.num);
+        container.appendChild(btn);
+    });
+
+    if (p.hasNext) {
+        const next = document.createElement('button');
+        next.className = 'page-btn w-8 h-8 rounded-lg flex items-center justify-center';
+        next.innerHTML = '<span class="material-symbols-outlined text-[18px]">chevron_right</span>';
+        next.onclick = () => fetchUsers(p.currentPage + 1);
+        container.appendChild(next);
+    }
+}
+
+// ─── FILTER / SORT DROPDOWNS ────────────────────────────────────
+function setFilter(value, label) {
+    currentFilter = value;
+    document.getElementById('filterSelectedLabel').textContent = label;
+    document.querySelectorAll('#filterMenu .dropdown-item').forEach(item =>
+        item.classList.toggle('selected', item.textContent.trim() === label));
+    closeAllDropdowns();
+    fetchUsers(1);
+}
+
+function setSort(value, label) {
+    currentSort = value;
+    document.getElementById('sortSelectedLabel').textContent = label;
+    document.querySelectorAll('#sortMenu .dropdown-item').forEach(item =>
+        item.classList.toggle('selected', item.textContent.trim() === label));
+    closeAllDropdowns();
+    fetchUsers(1);
+}
+
+function closeAllDropdowns() {
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+    document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+}
+
+// ─── LIVE SEARCH (debounced, no reload) ─────────────────────────
+let searchDebounce;
+
+document.getElementById('searchInput').addEventListener('input', function () {
+    const query = this.value.trim();
+
+    const clearBtn = document.getElementById('clearSearch');
+    if (query) clearBtn.classList.remove('hidden');
+    else clearBtn.classList.add('hidden');
+
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => {
+        currentSearch = query;
+        fetchUsers(1);
+    }, 400);
+});
+
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('clearSearch').classList.add('hidden');
+    currentSearch = '';
+    fetchUsers(1);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+fetchUsers(currentPage);
+
 
         // Close dropdowns on click outside
         document.addEventListener('click', e => {
@@ -644,100 +814,31 @@
             if (e.target === document.getElementById('confirmModal')) closeModal();
         }
 
-        async function confirmAction() {
-            if (!pendingAction) return;
+       async function confirmAction() {
+    if (!pendingAction) return;
+    const { userId, action } = pendingAction;
 
-            const { userId, action } = pendingAction;
+    try {
+        const res = await axios.patch(`/admin/userManagement/${action}/${userId}`);
+        const data = res.data;
 
-            try {
-
-                const res = await axios.patch(
-                    `/admin/userManagement/${action}/${userId}`
-                );
-
-                const data = res.data;
-
-                if (data.success) {
-                    closeModal();
-                    showToast("success", data.message);
-
-                    setTimeout(() => {
-                        location.reload();
-                    }, 500);
-
-                } else {
-                    showToast("error", data.message || "Action failed");
-                }
-
-            } catch (err) {
-                console.error(err);
-                showToast("error", "Something went wrong");
-            }
+        if (data.success) {
+            closeModal();
+            showToast("success", data.message);
+            fetchUsers(currentPage); // was: location.reload()
+        } else {
+            showToast("error", data.message || "Action failed");
         }
+    } catch (err) {
+        console.error(err);
+        showToast("error", "Something went wrong");
+    }
+}
 
         document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
-        // ─── DEBOUNCED SEARCH ────────────────────────────────────────
-     let searchDebounce;
+      
 
-     document.getElementById('searchInput').addEventListener('input', function () {
-    const query = this.value.trim().toLowerCase();
-
-    // Show/hide clear button
-    const clearBtn = document.getElementById('clearSearch');
-    if (query) clearBtn.classList.remove('hidden');
-    else clearBtn.classList.add('hidden');
-
-    clearTimeout(searchDebounce);
-    searchDebounce = setTimeout(() => {
-        filterUsers();
-    }, 300);
-    });
-
-    function clearSearch() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('clearSearch').classList.add('hidden');
-    filterUsers();
-    }
-
-    function filterUsers() {
-    const query = document.getElementById('searchInput').value.trim().toLowerCase();
-    const rows = document.querySelectorAll('.user-row');
-    let visibleCount = 0;
-
-    rows.forEach(row => {
-        const name  = row.querySelector('td:nth-child(2) .text-black')?.textContent?.toLowerCase() || '';
-        const email = row.querySelector('td:nth-child(2) .text-gray-400')?.textContent?.toLowerCase() || '';
-        const matches = name.includes(query) || email.includes(query);
-        row.style.display = matches ? '' : 'none';
-        if (matches) visibleCount++;
-    });
-
-    // Update count badge
-    const badge = document.querySelector('.bg-gray-100.px-2\\.5');
-    if (badge) badge.textContent = `${visibleCount} users`;
-
-    // Show/hide empty state
-    let emptyRow = document.getElementById('empty-search-row');
-    if (visibleCount === 0) {
-        if (!emptyRow) {
-            emptyRow = document.createElement('tr');
-            emptyRow.id = 'empty-search-row';
-            emptyRow.innerHTML = `
-                <td colspan="6" class="py-16 text-center">
-                    <div class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                        <span class="material-symbols-outlined text-gray-400 text-[28px]">manage_search</span>
-                    </div>
-                    <p class="text-[14px] font-bold text-gray-400">No users found</p>
-                    <p class="text-[12px] text-gray-300 mt-1">Try a different search or filter</p>
-                </td>`;
-            document.querySelector('tbody').appendChild(emptyRow);
-        }
-        emptyRow.style.display = '';
-    } else if (emptyRow) {
-        emptyRow.style.display = 'none';
-    }
-    }
 </script>
 
 </body>

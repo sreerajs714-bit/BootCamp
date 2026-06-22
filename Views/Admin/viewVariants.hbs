@@ -588,6 +588,16 @@
         const variantsList = {{{ json variants }}};
         const productId = '{{product._id}}';
 
+        function checkDuplicateVariant(color, size, excludeId = null) {
+            const normalizedColor = color.trim().toLowerCase();
+            return variantsList.some(v => {
+            if (excludeId && v._id.toString() === excludeId.toString()) return false;
+                const sameColor = v.color.trim().toLowerCase() === normalizedColor;
+                const sameSize = String(Array.isArray(v.sizes) ? v.sizes[0] : v.sizes) === String(size);
+                return sameColor && sameSize;
+            });
+       }
+
         // Set top summary image on page load to match the checked default variant
         window.addEventListener('DOMContentLoaded', () => {
             const checkedRadio = document.querySelector('input[name="defaultVariant"]:checked');
@@ -891,12 +901,19 @@
             const sku = document.getElementById('variantSku').value.trim();
             const price = document.getElementById('variantPrice').value.trim();
             const stock = document.getElementById('variantStock').value.trim();
+            const editingId = document.getElementById('variantId').value;
 
+            
             if (!color) { showError('colorError', true, 'Color is required'); isValid = false; }
             else { showError('colorError', false); }
 
             if (!selectedSize) { showError('sizesError', true, 'Size is required'); isValid = false; }
             else { showError('sizesError', false); }
+
+             if (color && selectedSize && checkDuplicateVariant(color, selectedSize, editingId)) {
+                showToast("error", "variant already exists.");
+                isValid = false;
+            }
 
             if (!sku) { showError('skuError', true, 'SKU is required'); isValid = false; }
             else { showError('skuError', false); }
