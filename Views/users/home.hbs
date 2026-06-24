@@ -1665,6 +1665,7 @@
                 resultsContainer.classList.remove('has-results');
                 return;
             }
+            
             searchTimeout = setTimeout(async () => {
                 try {
                     const response = await axios.get(`/users/search?q=${encodeURIComponent(query)}`);
