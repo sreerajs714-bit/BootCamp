@@ -5,6 +5,24 @@ import Wallet from "../../Model/walletModel.js";
 import axios from "axios";
 
 
+function calculateItemRefund(order, itemsToRefund) {
+    const refundRawTotal = itemsToRefund.reduce((sum, item) =>
+        sum + ((item.price || 0) * (item.quantity || 1)), 0
+    );
+
+    const orderActiveTotal = order.items
+        .filter(i => i.status !== 'Cancelled')
+        .reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
+
+    if (orderActiveTotal === 0) return refundRawTotal;
+
+    const couponDiscount = order.couponDiscount || 0;
+    const proportionalCoupon = couponDiscount > 0
+        ? (refundRawTotal / orderActiveTotal) * couponDiscount
+        : 0;
+
+    return Math.round(refundRawTotal - proportionalCoupon);
+}
 
 export const loadMyOrders = async (req, res) => {
     try {
@@ -213,61 +231,58 @@ export const cancelOrder = async (req, res) => {
             });
         }
 
-        // ── Cancel Entire Order ──────────────────────────────
-        if (id === 'ALL') {
-            let refundAmount = 0;
+      // ── Cancel Entire Order ──────────────────────────────
+    if (id === 'ALL') {
+    const itemsToCancel = order.items.filter(i => i.status === 'Active');
 
-            for (const item of order.items) {
-                if (item.status === 'Active') {
-                    const product = await Product.findById(item.product);
-                    if (product) {
-                        const variant = product.variants.find(v =>
-                            v.sizes && v.sizes.map(s => s.toString()).includes(item.size.toString())
-                        );
-                        if (variant) {
-                            variant.stock += item.quantity;
-                            await product.save();
-                        }
-                    }
-                    item.status = 'Cancelled';
-                    item.cancelReason = reason;
-                    item.cancelNote = note || '';
-                    refundAmount += item.price * item.quantity;
-                }
+   
+    const refundAmount = calculateItemRefund(order, itemsToCancel);
+
+    for (const item of itemsToCancel) {
+        const product = await Product.findById(item.product);
+        if (product) {
+            const variant = product.variants.find(v =>
+                v.sizes && v.sizes.map(s => s.toString()).includes(item.size.toString())
+            );
+            if (variant) {
+                variant.stock += item.quantity;
+                await product.save();
             }
-
-            order.orderStatus = 'Cancelled';
-            order.cancelReason = reason;
-            order.cancelNote = note || '';
-            order.totalAmount = Math.max(0, order.totalAmount - refundAmount);
-            await order.save();
-
-            // ── Wallet Refund ────────────────────────────────
-            if (['wallet', 'razorpay'].includes(order.paymentMethod) && refundAmount > 0) {
-                let wallet = await Wallet.findOne({ userId });
-                if (!wallet) {
-                    wallet = await Wallet.create({ userId, balance: 0, transactions: [] });
-                }
-
-                wallet.balance += refundAmount;
-                wallet.transactions.push({
-                    transactionId: `REFUND-${order._id}`,
-                    type: 'credit',
-                    amount: refundAmount,
-                    description: 'Order Cancellation Refund',
-                    orderId: order._id,
-                    date: new Date()
-                });
-                await wallet.save();
-            }
-
-            return res.json({
-                success: true,
-                message: ['wallet', 'razorpay'].includes(order.paymentMethod)
-                    ? `Order cancelled. ₹${refundAmount} refunded to your wallet.`
-                    : "Order cancelled successfully"
-            });
         }
+        item.status = 'Cancelled';
+        item.cancelReason = reason;
+        item.cancelNote = note || '';
+    }
+
+    order.orderStatus = 'Cancelled';
+    order.cancelReason = reason;
+    order.cancelNote = note || '';
+    order.totalAmount = Math.max(0, order.totalAmount - refundAmount);
+    await order.save();
+
+    if (['wallet', 'razorpay'].includes(order.paymentMethod) && refundAmount > 0) {
+        let wallet = await Wallet.findOne({ userId });
+        if (!wallet) wallet = await Wallet.create({ userId, balance: 0, transactions: [] });
+
+        wallet.balance += refundAmount;
+        wallet.transactions.push({
+            transactionId: `REFUND-${order._id}`,
+            type: 'credit',
+            amount: refundAmount,
+            description: 'Order Cancellation Refund',
+            orderId: order._id,
+            date: new Date()
+        });
+        await wallet.save();
+    }
+
+    return res.json({
+        success: true,
+        message: ['wallet', 'razorpay'].includes(order.paymentMethod)
+            ? `Order cancelled. ₹${refundAmount} refunded to your wallet.`
+            : "Order cancelled successfully"
+    });
+}
 
         // ── Cancel Single Item ───────────────────────────────
         const item = order.items.id(id);
@@ -291,7 +306,7 @@ export const cancelOrder = async (req, res) => {
             }
         }
 
-        const itemRefund = item.price * item.quantity;
+        const itemRefund = calculateItemRefund(order, [item]);
 
         item.status = 'Cancelled';
         item.cancelReason = reason;
@@ -306,19 +321,16 @@ export const cancelOrder = async (req, res) => {
 
         await order.save();
 
-        // ── Wallet Refund ────────────────────────────────────
         if (['wallet', 'razorpay'].includes(order.paymentMethod) && itemRefund > 0) {
             let wallet = await Wallet.findOne({ userId });
-            if (!wallet) {
-                wallet = await Wallet.create({ userId, balance: 0, transactions: [] });
-            }
+            if (!wallet) wallet = await Wallet.create({ userId, balance: 0, transactions: [] });
 
             wallet.balance += itemRefund;
             wallet.transactions.push({
-                transactionId: `REFUND-${order._id}-${id}`,  // unique per item
+                transactionId: `REFUND-${order._id}-${id}`,
                 type: 'credit',
                 amount: itemRefund,
-                description: `Item Cancellation Refund`,
+                description: 'Item Cancellation Refund',
                 orderId: order._id,
                 date: new Date()
             });
@@ -352,7 +364,24 @@ export const loadReturnPage = async (req, res) => {
             return res.redirect(`/users/orderDetail/${id}`);
         }
 
-        // ✅ Handle full order return
+        // ── Coupon proportion helper ──────────────────────────
+        function getRefundValue(items) {
+            const refundRaw = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
+            const activeTotal = order.items
+                .filter(i => i.status !== 'Cancelled')
+                .reduce((sum, i) => sum + (i.price * i.quantity), 0);
+
+            if (activeTotal === 0) return refundRaw;
+
+            const couponDiscount = order.couponDiscount || 0;
+            const proportional = couponDiscount > 0
+                ? (refundRaw / activeTotal) * couponDiscount
+                : 0;
+
+            return Math.round(refundRaw - proportional);
+        }
+
+        // ── Full order return ─────────────────────────────────
         if (itemId === 'ALL') {
             const returnableItems = order.items.filter(i =>
                 i.status !== 'Cancelled' &&
@@ -363,15 +392,24 @@ export const loadReturnPage = async (req, res) => {
                 return res.redirect(`/users/orderDetail/${id}`);
             }
 
+            // Add refundValue to each item for display
+            const itemsWithRefund = returnableItems.map(i => ({
+                ...i,
+                refundValue: getRefundValue([i])   // per-item refund after coupon share
+            }));
+
+            const totalRefund = getRefundValue(returnableItems);
+
             return res.render('users/return', {
                 order,
-                item: returnableItems[0],   // for display fallback
-                allItems: returnableItems,
-                isFullReturn: true
+                item: itemsWithRefund[0],
+                allItems: itemsWithRefund,
+                isFullReturn: true,
+                totalRefund,
             });
         }
 
-        // ✅ Handle single item return
+        // ── Single item return ────────────────────────────────
         const item = order.items.find(i => i._id.toString() === itemId);
         if (!item) return res.redirect(`/users/orderDetail/${id}`);
 
@@ -379,7 +417,14 @@ export const loadReturnPage = async (req, res) => {
             return res.redirect(`/users/orderDetail/${id}`);
         }
 
-        res.render('users/return', { order, item, isFullReturn: false });
+        const refundValue = getRefundValue([item]);
+
+        res.render('users/return', {
+            order,
+            item: { ...item, refundValue },
+            isFullReturn: false,
+            totalRefund: refundValue,
+        });
 
     } catch (error) {
         console.error('loadReturnPage error:', error);

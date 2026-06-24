@@ -324,7 +324,7 @@
             <div class="flex items-center justify-end pl-4">
                 <div class="refine-search-container">
                     <input type="text" id="bar-search-input" placeholder="SEARCH PRODUCT..." oninput="applyFilters()"
-                        onkeyup="if(event.key==='Escape') toggleBarSearch()"
+                        onkeyup="if(event.key==='Escape') toggleBarSearch()" value="{{searchQuery}}"
                         class="w-full bg-transparent border-none outline-none text-[10px] font-black tracking-widest text-right placeholder:text-gray-300">
                 </div>
 
@@ -660,6 +660,13 @@
 
             updateDualSlider();
             applyFilters();
+
+        const urlSearch = '{{searchQuery}}';
+        if (urlSearch) {
+        document.getElementById('refine-bar').classList.add('search-active'); // show the search bar open
+        document.getElementById('bar-search-input').value = urlSearch;
+        applyFilters();
+    }
         });
 
         async function addToCart(e, productId) {

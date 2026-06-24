@@ -110,6 +110,8 @@ export const loadCart = async (req, res) => {
 
 export const addToCart = async (req, res) => {
     try {
+        console.log('addToCart body:', req.body); // ← add this
+    console.log('existing cart items:', await Cart.findOne({ userId: req.session?.user?.id }));
         const userId = req.session?.user?.id || null;
         const { productId, variantId, size, quantity = 1 } = req.body;
 
@@ -163,10 +165,13 @@ export const addToCart = async (req, res) => {
                 });
             }
 
+            const resolvedSize = size || 
+                (Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes) || "";
+
             const existingItem = req.session.cart.find(item =>
                 item.productId === productId &&
                 item.variantId === variantId &&
-                item.size === (size || "")
+                item.size === resolvedSize
             );
 
             if (existingItem) {
@@ -182,7 +187,7 @@ export const addToCart = async (req, res) => {
                 variantId,
                 quantity,
                 price: variant.price,
-                size: size || (Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes),
+                size: resolvedSize,
                 productName: product.productName,
                 productImage: product.images?.[0] || ""
             });
@@ -211,10 +216,13 @@ export const addToCart = async (req, res) => {
             });
         }
 
+        const resolvedSize = size || 
+            (Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes) || "";
+
         const existingItem = cart.items.find(item =>
             item.productId.toString() === productId &&
             item.variantId?.toString() === variantId &&
-            item.size === (size || "")
+            item.size === resolvedSize 
         );
 
         if (existingItem) {
@@ -230,7 +238,7 @@ export const addToCart = async (req, res) => {
             variantId,
             quantity,
             price: variant.price,
-            size: size || (Array.isArray(variant.sizes) ? variant.sizes[0] : variant.sizes)
+            size: resolvedSize
         });
 
         await cart.save();

@@ -3,6 +3,10 @@ import Wishlist from "../../Model/wishlistModel.js";
 import Cart from "../../Model/cartModel.js";
 
 
+import { getActiveOffers, calculateOfferPrice } from "../../utils/offer.js";
+
+
+
 export const loadWishlist = async (req, res) => {
     try {
         const isLoggedIn = !!req.session?.user;
@@ -22,15 +26,18 @@ export const loadWishlist = async (req, res) => {
             { label: "Wishlist" },
         ];
 
-        const wishlist = await Wishlist.findOne({ userId })
-            .populate({
-                path: "products.productId",
-                populate: {
-                    path: "brand",
-                    model: "Brand"
-                }
-            })
-            .lean();
+        const [wishlist, activeOffers] = await Promise.all([
+            Wishlist.findOne({ userId })
+                .populate({
+                    path: "products.productId",
+                    populate: {
+                        path: "brand",
+                        model: "Brand"
+                    }
+                })
+                .lean(),
+            getActiveOffers()
+        ]);
 
         if (!wishlist || wishlist.products.length === 0) {
             return res.render("users/wishlist", {
@@ -40,14 +47,12 @@ export const loadWishlist = async (req, res) => {
             });
         }
 
-        // ✅ Split items into "valid" vs "blocked/deleted/missing"
         const idsToRemove = [];
         const validProducts = [];
 
         wishlist.products.forEach(item => {
             const product = item.productId;
             const isBlockedOrDeleted = !product || product.isDeleted || product.status !== "active";
-
             if (isBlockedOrDeleted) {
                 idsToRemove.push(product?._id || item.productId);
             } else {
@@ -55,7 +60,6 @@ export const loadWishlist = async (req, res) => {
             }
         });
 
-        // ✅ Permanently purge blocked/deleted items from this user's wishlist
         if (idsToRemove.length > 0) {
             await Wishlist.updateOne(
                 { userId },
@@ -87,17 +91,28 @@ export const loadWishlist = async (req, res) => {
                 return img.url || img.path || img.src || "";
             }).filter(Boolean);
 
+            const rawPrice = variant?.price || 0;
+            const pricing = calculateOfferPrice(rawPrice, product, activeOffers);  // ← ADD
+
             return {
-                id: product._id,
+                id: product._id.toString(),                          // ← stringify
                 productName: product.productName,
                 brand: product.brand?.name || product.brand?.brandName || "Brand",
-                rawPrice: variant?.price || 0,
-                price: `₹${(variant?.price || 0).toLocaleString("en-IN")}`,
-                variantId: variant?._id,
+                rawPrice,
+                price: pricing.hasOffer                              // ← offer price
+                    ? `₹${pricing.discountedPrice.toLocaleString("en-IN")}`
+                    : `₹${rawPrice.toLocaleString("en-IN")}`,
+                hasOffer: pricing.hasOffer,                          // ← ADD
+                discountedPrice: pricing.discountedPrice,            // ← ADD
+                offerPercentage: pricing.hasOffer                    // ← ADD
+                    ? (pricing.offer.discountType === 'percentage'
+                        ? pricing.offer.discountValue
+                        : Math.round((pricing.discount / rawPrice) * 100))
+                    : 0,
+                variantId: variant?._id?.toString() || "",           // ← stringify
                 size: item.size || variant?.sizes?.[0] || '',
                 images,
                 color: variant?.color || "",
-                badge: product.category || "",
                 isLimitedEdition: product.isLimitedEdition || false,
                 stock: variant?.stock || 0,
                 isOutOfStock: (variant?.stock || 0) === 0,

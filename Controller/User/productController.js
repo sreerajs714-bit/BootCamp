@@ -85,13 +85,21 @@ export const loadAllProducts = async (req, res) => {
         const activeCategoryIds = activeCategories.map(c => c._id);
         const activeBrandIds    = activeBrands.map(b => b._id);
 
+      
+        const searchQuery = req.query.search?.trim() || '';
+        const searchFilter = searchQuery
+            ? { productName: new RegExp(searchQuery, 'i') }
+            : {};
+
         const [products, wishlistedIds, activeOffers] = await Promise.all([
             Product.find({
                 status: "active",
                 isDeleted: false,
                 category: { $in: activeCategoryIds },
-                brand:    { $in: activeBrandIds }
+                brand:    { $in: activeBrandIds },
+                ...searchFilter,              
             })
+                .sort({ createdAt: -1 }) 
                 .populate("brand",    "name")
                 .populate("category", "name")
                 .lean(),
@@ -110,7 +118,8 @@ export const loadAllProducts = async (req, res) => {
             products:   shaped,
             categories: activeCategories,
             brands:     activeBrands,
-            user:       req.session?.user || null
+            user:       req.session?.user || null,
+            searchQuery,                       
         });
 
     } catch (error) {
@@ -132,6 +141,7 @@ export const loadMens = async (req, res) => {
                 category: { $in: activeCategoryIds },
                 brand:    { $in: activeBrandIds }
             })
+                .sort({ createdAt: -1 }) 
                 .populate("brand",    "name brandName")
                 .populate("category", "name categoryName")
                 .lean(),
@@ -176,6 +186,7 @@ export const loadWomens = async (req, res) => {
                 category: { $in: activeCategoryIds },
                 brand:    { $in: activeBrandIds }
             })
+                .sort({ createdAt: -1 }) 
                 .populate("brand",    "name brandName")
                 .populate("category", "name categoryName")
                 .lean(),
@@ -260,7 +271,7 @@ export const loadProductDetail = async (req, res) => {
         ]);
 
         if (!product || product.isDeleted || product.status !== "active") {
-            return res.status(404).send("Product not found");
+            return res.redirect('/?error=product_unavailable');
         }
 
         const variant =
@@ -400,4 +411,46 @@ export const loadProductDetail = async (req, res) => {
         console.error("loadProductDetail error:", error);
         res.status(500).send("Server error");
     }
+};
+
+export const searchProducts = async (req, res) => {
+  try {
+    const query = req.query.q?.trim();
+
+    if (!query || query.length < 2) {
+      return res.json({ products: [] });
+    }
+
+    const searchRegex = new RegExp(query, 'i');
+
+    const products = await Product.find({
+      status: 'active',
+      isDeleted: false,
+      productName: searchRegex,
+    })
+      .limit(10)
+      .populate('brand', 'name')
+      .lean();
+
+    const formatted = products.map(p => {
+      const variant =
+        p.variants?.find(v => v.isDefault && v.isActive) ||
+        p.variants?.find(v => v.isActive) ||
+        p.variants?.[0];
+
+      return {
+        id: p._id.toString(),
+        productName: p.productName,
+        brand: p.brand?.name || '',
+        rawPrice: variant?.price || 0,
+        images: variant?.images || [],
+      };
+    });
+
+    return res.json({ products: formatted });
+
+  } catch (error) {
+    console.error('Search error:', error);
+    return res.status(500).json({ products: [], message: 'Search failed' });
+  }
 };

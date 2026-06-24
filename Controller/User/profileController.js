@@ -55,7 +55,7 @@ export const changePassword = async (req, res) => {
     if (!user) return res.json({ success: false, message: "User not found" });
 
     if (user.googleId) {
-      // ✅ Google user — no current password needed
+      
       if (!newPassword || !confirmPassword) {
         return res.json({ success: false, message: "All fields are required" });
       }
@@ -74,7 +74,7 @@ export const changePassword = async (req, res) => {
       return res.json({ success: true, message: "Password set successfully" });
     }
 
-    // ✅ Normal user — verify current password
+    
     if (!currentPassword || !newPassword || !confirmPassword) {
       return res.json({ success: false, message: "All fields are required" });
     }

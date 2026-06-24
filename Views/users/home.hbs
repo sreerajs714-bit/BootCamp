@@ -80,30 +80,140 @@
             color: #ffffff;
         }
 
-        /* ── Search ── */
-        #search-container {
-            backdrop-filter: blur(12px);
-            background-color: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        /* ── Search Overlay ── */
+        #search-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            justify-content: center;
+            padding-top: 10vh;
         }
 
-        #main-navbar.nav-scrolled #search-container {
-            background-color: rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(0, 0, 0, 0.1);
-        }
-
-        #search-container.search-active {
-            width: 380px;
+        #search-overlay.active {
             opacity: 1;
-            padding-left: 1.25rem;
-            padding-right: 0.75rem;
-            margin-right: -4px;
+            visibility: visible;
         }
 
-        .search-open-state #search-trigger {
-            display: none;
+        #search-modal {
+            width: 100%;
+            max-width: 650px;
+            padding: 0 20px;
+            transform: translateY(20px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #search-overlay.active #search-modal {
+            transform: translateY(0);
+        }
+
+        .search-input-wrapper {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .search-results-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            max-height: 0;
+            transition: all 0.4s ease;
+            opacity: 0;
+        }
+
+        .search-results-container.has-results {
+            max-height: 500px;
+            opacity: 1;
+            padding: 8px 0;
+        }
+
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 24px;
+            gap: 16px;
+            transition: background 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .search-result-item:hover {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .search-result-img {
+            width: 56px;
+            height: 56px;
+            background: #f4f4f4;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+
+        .search-result-info {
+            flex: 1;
+        }
+
+        .search-result-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+        }
+
+        .search-result-price {
+            font-size: 12px;
+            font-weight: 500;
+            color: #666;
+        }
+
+        .view-all-results {
+            display: block;
+            padding: 16px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #000;
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            transition: background 0.2s;
+        }
+
+        .view-all-results:hover {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .close-search-btn {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .close-search-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
         }
 
         .badge {
@@ -847,34 +957,24 @@
                     BOOT<span class="font-light">CAMP</span>
                 </h1>
             </a>
-            <nav class="hidden lg:flex items-center space-x-10 font-bold text-[11px] tracking-[0.4em] uppercase">
+            <nav class="hidden lg:flex items-center space-x-8 font-bold text-[11px] tracking-[0.4em] uppercase">
                 <a href="/" class="transition-colors duration-300">Home</a>
                 <a href="/users/allProduct" class="transition-colors duration-300">Explore</a>
             </nav>
-            <div class="flex items-center space-x-6">
-                <div id="search-container"
-                    class="flex items-center overflow-hidden w-0 opacity-0 rounded-full h-10 px-0">
-                    <input type="text" id="search-input" placeholder="SEARCH PRODUCT..."
-                        class="bg-transparent border-none outline-none text-[10px] font-black tracking-widest pl-2 w-72 placeholder:text-gray-400">
-                    <button onclick="toggleSearch()" class="pr-1 text-gray-400 hover:text-black transition-colors">
-                        <span class="material-symbols-outlined text-[18px]">close</span>
-                    </button>
-                </div>
-                <button id="search-trigger" onclick="toggleSearch()" class="icon-btn group" aria-label="Search">
-                    <span
-                        class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">search</span>
+            
+            <div class="flex items-center space-x-5">
+                <button onclick="toggleSearch()" class="icon-btn group" aria-label="Search">
+                    <span class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">search</span>
                 </button>
                 <a href="/users/wishlist" class="icon-btn relative group" aria-label="Wishlist">
-                    <span
-                        class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">favorite</span>
+                    <span class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">favorite</span>
                     <span id="wishlist-badge"
                         class="badge absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all {{#unless wishlistCount}}opacity-0 scale-0{{/unless}}">
                         {{wishlistCount}}
                     </span>
                 </a>
                 <a href="/users/cart" class="icon-btn relative group" aria-label="Cart">
-                    <span
-                        class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">shopping_bag</span>
+                    <span class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">shopping_bag</span>
                     <span id="cart-badge"
                         class="badge absolute -top-1 -right-1 bg-black text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all {{#if cartCount}}{{else}}opacity-0 scale-0{{/if}}">
                         {{cartCount}}
@@ -882,8 +982,7 @@
                 </a>
                 {{#if user}}
                 <a href="/users/profile" id="profile-icon" class="icon-btn group" aria-label="Profile">
-                    <span
-                        class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">person</span>
+                    <span class="material-symbols-outlined font-light text-[22px] group-hover:text-gray-500 transition-colors duration-300">person</span>
                 </a>
                 {{else}}
                 <a href="/users/login" id="login-btn"
@@ -1054,16 +1153,17 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="home-new-arrivals">
             {{#if products}}
             {{#each products}}
-            <div class="home-card flex flex-col cursor-pointer" 
-                data-href="/users/productDetail/{{this.id}}"
+            <div class="home-card flex flex-col cursor-pointer" data-href="/users/productDetail/{{this.id}}" data-size="{{this.defaultSize}}" 
                 onmouseenter="startCarousel(this)" onmouseleave="stopCarousel(this)" data-brand="{{this.brand}}"
-                data-price="{{#if this.hasOffer}}{{this.discountedPrice}}{{else}}{{this.rawPrice}}{{/if}}" data-name="{{this.productName}}" data-variant="{{this.variantId}}">
+                data-price="{{#if this.hasOffer}}{{this.discountedPrice}}{{else}}{{this.rawPrice}}{{/if}}"
+                data-name="{{this.productName}}" data-variant="{{this.variantId}}">
 
                 <!-- IMAGE CAROUSEL -->
                 <div class="home-card-img-box">
                     {{#if this.hasOffer}}
-                    <div class="absolute top-3 left-3 z-20 bg-red-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-md">
-                    {{this.offerPercentage}}% OFF
+                    <div
+                        class="absolute top-3 left-3 z-20 bg-red-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-md">
+                        {{this.offerPercentage}}% OFF
                     </div>
                     {{/if}}
                     <!-- Wishlist -->
@@ -1072,9 +1172,12 @@
                             class="material-symbols-outlined text-[18px] text-gray-600 hover:text-red-500 {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
                     </button>
                     <!-- In Stock -->
-                    <div class="absolute bottom-4 left-4 z-20 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-md border border-gray-100">
-                     <span class="material-symbols-outlined text-[15px] {{#if (eq this.stock_icon 'check_circle')}}text-[#10b981]{{else if (eq this.stock_icon 'schedule')}}text-yellow-500{{else}}text-red-500{{/if}} icon-fill">{{this.stock_icon}}</span>
-                     <span class="text-[10px] font-bold {{#if (eq this.stock_icon 'check_circle')}}text-black{{else if (eq this.stock_icon 'schedule')}}text-yellow-500{{else}}text-red-500{{/if}} uppercase tracking-wider">{{this.stock_label}}</span>
+                    <div
+                        class="absolute bottom-4 left-4 z-20 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-md border border-gray-100">
+                        <span
+                            class="material-symbols-outlined text-[15px] {{#if (eq this.stock_icon 'check_circle')}}text-[#10b981]{{else if (eq this.stock_icon 'schedule')}}text-yellow-500{{else}}text-red-500{{/if}} icon-fill">{{this.stock_icon}}</span>
+                        <span
+                            class="text-[10px] font-bold {{#if (eq this.stock_icon 'check_circle')}}text-black{{else if (eq this.stock_icon 'schedule')}}text-yellow-500{{else}}text-red-500{{/if}} uppercase tracking-wider">{{this.stock_label}}</span>
                     </div>
                     {{#each this.images}}
                     <img src="{{this}}" alt="" class="home-carousel-img {{#if @first}}active{{else}}inactive{{/if}}">
@@ -1088,16 +1191,16 @@
                     <h3 class="font-bold text-[15px] mb-0.5 leading-tight">{{this.productName}}</h3>
                     <p class="text-[12px] text-gray-500 font-medium mb-2">{{this.brand}}</p>
                     {{#if this.hasOffer}}
-<div class="flex items-center gap-2 mb-6 flex-wrap">
-    <div class="text-[20px] font-black text-black">₹{{this.discountedPrice}}</div>
-    <div class="text-[13px] font-bold text-gray-400 line-through">₹{{this.rawPrice}}</div>
-    <div class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
-        {{this.offerPercentage}}% OFF
-    </div>
-</div>
-{{else}}
-<div class="text-[20px] font-black text-black mb-6">₹{{this.rawPrice}}</div>
-{{/if}}
+                    <div class="flex items-center gap-2 mb-6 flex-wrap">
+                        <div class="text-[20px] font-black text-black">₹{{this.discountedPrice}}</div>
+                        <div class="text-[13px] font-bold text-gray-400 line-through">₹{{this.rawPrice}}</div>
+                        <div class="text-[10px] font-black text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                            {{this.offerPercentage}}% OFF
+                        </div>
+                    </div>
+                    {{else}}
+                    <div class="text-[20px] font-black text-black mb-6">₹{{this.rawPrice}}</div>
+                    {{/if}}
                     <!-- ACTIONS -->
                     <div class="home-card-actions">
                         <button onclick="addToCart(event, '{{this.id}}')" class="home-btn-primary">
@@ -1153,21 +1256,25 @@
                     {{#if limitedProducts}}
                     {{#each limitedProducts}}
                     <div class="home-card home-card-dark flex flex-col cursor-pointer"
-                        data-href='/users/productDetail/{{this.id}}' data-variant="{{this.variantId}}"
+                        data-href='/users/productDetail/{{this.id}}' data-variant="{{this.variantId}}" data-size="{{this.defaultSize}}"
                         onmouseenter="startCarousel(this)" onmouseleave="stopCarousel(this)">
                         <div class="home-card-img-box">
                             {{#if this.hasOffer}}
-                            <div class="absolute top-3 left-3 z-20 bg-red-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-md">
-                             {{this.offerPercentage}}% OFF
+                            <div
+                                class="absolute top-3 left-3 z-20 bg-red-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow-md">
+                                {{this.offerPercentage}}% OFF
                             </div>
                             {{/if}}
                             <button onclick="toggleWishlist(event, '{{this.id}}', this)" class="home-wish-btn">
                                 <span
                                     class="material-symbols-outlined text-[18px] text-white hover:text-red-400 {{#if this.isWishlisted}}icon-fill text-red-400{{/if}}">favorite</span>
                             </button>
-                            <div class="absolute bottom-4 left-4 z-20 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-md border border-gray-100">
-                             <span class="material-symbols-outlined text-[15px] {{#if (eq this.stock_icon 'check_circle')}}text-[#10b981]{{else if (eq this.stock_icon 'schedule')}}text-yellow-500{{else}}text-red-500{{/if}} icon-fill">{{this.stock_icon}}</span>
-                             <span class="text-[10px] font-bold {{#if (eq this.stock_icon 'check_circle')}}text-black{{else if (eq this.stock_icon 'schedule')}}text-yellow-500{{else}}text-red-500{{/if}} uppercase tracking-wider">{{this.stock_label}}</span>
+                            <div
+                                class="absolute bottom-4 left-4 z-20 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full flex items-center gap-2 shadow-md border border-gray-100">
+                                <span
+                                    class="material-symbols-outlined text-[15px] {{#if (eq this.stock_icon 'check_circle')}}text-[#10b981]{{else if (eq this.stock_icon 'schedule')}}text-yellow-500{{else}}text-red-500{{/if}} icon-fill">{{this.stock_icon}}</span>
+                                <span
+                                    class="text-[10px] font-bold {{#if (eq this.stock_icon 'check_circle')}}text-black{{else if (eq this.stock_icon 'schedule')}}text-yellow-500{{else}}text-red-500{{/if}} uppercase tracking-wider">{{this.stock_label}}</span>
                             </div>
                             {{#each this.images}}
                             <img src="{{this}}" alt=""
@@ -1180,13 +1287,14 @@
                             <h3 class="font-bold text-[15px] text-white mb-0.5 leading-tight">{{this.productName}}</h3>
                             {{#if this.hasOffer}}
                             <div class="flex items-center gap-2 mb-3 flex-wrap">
-                               <div class="text-[18px] font-black text-white">₹{{this.discountedPrice}}</div>
-                               <div class="text-[12px] font-bold text-white/40 line-through">₹{{this.rawPrice}}</div>
-                               <div class="text-[10px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">
-                               {{this.offerPercentage}}% OFF
-                               </div>
+                                <div class="text-[18px] font-black text-white">₹{{this.discountedPrice}}</div>
+                                <div class="text-[12px] font-bold text-white/40 line-through">₹{{this.rawPrice}}</div>
+                                <div
+                                    class="text-[10px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full">
+                                    {{this.offerPercentage}}% OFF
                                 </div>
-                               {{else}}
+                            </div>
+                            {{else}}
                             <div class="text-[18px] font-black text-white mb-3">₹{{this.rawPrice}}</div>
                             {{/if}}
                             <div class="home-card-actions">
@@ -1299,248 +1407,349 @@
     </section>
 
     <!-- Footer -->
-   {{>footer}}
+    {{>footer}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/toast/toast.js"></script>
-    <script>
-
+   <script>
+    const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
 
     function safeFetchNavCounts() {
-    if (typeof window.fetchNavCounts === 'function') {
-        window.fetchNavCounts();
-    } else {
-        // Fallback — update directly
-        axios.get('/users/getCounts', { withCredentials: true }).then(res => {
-            const { cartCount, wishlistCount } = res.data;
-
-            const cartBadge = document.getElementById('cart-badge');
-            if (cartBadge) {
-                cartBadge.textContent = cartCount;
-                cartCount > 0
-                    ? cartBadge.classList.remove('opacity-0', 'scale-0')
-                    : cartBadge.classList.add('opacity-0', 'scale-0');
-            }
-
-            const wishlistBadge = document.getElementById('wishlist-badge');
-            if (wishlistBadge) {
-                wishlistBadge.textContent = wishlistCount;
-                wishlistCount > 0
-                    ? wishlistBadge.classList.remove('opacity-0', 'scale-0')
-                    : wishlistBadge.classList.add('opacity-0', 'scale-0');
-            }
-        }).catch(() => {});
+        if (typeof window.fetchNavCounts === 'function') {
+            window.fetchNavCounts();
+        } else {
+            axios.get('/users/getCounts', { withCredentials: true }).then(res => {
+                const { cartCount, wishlistCount } = res.data;
+                const cartBadge = document.getElementById('cart-badge');
+                if (cartBadge) {
+                    cartBadge.textContent = cartCount;
+                    cartCount > 0
+                        ? cartBadge.classList.remove('opacity-0', 'scale-0')
+                        : cartBadge.classList.add('opacity-0', 'scale-0');
+                }
+                const wishlistBadge = document.getElementById('wishlist-badge');
+                if (wishlistBadge) {
+                    wishlistBadge.textContent = wishlistCount;
+                    wishlistCount > 0
+                        ? wishlistBadge.classList.remove('opacity-0', 'scale-0')
+                        : wishlistBadge.classList.add('opacity-0', 'scale-0');
+                }
+            }).catch(() => {});
+        }
     }
-   }
 
+    async function addToCart(e, productId) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
 
-        document.addEventListener("DOMContentLoaded", () => {
-            const navbar = document.getElementById("main-navbar");
+        if (!isLoggedIn) {
+            showToast("error", "Please login to continue");
+            return;
+        }
 
-            function updateNavbar() {
-                if (window.scrollY > 50) {
-                    navbar.classList.remove("nav-transparent");
-                    navbar.classList.add("nav-scrolled");
-                } else {
-                    navbar.classList.remove("nav-scrolled");
-                    navbar.classList.add("nav-transparent");
-                }
+        const card = e.currentTarget.closest('.home-card');
+        const variantId = card?.dataset?.variant;
+        const size = card?.dataset?.size;
+
+        if (!variantId) {
+            showToast("error", "Variant missing for this product");
+            return;
+        }
+
+        const btn = e.currentTarget;
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">progress_activity</span> Adding...';
+        btn.disabled = true;
+
+        try {
+            const res = await axios.post('/users/addCart',
+                { productId, variantId,size, quantity: 1 },
+                { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
+            );
+
+            const data = res.data;
+
+            if (data.alreadyInCart) {
+                showToast("error", "Already in your cart");
+            } else if (data.cartLimit) {
+                showToast("error", "Cart is full! Maximum 10 items allowed.");
+            } else if (data.outOfStock) {
+                showToast("error", "This product is out of stock");
+            } else if (data.success) {
+                showToast("success", "Added to cart!");
+                safeFetchNavCounts();
+            } else {
+                showToast("error", data.message || "Something went wrong");
             }
-            window.addEventListener("scroll", updateNavbar);
-            updateNavbar();
 
-            window.toggleSearch = function () {
-                const container = document.getElementById('search-container');
-                const header = document.getElementById('main-navbar');
-                const input = document.getElementById('search-input');
-                container.classList.toggle('search-active');
-                header.classList.toggle('search-open-state');
-                if (container.classList.contains('search-active')) {
-                    setTimeout(() => input.focus(), 300);
-                } else {
-                    input.value = '';
-                }
+        } catch (err) {
+            if (err.response?.status === 401) {
+                showToast("error", "Please login to continue");
+                return;
+            }
+            const data = err.response?.data;
+            if (data?.alreadyInCart) showToast("error", "Already in your cart");
+            else if (data?.cartLimit) showToast("error", "Cart is full! Maximum 10 items allowed.");
+            else if (data?.outOfStock) showToast("error", "This product is out of stock!");
+            else showToast("error", data?.message || "Something went wrong");
+        } finally {
+            btn.innerHTML = originalHTML;
+            btn.disabled = false;
+        }
+    }
+
+    async function buyNow(e, productId) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        if (!isLoggedIn) {
+            showToast("error", "Please login to continue");
+            return;
+        }
+
+        const card = e.currentTarget.closest('.home-card');
+        const variantId = card?.dataset?.variant;
+        const size = card?.dataset?.size;
+        const btn = e.currentTarget;
+        const originalText = btn.textContent;
+
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
+        try {
+            const res = await axios.post('/users/addCart',
+                { productId, variantId,size, quantity: 1 },
+                { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
+            );
+
+            const data = res.data;
+
+            if (data.outOfStock) {
+                showToast("error", "This product is out of stock!");
+                btn.disabled = false;
+                btn.textContent = originalText;
+                return;
+            }
+            if (data.cartLimit) {
+                showToast("error", "Cart is full! Maximum 10 items allowed.");
+                btn.disabled = false;
+                btn.textContent = originalText;
+                return;
             }
 
-            // Scroll reveal
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); });
-            }, { threshold: 0.1 });
-            document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+            // success OR alreadyInCart → go to cart
+            window.location.href = '/users/cart';
 
+        } catch (err) {
+            if (err.response?.status === 401) {
+                showToast("error", "Please login to continue");
+                btn.disabled = false;
+                btn.textContent = originalText;
+                return;
+            }
+            const data = err?.response?.data;
+            if (data?.outOfStock) {
+                showToast("error", "This product is out of stock!");
+                btn.disabled = false;
+                btn.textContent = originalText;
+                return;
+            }
+            if (data?.cartLimit) {
+                showToast("error", "Cart is full! Maximum 10 items allowed.");
+                btn.disabled = false;
+                btn.textContent = originalText;
+                return;
+            }
+            // alreadyInCart or anything else → go to cart
+            window.location.href = '/users/cart';
+        }
+    }
 
-          document.querySelectorAll('.home-card').forEach(card => {
-              card.addEventListener('click', function (e) {
-               if (!e.target.closest('button')) {
+    async function toggleWishlist(e, productId, btn) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+
+        if (!isLoggedIn) {
+            showToast("error", "Please login to continue");
+            return;
+        }
+
+        const icon = btn.querySelector('.material-symbols-outlined');
+
+        try {
+            const res = await axios.post('/users/toggleWishlist',
+                { productId },
+                { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
+            );
+
+            if (res.data.success) {
+                if (res.data.isWishlisted) {
+                    icon.classList.add('icon-fill', 'text-red-500');
+                    showToast("success", "Added to wishlist!");
+                } else {
+                    icon.classList.remove('icon-fill', 'text-red-500');
+                    showToast("success", "Removed from wishlist");
+                }
+                safeFetchNavCounts();
+            }
+        } catch (err) {
+            if (err.response?.status === 401) {
+                showToast("error", "Please login to continue");
+                return;
+            }
+            showToast("error", "Failed to update wishlist");
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const navbar = document.getElementById("main-navbar");
+
+        function updateNavbar() {
+            if (window.scrollY > 50) {
+                navbar.classList.remove("nav-transparent");
+                navbar.classList.add("nav-scrolled");
+            } else {
+                navbar.classList.remove("nav-scrolled");
+                navbar.classList.add("nav-transparent");
+            }
+        }
+        window.addEventListener("scroll", updateNavbar);
+        updateNavbar();
+
+        // ── Search Overlay ────────────────────────────────────
+        const searchOverlay = document.createElement('div');
+        searchOverlay.id = 'search-overlay';
+        searchOverlay.innerHTML = `
+            <div class="close-search-btn" onclick="toggleSearch()">
+                <span class="material-symbols-outlined">close</span>
+            </div>
+            <div id="search-modal">
+                <div class="search-input-wrapper">
+                    <span class="material-symbols-outlined text-gray-400 mr-4">search</span>
+                    <input type="text" id="overlay-search-input" placeholder="What are you looking for?" 
+                        class="flex-1 bg-transparent border-none outline-none text-[15px] font-semibold">
+                    <span class="material-symbols-outlined text-gray-300 cursor-pointer hover:text-gray-500 transition-colors" 
+                        onclick="document.getElementById('overlay-search-input').value = ''; document.getElementById('search-results').classList.remove('has-results');">close</span>
+                </div>
+                <div id="search-results" class="search-results-container"></div>
+            </div>
+        `;
+        document.body.appendChild(searchOverlay);
+
+        window.toggleSearch = function () {
+            searchOverlay.classList.toggle('active');
+            if (searchOverlay.classList.contains('active')) {
+                setTimeout(() => document.getElementById('overlay-search-input').focus(), 300);
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+                document.getElementById('overlay-search-input').value = '';
+                document.getElementById('search-results').classList.remove('has-results');
+            }
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && searchOverlay.classList.contains('active')) toggleSearch();
+        });
+
+        let searchTimeout;
+        const searchInput = document.getElementById('overlay-search-input');
+        const resultsContainer = document.getElementById('search-results');
+
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            const query = e.target.value.trim();
+            if (query.length < 2) {
+                resultsContainer.classList.remove('has-results');
+                return;
+            }
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await axios.get(`/users/search?q=${encodeURIComponent(query)}`);
+                    const products = response.data.products || [];
+                    renderSearchResults(products);
+                } catch (err) {
+                    console.error('Search failed:', err);
+                }
+            }, 300);
+        });
+
+        function renderSearchResults(products) {
+            if (products.length === 0) {
+                resultsContainer.innerHTML = '<div class="p-8 text-center text-gray-400 text-sm font-medium">No products found matching your search.</div>';
+            } else {
+                let html = products.slice(0, 3).map(p => `
+                    <a href="/users/productDetail/${p._id || p.id}" class="search-result-item">
+                        <img src="${p.images ? p.images[0] : ''}" class="search-result-img" alt="${p.productName}">
+                        <div class="search-result-info">
+                            <div class="search-result-name">${p.productName}</div>
+                            <div class="search-result-price">₹${p.rawPrice || p.price}</div>
+                        </div>
+                        <span class="material-symbols-outlined text-gray-300 text-[20px]">chevron_right</span>
+                    </a>
+                `).join('');
+                if (products.length > 3) {
+                    html += `<a href="/users/allProduct?search=${encodeURIComponent(searchInput.value)}" class="view-all-results">View All Results <span class="ml-1">›</span></a>`;
+                }
+                resultsContainer.innerHTML = html;
+            }
+            resultsContainer.classList.add('has-results');
+        }
+
+        // ── Scroll Reveal ─────────────────────────────────────
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+            });
+        }, { threshold: 0.1 });
+        document.querySelectorAll('.scroll-reveal').forEach(el => observer.observe(el));
+
+        // ── Card Click → Navigate ─────────────────────────────
+        document.querySelectorAll('.home-card').forEach(card => {
+            card.addEventListener('click', function (e) {
+                if (!e.target.closest('button')) {
                     window.location.href = this.dataset.href;
                 }
             });
         });
 
-            // ── Image carousel for product cards ──────────────────
-            window.startCarousel = function (card) {
-                const imgs = card.querySelectorAll('.home-carousel-img');
-                if (imgs.length <= 1) return;
-                let idx = 0;
-                card._carouselInterval = setInterval(() => {
-                    imgs[idx].classList.remove('active');
-                    imgs[idx].classList.add('inactive');
-                    idx = (idx + 1) % imgs.length;
-                    imgs[idx].classList.remove('inactive');
-                    imgs[idx].classList.add('active');
-                }, 900);
-            };
+        // ── Image Carousel ────────────────────────────────────
+        window.startCarousel = function (card) {
+            const imgs = card.querySelectorAll('.home-carousel-img');
+            if (imgs.length <= 1) return;
+            let idx = 0;
+            card._carouselInterval = setInterval(() => {
+                imgs[idx].classList.remove('active');
+                imgs[idx].classList.add('inactive');
+                idx = (idx + 1) % imgs.length;
+                imgs[idx].classList.remove('inactive');
+                imgs[idx].classList.add('active');
+            }, 900);
+        };
 
-            window.stopCarousel = function (card) {
-                clearInterval(card._carouselInterval);
-                const imgs = card.querySelectorAll('.home-carousel-img');
-                imgs.forEach((img, i) => {
-                    img.classList.toggle('active', i === 0);
-                    img.classList.toggle('inactive', i !== 0);
-                });
-            };
+        window.stopCarousel = function (card) {
+            clearInterval(card._carouselInterval);
+            const imgs = card.querySelectorAll('.home-carousel-img');
+            imgs.forEach((img, i) => {
+                img.classList.toggle('active', i === 0);
+                img.classList.toggle('inactive', i !== 0);
+            });
+        };
+    });
+</script>
 
-    const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
-
-     // ── Add to Cart ───────────────────────────────────────
-    window.addToCart = async function (e, productId) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-
-    if (!isLoggedIn) {
-        showToast("error", "Please login to continue");
-        return;
-    }
-
-    const card = e.currentTarget.closest('[data-variant]');
-    const variantId = card?.dataset?.variant;
-
-    if (!variantId) {
-        showToast("error", "Variant missing for this product");
-        return;
-    }
-
-    const btn = e.currentTarget;
-    const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">progress_activity</span> Adding...';
-    btn.disabled = true;
-
-    try {
-        const res = await axios.post('/users/addCart',
-            { productId, variantId, quantity: 1 },
-            { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
-        );
-
-        console.log('Home cart response:', res.data); // ← check this
-
-        const data = res.data;
-
-        if (data.alreadyInCart) {
-            showToast("error", "Already in your cart");
-        } else if (data.cartLimit) {
-            showToast("error", "Cart is full! Maximum 10 items allowed.");
-        } else if (data.outOfStock) {
-            showToast("error", "This product is out of stock");
-        } else if (data.success) {
-            showToast("success", "Added to cart!");
-            safeFetchNavCounts()
-        } else {
-        
-            showToast("success", "Added to cart!");
-            safeFetchNavCounts()
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('error') === 'product_unavailable') {
+            showToast('error', 'This product is no longer available');
+            // Clean the URL without reload
+            window.history.replaceState({}, '', '/');
         }
-
-    } catch (err) {
-        if (err.response?.status === 401) {
-            showToast("error", "Please login to continue");
-            setTimeout(() => window.location.href = '/users/login', 1500);
-            return;
-        }
-        const data = err.response?.data;
-        if (data?.alreadyInCart) showToast("error", "Already in your cart");
-        else if (data?.cartLimit) showToast("error", "Cart is full! Maximum 10 items allowed.");
-        else if (data?.outOfStock) showToast("error", "This product is out of stock!");
-        else showToast("error", data?.message || "Something went wrong");
-    } finally {
-        btn.innerHTML = originalHTML;
-        btn.disabled = false;
-    }
-};
-
-    // ── Wishlist toggle ───────────────────────────────────
-    window.toggleWishlist = async function (e, productId, btn) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-
-    if (!isLoggedIn) {
-        showToast("error", "Please login to continue");
-        return;
-    }
-
-    const icon = btn.querySelector('.material-symbols-outlined');
-    const isWishlisted = icon.classList.contains('icon-fill');
-
-    try {
-        const res = await axios.post('/users/toggleWishlist',
-            { productId },
-            { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
-        );
-
-        if (res.data.success) {
-            if (res.data.isWishlisted) {
-                icon.classList.add('icon-fill', 'text-red-500');
-                showToast("success", "Added to wishlist!");
-            } else {
-                icon.classList.remove('icon-fill', 'text-red-500');
-                showToast("success", "Removed from wishlist");
-            }
-            safeFetchNavCounts()
-        }
-    } catch (err) {
-        if (err.response?.status === 401) {
-            showToast("error", "Please login to continue");
-            return;
-        }
-        showToast("error", "Failed to update wishlist");
-    }
-};
-
-    // ── Buy Now ──────────────────────────────────────────
-    window.buyNow = async function (e, productId) {
-    e.preventDefault();
-    e.stopPropagation();
-    e.stopImmediatePropagation();
-
-    if (!isLoggedIn) {
-        showToast("error", "Please login to continue");
-        return;
-    }
-
-    const card = e.currentTarget.closest('[data-variant]');
-    const variantId = card?.dataset?.variant;
-
-    try {
-        const res = await axios.post('/users/addCart',
-            { productId, variantId, quantity: 1 },
-            { withCredentials: true, headers: { 'Content-Type': 'application/json' } }
-        );
-        if (res.data.success || res.data.alreadyInCart) {
-            window.location.href = '/users/cart';
-        } else {
-            showToast("error", res.data.message || "Failed to process");
-        }
-    } catch (err) {
-        if (err.response?.status === 401) {
-            showToast("error", "Please login to continue");
-            return;
-        }
-        if (err.response?.data?.outOfStock) showToast("error", "This product is out of stock!");
-        else window.location.href = '/users/cart';
-    }
-  };
-});
-    </script>
+    });
+</script>
 </body>
 
 </html>

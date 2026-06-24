@@ -1,5 +1,7 @@
 import User from "../../Model/userModel.js";
 import Product from "../../Model/productModel.js";
+import Brand from "../../Model/brandModel.js";
+import Category from "../../Model/categoryModel.js";
 import Cart from "../../Model/cartModel.js";
 import Wishlist from "../../Model/wishlistModel.js";
 import session from "express-session";
@@ -229,6 +231,7 @@ export const loadHome = async (req, res) => {
         stock_icon,
         isWishlisted: userId ? wishlistSet.has(p._id.toString()) : false,
         variantId: variant?._id?.toString() || "",
+        defaultSize: Array.isArray(variant?.sizes) ? variant.sizes[0] : (variant?.sizes || ""),
       };
     };
 

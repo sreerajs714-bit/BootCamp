@@ -1,6 +1,6 @@
 import express from "express";
 const route=express.Router();
-import { loadHome, loadRegister, loadResetPassword, loadSetNew, loadVerifyOtp, LoginUser, Logout, resetPassword, SetNew} from "../Controller/User/authController.js";
+import { loadHome, loadRegister, loadResetPassword, loadSetNew, loadVerifyOtp, LoginUser, Logout, resetPassword,SetNew} from "../Controller/User/authController.js";
 import { loadLogin } from "../Controller/User/authController.js";
 import { RegisterUser } from "../Controller/User/authController.js";
 import { resendOTP, verifyOTP } from "../Controller/otpcontroller.js";
@@ -9,7 +9,7 @@ import { changeEmail, changePassword, editProfile, loadEditProfile, loadProfile,
 import { uploadProfile ,uploadReturn } from "../Middleware/multer.js";
 import passport from "../Config/passport.js";
 import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controller/User/addressController.js";
-import { loadAllProducts, loadLimitedEdition, loadMens, loadProductDetail, loadWomens } from "../Controller/User/productController.js";
+import { loadAllProducts, loadLimitedEdition, loadMens, loadProductDetail, loadWomens, searchProducts } from "../Controller/User/productController.js";
 import { clearWishlist, loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
 import { addToCart, loadCart, removeFromCart, updateCartQty } from "../Controller/User/cartController.js";
 import { applyCoupon, createRazorpayOrder, getAvailableCoupons, loadCheckout, loadOrderSuccess, loadPaymentFailed, placeOrder, removeCoupon, retryRazorpayPayment, verifyRazorpayPayment } from "../Controller/User/checkoutController.js";
@@ -56,6 +56,8 @@ route.post("/otpVerify",verifyOTP)
 route.post("/resendOtp",resendOTP)
 route.get("/setNew",noCache,loadSetNew)
 route.post("/setNew",SetNew)
+
+route.get("/search",searchProducts);
 
 route.get("/editProfile",noCache,checkSession,loadEditProfile)
 route.post("/editProfile", noCache, checkSession, uploadProfile.single("profilePhoto"), editProfile)

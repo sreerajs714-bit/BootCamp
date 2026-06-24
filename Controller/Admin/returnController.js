@@ -4,6 +4,25 @@ import User from "../../Model/userModel.js";
 import Wallet from "../../Model/walletModel.js";
 
 
+function calculateItemRefund(order, itemsToRefund) {
+    const refundRawTotal = itemsToRefund.reduce((sum, item) =>
+        sum + ((item.price || 0) * (item.quantity || 1)), 0
+    );
+
+    const orderActiveTotal = order.items
+        .filter(i => i.status !== 'Cancelled')
+        .reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
+
+    if (orderActiveTotal === 0) return refundRawTotal;
+
+    const couponDiscount = order.couponDiscount || 0;
+    const proportionalCoupon = couponDiscount > 0
+        ? (refundRawTotal / orderActiveTotal) * couponDiscount
+        : 0;
+
+    return Math.round(refundRawTotal - proportionalCoupon);
+}
+
 export const loadReturnManagement = async (req, res) => {
     try {
         const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest';
@@ -134,12 +153,11 @@ export const loadReturnDetail = async (req, res) => {
 
         if (!order) return res.redirect('/admin/returns');
 
-        // FIX: use isFullReturn flag — never use orderStatus for this check
         const itemsToShow = (order.isFullReturn === true)
             ? order.items
             : order.items.filter(i =>
                 (i.returnStatus && i.returnStatus !== 'None') ||
-                i.status === 'Return Requested'               ||
+                i.status === 'Return Requested' ||
                 (i.returnRequest?.status && i.returnRequest.status !== 'None')
               );
 
@@ -158,16 +176,29 @@ export const loadReturnDetail = async (req, res) => {
                 price:     item.price     || 0,
                 size:      item.size      || '—',
                 status:    item.returnStatus || item.status || '—',
-                reason:    item.returnRequest?.reason    || order.returnRequest?.reason    || '—',
+                reason:    item.returnRequest?.reason    || order.returnRequest?.reason || '—',
                 condition: item.returnRequest?.condition || '—',
-                comments:  item.returnRequest?.comments  || order.returnRequest?.note     || '—',
+                comments:  item.returnRequest?.comments  || order.returnRequest?.note  || '—',
                 images:    item.returnRequest?.images    || []
             };
         });
 
-        const totalRefund = itemsToShow.reduce((sum, item) =>
+        // ── Proportional coupon deduction ────────────────────
+        const refundRawTotal = itemsToShow.reduce((sum, item) =>
             sum + ((item.price || 0) * (item.quantity || 1)), 0
         );
+
+        const orderActiveTotal = order.items
+            .filter(i => i.status !== 'Cancelled')
+            .reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
+
+        const couponDiscount = order.couponDiscount || 0;
+        const proportionalCoupon = (couponDiscount > 0 && orderActiveTotal > 0)
+            ? (refundRawTotal / orderActiveTotal) * couponDiscount
+            : 0;
+
+        const totalRefund = Math.round(refundRawTotal - proportionalCoupon);
+        // ────────────────────────────────────────────────────
 
         const allImages = itemsToShow.flatMap(i => i.returnRequest?.images || []);
 
@@ -177,9 +208,9 @@ export const loadReturnDetail = async (req, res) => {
             status:    order.returnStatus || 'Requested',
             createdAt: order.returnRequestedAt || order.updatedAt,
 
-           user: {
-                 name:  order.user?.username || order.user?.name || 'Unknown',
-                 email: order.user?.email || ''
+            user: {
+                name:  order.user?.username || order.user?.name || 'Unknown',
+                email: order.user?.email || ''
             },
 
             address: {
@@ -195,7 +226,11 @@ export const loadReturnDetail = async (req, res) => {
             description: products[0]?.comments  || '—',
 
             images:       allImages,
-            refundAmount: totalRefund.toLocaleString('en-IN')
+            // ── Now shows coupon-adjusted refund ──
+            refundAmount: totalRefund.toLocaleString('en-IN'),
+            // Pass breakdown for display if needed
+            couponDeduction: Math.round(proportionalCoupon),
+            rawRefundAmount: refundRawTotal,
         };
 
         return res.render('admin/returnDetail', { returnRequest });
@@ -310,6 +345,7 @@ export const processRefund = async (req, res) => {
         const order = await Order.findById(id).populate('items.product');
         if (!order) return res.json({ success: false, message: 'Order not found' });
 
+        // Step 1: Restore stock
         const stockUpdates = order.items
             .filter(item => item.returnStatus === 'Picked Up')
             .map(async item => {
@@ -337,14 +373,13 @@ export const processRefund = async (req, res) => {
         order.orderStatus  = 'Returned';
         order.refundedAt   = new Date();
 
-        // Step 4: Calculate refund amount
-        const refundAmount = order.items
-            .filter(item => item.returnStatus === 'Refunded')
-            .reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+        // Step 4: Calculate refund amount with coupon deduction
+        const refundedItems = order.items.filter(item => item.returnStatus === 'Refunded');
+        const refundAmount = calculateItemRefund(order, refundedItems);
 
         await order.save();
 
-        // Step 5: Credit wallet  ← now BEFORE return
+        // Step 5: Credit wallet
         if (refundAmount > 0) {
             let wallet = await Wallet.findOne({ userId: order.user });
             if (!wallet) {
@@ -363,7 +398,7 @@ export const processRefund = async (req, res) => {
             await wallet.save();
         }
 
-        return res.json({ success: true, message: 'Refund processed and stock restored' }); // ← moved here
+        return res.json({ success: true, message: 'Refund processed and stock restored' });
 
     } catch (error) {
         console.error('processRefund error:', error);

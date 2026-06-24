@@ -362,32 +362,54 @@
             </div>
 
             <form id="passwordForm" class="space-y-6">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black tracking-widest text-gray-400 uppercase px-1">Current Password</label>
-                    <input id="currentPassword" type="password" placeholder="••••••••" class="w-full px-5 py-4 bg-gray-50 border-0 border-b-2 border-transparent focus:border-black rounded-2xl text-[14px] transition-all outline-none">
-                    <p id="currentPassword-error" class="hidden text-[11px] font-bold text-red-400 mt-1 px-1"></p>
-                </div>
-                
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black tracking-widest text-gray-400 uppercase px-1">New Password</label>
-                    <div class="relative">
-                        <input id="newPassword" type="password" placeholder="••••••••" class="w-full px-5 py-4 bg-gray-50 border-0 border-b-2 border-transparent focus:border-black rounded-2xl text-[14px] transition-all outline-none">
-                        <p id="newPassword-error" class="hidden text-[11px] font-bold text-red-400 mt-1 px-1"></p>
-                        <div id="password-reqs" class="hidden mt-4 grid grid-cols-2 gap-y-2 gap-x-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
-                            <div class="requirement-item requirement-invalid" data-req="length"><span class="material-symbols-outlined text-[14px]">circle</span> 8+ Chars</div>
-                            <div class="requirement-item requirement-invalid" data-req="uppercase"><span class="material-symbols-outlined text-[14px]">circle</span> Uppercase</div>
-                            <div class="requirement-item requirement-invalid" data-req="lowercase"><span class="material-symbols-outlined text-[14px]">circle</span> Lowercase</div>
-                            <div class="requirement-item requirement-invalid" data-req="number"><span class="material-symbols-outlined text-[14px]">circle</span> Number</div>
-                            <div class="requirement-item requirement-invalid" data-req="special"><span class="material-symbols-outlined text-[14px]">circle</span> Special</div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Current Password -->
+<div class="space-y-1">
+    <label class="text-[10px] font-black tracking-widest text-gray-400 uppercase px-1">Current Password</label>
+    <div class="relative">
+        <input id="currentPassword" type="password" placeholder="••••••••" 
+            class="w-full px-5 py-4 pr-14 bg-gray-50 border-0 border-b-2 border-transparent focus:border-black rounded-2xl text-[14px] transition-all outline-none">
+        <button type="button" onclick="togglePassword('currentPassword', this)"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors">
+            <span class="material-symbols-outlined text-[20px]">visibility</span>
+        </button>
+    </div>
+    <p id="currentPassword-error" class="hidden text-[11px] font-bold text-red-400 mt-1 px-1"></p>
+</div>
 
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black tracking-widest text-gray-400 uppercase px-1">Confirm New Password</label>
-                    <input id="confirmPassword" type="password" placeholder="••••••••" class="w-full px-5 py-4 bg-gray-50 border-0 border-b-2 border-transparent focus:border-black rounded-2xl text-[14px] transition-all outline-none">
-                    <p id="confirmPassword-error" class="hidden text-[11px] font-bold text-red-400 mt-1 px-1"></p>
-                </div>
+<!-- New Password -->
+<div class="space-y-1">
+    <label class="text-[10px] font-black tracking-widest text-gray-400 uppercase px-1">New Password</label>
+    <div class="relative">
+        <input id="newPassword" type="password" placeholder="••••••••" 
+            class="w-full px-5 py-4 pr-14 bg-gray-50 border-0 border-b-2 border-transparent focus:border-black rounded-2xl text-[14px] transition-all outline-none">
+        <button type="button" onclick="togglePassword('newPassword', this)"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors">
+            <span class="material-symbols-outlined text-[20px]">visibility</span>
+        </button>
+        <p id="newPassword-error" class="hidden text-[11px] font-bold text-red-400 mt-1 px-1"></p>
+        <div id="password-reqs" class="hidden mt-4 grid grid-cols-2 gap-y-2 gap-x-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+            <div class="requirement-item requirement-invalid" data-req="length"><span class="material-symbols-outlined text-[14px]">circle</span> 8+ Chars</div>
+            <div class="requirement-item requirement-invalid" data-req="uppercase"><span class="material-symbols-outlined text-[14px]">circle</span> Uppercase</div>
+            <div class="requirement-item requirement-invalid" data-req="lowercase"><span class="material-symbols-outlined text-[14px]">circle</span> Lowercase</div>
+            <div class="requirement-item requirement-invalid" data-req="number"><span class="material-symbols-outlined text-[14px]">circle</span> Number</div>
+            <div class="requirement-item requirement-invalid" data-req="special"><span class="material-symbols-outlined text-[14px]">circle</span> Special</div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Password -->
+<div class="space-y-1">
+    <label class="text-[10px] font-black tracking-widest text-gray-400 uppercase px-1">Confirm New Password</label>
+    <div class="relative">
+        <input id="confirmPassword" type="password" placeholder="••••••••" 
+            class="w-full px-5 py-4 pr-14 bg-gray-50 border-0 border-b-2 border-transparent focus:border-black rounded-2xl text-[14px] transition-all outline-none">
+        <button type="button" onclick="togglePassword('confirmPassword', this)"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors">
+            <span class="material-symbols-outlined text-[20px]">visibility</span>
+        </button>
+    </div>
+    <p id="confirmPassword-error" class="hidden text-[11px] font-bold text-red-400 mt-1 px-1"></p>
+</div>
 
                 <button type="submit" id="passwordSubmitBtn" class="w-full py-5 bg-black text-white font-black uppercase tracking-widest text-[11px] rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-2 group">
                     <span>Update Password</span>
@@ -633,6 +655,12 @@
         const response = await axios.post('/users/changePassword', {
             currentPassword, newPassword, confirmPassword
         });
+
+        if (!response.data.success) {
+        showToast("error", response.data.message || "Update Failed");
+        return;
+    }
+
         showToast("success", response.data.message || "Password Updated");
         document.getElementById('passwordForm').reset();
         setTimeout(() => closeModal('passwordModal'), 1500);
@@ -809,6 +837,15 @@
                 window.location.reload();
             }
         });
+
+
+    function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('.material-symbols-outlined');
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    icon.textContent = isHidden ? 'visibility_off' : 'visibility';
+}
     </script>
 </body>
 
