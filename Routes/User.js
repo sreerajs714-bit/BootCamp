@@ -7,7 +7,7 @@ import { resendOTP, verifyOTP } from "../Controller/otpcontroller.js";
 import { checkSession, checkUserBlocked, islogin, noCache } from "../Middleware/userAuth.js";
 import { changeEmail, changePassword, editProfile, loadEditProfile, loadProfile, removeProfilePhoto, uploadProfilePhoto } from "../Controller/User/profileController.js";
 import { uploadProfile ,uploadReturn } from "../Middleware/multer.js";
-import passport from "../Config/passport.js";
+import passport from "../config/passport.js";
 import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controller/User/addressController.js";
 import { loadAllProducts, loadLimitedEdition, loadMens, loadProductDetail, loadWomens, searchProducts } from "../Controller/User/productController.js";
 import { clearWishlist, loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";

@@ -12,6 +12,7 @@ import nocache from "nocache";
 import { registerHbsHelpers } from "./config/hbsHelpers.js";
 
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(nocache());
 
