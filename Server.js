@@ -14,6 +14,7 @@ import { registerHbsHelpers } from "./config/hbsHelpers.js";
 const app = express();
 app.set('trust proxy', 1);
 
+
 app.use(nocache());
 
 // ✅ User session — scoped to /users
