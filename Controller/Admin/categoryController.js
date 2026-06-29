@@ -58,7 +58,7 @@ for (let category of categories) {
 
     const totalPages = Math.ceil(totalCategories / limit);
 
-    res.render("Admin/category", {
+    res.render("admin/category", {
       categories,
       currentPage: page,
       totalPages,

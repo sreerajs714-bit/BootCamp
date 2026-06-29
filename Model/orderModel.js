@@ -15,12 +15,12 @@ const orderSchema = new mongoose.Schema({
         size: String,
         status: {
             type: String,
-            default: "Active"  // Active | Cancelled | Return Requested | Returned
+            default: "Active"  
         },
         cancelReason: { type: String, default: "" },
         cancelNote:   { type: String, default: "" },
 
-        // FIX: item-level return fields (template reads item.returnStatus)
+        
         returnStatus: {
             type: String,
             enum: ['None', 'Requested', 'Approved', 'Rejected', 'Picked Up', 'Refunded'],
@@ -44,8 +44,7 @@ const orderSchema = new mongoose.Schema({
     orderStatus: {
         type: String,
         default: "Pending"
-        // Pending | Confirmed | Processing | Shipped | Delivered
-        // Cancelled | Return Requested | Returned
+        
     },
     paymentStatus: {
         type: String,
@@ -60,7 +59,7 @@ const orderSchema = new mongoose.Schema({
         time:   { type: Date, default: Date.now }
     }],
 
-    // FIX: order-level returnStatus (template reads order.returnStatus)
+   
     returnStatus: {
         type: String,
         enum: ['None', 'Requested', 'Approved', 'Rejected', 'Picked Up', 'Refunded'],
@@ -71,7 +70,7 @@ const orderSchema = new mongoose.Schema({
     pickupDate:        Date,
     refundedAt:        Date,
 
-    // keep existing returnRequest for backward compat
+   
     returnRequest: {
         status: {
             type: String,

@@ -20,7 +20,7 @@ const transactionSchema = new mongoose.Schema({
         type: String,
         default: '',
     },
-    orderId: {                                              // 👈 add this
+    orderId: {                                              
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order',
         default: null,

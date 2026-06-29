@@ -13,7 +13,7 @@ export function calculateOfferPrice(originalPrice, product, activeOffers) {
     let bestDiscount = 0;
     let appliedOffer = null;
 
-    // Safely extract category ID whether populated or not
+    
     const productCategoryId = product.category?._id
         ? product.category._id.toString()
         : product.category

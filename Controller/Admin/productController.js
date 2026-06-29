@@ -88,7 +88,7 @@ export const loadProduct = async (req, res) => {
             return res.json({ success: true, ...payload });
         }
 
-        res.render("Admin/productManagement", payload);
+        res.render("admin/productManagement", payload);
 
     } catch (error) {
         console.error("loadProduct error:", error);
@@ -105,7 +105,7 @@ export const loadAddProduct = async (req, res) => {
             Category.find({ isDeleted: false, isActive: true }).select("name"),
             Brand.find({ isDeleted: false }).select("name"),
         ]);
-        res.render("Admin/addProduct", { categories, brands });
+        res.render("admin/addProduct", { categories, brands });
     } catch (error) {
         console.error("loadAddProduct error:", error);
         res.redirect("/admin/productManagement");
@@ -232,7 +232,7 @@ export const loadEditProduct = async (req, res) => {
             return res.redirect("/admin/productManagement");
         }
 
-        res.render("Admin/editProduct", { product, categories, brands });
+        res.render("admin/editProduct", { product, categories, brands });
 
     } catch (error) {
         console.error("loadEditProduct error:", error);
@@ -447,12 +447,12 @@ export const loadProductView = async (req, res) => {
             return res.redirect("/admin/productManagement");
         }
 
-        // ✅ FIND DEFAULT VARIANT
+        
         const defaultVariant =
             product.variants.find(v => v.isDefault) ||
             product.variants[0];
 
-        res.render("Admin/productView", {
+        res.render("admin/productView", {
             product,
             defaultVariant
         });
@@ -528,7 +528,7 @@ export const loadVariants = async (req, res) => {
 
         const activeCount = productObj.variants.filter(v => v.isActive !== false).length;
 
-        res.render("Admin/viewVariants", {
+        res.render("admin/viewVariants", {
             product: productObj,
             variants: paginatedVariants,
             activeCount,
@@ -722,12 +722,12 @@ export const setDefaultVariant = async (req, res) => {
             });
         }
 
-        // ✅ Reset all variants
+        
         product.variants.forEach(v => {
             v.isDefault = false;
         });
 
-        // ✅ Set selected variant
+        
         const targetVariant = product.variants.id(variantId);
 
         if (!targetVariant) {

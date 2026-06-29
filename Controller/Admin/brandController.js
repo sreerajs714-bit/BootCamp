@@ -12,7 +12,7 @@ export const loadBrand = async (req, res) => {
         const limit = 5;
         const skip = (page - 1) * limit;
 
-        // ── Build DB filter ──────────────────────────────────────
+        
         const dbFilter = {};
 
          if (search) {
@@ -28,38 +28,38 @@ export const loadBrand = async (req, res) => {
         } else if (filter === "deleted") {
             dbFilter.isDeleted = true;
         } else {
-            // "all" — show everything including deleted
+            
         }
 
-        // ── Build sort ───────────────────────────────────────────
+       
         let sortOption = { createdAt: -1 };
         if (sort === "name-asc")  sortOption = { createdAt: -1 };
         if (sort === "name-desc") sortOption = { createdAt: 1 };
 
-        // ── Get brands ───────────────────────────────────────────
+        
         const brands = await Brand.find(dbFilter)
             .sort(sortOption)
             .skip(skip)
             .limit(limit)
             .lean();
 
-        // ── Attach product count to each brand ───────────────────
+        
         for (let brand of brands) {
-  const count = await Product.countDocuments({
-    brand: brand._id,
-    isDeleted: false,
+        const count = await Product.countDocuments({
+        brand: brand._id,
+        isDeleted: false,
   });
   brand.productCount = count;
 }
 
-        // ── Stats cards ──────────────────────────────────────────
+        
         const [totalCount, activeCount, inactiveCount] = await Promise.all([
             Brand.countDocuments({ isDeleted: false }),
             Brand.countDocuments({ isDeleted: false, isActive: true }),
             Brand.countDocuments({ isDeleted: false, isActive: false }),
         ]);
 
-        // ── Pagination ───────────────────────────────────────────
+        
         const filteredCount = await Brand.countDocuments(dbFilter);
         const totalPages = Math.ceil(filteredCount / limit);
 

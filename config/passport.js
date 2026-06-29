@@ -4,6 +4,7 @@ dotenv.config();
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import userSchema from "../Model/userModel.js";
+import { generateReferralCode } from "./referalCode.js";
 
 passport.use(
   new GoogleStrategy(
@@ -20,14 +21,15 @@ passport.use(
 
          if (!user) {
       user = await userSchema.create({
-        username: profile.displayName,  // ✅ was `name`, must be `username`
+        username: profile.displayName,  
         email: profile.emails[0].value,
         googleId: profile.id,
-        password: "",                   // ✅ matches your schema default
+        password: "",                   
         phoneNO: "",
         profilePhoto: "",
         profileImage: "",
-        isBlocked: false
+        isBlocked: false,
+        referralCode: generateReferralCode(),
       });
     }
         return done(null, user);

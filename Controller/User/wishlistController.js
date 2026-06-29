@@ -92,24 +92,24 @@ export const loadWishlist = async (req, res) => {
             }).filter(Boolean);
 
             const rawPrice = variant?.price || 0;
-            const pricing = calculateOfferPrice(rawPrice, product, activeOffers);  // ← ADD
+            const pricing = calculateOfferPrice(rawPrice, product, activeOffers);  
 
             return {
-                id: product._id.toString(),                          // ← stringify
+                id: product._id.toString(),                          
                 productName: product.productName,
                 brand: product.brand?.name || product.brand?.brandName || "Brand",
                 rawPrice,
-                price: pricing.hasOffer                              // ← offer price
+                price: pricing.hasOffer                              
                     ? `₹${pricing.discountedPrice.toLocaleString("en-IN")}`
                     : `₹${rawPrice.toLocaleString("en-IN")}`,
-                hasOffer: pricing.hasOffer,                          // ← ADD
-                discountedPrice: pricing.discountedPrice,            // ← ADD
-                offerPercentage: pricing.hasOffer                    // ← ADD
+                hasOffer: pricing.hasOffer,                          
+                discountedPrice: pricing.discountedPrice,           
+                offerPercentage: pricing.hasOffer                    
                     ? (pricing.offer.discountType === 'percentage'
                         ? pricing.offer.discountValue
                         : Math.round((pricing.discount / rawPrice) * 100))
                     : 0,
-                variantId: variant?._id?.toString() || "",           // ← stringify
+                variantId: variant?._id?.toString() || "",           
                 size: item.size || variant?.sizes?.[0] || '',
                 images,
                 color: variant?.color || "",

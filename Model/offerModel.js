@@ -15,10 +15,10 @@ const offerSchema = new mongoose.Schema(
     targetId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
-      refPath: "applicableTo", // dynamic ref based on applicableTo
+      refPath: "applicableTo", 
     },
     targetName: {
-      type: String, // stored for display without populate
+      type: String, 
     },
     discountType: {
       type: String,
@@ -32,7 +32,7 @@ const offerSchema = new mongoose.Schema(
     },
     maxCap: {
       type: Number,
-      default: null, // max discount cap for percentage offers
+      default: null, 
     },
     minOrder: {
       type: Number,

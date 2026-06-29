@@ -150,9 +150,8 @@ export const addToCart = async (req, res) => {
             });
         }
 
-        // =====================
+       
         // GUEST CART
-        // =====================
         if (!userId) {
             if (!req.session.cart) req.session.cart = [];
 
@@ -198,9 +197,8 @@ export const addToCart = async (req, res) => {
             });
         }
 
-        // =====================
         // USER CART
-        // =====================
+     
         let cart = await Cart.findOne({ userId });
 
         if (!cart) {
@@ -255,7 +253,7 @@ export const addToCart = async (req, res) => {
         });
 
     } catch (error) {
-        // ✅ Backend only — no frontend code here
+        
         console.error("addToCart error:", error);
         return res.status(500).json({
             success: false,
@@ -332,7 +330,7 @@ export const removeFromCart = async (req, res) => {
             });
         }
 
-        // ✅ Remove by itemId (_id of the cart item)
+        
         const indexToRemove = cart.items.findIndex(item =>
             item._id.toString() === itemId?.toString()
         );

@@ -121,7 +121,7 @@ export const loadOrderDetail = async (req, res) => {
     order.paymentExpiresAt &&
     new Date() > order.paymentExpiresAt
     ) {
-    // ✅ Use updateOne instead of order.save() — works with lean queries too
+    
     await Order.findByIdAndUpdate(order._id, {
         paymentStatus: 'Failed',
         orderStatus: 'Cancelled',

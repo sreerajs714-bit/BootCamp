@@ -2,7 +2,7 @@ import nodemailer from "nodemailer"
 import dotenv from "dotenv"
 dotenv.config();
 
-// 🔢 Generate OTP
+
     export const generateOTP =()=>{
      return Math.floor(100000 + Math.random() * 900000).toString();
     };

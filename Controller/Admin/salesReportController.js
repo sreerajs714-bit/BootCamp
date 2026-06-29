@@ -27,7 +27,7 @@ export const loadSalesReport = async (req, res) => {
     return Math.max(0, subtotal - (o.couponDiscount || 0));
     };
 
-    // ✅ FIX: use totalAmount instead of finalAmount
+    
     const totalRevenue = currentOrders.reduce((s, o) => s + calcFinal(o), 0);
     const totalOrders  = currentOrders.length;
     const totalProductsSold = currentOrders.reduce((s, o) =>

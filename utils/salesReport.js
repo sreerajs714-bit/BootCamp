@@ -16,7 +16,7 @@ export function getDateRange(period, startDate, endDate) {
       break;
     }
     case 'week': {
-      const day = now.getDay();                       // 0 Sun … 6 Sat
+      const day = now.getDay();                       
       start    = new Date(now);
       start.setDate(now.getDate() - day);
       start.setHours(0, 0, 0, 0);
@@ -45,7 +45,7 @@ export function getDateRange(period, startDate, endDate) {
       label    = `${fmtDate(start)} – ${fmtDate(end)}`;
       break;
     }
-    default: {                                       // 'month' (default)
+    default: {                                      
       start    = new Date(now.getFullYear(), now.getMonth(), 1);
       end      = new Date(now); end.setHours(23, 59, 59, 999);
       prevStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
@@ -58,18 +58,16 @@ export function getDateRange(period, startDate, endDate) {
   return { start, end, prevStart, prevEnd, label };
 }
  
-/** Format a Date as M/D/YYYY */
 export function fmtDate(d) {
   return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
 }
  
-/** Group orders into chart buckets and return { labels[], data[] } */
 export function buildChartData(orders, period, start, end) {
   const buckets = {};
  
-  // Build bucket keys
+  
   if (period === 'day') {
-    // Hourly buckets: "0h", "1h" … "23h"
+  
     for (let h = 0; h < 24; h++) buckets[`${h}h`] = 0;
   } else if (period === 'week') {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -78,7 +76,7 @@ export function buildChartData(orders, period, start, end) {
     const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
     months.forEach(m => (buckets[m] = 0));
   } else {
-    // month / custom → daily buckets
+    
     const cursor = new Date(start);
     while (cursor <= end) {
       buckets[fmtDate(cursor)] = 0;
@@ -86,7 +84,7 @@ export function buildChartData(orders, period, start, end) {
     }
   }
  
-  // Fill buckets
+  
   orders.forEach(order => {
     const d = new Date(order.createdAt);
     let key;
@@ -109,7 +107,6 @@ export function buildChartData(orders, period, start, end) {
   };
 }
  
-/** Build coupon usage summary from orders */
 export function buildCouponUsage(orders) {
   const map = {};
   orders.forEach(order => {
@@ -122,7 +119,6 @@ export function buildCouponUsage(orders) {
   return Object.values(map).sort((a, b) => b.usageCount - a.usageCount);
 }
  
-/** Generate an analysis blurb based on growth % */
 export function growthAnalysis(current, previous) {
   if (previous === 0) return 'No previous period data to compare.';
   const pct = (((current - previous) / previous) * 100).toFixed(1);

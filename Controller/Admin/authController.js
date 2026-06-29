@@ -70,7 +70,7 @@ export const loadDasboard = async (req, res) => {
     try {
         const period = (req.query.period || 'month').toLowerCase();
 
-        // ── Date Range ──────────────────────────────────────────────
+        
         const now = new Date();
         let startDate = new Date();
 
@@ -87,7 +87,7 @@ export const loadDasboard = async (req, res) => {
         const dateFilter  = { createdAt: { $gte: startDate, $lte: now } };
         const activeMatch = { ...dateFilter, orderStatus: { $nin: ['Cancelled','Returned'] } }; 
 
-        // ── 1. Total Earnings & Orders ───────────────────────────────
+        
         const orderAgg = await Order.aggregate([
             { $match: activeMatch }, 
             {
@@ -101,18 +101,18 @@ export const loadDasboard = async (req, res) => {
         const totalEarnings = orderAgg[0]?.totalEarnings ?? 0;
         const totalOrders   = orderAgg[0]?.totalOrders   ?? 0;
 
-        // ── 2. Active Users ──────────────────────────────────────────
+        
         const activeUsersCount = await User.countDocuments({
             isBlocked: false,
             ...dateFilter
         });
 
-        // ── 3. Sales Chart Data ──────────────────────────────────────
+        
         let salesData = [0, 0, 0, 0];
 
         if (period === 'today') {
             const buckets = [0, 6, 12, 18, 24];
-            const todayOrders = await Order.find(activeMatch) // ✅ fixed
+            const todayOrders = await Order.find(activeMatch) 
                 .select('createdAt totalAmount');
 
             buckets.slice(0, 4).forEach((startHour, i) => {
@@ -148,7 +148,7 @@ export const loadDasboard = async (req, res) => {
             });
         }
 
-        // ── 4. Order Status Breakdown ────────────────────────────────
+       
         const statusAgg = await Order.aggregate([
             { $match: dateFilter },
             { $group: { _id: '$orderStatus', count: { $sum: 1 } } }
@@ -166,7 +166,7 @@ export const loadDasboard = async (req, res) => {
             total:     statusAgg.reduce((a, s) => a + s.count, 0)
         };
 
-        // ── 5. Best Categories ───────────────────────────────────────
+       
         const categoryAgg = await Order.aggregate([
             { $match: activeMatch }, 
             { $unwind: '$items' },
@@ -205,7 +205,7 @@ export const loadDasboard = async (req, res) => {
             percentage: Math.round((c.count / maxCatCount) * 100)
         }));
 
-        // ── 6. Inventory Alerts ──────────────────────────────────────
+        
         const allVariants = await Product.aggregate([
             { $match: { isDeleted: false } },
             { $unwind: '$variants' },
@@ -215,7 +215,7 @@ export const loadDasboard = async (req, res) => {
         const outOfStockCount = allVariants.filter(v => v.stock === 0).length;
         const lowStockCount   = allVariants.filter(v => v.stock > 0 && v.stock <= 5).length;
 
-        // ── 7. Recent Acquisitions ───────────────────────────────────
+        
         const recentOrders = await Order.find(dateFilter)
             .sort({ createdAt: -1 })
             .limit(5)
@@ -228,7 +228,7 @@ export const loadDasboard = async (req, res) => {
             client:  o.user?.fullName || o.user?.name || o.user?.email || 'Guest'
         }));
 
-        // ── 8. Most Popular Products ─────────────────────────────────
+        
         const popularAgg = await Order.aggregate([
             { $match: activeMatch }, 
             { $unwind: '$items' },
@@ -258,7 +258,7 @@ export const loadDasboard = async (req, res) => {
             soldCount: p.soldCount
         }));
 
-        // ── Response ─────────────────────────────────────────────────
+        
         if (req.xhr || req.headers.accept?.includes('application/json')) {
             return res.json({
                 success: true,

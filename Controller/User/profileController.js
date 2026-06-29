@@ -35,7 +35,7 @@ export const loadEditProfile=async (req,res)=>{
        { label: "editProfile" },
        ];
 
-    // ✅ Fetch full user from DB
+    
     const user = await userSchema.findById(userId);
 
     return res.render("users/editProfile", { user });
@@ -220,7 +220,7 @@ export const removeProfilePhoto = async (req, res) => {
     // Get current user to find the file path
     const user = await userSchema.findById(userId);
 
-    // ✅ Delete file from disk if it exists
+    
     if (user.profilePhoto) {
       const filePath = `public${user.profilePhoto}`;
       fs.unlink(filePath, (err) => {
@@ -228,7 +228,7 @@ export const removeProfilePhoto = async (req, res) => {
       });
     }
 
-    // ✅ Remove from DB
+    
     await userSchema.findByIdAndUpdate(userId, { profilePhoto: null });
 
     return res.json({ success: true });

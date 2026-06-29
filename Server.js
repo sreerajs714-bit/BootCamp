@@ -17,7 +17,7 @@ app.set('trust proxy', 1);
 
 app.use(nocache());
 
-// ✅ User session — scoped to /users
+
 const userSession = session({
     secret: process.env.USER_SESSION_SECRET,
     resave: false,
@@ -30,7 +30,7 @@ const userSession = session({
     }
 });
 
-// ✅ Admin session — scoped to /admin
+
 const adminSession = session({
     secret: process.env.ADMIN_SESSION_SECRET,
     resave: false,
@@ -43,11 +43,11 @@ const adminSession = session({
     }
 });
 
-// ✅ Apply sessions to their paths
+
 app.use("/users", userSession);
 app.use("/admin", adminSession);
 
-// ✅ Passport ONLY under /users — Google OAuth lives there
+
 app.use("/users", passport.initialize());
 app.use("/users", passport.session());
 

@@ -292,7 +292,7 @@ export const placeOrder = async (req, res) => {
                 couponDiscount = Math.min(couponDiscount, effectiveSubtotal);
                 appliedCoupon = coupon.code;
 
-                // ✅ Mark coupon as used
+                
                 await Coupon.findByIdAndUpdate(coupon._id, {
                     $inc: { usedCount: 1 },
                     $addToSet: { usedBy: userId },
@@ -333,8 +333,8 @@ export const placeOrder = async (req, res) => {
                 addressType: address.addressType
             },
             paymentMethod,
-            subtotal,                   // original subtotal before any discount
-            offerSavings,                // ✅ new: offer discount total
+            subtotal,                   
+            offerSavings,                
             couponCode: appliedCoupon,
             couponDiscount,
             totalAmount,
@@ -437,7 +437,7 @@ export const loadOrderSuccess = async (req, res) => {
 
         const couponDiscount = order.couponDiscount ?? 0;
 
-        // ✅ Total savings = offer discount + coupon discount
+        
         const totalDiscount = offerDiscount + couponDiscount;
 
         const formattedOrder = {
@@ -461,14 +461,14 @@ export const loadOrderSuccess = async (req, res) => {
             subtotal: `₹${order.subtotal || order.totalAmount}`,
             shippingCost: 'Free',
 
-            // ✅ Offer discount line (only show if > 0)
+            
             offerDiscount: offerDiscount > 0 ? `₹${offerDiscount}` : null,
 
-            // ✅ Coupon discount line (only show if applied)
+            
             couponCode: order.couponCode || null,
             couponDiscount: couponDiscount > 0 ? `₹${couponDiscount}` : null,
 
-            // ✅ Combined total savings
+            
             totalDiscount: totalDiscount > 0 ? `₹${totalDiscount}` : null,
 
             total: `₹${order.totalAmount}`,

@@ -46,8 +46,6 @@ export const loadWallet = async (req, res) => {
     }
 };
 
-// ── Add Funds 
-// ── Step 1: Create Razorpay Order ─────────────────────
 export const createWalletOrder = async (req, res) => {
     try {
         const userId = req.session.user?._id || req.session.user?.id;
