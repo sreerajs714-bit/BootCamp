@@ -42,7 +42,9 @@ export const loadMyOrders = async (req, res) => {
         const formattedOrders = orders.map(order => {
             const items = order.items.map(item => {
                 const product = item.product;
-                const variant = product?.variants?.[0];
+            const variant = product.variants.find(v => v._id.toString() === item.variant?.toString())
+            || product.variants.find(pv => pv.sizes?.some(s => s.toString() === item.size?.toString()));                                                        
+
                 const rawImages = variant?.images || [];
                 const images = rawImages.map(img => {
                     if (typeof img === "string") return img;
@@ -137,7 +139,9 @@ export const loadOrderDetail = async (req, res) => {
 
         const items = order.items.map(item => {
             const product = item.product;
-            const variant = product?.variants?.[0];
+        const variant = product.variants.find(v => v._id.toString() === item.variant?.toString())
+        || product.variants.find(pv => pv.sizes?.some(s => s.toString() === item.size?.toString()));                                                        
+
             const rawImages = variant?.images || [];
             const images = rawImages.map(img => {
                 if (typeof img === "string") return img;
@@ -364,16 +368,37 @@ export const loadReturnPage = async (req, res) => {
             return res.redirect(`/users/orderDetail/${id}`);
         }
 
-        // ── Coupon proportion helper ──────────────────────────
+        // ── Reshape items so the template's hardcoded variants[0] resolves correctly ──
+        const shapedOrder = {
+            ...order,
+            items: order.items.map(item => {
+            const product = item.product;
+            const variant =
+            product?.variants?.find(v => v._id.toString() === item.variant?.toString()) || 
+            product?.variants?.find(v => v.isDefault && v.isActive) ||                  
+            product?.variants?.find(v => v.isActive) ||                                     
+            product?.variants?.[0];                                                         
+
+
+                return {
+                    ...item,
+                    product: {
+                        ...product,
+                        variants: [variant || { images: [] }]
+                    }
+                };
+            })
+        };
+
         function getRefundValue(items) {
             const refundRaw = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-            const activeTotal = order.items
+            const activeTotal = shapedOrder.items
                 .filter(i => i.status !== 'Cancelled')
                 .reduce((sum, i) => sum + (i.price * i.quantity), 0);
 
             if (activeTotal === 0) return refundRaw;
 
-            const couponDiscount = order.couponDiscount || 0;
+            const couponDiscount = shapedOrder.couponDiscount || 0;
             const proportional = couponDiscount > 0
                 ? (refundRaw / activeTotal) * couponDiscount
                 : 0;
@@ -381,9 +406,8 @@ export const loadReturnPage = async (req, res) => {
             return Math.round(refundRaw - proportional);
         }
 
-        // ── Full order return ─────────────────────────────────
         if (itemId === 'ALL') {
-            const returnableItems = order.items.filter(i =>
+            const returnableItems = shapedOrder.items.filter(i =>
                 i.status !== 'Cancelled' &&
                 (!i.returnRequest?.status || i.returnRequest.status === 'None')
             );
@@ -392,16 +416,15 @@ export const loadReturnPage = async (req, res) => {
                 return res.redirect(`/users/orderDetail/${id}`);
             }
 
-            // Add refundValue to each item for display
             const itemsWithRefund = returnableItems.map(i => ({
                 ...i,
-                refundValue: getRefundValue([i])   // per-item refund after coupon share
+                refundValue: getRefundValue([i])
             }));
 
             const totalRefund = getRefundValue(returnableItems);
 
             return res.render('users/return', {
-                order,
+                order: shapedOrder,
                 item: itemsWithRefund[0],
                 allItems: itemsWithRefund,
                 isFullReturn: true,
@@ -409,8 +432,7 @@ export const loadReturnPage = async (req, res) => {
             });
         }
 
-        // ── Single item return ────────────────────────────────
-        const item = order.items.find(i => i._id.toString() === itemId);
+        const item = shapedOrder.items.find(i => i._id.toString() === itemId);
         if (!item) return res.redirect(`/users/orderDetail/${id}`);
 
         if (item.returnRequest?.status && item.returnRequest.status !== 'None') {
@@ -420,7 +442,7 @@ export const loadReturnPage = async (req, res) => {
         const refundValue = getRefundValue([item]);
 
         res.render('users/return', {
-            order,
+            order: shapedOrder,
             item: { ...item, refundValue },
             isFullReturn: false,
             totalRefund: refundValue,
@@ -727,7 +749,9 @@ export const downloadInvoice = async (req, res) => {
 
         for (const item of order.items) {
             const product  = item.product;
-            const variant  = product?.variants?.[0];
+           const variant = product.variants.find(v => v._id.toString() === item.variant?.toString())
+            || product.variants.find(pv => pv.sizes?.some(s => s.toString() === item.size?.toString()));                                                         
+
             const size     = item.size || variant?.sizes?.[0] || "N/A";
             const isCancelled = item.status === "Cancelled";
             const itemStatus  = item.status || "Active";

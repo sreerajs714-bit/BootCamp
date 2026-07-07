@@ -128,11 +128,11 @@ export const createOffer = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid scope" });
     }
 
-    if (!["percentage", "flat"].includes(discountType)) {
+    if (discountType !== "percentage") {
       return res.status(400).json({ success: false, message: "Invalid discount type" });
     }
 
-    if (discountType === "percentage" && Number(amount) > 100) {
+    if (Number(amount) > 100) {
       return res.status(400).json({ success: false, message: "Percentage cannot exceed 100%" });
     }
 
@@ -151,7 +151,7 @@ export const createOffer = async (req, res) => {
       return res.status(400).json({ success: false, message: "End date must be after start date" });
     }
 
-    // ── Resolve targetName + flat discount price check ────────────────────────────
+    // ── Resolve targetName ────────────────────────────
     let targetName = "";
 
     if (applicableTo === "product") {
@@ -161,57 +161,12 @@ export const createOffer = async (req, res) => {
       }
       targetName = product.productName || product.name;
 
-      if (discountType === "flat") {
-        const prices = product.variants
-       .map(v => v.price)
-       .filter(p => typeof p === "number" && p > 0);
-
-        if (prices.length === 0) {
-          return res.status(400).json({ success: false, message: "Product has no valid variant prices" });
-        }
-
-        const lowestPrice = Math.min(...prices);
-
-        if (Number(amount) >= lowestPrice) {
-          return res.status(400).json({
-            success: false,
-            message: `Flat discount ₹${amount} must be less than the lowest variant price ₹${lowestPrice}`,
-          });
-        }
-      }
-
     } else {
       const category = await Category.findById(target).lean();
       if (!category) {
         return res.status(404).json({ success: false, message: "Category not found" });
       }
       targetName = category.name;
-
-      if (discountType === "flat") {
-        const products = await Product.find({ category: target, status: "active", isDeleted: false }).lean();
-        if (products.length === 0) {
-          return res.status(400).json({ success: false, message: "No active products found in this category" });
-        }
-
-        const allPrices = products.flatMap(p =>
-        p.variants
-        .map(v => v.price)
-        .filter(p => typeof p === "number" && p > 0)
-        );
-
-        if (allPrices.length === 0) {
-          return res.status(400).json({ success: false, message: "No valid prices found in this category" });
-        }
-
-        const lowestPrice = Math.min(...allPrices);
-
-        if (Number(amount) >= lowestPrice) {
-          return res.status(400).json({
-            success: false,
-            message: `Flat discount ₹${amount} must be less than the lowest product price in this category (₹${lowestPrice})`,
-          });
-        }
-      }
     }
 
     // ── Create offer ──────────────────────────────────
@@ -254,11 +209,11 @@ export const updateOffer = async (req, res) => {
       return res.status(400).json({ success: false, message: "Invalid scope" });
     }
 
-    if (!["percentage", "flat"].includes(discountType)) {
+    if (discountType !== "percentage") {
       return res.status(400).json({ success: false, message: "Invalid discount type" });
     }
 
-    if (discountType === "percentage" && Number(amount) > 100) {
+    if (Number(amount) > 100) {
       return res.status(400).json({ success: false, message: "Percentage cannot exceed 100%" });
     }
 
@@ -277,7 +232,7 @@ export const updateOffer = async (req, res) => {
       return res.status(400).json({ success: false, message: "End date must be after start date" });
     }
 
-    // ── Resolve targetName + flat discount price check ────────────────────────────
+    // ── Resolve targetName ────────────────────────────
     let targetName = "";
 
     if (applicableTo === "product") {
@@ -287,58 +242,12 @@ export const updateOffer = async (req, res) => {
       }
       targetName = product.productName || product.name;
 
-      if (discountType === "flat") {
-        const prices = product.variants
-        .map(v => v.price)
-        .filter(p => typeof p === "number" && p > 0);
-
-        if (prices.length === 0) {
-          return res.status(400).json({ success: false, message: "Product has no valid variant prices" });
-        }
-
-        const lowestPrice = Math.min(...prices);
-
-        if (Number(amount) >= lowestPrice) {
-          return res.status(400).json({
-            success: false,
-            message: `Flat discount ₹${amount} must be less than the lowest variant price ₹${lowestPrice}`,
-          });
-        }
-      }
-
     } else {
       const category = await Category.findById(target).lean();
       if (!category) {
         return res.status(404).json({ success: false, message: "Category not found" });
       }
       targetName = category.name;
-
-      if (discountType === "flat") {
-        const products = await Product.find({ category: target, status: "active", isDeleted: false }).lean();
-
-        if (products.length === 0) {
-          return res.status(400).json({ success: false, message: "No active products found in this category" });
-        }
-
-        const allPrices = products.flatMap(p =>
-        p.variants
-        .map(v => v.price)
-        .filter(p => typeof p === "number" && p > 0)
-        );
-
-        if (allPrices.length === 0) {
-          return res.status(400).json({ success: false, message: "No valid prices found in this category" });
-        }
-
-        const lowestPrice = Math.min(...allPrices);
-
-        if (Number(amount) >= lowestPrice) {
-          return res.status(400).json({
-            success: false,
-            message: `Flat discount ₹${amount} must be less than the lowest product price in this category (₹${lowestPrice})`,
-          });
-        }
-      }
     }
 
     // ── Update offer ──────────────────────────────────

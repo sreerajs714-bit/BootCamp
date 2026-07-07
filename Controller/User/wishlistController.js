@@ -81,9 +81,11 @@ export const loadWishlist = async (req, res) => {
         const wishlistItems = validProducts.map(item => {
             const product = item.productId;
 
-            const variant = product.variants?.find(
-                v => v._id.toString() === item.variantId?.toString()
-            ) || product.variants?.[0];
+            const variant =
+            product.variants?.find(v => String(v._id) === String(item.variantId)) ||
+            product.variants?.find(v => v.isDefault && v.isActive) ||
+            product.variants?.find(v => v.isActive) ||
+            product.variants?.[0];
 
             const rawImages = variant?.images || [];
             const images = rawImages.map(img => {
@@ -140,7 +142,10 @@ export const loadWishlist = async (req, res) => {
 export const toggleWishlist = async (req, res) => {
     try {
         const userId = req.session?.user?.id;
-        const { productId } = req.body;
+        const { productId, variantId  } = req.body;
+
+        console.log("productId:", productId);
+console.log("variantId:", variantId);
  
         if (!userId) {
             return res.status(401).json({
@@ -189,7 +194,9 @@ export const toggleWishlist = async (req, res) => {
  
         } else {
             // Not wishlisted — add it
-            const variant = product.variants?.[0];
+            const variant = product.variants?.find(
+                 v => String(v._id) === String(variantId)
+                );
  
             wishlist.products.push({
                 productId,

@@ -320,8 +320,15 @@
         }
 
         @keyframes modalPop {
-            from { opacity: 0; transform: scale(0.95) translateY(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
 
         .coupon-list-item {
@@ -435,8 +442,11 @@
                     <div class="text-center py-8">
                         <span class="material-symbols-outlined text-[36px] text-gray-200 mb-3 block">location_off</span>
                         <p class="text-[13px] text-gray-400 mb-4">No delivery address found.</p>
-                        <a href="/users/address"
-                            class="text-[11px] font-bold uppercase tracking-widest underline text-black">Add Address</a>
+                        <button onclick="openAddAddressModal()"
+                            class="inline-flex items-center gap-2 bg-black text-white text-[11px] font-black uppercase tracking-widest px-5 py-3 rounded-xl hover:bg-gray-800 transition-all shadow-md shadow-black/10">
+                            <span class="material-symbols-outlined text-[16px]">add_location_alt</span>
+                            Add New Address
+                        </button>
                     </div>
                     {{/if}}
                 </div>
@@ -485,9 +495,8 @@
                         </div>
 
                         <!-- Cash on Delivery -->
-                        <div class="payment-card {{#if codUnavailable}}opacity-50 cursor-not-allowed filter grayscale{{/if}} {{#unless codUnavailable}}selected{{/unless}}" 
-                             id="pay-cod" 
-                                {{#unless codUnavailable}}onclick="selectPayment('cod')"{{/unless}}>
+                        <div class="payment-card {{#if codUnavailable}}opacity-50 cursor-not-allowed filter grayscale{{/if}} {{#unless codUnavailable}}selected{{/unless}}"
+                            id="pay-cod" {{#unless codUnavailable}}onclick="selectPayment('cod')" {{/unless}}>
                             <div class="payment-radio">
                                 <div class="payment-radio-dot"></div>
                             </div>
@@ -497,9 +506,9 @@
                             <div class="flex-1 min-w-0">
                                 <p class="text-[13px] font-semibold text-[#1a1a1a]">Cash on Delivery</p>
                                 <p class="text-[11px] text-gray-400">Pay with cash at your doorstep</p>
-                                       {{#if codUnavailable}}
-                                       <span class="insuff-badge">Not Available</span>
-                                    {{/if}}
+                                {{#if codUnavailable}}
+                                <span class="insuff-badge">Not Available</span>
+                                {{/if}}
                             </div>
                         </div>
 
@@ -552,7 +561,8 @@
                         <div class="coupon-wrap">
                             <input type="text" id="coupon-input" placeholder="Enter coupon code"
                                 value="{{#if appliedCoupon}}{{appliedCoupon}}{{/if}}" style="text-transform:uppercase;">
-                            <button class="coupon-btn" id="coupon-action-btn" onclick="handleCouponAction()">Apply</button>
+                            <button class="coupon-btn" id="coupon-action-btn"
+                                onclick="handleCouponAction()">Apply</button>
                         </div>
                         <div class="flex items-center gap-2 mt-2.5">
                             <span class="material-symbols-outlined text-[14px] text-gray-400">local_offer</span>
@@ -688,7 +698,12 @@
                 <!-- No addresses at all -->
                 <div class="text-center py-10">
                     <span class="material-symbols-outlined text-[40px] text-gray-200 mb-3 block">location_off</span>
-                    <p class="text-[13px] text-gray-400 mb-4">No saved addresses.</p>
+                    <p class="text-[13px] text-gray-400 mb-4">No saved addresses yet.</p>
+                    <button onclick="closeAddressModal(); setTimeout(openAddAddressModal, 200)"
+                        class="inline-flex items-center gap-2 bg-black text-white text-[11px] font-black uppercase tracking-widest px-5 py-3 rounded-xl hover:bg-gray-800 transition-all">
+                        <span class="material-symbols-outlined text-[16px]">add_location_alt</span>
+                        Add a New Address
+                    </button>
                 </div>
                 {{/each}}
 
@@ -825,13 +840,15 @@
             <div class="p-8 border-b border-gray-100 flex items-center justify-between">
                 <div>
                     <h3 class="text-[18px] font-black uppercase tracking-tight">Available Coupons</h3>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Select a code to apply</p>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">Select a code to apply
+                    </p>
                 </div>
-                <button onclick="closeCouponModal()" class="w-10 h-10 flex items-center justify-center text-gray-300 hover:text-black transition-colors">
+                <button onclick="closeCouponModal()"
+                    class="w-10 h-10 flex items-center justify-center text-gray-300 hover:text-black transition-colors">
                     <span class="material-symbols-outlined text-[24px]">close</span>
                 </button>
             </div>
-            
+
             <div id="coupon-list-container" class="max-h-[400px] overflow-y-auto">
                 <!-- Skeleton Loader -->
                 <div id="coupon-skeleton" class="p-8 space-y-4">
@@ -841,16 +858,18 @@
                 </div>
                 <!-- Real items will be injected here -->
                 <div id="coupon-items-list" class="hidden"></div>
-                
+
                 <!-- Empty State -->
                 <div id="coupon-empty" class="hidden p-12 text-center">
                     <span class="material-symbols-outlined text-[40px] text-gray-200 mb-2">confirmation_number</span>
-                    <p class="text-[12px] font-bold text-gray-400 uppercase tracking-widest">No available coupons found</p>
+                    <p class="text-[12px] font-bold text-gray-400 uppercase tracking-widest">No available coupons found
+                    </p>
                 </div>
             </div>
-            
+
             <div class="p-8 bg-gray-50/50">
-                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed text-center">Coupons cannot be combined with other offers. Terms and conditions apply.</p>
+                <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-relaxed text-center">
+                    Coupons cannot be combined with other offers. Terms and conditions apply.</p>
             </div>
         </div>
     </div>
@@ -862,17 +881,17 @@
     <script>
         // ─── State ─────────────────────────────────────────────────
         let selectedAddressId = '{{defaultAddress._id}}';
-        let selectedPaymentMethod = {{#if codUnavailable}}'razorpay'{{else}}'cod'{{/if}};
+        let selectedPaymentMethod = {{#if codUnavailable}}'razorpay'{{else}} 'cod'{{/if}};
         // Auto-select razorpay if COD unavailable
         window.addEventListener('DOMContentLoaded', () => {
-        {{#if codUnavailable}}
-        document.getElementById('pay-cod').classList.remove('selected');
-        document.getElementById('pay-razorpay').classList.add('selected');
-        {{/if}}
+            {{#if codUnavailable}}
+            document.getElementById('pay-cod').classList.remove('selected');
+            document.getElementById('pay-razorpay').classList.add('selected');
+            {{/if }}
         });
         let appliedCouponCode = '{{#if appliedCoupon}}{{appliedCoupon}}{{/if}}';
         let currentTotal = {{ total }};
-        let currentCouponDiscount = {{#if couponDiscount }}{{ couponDiscount }} {{else }} 0{{/if }};
+        let currentCouponDiscount = {{#if couponDiscount}}{{ couponDiscount }} {{else }} 0{{/if }};
 
         // ─── Payment Selection ─────────────────────────────────────
         function selectPayment(method) {
@@ -1017,103 +1036,103 @@
             }
         }
 
-       function handleCouponAction() {
-    if (appliedCouponCode) {
-        removeCoupon();
-    } else {
-        applyCoupon();
-    }
-}
-
-function updateCouponBtn() {
-    const btn = document.getElementById('coupon-action-btn');
-    if (appliedCouponCode) {
-        btn.textContent = 'Remove';
-        btn.style.background = '#dc2626';  // red for remove
-    } else {
-        btn.textContent = 'Apply';
-        btn.style.background = '#1a1a1a';  // default black
-    }
-}
-
-async function applyCoupon() {
-    // Block if a coupon is already applied
-    if (appliedCouponCode) {
-        showToast('error', 'Remove the current coupon before applying a new one');
-        return;
-    }
-
-    const code = document.getElementById('coupon-input').value.trim().toUpperCase();
-    if (!code) {
-        showToast('error', 'Please enter a coupon code');
-        return;
-    }
-
-    const btn = document.getElementById('coupon-action-btn');
-    btn.textContent = '...';
-    btn.disabled = true;
-
-    try {
-        const res = await axios.post('/users/applyCoupon', { couponCode: code }, { withCredentials: true });
-
-        if (res.data.success) {
-            appliedCouponCode = code;
-            const discount = res.data.discount || 0;
-            const newTotal = res.data.newTotal;
-
-            document.getElementById('coupon-row').style.display = 'flex';
-            document.getElementById('disp-coupon').textContent = `-₹${discount.toLocaleString('en-IN')}`;
-
-            currentTotal = newTotal;
-            document.getElementById('disp-total').textContent = `₹ ${newTotal.toLocaleString('en-IN')}`;
-            document.getElementById('btn-total').textContent = newTotal.toLocaleString('en-IN');
-
-            updateCouponBtn();
-            showToast('success', res.data.message || 'Coupon applied!');
-        } else {
-            showToast('error', res.data.message || 'Invalid coupon');
-            updateCouponBtn();
+        function handleCouponAction() {
+            if (appliedCouponCode) {
+                removeCoupon();
+            } else {
+                applyCoupon();
+            }
         }
-    } catch (err) {
-        showToast('error', err.response?.data?.message || 'Failed to apply coupon');
-        updateCouponBtn();
-    } finally {
-        btn.disabled = false;
-    }
-}
 
-async function removeCoupon() {
-    const btn = document.getElementById('coupon-action-btn');
-    btn.textContent = '...';
-    btn.disabled = true;
-
-    try {
-        const res = await axios.post('/users/removeCoupon', {}, { withCredentials: true });
-
-        if (res.data.success) {
-            appliedCouponCode = '';
-            document.getElementById('coupon-input').value = '';
-            document.getElementById('coupon-row').style.display = 'none';
-            document.getElementById('disp-coupon').textContent = '';
-
-            const newTotal = res.data.newTotal;
-            currentTotal = newTotal;
-            document.getElementById('disp-total').textContent = `₹ ${newTotal.toLocaleString('en-IN')}`;
-            document.getElementById('btn-total').textContent = newTotal.toLocaleString('en-IN');
-
-            updateCouponBtn();
-            showToast('success', 'Coupon removed');
-        } else {
-            showToast('error', res.data.message || 'Failed to remove coupon');
-            updateCouponBtn();
+        function updateCouponBtn() {
+            const btn = document.getElementById('coupon-action-btn');
+            if (appliedCouponCode) {
+                btn.textContent = 'Remove';
+                btn.style.background = '#dc2626';  // red for remove
+            } else {
+                btn.textContent = 'Apply';
+                btn.style.background = '#1a1a1a';  // default black
+            }
         }
-    } catch (err) {
-        showToast('error', err.response?.data?.message || 'Failed to remove coupon');
-        updateCouponBtn();
-    } finally {
-        btn.disabled = false;
-    }
-}
+
+        async function applyCoupon() {
+            // Block if a coupon is already applied
+            if (appliedCouponCode) {
+                showToast('error', 'Remove the current coupon before applying a new one');
+                return;
+            }
+
+            const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+            if (!code) {
+                showToast('error', 'Please enter a coupon code');
+                return;
+            }
+
+            const btn = document.getElementById('coupon-action-btn');
+            btn.textContent = '...';
+            btn.disabled = true;
+
+            try {
+                const res = await axios.post('/users/applyCoupon', { couponCode: code }, { withCredentials: true });
+
+                if (res.data.success) {
+                    appliedCouponCode = code;
+                    const discount = res.data.discount || 0;
+                    const newTotal = res.data.newTotal;
+
+                    document.getElementById('coupon-row').style.display = 'flex';
+                    document.getElementById('disp-coupon').textContent = `-₹${discount.toLocaleString('en-IN')}`;
+
+                    currentTotal = newTotal;
+                    document.getElementById('disp-total').textContent = `₹ ${newTotal.toLocaleString('en-IN')}`;
+                    document.getElementById('btn-total').textContent = newTotal.toLocaleString('en-IN');
+
+                    updateCouponBtn();
+                    showToast('success', res.data.message || 'Coupon applied!');
+                } else {
+                    showToast('error', res.data.message || 'Invalid coupon');
+                    updateCouponBtn();
+                }
+            } catch (err) {
+                showToast('error', err.response?.data?.message || 'Failed to apply coupon');
+                updateCouponBtn();
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function removeCoupon() {
+            const btn = document.getElementById('coupon-action-btn');
+            btn.textContent = '...';
+            btn.disabled = true;
+
+            try {
+                const res = await axios.post('/users/removeCoupon', {}, { withCredentials: true });
+
+                if (res.data.success) {
+                    appliedCouponCode = '';
+                    document.getElementById('coupon-input').value = '';
+                    document.getElementById('coupon-row').style.display = 'none';
+                    document.getElementById('disp-coupon').textContent = '';
+
+                    const newTotal = res.data.newTotal;
+                    currentTotal = newTotal;
+                    document.getElementById('disp-total').textContent = `₹ ${newTotal.toLocaleString('en-IN')}`;
+                    document.getElementById('btn-total').textContent = newTotal.toLocaleString('en-IN');
+
+                    updateCouponBtn();
+                    showToast('success', 'Coupon removed');
+                } else {
+                    showToast('error', res.data.message || 'Failed to remove coupon');
+                    updateCouponBtn();
+                }
+            } catch (err) {
+                showToast('error', err.response?.data?.message || 'Failed to remove coupon');
+                updateCouponBtn();
+            } finally {
+                btn.disabled = false;
+            }
+        }
 
         // ─── Coupon Modal ──────────────────────────────────────────
         async function openCouponModal() {
@@ -1121,7 +1140,7 @@ async function removeCoupon() {
             const skeleton = document.getElementById('coupon-skeleton');
             const itemsList = document.getElementById('coupon-items-list');
             const emptyState = document.getElementById('coupon-empty');
-            
+
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('open'), 10);
             document.body.style.overflow = 'hidden';
@@ -1135,7 +1154,7 @@ async function removeCoupon() {
                 // Fetch available coupons
                 const res = await axios.get('/users/coupons', { withCredentials: true });
                 console.log('Coupons response:', res.data);
-                
+
                 if (res.data.success && res.data.coupons && res.data.coupons.length > 0) {
                     renderCoupons(res.data.coupons);
                     skeleton.classList.add('hidden');
@@ -1160,19 +1179,19 @@ async function removeCoupon() {
         }
 
         function renderCoupons(coupons) {
-    const container = document.getElementById('coupon-items-list');
-    container.innerHTML = coupons.map(c => {
-        const discountLabel = c.discountType === 'percentage'
-            ? `${c.discountValue}% OFF`
-            : `₹${c.discountValue} OFF`;
+            const container = document.getElementById('coupon-items-list');
+            container.innerHTML = coupons.map(c => {
+                const discountLabel = c.discountType === 'percentage'
+                    ? `${c.discountValue}% OFF`
+                    : `₹${c.discountValue} OFF`;
 
-        const expiry = c.expiryDate
-            ? new Date(c.expiryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
-            : null;
+                const expiry = c.expiryDate
+                    ? new Date(c.expiryDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+                    : null;
 
-        const isApplied = appliedCouponCode === c.code;
+                const isApplied = appliedCouponCode === c.code;
 
-        return `
+                return `
         <div class="coupon-list-item p-6 flex items-center justify-between gap-4 ${isApplied ? 'bg-green-50' : ''}">
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-3 mb-1.5 flex-wrap">
@@ -1193,8 +1212,8 @@ async function removeCoupon() {
                 ${isApplied ? 'Applied' : 'Apply'}
             </button>
         </div>`;
-    }).join('');
-}
+            }).join('');
+        }
 
         function selectCoupon(code) {
             document.getElementById('coupon-input').value = code;

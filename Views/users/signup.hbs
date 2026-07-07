@@ -164,14 +164,14 @@
             <!-- Signup Form -->
             <form id="signup-form" class="space-y-5" action="/users/signup" method="POST">
 
-                <!-- Full Name -->
+                <!-- UserName -->
                 <div class="group">
                     <div class="relative">
                         <div
                             class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-purple-400">
                             <span class="material-symbols-outlined text-[20px]">person</span>
                         </div>
-                        <input type="text" id="username" name="username" placeholder="Full Name"
+                        <input type="text" id="username" name="username" placeholder="UserName"
                             class="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 custom-input transition-all duration-300">
                     </div>
                     <p id="username-error"
@@ -408,10 +408,10 @@
             // Final Validation
             let isValid = true;
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            const usernameRegex = /^[a-zA-Z0-9_ ]{3,16}$/; // Added space for full name support if needed
+            const usernameRegex = /^[a-zA-Z_ ]{3,16}$/; 
 
             if (!username) { showError('username', 'Full name required'); isValid = false; }
-            else if (!usernameRegex.test(username)) { showError('username', '3-16 chars, letters/numbers only'); isValid = false; }
+            else if (!usernameRegex.test(username)) { showError('username', '3-16 chars, letters only'); isValid = false; }
 
             if (!email) { showError('email', 'Email required'); isValid = false; }
             else if (!emailRegex.test(email)) { showError('email', 'Invalid email address'); isValid = false; }

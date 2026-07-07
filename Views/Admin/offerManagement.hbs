@@ -698,9 +698,7 @@
                             class="block text-[10px] font-black uppercase tracking-widest text-gray-400 mb-2">Discount
                             Mode</label>
                         <div class="toggle-group" id="modeToggle">
-                            <div class="toggle-btn active" data-value="percentage" onclick="toggleMode('percentage')">
-                                Percentage</div>
-                            <div class="toggle-btn" data-value="flat" onclick="toggleMode('flat')">Flat</div>
+                          <div class="toggle-btn active" data-value="percentage">Percentage</div>
                         </div>
                     </div>
                     <div>
@@ -710,7 +708,7 @@
                         <div class="relative">
                             <input type="number" name="amount" placeholder="0.00" class="input-pill pr-12">
                             <span id="amountUnit"
-                                class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 font-black">%</span>
+                             class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 font-black">%</span>
                                 <p class="err-msg" id="err_amount"><span id="err_amount_txt">Enter a valid discount (1–100%)</span></p>
                         </div>
                     </div>
@@ -776,7 +774,7 @@
     // ── State
     let editId = null;
     let selectedScope = 'product';
-    let selectedMode = 'percentage';
+    const selectedMode = 'percentage';
     let currentSearch = '';
     let currentType = 'all';
     let currentStatus = 'all';
@@ -893,18 +891,15 @@
 
         // Discount amount
         const amt = parseFloat(f.amount.value);
-        if (!f.amount.value || isNaN(amt) || amt <= 0) {
-            const msg = selectedMode === 'percentage'
-                ? 'Enter a valid discount (1–100%)'
-                : 'Enter a valid flat amount';
-            showErr('amount', msg);
-            ok = false;
-        } else if (selectedMode === 'percentage' && amt > 100) {
-            showErr('amount', 'Percentage discount cannot exceed 100%');
-            ok = false;
-        } else {
-            clearErr('amount');
-        }
+if (!f.amount.value || isNaN(amt) || amt <= 0) {
+    showErr('amount', 'Enter a valid discount (1–100%)');
+    ok = false;
+} else if (amt > 100) {
+    showErr('amount', 'Percentage discount cannot exceed 100%');
+    ok = false;
+} else {
+    clearErr('amount');
+}
 
         // Start date
         if (!f.startDate.value) {
@@ -989,7 +984,7 @@
                 ${o.applicableTo}
             </td>
             <td class="py-6 px-8 text-center">
-                <div class="text-[14px] font-black text-black">${o.discountValue}${o.discountType === 'percentage' ? '%' : '₹'}</div>
+                <div class="text-[14px] font-black text-black">${o.discountValue}%</div>
             </td>
             <td class="py-6 px-8 text-center">
                 <div class="flex flex-col items-center gap-3">
@@ -1054,7 +1049,6 @@
         document.getElementById('offerForm').reset();
         document.querySelector('button[type="submit"]').innerText = 'Create Offer';
         toggleScope('product');
-        toggleMode('percentage');
         fpStart.clear();
         fpEnd.clear();
         clearAllErrors();
@@ -1083,16 +1077,6 @@
         clearErr('target');
     }
 
-    function toggleMode(mode) {
-        selectedMode = mode;
-        const btns = document.querySelectorAll('#modeToggle .toggle-btn');
-        btns.forEach(b => b.classList.toggle('active', b.dataset.value === mode));
-        document.getElementById('amountUnit').innerText = mode === 'percentage' ? '%' : '₹';
-
-        // Re-validate amount live if already entered
-        const amt = parseFloat(document.querySelector('[name="amount"]')?.value);
-        if (amt > 0) clearErr('amount');
-    }
 
     // ══════════════════════════════════════════
     // DROPDOWNS
@@ -1143,7 +1127,7 @@
         try {
             const data = Object.fromEntries(new FormData(e.target).entries());
             data.applicableTo = selectedScope;
-            data.discountType = selectedMode;
+            data.discountType = 'percentage';
 
             const url = editId ? `/admin/offers/edit/${editId}` : '/admin/offers/add';
             const method = editId ? 'put' : 'post';
@@ -1221,7 +1205,7 @@
 
                 toggleScope(o.applicableTo);
                 f.target.value = o.targetId;
-                toggleMode(o.discountType);
+               
 
                 fpStart.setDate(o.startDate);
                 fpEnd.setDate(o.expiryDate);

@@ -38,8 +38,6 @@ export function calculateOfferPrice(originalPrice, product, activeOffers) {
         if (offer.discountType === 'percentage') {
             discount = Math.round((originalPrice * offer.discountValue) / 100);
             if (offer.maxCap && discount > offer.maxCap) discount = offer.maxCap;
-        } else if (offer.discountType === 'flat') {
-            discount = offer.discountValue;
         }
 
         if (discount > bestDiscount) {

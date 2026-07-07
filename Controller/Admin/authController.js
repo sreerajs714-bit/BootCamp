@@ -251,12 +251,19 @@ export const loadDasboard = async (req, res) => {
             { $unwind: '$productDoc' }
         ]);
 
-        const mostPopularProducts = popularAgg.map(p => ({
-            _id:       p._id,
-            name:      p.productDoc.productName,
-            image:     p.productDoc.variants?.[0]?.images?.[0] ?? '/images/placeholder.jpg',
-            soldCount: p.soldCount
-        }));
+       const mostPopularProducts = popularAgg.map(p => {
+    const variant =
+        p.productDoc.variants?.find(v => v.isDefault && v.isActive) ||
+        p.productDoc.variants?.find(v => v.isActive) ||
+        p.productDoc.variants?.[0];
+
+       return {
+        _id:       p._id,
+        name:      p.productDoc.productName,
+        image:     variant?.images?.[0] ?? '/images/placeholder.jpg',
+        soldCount: p.soldCount
+      };
+   });
 
         
         if (req.xhr || req.headers.accept?.includes('application/json')) {

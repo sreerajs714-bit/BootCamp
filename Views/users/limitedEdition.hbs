@@ -403,12 +403,6 @@
 
         <div class="flex-1 overflow-y-auto p-8 space-y-12">
 
-            <!-- Search -->
-            <div class="space-y-4">
-                <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Search Product</label>
-                <input type="text" id="filter-search" placeholder="Enter keywords..." oninput="syncSearchAndFilter()"
-                    class="w-full bg-[#f8f9fc] border-none outline-none rounded-2xl py-5 px-6 text-[14px] font-medium transition-all focus:ring-2 focus:ring-black/5">
-            </div>
 
             <!-- Sort Options -->
             <div class="space-y-6">
@@ -424,13 +418,15 @@
                 </div>
             </div>
 
-            <!-- Brand Filter -->
-            <div class="space-y-6">
-                <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Filter by Brand</label>
-                <div class="flex flex-wrap gap-3" id="brand-chips">
-                    <!-- Brands will be dynamically inserted here -->
-                </div>
-            </div>
+           <!-- Brand Filter -->
+<div class="space-y-6">
+    <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Filter by Brand</label>
+    <div class="flex flex-wrap gap-3" id="brand-chips">
+        {{#each brands}}
+        <button class="filter-chip brand-chip" data-brand="{{this._id}}">{{this.name}}</button>
+        {{/each}}
+    </div>
+</div>
 
             <!-- Price Range -->
             <div class="space-y-8">
@@ -544,18 +540,24 @@
                 Filters</button>
         </div>
 
-        <!-- PAGINATION -->
-        <div id="pagination-container" class="flex items-center justify-center gap-2 mt-12 mb-4">
-            <button id="prev-btn" onclick="changePage(currentPage - 1)"
-                class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition-all">
-                <span class="material-symbols-outlined text-[18px]">chevron_left</span>
-            </button>
-            <div id="page-numbers" class="flex items-center gap-2"></div>
-            <button id="next-btn" onclick="changePage(currentPage + 1)"
-                class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition-all">
-                <span class="material-symbols-outlined text-[18px]">chevron_right</span>
-            </button>
-        </div>
+       <div id="pagination-container" class="flex items-center justify-center gap-2 mt-12 mb-4">
+    <button id="prev-btn" onclick="changePage(currentPage - 1)" {{#unless hasPrev}}disabled{{/unless}}
+        class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition-all">
+        <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+    </button>
+    <div id="page-numbers" class="flex items-center gap-2">
+        {{#each pages}}
+        <button onclick="changePage({{this.number}})"
+            class="w-10 h-10 rounded-full text-[11px] font-black transition-all {{#if this.isCurrent}}bg-black text-white shadow-lg shadow-black/20{{else}}border border-gray-200 hover:bg-black hover:text-white hover:border-black{{/if}}">
+            {{this.number}}
+        </button>
+        {{/each}}
+    </div>
+    <button id="next-btn" onclick="changePage(currentPage + 1)" {{#unless hasNext}}disabled{{/unless}}
+        class="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center hover:bg-black hover:text-white hover:border-black transition-all">
+        <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+    </button>
+</div>
     </main>
 
     {{>footer}}
@@ -565,14 +567,40 @@
     <script>
 
 
-    function safeFetchNavCounts() {
+    const currentPage = {{currentPage}};
+const totalPages  = {{totalPages}};
+
+function buildParamsFromUI() {
+    const params = new URLSearchParams();
+
+    const searchQuery = (document.getElementById('bar-search-input').value || '').trim();
+    if (searchQuery) params.set('search', searchQuery);
+
+    const sortMap = {
+        'PRICE LOW - HIGH': 'price-asc', 'PRICE HIGH - LOW': 'price-desc',
+        'NAME A - Z': 'name-asc', 'NAME Z - A': 'name-desc',
+        'BRAND A - Z': 'brand-asc', 'BRAND Z - A': 'brand-desc'
+    };
+    const activeSort = document.getElementById('active-sort-label').innerText.toUpperCase();
+    if (sortMap[activeSort]) params.set('sort', sortMap[activeSort]);
+
+    const selectedBrands = [...document.querySelectorAll('.brand-chip.active')].map(c => c.dataset.brand);
+    if (selectedBrands.length) params.set('brand', selectedBrands.join(','));
+
+    let minPrice = parseInt(minRange.value), maxPrice = parseInt(maxRange.value);
+    if (minPrice > maxPrice) [minPrice, maxPrice] = [maxPrice, minPrice];
+    if (minPrice > 0)      params.set('minPrice', minPrice);
+    if (maxPrice < 10000)  params.set('maxPrice', maxPrice);
+
+    return params;
+}
+
+function safeFetchNavCounts() {
     if (typeof window.fetchNavCounts === 'function') {
         window.fetchNavCounts();
     } else {
-        // Fallback — update directly
         axios.get('/users/getCounts', { withCredentials: true }).then(res => {
             const { cartCount, wishlistCount } = res.data;
-
             const cartBadge = document.getElementById('cart-badge');
             if (cartBadge) {
                 cartBadge.textContent = cartCount;
@@ -580,7 +608,6 @@
                     ? cartBadge.classList.remove('opacity-0', 'scale-0')
                     : cartBadge.classList.add('opacity-0', 'scale-0');
             }
-
             const wishlistBadge = document.getElementById('wishlist-badge');
             if (wishlistBadge) {
                 wishlistBadge.textContent = wishlistCount;
@@ -590,421 +617,274 @@
             }
         }).catch(() => {});
     }
-   }
+}
 
+const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
 
-        const isLoggedIn = {{#if user}}true{{else }} false{{/if }};
+async function addToCart(e, productId) {
+    e.preventDefault(); e.stopPropagation();
+    if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
 
-        async function addToCart(e, productId) {
-            e.preventDefault(); e.stopPropagation();
-            if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
+    const productCard = e.currentTarget.closest('.product-card');
+    const variantId = productCard?.dataset?.variant;
+    const size = productCard?.dataset?.size;
 
-            const productCard = e.currentTarget.closest('.product-card');
-            const variantId = productCard?.dataset?.variant;
-            const size = productCard?.dataset?.size;  // ← add this
+    if (!variantId) { showToast("error", "Variant missing for this product"); return; }
 
-            if (!variantId) { showToast("error", "Variant missing for this product"); return; }
-
-            try {
-                const response = await axios.post("/users/addCart", { productId, variantId, size, quantity: 1 }, {
-                    validateStatus: (status) => status < 500
-                });
-
-                if (response.data.alreadyInCart) {
-                    showToast("error", "Already in your cart");
-                } else if (response.data.cartLimit) {
-                    showToast("error", "Cart is full! Maximum 10 items allowed.");
-                } else if (response.data.success) {
-                    showToast("success", "Added to cart");
-                   safeFetchNavCounts()
-                } else if (response.data.outOfStock) {
-                    showToast("error", "This product is out of stock");
-                } else {
-                    showToast("error", response.data.message || "Failed to add to cart");
-                }
-            } catch (err) {
-                const data = err?.response?.data;
-                if (data?.cartLimit) showToast("error", "Cart is full! Maximum 10 items allowed.");
-                else if (data?.outOfStock) showToast("error", "This product is out of stock!");
-                else showToast("error", data?.message || "Something went wrong");
-            }
-        }
-
-        async function buyNow(e, productId) {
-            e.preventDefault(); e.stopPropagation();
-            if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
-            try {
-                const productCard = e.currentTarget.closest('.product-card');
-                const variantId = productCard?.dataset?.variant;
-                const size = productCard?.dataset?.size;  // ← add this
-                const res = await axios.post('/users/addCart', { productId, variantId, size, quantity: 1 });
-                if (res.data.success || res.data.alreadyInCart) {
-                    window.location.href = "/users/cart";
-                } else {
-                    showToast("error", res.data.message || "Failed to process");
-                }
-            } catch (err) {
-                const data = err?.response?.data;
-                if (data?.outOfStock) showToast("error", "This product is out of stock!");
-                else window.location.href = "/users/cart";
-            }
-        }
-
-        async function toggleWishlist(e, id, btn) {
-            e.preventDefault(); e.stopPropagation();
-            if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
-            try {
-                const response = await axios.post('/users/toggleWishlist', { productId: id });
-                if (response.data.success) {
-                    const icon = btn.querySelector('.material-symbols-outlined');
-                    if (response.data.isWishlisted) {
-                        icon.classList.add('icon-fill', 'text-red-500');
-                        showToast("success", "Added to wishlist");
-                    } else {
-                        icon.classList.remove('icon-fill', 'text-red-500');
-                        showToast("success", "Removed from wishlist");
-                    }
-                    safeFetchNavCounts()
-                }
-            } catch (err) {
-                showToast("error", "Failed to update wishlist");
-            }
-        }
-
-        // ── Sidebar ───────────────────────────────────────────
-        function openSidebar() {
-            document.body.classList.add('sidebar-open');
-            document.getElementById('filter-sidebar').classList.replace('translate-x-full', 'translate-x-0');
-        }
-        function closeSidebar() {
-            document.body.classList.remove('sidebar-open');
-            document.getElementById('filter-sidebar').classList.replace('translate-x-0', 'translate-x-full');
-        }
-
-        // ── Search bar ────────────────────────────────────────
-        function toggleBarSearch() {
-            const bar = document.getElementById('refine-bar');
-            const input = document.getElementById('bar-search-input');
-            bar.classList.toggle('search-active');
-            if (bar.classList.contains('search-active')) {
-                setTimeout(() => input.focus(), 300);
-            } else {
-                input.value = '';
-                applyFilters();
-            }
-        }
-
-        function syncSearchAndFilter() {
-            document.getElementById('bar-search-input').value = document.getElementById('filter-search').value;
-            applyFilters();
-        }
-
-        // ── Sort dropdown ─────────────────────────────────────
-        function toggleSortDropdown() {
-            document.getElementById('sort-dropdown').classList.toggle('active');
-        }
-
-        function selectSort(sortType) {
-            document.getElementById('active-sort-label').innerText = sortType;
-            document.getElementById('sort-dropdown').classList.remove('active');
-            document.querySelectorAll('.sort-chip').forEach(c => {
-                c.classList.toggle('active', c.dataset.sort === sortType);
-            });
-            applyFilters();
-        }
-
-        document.addEventListener('click', (e) => {
-            const dropdown = document.getElementById('sort-dropdown');
-            const btn = dropdown.previousElementSibling;
-            if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
-                dropdown.classList.remove('active');
-            }
+    try {
+        const response = await axios.post("/users/addCart", { productId, variantId, size, quantity: 1 }, {
+            validateStatus: (status) => status < 500
         });
-
-        document.querySelectorAll('.sort-chip').forEach(chip => {
-            chip.addEventListener('click', () => {
-                document.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('active'));
-                chip.classList.add('active');
-                document.getElementById('active-sort-label').innerText = chip.dataset.sort;
-            });
-        });
-
-        // ── Price slider ──────────────────────────────────────
-        const minRange = document.getElementById('price-min');
-        const maxRange = document.getElementById('price-max');
-        const rangeFill = document.getElementById('range-fill');
-        const priceDisplay = document.getElementById('price-display');
-
-        function updateDualSlider() {
-            let minVal = parseInt(minRange.value);
-            let maxVal = parseInt(maxRange.value);
-            if (minVal > maxVal) [minVal, maxVal] = [maxVal, minVal];
-            const minPct = (minVal / 10000) * 100;
-            const maxPct = (maxVal / 10000) * 100;
-            rangeFill.style.left = minPct + '%';
-            rangeFill.style.width = (maxPct - minPct) + '%';
-            priceDisplay.innerText = `₹${minVal.toLocaleString('en-IN')} - ₹${maxVal.toLocaleString('en-IN')}`;
+        if (response.data.alreadyInCart) {
+            showToast("error", "Already in your cart");
+        } else if (response.data.cartLimit) {
+            showToast("error", "Cart is full! Maximum 10 items allowed.");
+        } else if (response.data.success) {
+            showToast("success", "Added to cart");
+            safeFetchNavCounts();
+        } else if (response.data.outOfStock) {
+            showToast("error", "This product is out of stock");
+        } else {
+            showToast("error", response.data.message || "Failed to add to cart");
         }
+    } catch (err) {
+        const data = err?.response?.data;
+        if (data?.cartLimit) showToast("error", "Cart is full! Maximum 10 items allowed.");
+        else if (data?.outOfStock) showToast("error", "This product is out of stock!");
+        else showToast("error", data?.message || "Something went wrong");
+    }
+}
 
-        minRange.addEventListener('input', updateDualSlider);
-        maxRange.addEventListener('input', updateDualSlider);
-        updateDualSlider();
+async function buyNow(e, productId) {
+    e.preventDefault(); e.stopPropagation();
+    if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
+    try {
+        const productCard = e.currentTarget.closest('.product-card');
+        const variantId = productCard?.dataset?.variant;
+        const size = productCard?.dataset?.size;
+        const res = await axios.post('/users/addCart', { productId, variantId, size, quantity: 1 });
+        if (res.data.success || res.data.alreadyInCart) {
+            window.location.href = "/users/cart";
+        } else {
+            showToast("error", res.data.message || "Failed to process");
+        }
+    } catch (err) {
+        const data = err?.response?.data;
+        if (data?.outOfStock) showToast("error", "This product is out of stock!");
+        else window.location.href = "/users/cart";
+    }
+}
 
-        // ── Pagination State ──────────────────────────────────
-        const ITEMS_PER_PAGE = 8;
-        let currentPage = 1;
-        let filteredCards = [];
-        let originalCards = [];
-        let currentView = 'grid';
-
-        function toggleView(view) {
-            currentView = view;
-            const grid = document.getElementById('product-grid');
-            const gridBtn = document.getElementById('grid-view-btn');
-            const listBtn = document.getElementById('list-view-btn');
-            if (view === 'list') {
-                grid.classList.add('list-view');
-                listBtn.classList.add('active');
-                gridBtn.classList.remove('active');
+async function toggleWishlist(e, id, btn) {
+    e.preventDefault(); e.stopPropagation();
+    if (!isLoggedIn) { showToast("error", "Please login to continue"); return; }
+    try {
+        const productCard = e.currentTarget.closest('.product-card');
+        const variantId = productCard?.dataset?.variant;
+        const response = await axios.post('/users/toggleWishlist', { productId: id, variantId });
+        if (response.data.success) {
+            const icon = btn.querySelector('.material-symbols-outlined');
+            if (response.data.isWishlisted) {
+                icon.classList.add('icon-fill', 'text-red-500');
+                showToast("success", "Added to wishlist");
             } else {
-                grid.classList.remove('list-view');
-                gridBtn.classList.add('active');
-                listBtn.classList.remove('active');
+                icon.classList.remove('icon-fill', 'text-red-500');
+                showToast("success", "Removed from wishlist");
             }
-            localStorage.setItem('productViewPreference', view);
+            safeFetchNavCounts();
         }
+    } catch (err) {
+        showToast("error", "Failed to update wishlist");
+    }
+}
 
-        const savedView = localStorage.getItem('productViewPreference');
-        if (savedView) setTimeout(() => toggleView(savedView), 0);
+function openSidebar() {
+    document.body.classList.add('sidebar-open');
+    document.getElementById('filter-sidebar').classList.replace('translate-x-full', 'translate-x-0');
+}
+function closeSidebar() {
+    document.body.classList.remove('sidebar-open');
+    document.getElementById('filter-sidebar').classList.replace('translate-x-0', 'translate-x-full');
+}
 
-        // ── Core filter + sort + pagination engine ────────────
-        document.addEventListener('DOMContentLoaded', () => {
-            originalCards = [...document.querySelectorAll('.product-card')];
+function toggleBarSearch() {
+    const bar = document.getElementById('refine-bar');
+    const input = document.getElementById('bar-search-input');
+    bar.classList.toggle('search-active');
+    if (bar.classList.contains('search-active')) {
+        setTimeout(() => input.focus(), 300);
+    } else {
+        input.value = '';
+        applyFilters();
+    }
+}
 
-            // Extract and render brands
-            renderBrandChips();
 
-            // Carousel logic
-            originalCards.forEach(card => {
-                const images = card.querySelectorAll('.carousel-img');
-                if (images.length <= 1) return;
-                let i = 0, interval;
-                card.addEventListener('mouseenter', () => {
-                    interval = setInterval(() => {
-                        images[i].classList.replace('opacity-100', 'opacity-0');
-                        i = (i + 1) % images.length;
-                        images[i].classList.replace('opacity-0', 'opacity-100');
-                    }, 1000);
-                });
-                card.addEventListener('mouseleave', () => {
-                    clearInterval(interval);
-                    images.forEach((img, idx) => {
-                        img.classList.toggle('opacity-100', idx === 0);
-                        img.classList.toggle('opacity-0', idx !== 0);
-                    });
-                    i = 0;
-                });
-            });
+function toggleSortDropdown() {
+    document.getElementById('sort-dropdown').classList.toggle('active');
+}
 
-            // Initial render
-            applyFilters();
+function selectSort(sortType) {
+    document.getElementById('active-sort-label').innerText = sortType;
+    document.getElementById('sort-dropdown').classList.remove('active');
+    document.querySelectorAll('.sort-chip').forEach(c => c.classList.toggle('active', c.dataset.sort === sortType));
+    applyFilters();
+}
+
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('sort-dropdown');
+    const btn = dropdown.previousElementSibling;
+    if (!dropdown.contains(e.target) && !btn.contains(e.target)) {
+        dropdown.classList.remove('active');
+    }
+});
+
+document.querySelectorAll('.brand-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+        chip.classList.toggle('active');
+    });
+});
+
+const minRange = document.getElementById('price-min');
+const maxRange = document.getElementById('price-max');
+const rangeFill = document.getElementById('range-fill');
+const priceDisplay = document.getElementById('price-display');
+
+function updateDualSlider() {
+    let minVal = parseInt(minRange.value);
+    let maxVal = parseInt(maxRange.value);
+    if (minVal > maxVal) [minVal, maxVal] = [maxVal, minVal];
+    const minPct = (minVal / 10000) * 100;
+    const maxPct = (maxVal / 10000) * 100;
+    rangeFill.style.left = minPct + '%';
+    rangeFill.style.width = (maxPct - minPct) + '%';
+    priceDisplay.innerText = `₹${minVal.toLocaleString('en-IN')} - ₹${maxVal.toLocaleString('en-IN')}`;
+}
+minRange.addEventListener('input', updateDualSlider);
+maxRange.addEventListener('input', updateDualSlider);
+updateDualSlider();
+
+let currentView = 'grid';
+
+function toggleView(view) {
+    currentView = view;
+    const grid = document.getElementById('product-grid');
+    const gridBtn = document.getElementById('grid-view-btn');
+    const listBtn = document.getElementById('list-view-btn');
+    if (view === 'list') {
+        grid.classList.add('list-view');
+        listBtn.classList.add('active');
+        gridBtn.classList.remove('active');
+    } else {
+        grid.classList.remove('list-view');
+        gridBtn.classList.add('active');
+        listBtn.classList.remove('active');
+    }
+    localStorage.setItem('productViewPreference', view);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+
+    const search = params.get('search') || '';
+    document.getElementById('bar-search-input').value = search;
+
+    const sortLabelMap = {
+        'price-asc': 'Price Low - High', 'price-desc': 'Price High - Low',
+        'name-asc': 'Name A - Z', 'name-desc': 'Name Z - A',
+        'brand-asc': 'Brand A - Z', 'brand-desc': 'Brand Z - A'
+    };
+    const sort = params.get('sort');
+    if (sort && sortLabelMap[sort]) {
+        const label = sortLabelMap[sort];
+        document.getElementById('active-sort-label').innerText = label;
+        document.querySelectorAll('.sort-chip').forEach(c => c.classList.toggle('active', c.dataset.sort === label));
+    }
+
+    const brands = (params.get('brand') || '').split(',').filter(Boolean);
+    document.querySelectorAll('.brand-chip').forEach(b => b.classList.toggle('active', brands.includes(b.dataset.brand)));
+
+    if (params.get('minPrice')) minRange.value = params.get('minPrice');
+    if (params.get('maxPrice')) maxRange.value = params.get('maxPrice');
+    updateDualSlider();
+
+    renderFilterTags(search, document.getElementById('active-sort-label').innerText,
+        parseInt(minRange.value), parseInt(maxRange.value));
+
+    document.querySelectorAll('.product-card').forEach(card => {
+        const images = card.querySelectorAll('.carousel-img');
+        if (images.length <= 1) return;
+        let i = 0, interval;
+        card.addEventListener('mouseenter', () => {
+            interval = setInterval(() => {
+                images[i].classList.replace('opacity-100', 'opacity-0');
+                i = (i + 1) % images.length;
+                images[i].classList.replace('opacity-0', 'opacity-100');
+            }, 1000);
         });
-
-        function applyFilters() {
-            const searchQuery = (
-                document.getElementById('bar-search-input').value ||
-                document.getElementById('filter-search').value
-            ).toLowerCase().trim();
-
-            const activeSort = document.getElementById('active-sort-label').innerText;
-            const selectedBrands = [...document.querySelectorAll('.brand-chip.active')].map(c => c.dataset.brand);
-
-            let minPrice = parseInt(minRange.value);
-            let maxPrice = parseInt(maxRange.value);
-            if (minPrice > maxPrice) [minPrice, maxPrice] = [maxPrice, minPrice];
-
-            // ── 1. Filter ─────────────────────────────────────
-            filteredCards = originalCards.filter(card => {
-                const name = (card.dataset.name || '').toLowerCase();
-                const brand = (card.dataset.brand || '').toLowerCase();
-                const price = parseFloat(card.dataset.price) || 0;
-
-                if (selectedBrands.length > 0 && !selectedBrands.includes(card.dataset.brand)) return false;
-                if (searchQuery && !name.includes(searchQuery) && !brand.includes(searchQuery)) return false;
-                if (price < minPrice || price > maxPrice) return false;
-                return true;
+        card.addEventListener('mouseleave', () => {
+            clearInterval(interval);
+            images.forEach((img, idx) => {
+                img.classList.toggle('opacity-100', idx === 0);
+                img.classList.toggle('opacity-0', idx !== 0);
             });
+            i = 0;
+        });
+    });
 
-            // ── 2. Sort ───────────────────────────────────────
-            if (activeSort === 'PRICE LOW - HIGH' || activeSort === 'Price Low - High') {
-                filteredCards.sort((a, b) => parseFloat(a.dataset.price) - parseFloat(b.dataset.price));
-            } else if (activeSort === 'PRICE HIGH - LOW' || activeSort === 'Price High - Low') {
-                filteredCards.sort((a, b) => parseFloat(b.dataset.price) - parseFloat(a.dataset.price));
-            } else if (activeSort === 'NAME A - Z' || activeSort === 'Name A - Z') {
-                filteredCards.sort((a, b) => (a.dataset.name || '').localeCompare(b.dataset.name || ''));
-            } else if (activeSort === 'NAME Z - A' || activeSort === 'Name Z - A') {
-                filteredCards.sort((a, b) => (b.dataset.name || '').localeCompare(a.dataset.name || ''));
-            } else if (activeSort === 'Brand A - Z') {
-                filteredCards.sort((a, b) => (a.dataset.brand || '').localeCompare(b.dataset.brand || ''));
-            } else if (activeSort === 'Brand Z - A') {
-                filteredCards.sort((a, b) => (b.dataset.brand || '').localeCompare(a.dataset.brand || ''));
-            }
+    const savedView = localStorage.getItem('productViewPreference');
+    if (savedView) toggleView(savedView);
+});
 
-            // ── 3. Reset to page 1 on new filter ─────────────
-            currentPage = 1;
-            renderPage();
+function applyFilters() {
+    const params = buildParamsFromUI();
+    params.set('page', 1);
+    window.location.href = `${window.location.pathname}?${params.toString()}`;
+}
 
-            renderFilterTags(searchQuery, activeSort, minPrice, maxPrice);
-        }
+function changePage(page) {
+    if (page < 1 || page > totalPages) return;
+    const params = buildParamsFromUI();
+    params.set('page', page);
+    window.location.href = `${window.location.pathname}?${params.toString()}`;
+}
 
-        function renderPage() {
-            const grid = document.getElementById('product-grid');
-            const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
-            const start = (currentPage - 1) * ITEMS_PER_PAGE;
-            const end = start + ITEMS_PER_PAGE;
-            const pageCards = filteredCards.slice(start, end);
+function renderFilterTags(search, sort, minP, maxP) {
+    const container = document.getElementById('active-filter-tags');
+    container.innerHTML = '';
 
-            // Hide all
-            originalCards.forEach(card => card.style.display = 'none');
+    function makeTag(label, onRemove) {
+        const tag = document.createElement('span');
+        tag.className = 'inline-flex items-center gap-1 bg-black text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full';
+        tag.innerHTML = `${label} <button onclick="(${onRemove.toString()})()" class="ml-1 hover:text-gray-300">✕</button>`;
+        container.appendChild(tag);
+    }
 
-            // Show only current page cards
-            pageCards.forEach(card => {
-                card.style.display = 'flex';
-                grid.appendChild(card);
-            });
-
-            // Update count & visibility
-            document.getElementById('result-count').textContent = filteredCards.length;
-            document.getElementById('no-results').style.display = filteredCards.length === 0 ? 'block' : 'none';
-            document.getElementById('pagination-container').style.display = filteredCards.length === 0 ? 'none' : 'flex';
-
-            renderPaginationButtons(totalPages);
-        }
-
-        function renderPaginationButtons(totalPages) {
-            const container = document.getElementById('page-numbers');
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-
-            prevBtn.disabled = currentPage === 1;
-            nextBtn.disabled = currentPage === totalPages || totalPages === 0;
-
-            container.innerHTML = '';
-
-            if (totalPages <= 1) return;
-
-            // Smart page number list with ellipsis
-            const pages = [];
-            if (totalPages <= 5) {
-                for (let i = 1; i <= totalPages; i++) pages.push(i);
-            } else {
-                if (currentPage <= 3) {
-                    pages.push(1, 2, 3, 4, '...', totalPages);
-                } else if (currentPage >= totalPages - 2) {
-                    pages.push(1, '...', totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
-                } else {
-                    pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
-                }
-            }
-
-            pages.forEach(p => {
-                if (p === '...') {
-                    const dots = document.createElement('span');
-                    dots.className = 'text-gray-400 text-[12px] font-bold px-1';
-                    dots.textContent = '...';
-                    container.appendChild(dots);
-                } else {
-                    const btn = document.createElement('button');
-                    btn.textContent = p;
-                    btn.className = `w-10 h-10 rounded-full text-[11px] font-black transition-all ${p === currentPage
-                        ? 'bg-black text-white shadow-lg shadow-black/20'
-                        : 'border border-gray-200 hover:bg-black hover:text-white hover:border-black'
-                        }`;
-                    btn.onclick = () => changePage(p);
-                    container.appendChild(btn);
-                }
-            });
-        }
-
-        function changePage(page) {
-            const totalPages = Math.ceil(filteredCards.length / ITEMS_PER_PAGE);
-            if (page < 1 || page > totalPages) return;
-            currentPage = page;
-            renderPage();
-            document.getElementById('product-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-
-        // ── Active filter tags ────────────────────────────────
-        function renderFilterTags(search, sort, minP, maxP) {
-            const container = document.getElementById('active-filter-tags');
-            container.innerHTML = '';
-
-            function makeTag(label, onRemove) {
-                const tag = document.createElement('span');
-                tag.className = 'inline-flex items-center gap-1 bg-black text-white text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full';
-                tag.innerHTML = `${label} <button onclick="(${onRemove.toString()})()" class="ml-1 hover:text-gray-300">✕</button>`;
-                container.appendChild(tag);
-            }
-
-            if (search) {
-                makeTag(`"${search}"`, () => {
-                    document.getElementById('bar-search-input').value = '';
-                    document.getElementById('filter-search').value = '';
-                    applyFilters();
-                });
-            }
-            if (sort && sort !== 'Sort By' && sort !== 'Latest Drop') {
-                makeTag(sort, () => {
-                    selectSort('Latest Drop');
-                });
-            }
-            if (minP > 0 || maxP < 10000) {
-                makeTag(`₹${minP.toLocaleString('en-IN')} - ₹${maxP.toLocaleString('en-IN')}`, () => {
-                    minRange.value = 0;
-                    maxRange.value = 10000;
-                    updateDualSlider();
-                    applyFilters();
-                });
-            }
-        }
-
-        // ── Clear all ─────────────────────────────────────────
-        function clearAll() {
-            document.getElementById('filter-search').value = '';
+    if (search) {
+        makeTag(`"${search}"`, () => {
             document.getElementById('bar-search-input').value = '';
+            applyFilters();
+        });
+    }
+    if (sort && sort !== 'Sort By' && sort !== 'Latest Drop') {
+        makeTag(sort, () => { selectSort('Latest Drop'); });
+    }
+    if (minP > 0 || maxP < 10000) {
+        makeTag(`₹${minP.toLocaleString('en-IN')} - ₹${maxP.toLocaleString('en-IN')}`, () => {
             minRange.value = 0;
             maxRange.value = 10000;
             updateDualSlider();
-            document.querySelectorAll('.sort-chip').forEach(c => {
-                c.classList.toggle('active', c.dataset.sort === 'Latest Drop');
-            });
-            document.querySelectorAll('.brand-chip').forEach(c => c.classList.remove('active'));
-            document.getElementById('active-sort-label').innerText = 'Sort By';
             applyFilters();
-            closeSidebar();
-        }
+        });
+    }
+}
 
-        function renderBrandChips() {
-            const container = document.getElementById('brand-chips');
-            if (!container) return;
-            const brands = [...new Set(originalCards.map(c => c.dataset.brand))].filter(b => b).sort();
+function clearAll() {
+    window.location.href = window.location.pathname;
+}
 
-            container.innerHTML = '';
-            brands.forEach(brand => {
-                const chip = document.createElement('button');
-                chip.className = 'filter-chip brand-chip';
-                chip.dataset.brand = brand;
-                chip.textContent = brand;
-                chip.onclick = () => {
-                    chip.classList.toggle('active');
-                };
-                container.appendChild(chip);
-            });
-        }
-
-        // ── Sidebar buttons ───────────────────────────────────
-        document.getElementById('clear-btn').onclick = clearAll;
-        document.getElementById('apply-btn').onclick = () => { applyFilters(); closeSidebar(); showToast("success", "Filters Applied"); };
+document.getElementById('clear-btn').onclick = clearAll;
+document.getElementById('apply-btn').onclick = () => { applyFilters(); closeSidebar(); showToast("success", "Filters Applied"); };
     </script>
 
 </body>

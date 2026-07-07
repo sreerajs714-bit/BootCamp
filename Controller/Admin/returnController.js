@@ -46,7 +46,8 @@ export const loadReturnManagement = async (req, res) => {
             ) || order.items[0];
 
             const product = returnedItem?.product;
-            const variant = product?.variants?.[0];
+            const variant = product.variants.find(v => v._id.toString() === item.variant?.toString())
+            || product.variants.find(pv => pv.sizes?.some(s => s.toString() === item.size?.toString()));
             const rawImage = variant?.images?.[0];
             const image = typeof rawImage === 'string'
                 ? rawImage : rawImage?.url || rawImage?.path || '';
@@ -163,7 +164,8 @@ export const loadReturnDetail = async (req, res) => {
 
         const products = itemsToShow.map(item => {
             const product  = item.product;
-            const variant  = product?.variants?.[0];
+            const variant = product.variants.find(v => v._id.toString() === item.variant?.toString())
+            || product.variants.find(pv => pv.sizes?.some(s => s.toString() === item.size?.toString()));
             const rawImage = variant?.images?.[0];
             const image    = typeof rawImage === 'string'
                 ? rawImage

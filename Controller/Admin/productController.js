@@ -352,7 +352,11 @@ export const editProduct = async (req, res) => {
         variant.sizes    = parsedSizes;
         variant.images   = allImages;
         variant.isActive = true;
+        product.variants.forEach(v => {
+        v.isDefault = false;
+        });
         variant.isDefault = true;
+
         await product.save();
  
         return res.json({ success: true, message: "Product updated successfully." });

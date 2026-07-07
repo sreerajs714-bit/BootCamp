@@ -8,7 +8,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    
+
     <!-- Toastify -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -76,9 +76,10 @@
         .product-card-similar {
             transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
         }
+
         .product-card-similar:hover {
             transform: translateY(-8px);
-            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.08);
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.08);
             border-color: #f4f4f5;
         }
 
@@ -91,6 +92,18 @@
 
         .btn-action:active {
             transform: scale(0.98);
+        }
+
+        /* Color swatch unavailable state */
+        .variant-clr-btn.unavailable {
+            opacity: 0.2;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .variant-clr-btn.available {
+            opacity: 1;
+            pointer-events: auto;
         }
     </style>
 </head>
@@ -109,9 +122,11 @@
             <div class="lg:col-span-5 flex flex-col-reverse lg:flex-row gap-6 pt-12">
 
                 <!-- THUMBNAILS -->
-                <div id="thumbnail-container" class="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
+                <div id="thumbnail-container"
+                    class="flex lg:flex-col gap-4 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
                     {{#each product.images}}
-                    <button type="button" class="thumbnail {{#if @first}}active{{/if}} w-20 h-24 border-2 rounded-lg overflow-hidden flex-shrink-0"
+                    <button type="button"
+                        class="thumbnail {{#if @first}}active{{/if}} w-20 h-24 border-2 rounded-lg overflow-hidden flex-shrink-0"
                         onclick="changeImage({{@index}}, this)">
                         <img src="{{this}}" class="w-full h-full object-contain mix-blend-multiply">
                     </button>
@@ -120,65 +135,62 @@
 
                 <!-- MAIN IMAGE -->
                 <div class="flex-1 zoom-container group" onmousemove="zoomImage(event)" onmouseleave="resetZoom(event)">
-                    <img id="main-image" src="{{product.images.[0]}}" class="max-h-full object-contain mix-blend-multiply filter drop-shadow-2xl">
+                    <img id="main-image" src="{{product.images.[0]}}"
+                        class="max-h-full object-contain mix-blend-multiply filter drop-shadow-2xl">
                 </div>
             </div>
 
             <!-- DETAILS -->
             <div class="lg:col-span-7 flex flex-col justify-center">
 
-                <h1 id="product-name" class="text-4xl lg:text-3xl font-black uppercase tracking-tighter mb-4 leading-tight">
+                <h1 id="product-name"
+                    class="text-4xl lg:text-3xl font-black uppercase tracking-tighter mb-4 leading-tight">
                     {{product.productName}}
                 </h1>
 
                 <div class="flex items-baseline gap-3 mb-6">
-    <span id="product-price" class="text-2xl font-black">
-        ₹{{#if product.hasOffer}}{{product.discountedPrice}}{{else}}{{product.price}}{{/if}}
-    </span>
-    <span id="product-old-price" class="text-sm text-gray-400 line-through {{#unless product.hasOffer}}hidden{{/unless}}">
-        ₹{{product.price}}
-    </span>
-    <span id="product-offer-badge" class="text-xs font-black text-green-600 {{#unless product.hasOffer}}hidden{{/unless}}">
-        {{#if product.offerLabel}}{{product.offerLabel}}{{else}}{{product.offerPercentage}}% OFF{{/if}}
-    </span>
-</div>
+                    <span id="product-price" class="text-2xl font-black">
+                        ₹{{#if product.hasOffer}}{{product.discountedPrice}}{{else}}{{product.price}}{{/if}}
+                    </span>
+                    <span id="product-old-price"
+                        class="text-sm text-gray-400 line-through {{#unless product.hasOffer}}hidden{{/unless}}">
+                        ₹{{product.price}}
+                    </span>
+                    <span id="product-offer-badge"
+                        class="text-xs font-black text-green-600 {{#unless product.hasOffer}}hidden{{/unless}}">
+                        {{#if product.offerLabel}}{{product.offerLabel}}{{else}}{{product.offerPercentage}}% OFF{{/if}}
+                    </span>
+                </div>
 
-                <div class="inline-flex bg-gray-100 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest mb-8 self-start">
+                <div
+                    class="inline-flex bg-gray-100 px-3 py-1 rounded text-[10px] font-bold uppercase tracking-widest mb-8 self-start">
                     {{product.badge}}
                 </div>
 
-                <!-- COLORS -->
+                <!-- SIZE (click first) -->
                 <div class="mb-8">
+                    <div class="flex justify-between items-center mb-3">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-gray-500">Select Size</p>
+                        <button class="text-[9px] font-bold underline underline-offset-4 text-gray-400 hover:text-black">Size Guide</button>
+                    </div>
+                    <div id="size-container" class="flex flex-wrap gap-2">
+                        <!-- Populated by JS from all variants -->
+                    </div>
+                </div>
+
+                <!-- COLORS (filtered after size selected) -->
+                <div class="mb-10">
                     <p class="text-[10px] font-black uppercase tracking-widest mb-3 text-gray-500">Select Color</p>
                     <div id="color-container" class="flex gap-2.5">
                         {{#each product.variants}}
-                        <button 
-                            data-variant-id="{{this.id}}"
-                            class="variant-clr-btn w-7 h-7 rounded-full border-2 border-white ring-2 {{#if @first}}ring-black{{else}}{{#if this.isDefault}}ring-black{{else}}ring-transparent{{/if}}{{/if}} hover:ring-gray-300 transition-all focus:ring-black outline-none" 
-                            style="background-color: {{this.color}};"
-                            title="{{this.color}}"
+                        <button data-variant-id="{{this.id}}"
+                            class="variant-clr-btn unavailable w-7 h-7 rounded-full border-2 border-gray-300 ring-2 ring-offset-2 ring-transparent hover:ring-gray-400 transition-all focus:ring-black outline-none"
+                            style="background-color: {{this.color}};" title="{{this.color}}"
                             onclick="selectVariant('{{this.id}}', this)">
                         </button>
                         {{/each}}
                     </div>
-                </div>
-
-                <!-- SIZE -->
-                <div class="mb-10">
-                    <div class="flex justify-between items-center mb-3">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-gray-500">Select Size</p>
-                    </div>
-
-                    <!-- REPLACE THIS -->
-                       <div id="size-container" class="flex flex-wrap gap-2">
-                            {{#each product.sizes}}
-                                <button onclick="selectSize(this)"  class="size-btn w-12 h-10 border border-gray-200 rounded-lg text-[11px] font-bold hover:border-black transition-all flex items-center justify-center">
-                             {{this}}
-                                 </button>
-                             {{/each}}
-                        </div>
-                        <!-- EMPTY — JS will populate this -->
-                       <div id="size-container" class="flex flex-wrap gap-2"></div>
+                    <p id="color-hint" class="text-[10px] text-gray-400 mt-2 font-medium">Pick a size to see available colors</p>
                 </div>
 
                 <!-- ACTIONS -->
@@ -188,14 +200,15 @@
                         Add to Cart
                     </button>
 
-                    <button onclick="buyNow('{{product.id}}')" 
+                    <button onclick="buyNow('{{product.id}}')"
                         class="btn-action w-full bg-[#f4f4f5] text-black py-4 rounded-2xl text-[13px] hover:bg-gray-200">
                         Buy Now
                     </button>
 
-                    <button onclick="toggleWishlist('{{product.id}}', this)"
+                    <button onclick="toggleWishlist('{{product.id}}',selectedVariantId,this)"
                         class="btn-action w-full mt-2 flex items-center justify-center gap-2 text-gray-500 hover:text-red-500 transition-colors">
-                        <span class="material-symbols-outlined text-[20px] {{#if product.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
+                        <span
+                            class="material-symbols-outlined text-[20px] {{#if product.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
                         <span class="text-[10px] font-bold uppercase tracking-widest">Add to Wishlist</span>
                     </button>
                 </div>
@@ -219,24 +232,28 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {{#each similarProducts}}
-                <a href="/users/productdetail/{{this.id}}" class="product-card-similar block group flex flex-col bg-white rounded-3xl p-3 border border-gray-50 transition-all cursor-pointer hover:no-underline text-inherit">
-                    
+                <a href="/users/productdetail/{{this.id}}"
+                    class="product-card-similar block group flex flex-col bg-white rounded-3xl p-3 border border-gray-50 transition-all cursor-pointer hover:no-underline text-inherit">
+
                     <!-- Card Top (Image + Icons) -->
                     <div class="relative aspect-square bg-[#f8f8f8] rounded-2xl overflow-hidden mb-5">
-                        
-                        <button onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('{{this.id}}', this)" 
+
+                        <button
+                            onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('{{this.id}}',this)"
                             class="absolute top-3 right-3 z-20 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-all shadow-sm">
-                            <span class="material-symbols-outlined text-[18px] {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
+                            <span
+                                class="material-symbols-outlined text-[18px] {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
                         </button>
 
                         <div class="carousel-container relative w-full h-full flex items-center justify-center p-6">
                             {{#each this.images}}
-                            <img src="{{this}}" 
+                            <img src="{{this}}"
                                 class="carousel-img absolute max-w-[85%] max-h-[85%] object-contain mix-blend-multiply transition-opacity duration-500 {{#if @first}}opacity-100{{else}}opacity-0{{/if}}">
                             {{/each}}
                         </div>
 
-                        <div class="absolute bottom-3 left-3 z-20 bg-white px-2 py-1 rounded-lg shadow-sm border border-gray-100 flex items-center gap-1.5">
+                        <div
+                            class="absolute bottom-3 left-3 z-20 bg-white px-2 py-1 rounded-lg shadow-sm border border-gray-100 flex items-center gap-1.5">
                             <span class="material-symbols-outlined text-[14px] text-gray-400">check_circle</span>
                             <span class="text-[9px] font-black uppercase tracking-tighter text-gray-700">In Stock</span>
                         </div>
@@ -244,21 +261,23 @@
 
                     <!-- Card Info -->
                     <div class="px-1 flex-1 flex flex-col pt-1">
-                        <div class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{{this.badge}}</div>
+                        <div class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">{{this.badge}}
+                        </div>
                         <h3 class="text-[15px] font-black text-gray-900 mb-1">{{this.productName}}</h3>
                         <div class="text-lg font-black text-gray-900 mb-1 flex items-baseline gap-2">
-                        <span>₹{{#if this.hasOffer}}{{this.discountedPrice}}{{else}}{{this.price}}{{/if}}</span>
-                         {{#if this.hasOffer}}
-                         <span class="text-xs text-gray-400 line-through">₹{{this.price}}</span>
-                         {{/if}}
-                         </div>
+                            <span>₹{{#if this.hasOffer}}{{this.discountedPrice}}{{else}}{{this.price}}{{/if}}</span>
+                            {{#if this.hasOffer}}
+                            <span class="text-xs text-gray-400 line-through">₹{{this.price}}</span>
+                            {{/if}}
+                        </div>
 
                         <div class="mt-auto flex flex-col gap-2">
-                            <button onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{this.id}}', true)" 
+                            <button
+                                onclick="event.preventDefault(); event.stopPropagation(); addToCart('{{this.id}}', true)"
                                 class="w-full bg-black text-white py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-all shadow-sm">
                                 Add to Cart
                             </button>
-                            <button onclick="event.preventDefault(); event.stopPropagation(); buyNow('{{this.id}}')" 
+                            <button onclick="event.preventDefault(); event.stopPropagation(); buyNow('{{this.id}}')"
                                 class="w-full bg-[#f4f4f5] text-black py-3 rounded-xl text-[11px] font-bold uppercase tracking-widest hover:bg-gray-200 transition-all">
                                 Buy Now
                             </button>
@@ -278,82 +297,64 @@
     <script>
 
 
-     // Ensures fetchNavCounts is always available even if navbar loads late
-    function safeFetchNavCounts() {
-    if (typeof window.fetchNavCounts === 'function') {
-        window.fetchNavCounts();
-    } else {
-        // Fallback — update directly
-        axios.get('/users/getCounts', { withCredentials: true }).then(res => {
-            const { cartCount, wishlistCount } = res.data;
+        // Ensures fetchNavCounts is always available even if navbar loads late
+        function safeFetchNavCounts() {
+            if (typeof window.fetchNavCounts === 'function') {
+                window.fetchNavCounts();
+            } else {
+                // Fallback — update directly
+                axios.get('/users/getCounts', { withCredentials: true }).then(res => {
+                    const { cartCount, wishlistCount } = res.data;
 
-            const cartBadge = document.getElementById('cart-badge');
-            if (cartBadge) {
-                cartBadge.textContent = cartCount;
-                cartCount > 0
-                    ? cartBadge.classList.remove('opacity-0', 'scale-0')
-                    : cartBadge.classList.add('opacity-0', 'scale-0');
-            }
+                    const cartBadge = document.getElementById('cart-badge');
+                    if (cartBadge) {
+                        cartBadge.textContent = cartCount;
+                        cartCount > 0
+                            ? cartBadge.classList.remove('opacity-0', 'scale-0')
+                            : cartBadge.classList.add('opacity-0', 'scale-0');
+                    }
 
-            const wishlistBadge = document.getElementById('wishlist-badge');
-            if (wishlistBadge) {
-                wishlistBadge.textContent = wishlistCount;
-                wishlistCount > 0
-                    ? wishlistBadge.classList.remove('opacity-0', 'scale-0')
-                    : wishlistBadge.classList.add('opacity-0', 'scale-0');
+                    const wishlistBadge = document.getElementById('wishlist-badge');
+                    if (wishlistBadge) {
+                        wishlistBadge.textContent = wishlistCount;
+                        wishlistCount > 0
+                            ? wishlistBadge.classList.remove('opacity-0', 'scale-0')
+                            : wishlistBadge.classList.add('opacity-0', 'scale-0');
+                    }
+                }).catch(() => { });
             }
-        }).catch(() => {});
-    }
-   }
+        }
 
         const productVariants = {{{ json product.variants }}};
         const initialImages = {{{ json product.images }}};
-        
+
         // State Management
         let currentImages = initialImages;
-        let selectedVariantId = (productVariants.find(v => v.isDefault) || productVariants[0] || {}).id;
+        let selectedVariantId = null;
         let selectedSize = null;
         const isLoggedIn = {{#if user}}true{{else}}false{{/if}};
 
-        // Sync initial visual state
+        // Build unique sizes list from ALL variants on load
         document.addEventListener('DOMContentLoaded', () => {
-            const initialBtn = document.querySelector(`[data-variant-id="${selectedVariantId}"]`);
-            if (initialBtn) {
-                document.querySelectorAll('#color-container button').forEach(b => {
-                    b.classList.remove('ring-black');
-                    b.classList.add('ring-transparent');
+            const allSizes = [];
+            productVariants.forEach(v => {
+                (v.sizes || []).forEach(s => {
+                    if (!allSizes.includes(s)) allSizes.push(s);
                 });
-                initialBtn.classList.add('ring-black');
-                initialBtn.classList.remove('ring-transparent');
+            });
+            const sizeContainer = document.getElementById('size-container');
+            if (sizeContainer) {
+                sizeContainer.innerHTML = allSizes.map(size => `
+                    <button onclick="selectSize(this)"
+                        data-size="${size}"
+                        class="size-btn w-12 h-10 border border-gray-200 rounded-lg text-[11px] font-bold hover:border-black transition-all flex items-center justify-center">
+                        ${size}
+                    </button>
+                `).join('');
             }
         });
 
-        // Dynamic Badge Updates
-        function updateBadges() {
-            axios.get('/user/nav-counts').then(response => {
-                if(response.data.success) {
-                    const cartBadge = document.getElementById('cart-badge');
-                    const wishlistBadge = document.getElementById('wishlist-badge');
-                    
-                    if(cartBadge) {
-                        cartBadge.innerText = response.data.cartCount;
-                        const isEmpty = response.data.cartCount === 0;
-                        cartBadge.classList.toggle('opacity-0', isEmpty);
-                        cartBadge.classList.toggle('scale-0', isEmpty);
-                    }
-                    if(wishlistBadge) {
-                        wishlistBadge.innerText = response.data.wishlistCount;
-                        const isEmpty = response.data.wishlistCount === 0;
-                        wishlistBadge.classList.toggle('opacity-0', isEmpty);
-                        wishlistBadge.classList.toggle('scale-0', isEmpty);
-                    }
-                }
-            }).catch(err => console.error("Error updating badges:", err));
-        }
-
-        // Initialize badges on load
-        document.addEventListener('DOMContentLoaded', updateBadges);
-
+        document.addEventListener('DOMContentLoaded', safeFetchNavCounts);
 
         // Hover Carousel for Similar Products
         document.addEventListener('DOMContentLoaded', () => {
@@ -361,10 +362,8 @@
             cards.forEach(card => {
                 const images = card.querySelectorAll('.carousel-img');
                 if (images.length <= 1) return;
-
                 let intervalId;
                 let currentIndex = 0;
-
                 card.addEventListener('mouseenter', () => {
                     intervalId = setInterval(() => {
                         images[currentIndex].classList.remove('opacity-100');
@@ -374,7 +373,6 @@
                         images[currentIndex].classList.add('opacity-100');
                     }, 1200);
                 });
-
                 card.addEventListener('mouseleave', () => {
                     clearInterval(intervalId);
                     images.forEach((img, idx) => {
@@ -386,20 +384,10 @@
             });
         });
 
-
-        document.addEventListener('DOMContentLoaded', () => {
-    // find default variant button and trigger selectVariant
-    const defaultVariant = productVariants.find(v => v.isDefault) || productVariants[0];
-    if (defaultVariant) {
-        const defaultBtn = document.querySelector(`[data-variant-id="${defaultVariant.id}"]`);
-        if (defaultBtn) selectVariant(defaultVariant.id, defaultBtn);
-    }
-});
-
         function changeImage(index, el) {
             const mainImg = document.getElementById('main-image');
             mainImg.style.opacity = '0.4';
-            
+
             setTimeout(() => {
                 mainImg.src = currentImages[index];
                 mainImg.style.opacity = '1';
@@ -408,56 +396,48 @@
             }, 150);
         }
 
-        function selectVariant(id, el) {
-    const variant = productVariants.find(v => v.id === id);
-    if (!variant) return;
+        // selectVariant — fromSize=true means called internally by selectSize
+        function selectVariant(id, el, fromSize = false) {
+            const variant = productVariants.find(v => v.id === id);
+            if (!variant) return;
 
-    selectedVariantId = id;
-    selectedSize = null;
+            selectedVariantId = id;
 
-    document.querySelectorAll('#color-container button').forEach(btn => {
-        btn.classList.remove('ring-black');
-        btn.classList.add('ring-transparent');
-    });
-    el.classList.add('ring-black');
-    el.classList.remove('ring-transparent');
+            // Color ring highlight (only change ring, preserve available/unavailable)
+            document.querySelectorAll('#color-container button').forEach(btn => {
+                btn.classList.remove('ring-black');
+                if (!btn.classList.contains('unavailable')) btn.classList.add('ring-transparent');
+            });
+            el.classList.add('ring-black');
+            el.classList.remove('ring-transparent');
 
-    // PRICE + OFFER
-    const priceEl    = document.getElementById('product-price');
-    const oldPriceEl = document.getElementById('product-old-price');
-    const badgeEl    = document.getElementById('product-offer-badge');
-
-    if (variant.hasOffer) {
-        priceEl.innerText = `₹${variant.discountedPrice}`;
-        oldPriceEl.innerText = `₹${variant.price}`;
-        oldPriceEl.classList.remove('hidden');
-        badgeEl.classList.remove('hidden');
-    } else {
-        priceEl.innerText = `₹${variant.price}`;
-        oldPriceEl.classList.add('hidden');
-        badgeEl.classList.add('hidden');
-    }
-
-            // SIZES
-            const sizeContainer = document.getElementById('size-container');
-            sizeContainer.innerHTML = variant.sizes.map(size => `
-                <button onclick="selectSize(this)" 
-                    class="size-btn w-12 h-10 border border-gray-200 rounded-lg text-[11px] font-bold hover:border-black transition-all flex items-center justify-center">
-                    ${size}
-                </button>
-            `).join('');
+            // PRICE + OFFER
+            const priceEl = document.getElementById('product-price');
+            const oldPriceEl = document.getElementById('product-old-price');
+            const badgeEl = document.getElementById('product-offer-badge');
+            if (variant.hasOffer) {
+                priceEl.innerText = `₹${variant.discountedPrice}`;
+                oldPriceEl.innerText = `₹${variant.price}`;
+                if (oldPriceEl) oldPriceEl.classList.remove('hidden');
+                if (badgeEl) badgeEl.classList.remove('hidden');
+            } else {
+                priceEl.innerText = `₹${variant.price}`;
+                if (oldPriceEl) oldPriceEl.classList.add('hidden');
+                if (badgeEl) badgeEl.classList.add('hidden');
+            }
 
             // IMAGES
-            currentImages = variant.images;
+            currentImages = variant.images || [];
             const mainImg = document.getElementById('main-image');
-            if (variant.images.length > 0) {
-                mainImg.src = variant.images[0];
+            if (currentImages.length > 0) {
+                mainImg.style.opacity = '0.4';
+                setTimeout(() => { mainImg.src = currentImages[0]; mainImg.style.opacity = '1'; }, 150);
             }
 
             // THUMBNAILS
             const thumbnailContainer = document.getElementById('thumbnail-container');
             if (thumbnailContainer) {
-                thumbnailContainer.innerHTML = variant.images.map((img, index) => `
+                thumbnailContainer.innerHTML = currentImages.map((img, index) => `
                     <button type="button" class="thumbnail ${index === 0 ? 'active' : ''} w-20 h-24 border-2 rounded-lg overflow-hidden flex-shrink-0"
                         onclick="changeImage(${index}, this)">
                         <img src="${img}" class="w-full h-full object-contain mix-blend-multiply">
@@ -467,13 +447,53 @@
         }
 
         function selectSize(el) {
-            selectedSize = el.innerText.trim();
+            selectedSize = el.dataset.size || el.innerText.trim();
+
+            // Highlight selected size button
             document.querySelectorAll('.size-btn').forEach(btn => {
                 btn.classList.remove('bg-black', 'text-white', 'border-black');
-                btn.classList.add('bg-white', 'text-black', 'border-gray-200');
+                btn.classList.add('border-gray-200');
             });
             el.classList.add('bg-black', 'text-white', 'border-black');
-            el.classList.remove('bg-white', 'text-black', 'border-gray-200');
+            el.classList.remove('border-gray-200');
+
+            // Find which variants carry this size
+            const variantsWithSize = productVariants.filter(v =>
+                v.sizes && v.sizes.includes(selectedSize)
+            );
+
+            // Update color swatches: show only available colors for this size
+            const colorBtns = document.querySelectorAll('#color-container button');
+            let firstAvailableBtn = null;
+            let firstAvailableVariant = null;
+
+            colorBtns.forEach(btn => {
+                const vid = btn.dataset.variantId;
+                const isAvailable = variantsWithSize.some(v => v.id === vid);
+                btn.classList.remove('ring-black', 'available', 'unavailable');
+                if (isAvailable) {
+                    btn.classList.add('available', 'ring-transparent');
+                    if (!firstAvailableBtn) {
+                        firstAvailableBtn = btn;
+                        firstAvailableVariant = productVariants.find(v => v.id === vid);
+                    }
+                } else {
+                    btn.classList.add('unavailable', 'ring-transparent');
+                }
+            });
+
+            // Update hint text
+            const hint = document.getElementById('color-hint');
+            if (hint) {
+                hint.textContent = variantsWithSize.length > 0
+                    ? `${variantsWithSize.length} color${variantsWithSize.length > 1 ? 's' : ''} available in this size — select one`
+                    : 'No colors available in this size';
+            }
+
+            // Auto-select first available color variant
+            if (firstAvailableBtn && firstAvailableVariant) {
+                selectVariant(firstAvailableVariant.id, firstAvailableBtn, true /* fromSize */);
+            }
         }
 
         // ZOOM
@@ -498,16 +518,16 @@
         // API OPERATIONS
         async function addToCart(productId, isSimilar = false) {
             if (!isLoggedIn) {
-                showToast("error","Please login to continue");
+                showToast("error", "Please login to continue");
                 return;
             }
 
             try {
                 let data = { productId };
-                
+
                 if (!isSimilar) {
                     if (!selectedSize) {
-                        showToast("error","Please select a size first");
+                        showToast("error", "Please select a size first");
                         return;
                     }
                     data.variantId = selectedVariantId;
@@ -516,61 +536,61 @@
 
                 const response = await axios.post('/users/addCart', data);
                 if (response.data.success) {
-                    showToast("success","Added to Cart Successfully");
+                    showToast("success", "Added to Cart Successfully");
                     safeFetchNavCounts()
-                }else if(response.data.alreadyInCart){
-                    showToast("error", "Already in cart!"); 
-                }  else if (response.data.outOfStock) {
+                } else if (response.data.alreadyInCart) {
+                    showToast("error", "Already in cart!");
+                } else if (response.data.outOfStock) {
                     showToast("error", "Sorry, this item is out of stock!");
-                }else {
-                    showToast(response.data.message || "error","Failed to add to cart");
-                }
-           } catch (error) {
-               console.error("Cart Error:", error);
-               const data = error.response?.data;
-               if (data?.outOfStock) {
-                     showToast("error", "Sorry, this item is out of stock!");
-                } else if (data?.alreadyInCart) {
-                     showToast("error", "Already in cart!");
                 } else {
-                      showToast("error", data?.message || "Something went wrong");
+                    showToast(response.data.message || "error", "Failed to add to cart");
+                }
+            } catch (error) {
+                console.error("Cart Error:", error);
+                const data = error.response?.data;
+                if (data?.outOfStock) {
+                    showToast("error", "Sorry, this item is out of stock!");
+                } else if (data?.alreadyInCart) {
+                    showToast("error", "Already in cart!");
+                } else {
+                    showToast("error", data?.message || "Something went wrong");
                 }
             }
         }
 
-        async function toggleWishlist(productId, btn) {
+        async function toggleWishlist(productId, variantId, btn) {
             if (!isLoggedIn) {
-                showToast("error","Please login to continue");
+                showToast("error", "Please login to continue");
                 return;
             }
 
             try {
-                const response = await axios.post('/users/toggleWishlist', { productId });
+                const response = await axios.post('/users/toggleWishlist', { productId, variantId });
                 if (response.data.success) {
                     const icon = btn.querySelector('.material-symbols-outlined');
                     if (response.data.isWishlisted) {
                         icon.classList.add('icon-fill', 'text-red-500');
-                        showToast("success","Added to Wishlist");
+                        showToast("success", "Added to Wishlist");
                     } else {
                         icon.classList.remove('icon-fill', 'text-red-500');
-                        showToast("success","Removed from Wishlist");
+                        showToast("success", "Removed from Wishlist");
                     }
                     safeFetchNavCounts()
                 }
             } catch (error) {
                 console.error("Wishlist Error:", error);
-                showToast("error","Failed to update wishlist");
+                showToast("error", "Failed to update wishlist");
             }
         }
 
         async function buyNow(productId) {
             if (!isLoggedIn) {
-                showToast("error","Please login to continue");
+                showToast("error", "Please login to continue");
                 return;
             }
 
             if (!selectedSize) {
-                showToast("error","Please select a size first");
+                showToast("error", "Please select a size first");
                 return;
             }
             await addToCart(productId);

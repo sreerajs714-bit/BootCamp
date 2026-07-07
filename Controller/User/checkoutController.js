@@ -117,8 +117,10 @@ let offerSavings = 0;
                         ? pricing.offer.discountValue
                         : Math.round((pricing.discount / originalPrice) * 100)
                     : 0,
-                // Use variant images if available, fallback to first variant
-                images: variant?.images || product.variants[0]?.images || [],
+                images: variant?.images
+                       || product.variants?.find(v => v.isDefault && v.isActive)?.images
+                       || product.variants?.[0]?.images
+                       || [],
             };
         });
 
@@ -224,9 +226,9 @@ export const placeOrder = async (req, res) => {
             const product = item.productId;
             if (!product || product.isDeleted) continue;
 
-            const variant = product.variants.find(
-                v => v._id.toString() === item.variantId.toString()
-            );
+        const variant = product.variants.find(
+        v => v._id.toString() === item.variantId.toString()   // ← cart items use variantId, not variant
+        );                                                        
 
             if (!variant) {
                 return res.status(400).json({ success: false, message: `${product.name} variant not found` });
@@ -247,6 +249,7 @@ export const placeOrder = async (req, res) => {
 
             orderItems.push({
                 product: product._id,
+                variant: variant._id, 
                 quantity: item.quantity,
                 price: finalPrice,
                 originalPrice,
@@ -424,20 +427,28 @@ export const loadOrderSuccess = async (req, res) => {
 
         const currentStep = statusStepMap[order.orderStatus?.toLowerCase()] ?? 0;
 
-    const offerDiscount = order.items.reduce((acc, item) => {
-    const product = item.product;
-    const variant = product?.variants?.[0];
+        // ── Resolve the correct variant per item once, reuse everywhere below ──
+        const getVariant = (item) => {
+            const product = item.product;
+            return (
+                product?.variants?.find(v => v._id.toString() === item.variant?.toString()) ||
+                product?.variants?.find(v => v.isDefault && v.isActive) ||
+                product?.variants?.find(v => v.isActive) ||
+                product?.variants?.[0]
+            );
+        };
 
-    const mrp = variant?.price ?? 0;          // ← was: variant?.mrp ?? item.mrp ?? 0
-    const sellingPrice = item.price ?? 0;     // ← was: item.price ?? variant?.sellingPrice ?? 0
+        const offerDiscount = order.items.reduce((acc, item) => {
+            const variant = getVariant(item);
 
-    const discountPerUnit = Math.max(0, mrp - sellingPrice);
-    return acc + discountPerUnit * item.quantity;
-    }, 0);
+            const mrp = variant?.price ?? 0;
+            const sellingPrice = item.price ?? 0;
+
+            const discountPerUnit = Math.max(0, mrp - sellingPrice);
+            return acc + discountPerUnit * item.quantity;
+        }, 0);
 
         const couponDiscount = order.couponDiscount ?? 0;
-
-        
         const totalDiscount = offerDiscount + couponDiscount;
 
         const formattedOrder = {
@@ -451,26 +462,22 @@ export const loadOrderSuccess = async (req, res) => {
                 progressPercent: (currentStep / 3) * 100
             },
 
-            items: order.items.map(item => ({
-                name: item.product?.productName || item.product?.name || 'Product',
-                variant: `Qty: ${item.quantity}`,
-                price: `₹${item.price}`,
-                imageUrl: item.product?.variants?.[0]?.images?.[0] || '/images/product-placeholder.jpg'
-            })),
+            items: order.items.map(item => {
+                const variant = getVariant(item);
+                return {
+                    name: item.product?.productName || item.product?.name || 'Product',
+                    variant: `Qty: ${item.quantity}`,
+                    price: `₹${item.price}`,
+                    imageUrl: variant?.images?.[0] || '/images/product-placeholder.jpg'
+                };
+            }),
 
             subtotal: `₹${order.subtotal || order.totalAmount}`,
             shippingCost: 'Free',
-
-            
             offerDiscount: offerDiscount > 0 ? `₹${offerDiscount}` : null,
-
-            
             couponCode: order.couponCode || null,
             couponDiscount: couponDiscount > 0 ? `₹${couponDiscount}` : null,
-
-            
             totalDiscount: totalDiscount > 0 ? `₹${totalDiscount}` : null,
-
             total: `₹${order.totalAmount}`,
             paymentMethod: order.paymentMethod?.toUpperCase()
         };
@@ -535,6 +542,7 @@ export const createRazorpayOrder = async (req, res) => {
 
             orderItems.push({
                 product: product._id,
+                variant: variant._id,
                 quantity: item.quantity,
                 price: finalPrice,
                 originalPrice,
@@ -665,10 +673,8 @@ export const verifyRazorpayPayment = async (req, res) => {
                     continue;
                 }
 
-                // Find the variant that contains the ordered size
-                const variant = product.variants.find(pv =>
-                    pv.sizes?.some(s => s.toString() === item.size?.toString())
-                );
+                const variant = product.variants.find(v => v._id.toString() === item.variant?.toString())
+                 || product.variants.find(pv => pv.sizes?.some(s => s.toString() === item.size?.toString()));
 
                 if (variant) {
                     variant.stock = Math.max(0, (variant.stock || 0) - item.quantity);

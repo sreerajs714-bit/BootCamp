@@ -10,6 +10,9 @@ const orderSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: "Product"
         },
+         variant: {                              // ← ADD THIS
+        type: mongoose.Schema.Types.ObjectId
+        },
         quantity: Number,
         price: Number,
         size: String,

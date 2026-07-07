@@ -71,6 +71,13 @@ async function getWishlistedIds(req) {
     return (user?.wishlist || []).map(id => String(id));
 }
 
+function buildPages(totalPages, page) {
+    return Array.from({ length: totalPages }, (_, i) => ({
+        number: i + 1,
+        isCurrent: i + 1 === page
+    }));
+}
+
 async function getActiveMeta() {
     const [activeCategories, activeBrands] = await Promise.all([
         Category.find({ isActive: true, isDeleted: false }).select("_id name").lean(),
@@ -79,47 +86,166 @@ async function getActiveMeta() {
     return { activeCategories, activeBrands };
 }
 
+const PRODUCTS_PER_PAGE = 8;
+
+async function getPaginatedProducts(baseMatch, query, { categoryName } = {}) {
+    const page   = Math.max(1, parseInt(query.page) || 1);
+    const search = (query.search || '').trim();
+    const sort   = query.sort || 'newest';
+    const minPrice = query.minPrice ? Number(query.minPrice) : null;
+    const maxPrice = query.maxPrice ? Number(query.maxPrice) : null;
+
+    const { activeCategories, activeBrands } = await getActiveMeta();
+    const activeCategoryIds = activeCategories.map(c => c._id);
+    const activeBrandIds    = activeBrands.map(b => b._id);
+
+    // Restrict to a specific category by name (used by Men's/Women's pages).
+    // Defensive against both `name` and `categoryName` field variants.
+    const allowedCategoryIds = categoryName
+        ? activeCategories
+            .filter(c => (c.name || c.categoryName || '').toLowerCase() === categoryName.toLowerCase())
+            .map(c => c._id)
+        : activeCategoryIds;
+
+    const selectedCategoryIds = query.category
+        ? query.category.split(',').filter(Boolean)
+        : allowedCategoryIds.map(String);
+    const selectedBrandIds = query.brand
+        ? query.brand.split(',').filter(Boolean)
+        : activeBrandIds.map(String);
+
+    const match = {
+        ...baseMatch,
+        status: "active",
+        isDeleted: false,
+        category: { $in: allowedCategoryIds.filter(id => selectedCategoryIds.includes(String(id))) },
+        brand:    { $in: activeBrandIds.filter(id => selectedBrandIds.includes(String(id))) },
+        ...(search ? { productName: new RegExp(search, 'i') } : {})
+    };
+
+    const sortStage =
+        sort === 'price-asc'  ? { displayPrice: 1 } :
+        sort === 'price-desc' ? { displayPrice: -1 } :
+        sort === 'name-asc'   ? { productName: 1 } :
+        sort === 'name-desc'  ? { productName: -1 } :
+        sort === 'brand-asc'  ? { brandName: 1 } :
+        sort === 'brand-desc' ? { brandName: -1 } :
+                                 { createdAt: -1 }; // "newest" / default
+
+    const pipeline = [
+        { $match: match },
+        {
+            $addFields: {
+                displayVariant: {
+                    $let: {
+                        vars: {
+                            defaultActive: {
+                                $first: {
+                                    $filter: {
+                                        input: "$variants",
+                                        as: "v",
+                                        cond: { $and: ["$$v.isDefault", "$$v.isActive"] }
+                                    }
+                                }
+                            },
+                            anyActive: {
+                                $first: {
+                                    $filter: { input: "$variants", as: "v", cond: "$$v.isActive" }
+                                }
+                            },
+                            first: { $arrayElemAt: ["$variants", 0] }
+                        },
+                        in: {
+                            $ifNull: ["$$defaultActive", { $ifNull: ["$$anyActive", "$$first"] }]
+                        }
+                    }
+                }
+            }
+        },
+        {
+            $lookup: {
+                from: 'brands',
+                localField: 'brand',
+                foreignField: '_id',
+                as: 'brandDoc'
+            }
+        },
+        {
+            $addFields: {
+                displayPrice: "$displayVariant.price",
+                brandName: { $first: "$brandDoc.name" }
+            }
+        },
+        ...(minPrice != null || maxPrice != null
+            ? [{
+                $match: {
+                    displayPrice: {
+                        ...(minPrice != null ? { $gte: minPrice } : {}),
+                        ...(maxPrice != null ? { $lte: maxPrice } : {})
+                    }
+                }
+            }]
+            : []),
+        { $sort: sortStage },
+        {
+            $facet: {
+                data: [
+                    { $skip: (page - 1) * PRODUCTS_PER_PAGE },
+                    { $limit: PRODUCTS_PER_PAGE }
+                ],
+                totalCount: [{ $count: "count" }]
+            }
+        }
+    ];
+
+    const [result] = await Product.aggregate(pipeline);
+    const rawProducts = result.data;
+    const totalCount   = result.totalCount[0]?.count || 0;
+    const totalPages   = Math.max(1, Math.ceil(totalCount / PRODUCTS_PER_PAGE));
+
+    // Aggregation doesn't populate refs — do it in one extra step on the page slice only.
+    const products = await Product.populate(rawProducts, [
+        { path: "brand",    select: "name" },
+        { path: "category", select: "name" }
+    ]);
+
+    return {
+        products, activeCategories, activeBrands,
+        page: Math.min(page, totalPages), totalPages, totalCount,
+        search, sort, minPrice, maxPrice
+    };
+}
+
 export const loadAllProducts = async (req, res) => {
     try {
-        const { activeCategories, activeBrands } = await getActiveMeta();
-        const activeCategoryIds = activeCategories.map(c => c._id);
-        const activeBrandIds    = activeBrands.map(b => b._id);
-
-      
-        const searchQuery = req.query.search?.trim() || '';
-        const searchFilter = searchQuery
-            ? { productName: new RegExp(searchQuery, 'i') }
-            : {};
-
-        const [products, wishlistedIds, activeOffers] = await Promise.all([
-            Product.find({
-                status: "active",
-                isDeleted: false,
-                category: { $in: activeCategoryIds },
-                brand:    { $in: activeBrandIds },
-                ...searchFilter,              
-            })
-                .sort({ createdAt: -1 }) 
-                .populate("brand",    "name")
-                .populate("category", "name")
-                .lean(),
-
-            getWishlistedIds(req),
-            getActiveOffers(),
-        ]);
+        const [{ products, activeCategories, activeBrands, page, totalPages, totalCount, search, sort, minPrice, maxPrice }, wishlistedIds, activeOffers] =
+            await Promise.all([
+                getPaginatedProducts({}, req.query),
+                getWishlistedIds(req),
+                getActiveOffers(),
+            ]);
 
         const shaped = products.map(p => shapeProduct(p, wishlistedIds, activeOffers));
+
+        const pages = Array.from({ length: totalPages }, (_, i) => ({
+            number: i + 1,
+            isCurrent: i + 1 === page
+        }));
 
         res.render("users/allProduct", {
             breadcrumbs: [
                 { label: 'Home', url: '/' },
                 { label: 'All Products' }
             ],
-            products:   shaped,
+            products: shaped,
             categories: activeCategories,
-            brands:     activeBrands,
-            user:       req.session?.user || null,
-            searchQuery,                       
+            brands: activeBrands,
+            user: req.session?.user || null,
+            searchQuery: search,
+            sort, minPrice, maxPrice,
+            currentPage: page, totalPages, totalCount, pages,
+            hasPrev: page > 1, hasNext: page < totalPages,
+            prevPage: page - 1, nextPage: page + 1
         });
 
     } catch (error) {
@@ -130,32 +256,14 @@ export const loadAllProducts = async (req, res) => {
 
 export const loadMens = async (req, res) => {
     try {
-        const { activeCategories, activeBrands } = await getActiveMeta();
-        const activeCategoryIds = activeCategories.map(c => c._id.toString());
-        const activeBrandIds    = activeBrands.map(b => b._id.toString());
+        const [{ products, activeCategories, activeBrands, page, totalPages, totalCount, search, sort, minPrice, maxPrice }, wishlistedIds, activeOffers] =
+            await Promise.all([
+                getPaginatedProducts({}, req.query, { categoryName: 'men' }),
+                getWishlistedIds(req),
+                getActiveOffers(),
+            ]);
 
-        const [products, wishlistedIds, activeOffers] = await Promise.all([
-            Product.find({
-                status: "active",
-                isDeleted: false,
-                category: { $in: activeCategoryIds },
-                brand:    { $in: activeBrandIds }
-            })
-                .sort({ createdAt: -1 }) 
-                .populate("brand",    "name brandName")
-                .populate("category", "name categoryName")
-                .lean(),
-
-            getWishlistedIds(req),
-            getActiveOffers(),
-        ]);
-
-        const mensProducts = products.filter(p => {
-            const name = p.category?.name || p.category?.categoryName;
-            return name?.toLowerCase() === "men";
-        });
-
-        const shaped = mensProducts.map(p => shapeProduct(p, wishlistedIds, activeOffers));
+        const shaped = products.map(p => shapeProduct(p, wishlistedIds, activeOffers));
 
         res.render("users/mensCollection", {
             breadcrumbs: [
@@ -163,8 +271,16 @@ export const loadMens = async (req, res) => {
                 { label: 'Mens' }
             ],
             products: shaped,
-            count:    shaped.length,
-            user:     req.session?.user || null
+            categories: activeCategories,
+            brands: activeBrands,
+            count: totalCount,
+            searchQuery: search,
+            sort, minPrice, maxPrice,
+            currentPage: page, totalPages, totalCount,
+            pages: buildPages(totalPages, page),
+            hasPrev: page > 1, hasNext: page < totalPages,
+            prevPage: page - 1, nextPage: page + 1,
+            user: req.session?.user || null
         });
 
     } catch (error) {
@@ -175,32 +291,14 @@ export const loadMens = async (req, res) => {
 
 export const loadWomens = async (req, res) => {
     try {
-        const { activeCategories, activeBrands } = await getActiveMeta();
-        const activeCategoryIds = activeCategories.map(c => c._id.toString());
-        const activeBrandIds    = activeBrands.map(b => b._id.toString());
+        const [{ products, activeCategories, activeBrands, page, totalPages, totalCount, search, sort, minPrice, maxPrice }, wishlistedIds, activeOffers] =
+            await Promise.all([
+                getPaginatedProducts({}, req.query, { categoryName: 'women' }),
+                getWishlistedIds(req),
+                getActiveOffers(),
+            ]);
 
-        const [products, wishlistedIds, activeOffers] = await Promise.all([
-            Product.find({
-                status: "active",
-                isDeleted: false,
-                category: { $in: activeCategoryIds },
-                brand:    { $in: activeBrandIds }
-            })
-                .sort({ createdAt: -1 }) 
-                .populate("brand",    "name brandName")
-                .populate("category", "name categoryName")
-                .lean(),
-
-            getWishlistedIds(req),
-            getActiveOffers(),
-        ]);
-
-        const womensProducts = products.filter(p => {
-            const name = p.category?.name || p.category?.categoryName;
-            return name?.toLowerCase() === "women";
-        });
-
-        const shaped = womensProducts.map(p => shapeProduct(p, wishlistedIds, activeOffers));
+        const shaped = products.map(p => shapeProduct(p, wishlistedIds, activeOffers));
 
         res.render("users/womensCollection", {
             breadcrumbs: [
@@ -208,8 +306,16 @@ export const loadWomens = async (req, res) => {
                 { label: 'Womens' }
             ],
             products: shaped,
-            count:    shaped.length,
-            user:     req.session?.user || null
+            categories: activeCategories,
+            brands: activeBrands,
+            count: totalCount,
+            searchQuery: search,
+            sort, minPrice, maxPrice,
+            currentPage: page, totalPages, totalCount,
+            pages: buildPages(totalPages, page),
+            hasPrev: page > 1, hasNext: page < totalPages,
+            prevPage: page - 1, nextPage: page + 1,
+            user: req.session?.user || null
         });
 
     } catch (error) {
@@ -220,25 +326,12 @@ export const loadWomens = async (req, res) => {
 
 export const loadLimitedEdition = async (req, res) => {
     try {
-        const { activeCategories, activeBrands } = await getActiveMeta();
-        const activeCategoryIds = activeCategories.map(c => c._id.toString());
-        const activeBrandIds    = activeBrands.map(b => b._id.toString());
-
-        const [products, wishlistedIds, activeOffers] = await Promise.all([
-            Product.find({
-                status:          "active",
-                isDeleted:       false,
-                isLimitedEdition: true,
-                category: { $in: activeCategoryIds },
-                brand:    { $in: activeBrandIds }
-            })
-                .populate("brand",    "name brandName")
-                .populate("category", "name categoryName")
-                .lean(),
-
-            getWishlistedIds(req),
-            getActiveOffers(),
-        ]);
+        const [{ products, activeCategories, activeBrands, page, totalPages, totalCount, search, sort, minPrice, maxPrice }, wishlistedIds, activeOffers] =
+            await Promise.all([
+                getPaginatedProducts({ isLimitedEdition: true }, req.query),
+                getWishlistedIds(req),
+                getActiveOffers(),
+            ]);
 
         const shaped = products.map(p => shapeProduct(p, wishlistedIds, activeOffers));
 
@@ -248,8 +341,16 @@ export const loadLimitedEdition = async (req, res) => {
                 { label: 'Limited Edition' }
             ],
             products: shaped,
-            count:    shaped.length,
-            user:     req.session?.user || null
+            categories: activeCategories,
+            brands: activeBrands,
+            count: totalCount,
+            searchQuery: search,
+            sort, minPrice, maxPrice,
+            currentPage: page, totalPages, totalCount,
+            pages: buildPages(totalPages, page),
+            hasPrev: page > 1, hasNext: page < totalPages,
+            prevPage: page - 1, nextPage: page + 1,
+            user: req.session?.user || null
         });
 
     } catch (error) {

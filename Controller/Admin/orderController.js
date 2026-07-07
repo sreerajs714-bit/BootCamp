@@ -53,7 +53,7 @@ export const loadOrders = async (req, res) => {
         const safePage      = Math.min(page, totalPages);
         const safeSkip      = (safePage - 1) * ORDERS_PER_PAGE;
 
-        const orders = await Order.find(filter)
+       const orders = await Order.find(filter)
             .populate('user', 'username email')
             .populate('items.product', 'productName variants')
             .sort({ createdAt: -1 })
@@ -61,41 +61,57 @@ export const loadOrders = async (req, res) => {
             .limit(ORDERS_PER_PAGE)
             .lean();
 
+        const shapedOrders = orders.map(o => ({
+            ...o,
+            items: o.items.map(item => {
+                const product = item.product;
+               const variant = product.variants.find(v => v._id.toString() === item.variant?.toString())
+               || product.variants.find(pv => pv.sizes?.some(s => s.toString() === item.size?.toString()));
+
+                return {
+                    ...item,
+                    product: {
+                        ...product,
+                        variants: [variant || { images: [] }]
+                    }
+                };
+            })
+        }));
+
         const pages = Array.from({ length: totalPages }, (_, i) => ({
             number:    i + 1,
             isCurrent: i + 1 === safePage
         }));
 
-        // FIX: return JSON for AJAX requests
-       if (isAjax) {
-        return res.json({
-        success: true,
-        orders: orders.map(o => ({
-            _id: o._id,
-            user: { username: o.user?.username || '—' },
-            items: o.items.map(i => ({
-                product: {
-                    productName: i.product?.productName || '—',
-                    variants: i.product?.variants || [{ images: [] }]
-                }
-            })),
-            createdAt: o.createdAt,
-            totalAmount: o.totalAmount,
-            paymentMethod: o.paymentMethod,
-            orderStatus: o.orderStatus
-        })),
-        totalFiltered,
-        totalPages,
-        currentPage: safePage,
-        hasPrev:  safePage > 1,
-        hasNext:  safePage < totalPages,
-        prevPage: safePage - 1,
-        nextPage: safePage + 1
-    });
-}
+        if (isAjax) {
+            return res.json({
+                success: true,
+                orders: shapedOrders.map(o => ({
+                    _id: o._id,
+                    user: { username: o.user?.username || '—' },
+                    items: o.items.map(i => ({
+                        product: {
+                            productName: i.product?.productName || '—',
+                            variants: i.product?.variants || [{ images: [] }]
+                        }
+                    })),
+                    createdAt: o.createdAt,
+                    totalAmount: o.totalAmount,
+                    paymentMethod: o.paymentMethod,
+                    orderStatus: o.orderStatus
+                })),
+                totalFiltered,
+                totalPages,
+                currentPage: safePage,
+                hasPrev:  safePage > 1,
+                hasNext:  safePage < totalPages,
+                prevPage: safePage - 1,
+                nextPage: safePage + 1
+            });
+        }
 
         return res.render('admin/orderManagement', {
-            orders,
+            orders: shapedOrders,
             totalOrdersCount,
             pendingOrdersCount,
             completedOrdersCount,
@@ -131,7 +147,24 @@ export const loadOrderDetail = async (req, res) => {
             return res.status(404).redirect("/admin/orders");
         }
 
-        res.render("admin/orderDetail", { order });
+        const shapedOrder = {
+            ...order,
+            items: order.items.map(item => {
+                const product = item.product;
+                const variant = product.variants.find(v => v._id.toString() === item.variant?.toString())
+                || product.variants.find(pv => pv.sizes?.some(s => s.toString() === item.size?.toString()));
+
+                return {
+                    ...item,
+                    product: {
+                        ...product,
+                        variants: [variant || { images: [] }]
+                    }
+                };
+            })
+        };
+
+        res.render("admin/orderDetail", { order: shapedOrder });
 
     } catch (error) {
         console.error("loadOrderDetail error:", error);
