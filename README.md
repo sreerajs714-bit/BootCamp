@@ -27,18 +27,4 @@ Admin
 * User management (block/unblock)
 * Dashboard with earnings, order status breakdown, top categories, and best-selling products
 
-
-Tech Stack
-
-Layer             Technology
-
-Runtime           Node.js
-Framework         Express 5
-Database          MongoDB with Mongoose (aggregation pipelines for catalog search/sort/filter/pagination)
-Templating        Handlebars (hbs)
-Auth              express-session, Passport (Google OAuth), bcrypt
-Payments          Razorpay
-Media             storageCloudinary (via multer-storage-cloudinary)
-Email             Nodemailer
-Reports/exports   ExcelJS, PDFKit
   
