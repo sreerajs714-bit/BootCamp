@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management | Admin | BOOTCAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f4f4f4;
+            color: #111827;
+            overflow: hidden;
+        }
+
+        .sidebar-item {
+            transition: all 0.18s ease;
+        }
+
+        .sidebar-item:hover:not(.active) {
+            background-color: #f9fafb;
+        }
+
+        .sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-item.active .material-symbols-outlined {
+            color: #fff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        .user-row {
+            transition: background 0.12s;
+        }
+
+        .user-row:hover {
+            background: rgba(249, 250, 251, 0.8);
+        }
+
+        .user-row.blocked-row {
+            background: #fafafa;
+            opacity: 0.75;
+        }
+
+        .filter-btn {
+            transition: all 0.15s ease;
+        }
+
+        .filter-btn.active {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .sort-select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 28px !important;
+            cursor: pointer;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            transition: all 0.2s;
+        }
+
+        .status-badge.active {
+            background-color: #ecfdf5;
+            color: #10b981;
+        }
+
+        .status-badge.blocked {
+            background-color: #000;
+            color: #fff;
+        }
+
+        .custom-dropdown {
+            position: relative;
+            min-width: 150px;
+        }
+
+        .dropdown-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fdfdfd;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-toggle:hover {
+            border-color: #000;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .dropdown-toggle.active {
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 6px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background: #f9fafb;
+            color: #000;
+        }
+
+        .dropdown-item.selected {
+            background: #000;
+            color: #fff;
+        }
+
+        .filter-label {
+            position: absolute;
+            top: -7px;
+            left: 12px;
+            background: white;
+            padding: 0 6px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            z-index: 10;
+        }
+
+        .modal-box {
+            animation: slideUp 0.2s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .page-btn {
+            transition: all 0.12s;
+        }
+
+        .page-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .page-btn.current {
+            background: #000;
+            color: #fff;
+        }
+
+        .btn-confirm-danger:hover {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-confirm-success:hover {
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased h-screen flex">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+        <div class="h-24 flex flex-col justify-center px-8 border-b border-gray-100">
+            <h1 class="font-sans font-black text-2xl tracking-tight uppercase text-black">BOOTCAMP</h1>
+            <span class="text-[10px] font-bold tracking-widest text-emerald-500 mt-1">SYSTEM ADMIN</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <a href="/admin/dashboard"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard
+            </a>
+            <a href="/admin/productManagement"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">sports_soccer</span>Products
+            </a>
+            <a href="/admin/category"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">category</span>Categories
+            </a>
+            <a href="/admin/orders"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">shopping_bag</span>Orders
+            </a>
+            <a href="/admin/offers"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">local_offer</span>Offers
+            </a>
+            <a href="/admin/coupons"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">confirmation_number</span>Coupons
+            </a>
+            <a href="/admin/usermanagement"
+                class="sidebar-item active flex items-center px-4 py-3 text-[13px] font-bold uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">group</span>Users
+            </a>
+            <a href="/admin/returns"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">assignment_return</span>Returns
+            </a>
+            <a href="/admin/brand"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">sell</span>Brand
+            </a>
+        </nav>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-[#f8f9fa]">
+
+        <!-- Header -->
+        <header
+            class="h-[88px] bg-white border-b border-gray-200 flex items-center justify-between px-10 flex-shrink-0 z-10">
+            <div>
+                <h2 class="font-sans font-black text-[17px] tracking-tight uppercase text-black">User Management</h2>
+                <p class="text-[11px] text-gray-400 font-medium mt-0.5">Manage and monitor all registered users</p>
+            </div>
+            <div class="relative w-[360px]">
+    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[19px] pointer-events-none">search</span>
+    <input type="text" id="searchInput" value="{{filters.search}}" placeholder="Search by name or email..."
+        class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-11 pr-10 text-[13px] font-medium text-gray-700 outline-none placeholder-gray-400 focus:bg-white focus:border-gray-300 transition-colors">
+    <button id="clearSearch" onclick="clearSearch()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 {{#unless filters.search}}hidden{{/unless}}">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+    </button>
+      </div>
+        </header>
+
+        <!-- Body -->
+        <div class="flex-1 overflow-y-auto p-8">
+
+            <!-- Stats -->
+            <div class="grid grid-cols-3 gap-5 mb-7">
+                <div
+                    class="bg-white rounded-2xl p-7 border border-gray-100 flex items-center justify-between relative overflow-hidden">
+                    <div class="absolute bottom-0 left-0 right-0 h-[3px] bg-black rounded-b-2xl"></div>
+                    <div>
+                        <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center mb-3">
+                            <span class="material-symbols-outlined text-gray-600 text-[20px]">group</span>
+                        </div>
+                        <div id="totalAllCount" class="text-[36px] font-black text-black tracking-tight leading-none">{{stats.totalAll}}
+                        </div>
+                    </div>
+                    <div class="text-[10px] font-bold tracking-[0.15em] text-gray-300 uppercase self-start mt-1">
+                        Total<br>Users</div>
+                </div>
+
+                <div
+                    class="bg-white rounded-2xl p-7 border border-gray-100 flex items-center justify-between relative overflow-hidden">
+                    <div>
+                        <div class="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center mb-3">
+                            <span class="material-symbols-outlined text-emerald-500 text-[20px]">person</span>
+                        </div>
+                        <div id="totalActiveCount" class="text-[36px] font-black text-black tracking-tight leading-none">{{stats.totalActive}}
+                        </div>
+                        <div class="flex items-center gap-1.5 mt-2">
+                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-[11px] font-bold text-emerald-500">Active users</span>
+                        </div>
+                    </div>
+                    <div class="text-[10px] font-bold tracking-[0.15em] text-gray-300 uppercase self-start mt-1">
+                        Active<br>Users</div>
+                </div>
+
+                <div
+                    class="bg-white rounded-2xl p-7 border border-gray-100 flex items-center justify-between relative overflow-hidden">
+                    <div>
+                        <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center mb-3">
+                            <span class="material-symbols-outlined text-red-400 text-[20px]">block</span>
+                        </div>
+                        <div  id="totalBlockedCount" class="text-[36px] font-black text-black tracking-tight leading-none">
+                            {{stats.totalBlocked}}</div>
+                        <div class="text-[11px] font-bold text-red-400 mt-2">Blocked users</div>
+                    </div>
+                    <div class="text-[10px] font-bold tracking-[0.15em] text-gray-300 uppercase self-start mt-1">
+                        Blocked<br>Users</div>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="bg-white rounded-2xl border border-gray-100 overflow-hidden">
+
+                <!-- Controls -->
+                <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between gap-4 flex-wrap">
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-[15px] font-black text-black">User Directory</h3>
+                        <span
+                            id="filteredCountBadge" class="text-[10px] font-bold tracking-widest text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full uppercase">
+                            {{pagination.totalFiltered}} users
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-3 flex-wrap">
+
+                    <!-- Filter Dropdown -->
+                    <div class="custom-dropdown min-w-[150px]">
+                        <span class="filter-label">Filter</span>
+                        <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                            <span id="filterSelectedLabel" class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                                {{#if filters.isAll}}All Status{{else if filters.isActive}}Active{{else if filters.isBlocked}}Blocked{{else}}All Status{{/if}}
+                            </span>
+                            <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+                        </div>
+                        <div id="filterMenu" class="dropdown-menu">
+                           <div class="dropdown-item {{#if filters.isAll}}selected{{/if}}" onclick="setFilter('all', 'All Status')">All Status</div>
+                           <div class="dropdown-item {{#if filters.isActive}}selected{{/if}}" onclick="setFilter('active', 'Active')">Active</div>
+                           <div class="dropdown-item {{#if filters.isBlocked}}selected{{/if}}" onclick="setFilter('blocked', 'Blocked')">Blocked</div>
+                        </div>
+                    </div>
+
+                    <!-- Sort Dropdown -->
+                    <div class="custom-dropdown min-w-[160px]">
+                        <span class="filter-label">Sort</span>
+                        <!-- Sort Dropdown — change this span -->
+                        <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                            <span id="sortSelectedLabel" class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                            {{#if (eq filters.sort 'default')}}Default{{else if (eq filters.sort 'date-desc')}}Newest first{{else if (eq filters.sort 'date-asc')}}Oldest first{{else}}Default{{/if}}
+                            </span>
+                             <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+                        </div>
+                        <div id="sortMenu" class="dropdown-menu">
+                            <div class="dropdown-item {{#if (eq filters.sort 'default')}}selected{{/if}}" onclick="setSort('default', 'Default')">Default</div>
+                            <div class="dropdown-item {{#if (eq filters.sort 'date-desc')}}selected{{/if}}" onclick="setSort('date-desc', 'Newest first')">Newest first</div>
+                            <div class="dropdown-item {{#if (eq filters.sort 'date-asc')}}selected{{/if}}" onclick="setSort('date-asc', 'Oldest first')">Oldest first</div>
+                        </div>
+                    </div>
+
+                    <form id="dropdownForm" method="GET" action="/admin/usermanagement" class="hidden">
+                        <input type="hidden" name="filter" id="hiddenFilter" value="{{filters.filter}}">
+                        <input type="hidden" name="sort"   id="hiddenSort"   value="{{filters.sort}}">
+                        <input type="hidden" name="search" value="{{filters.search}}">
+                    </form>
+                </div>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr class="bg-[#f9fafb]">
+                                <th
+                                    class="py-3.5 px-8 text-[9px] font-bold tracking-[0.18em] text-gray-400 uppercase w-16">
+                                    Sl No</th>
+                                <th class="py-3.5 px-6 text-[9px] font-bold tracking-[0.18em] text-gray-400 uppercase">
+                                    User</th>
+                                <th class="py-3.5 px-6 text-[9px] font-bold tracking-[0.18em] text-gray-400 uppercase">
+                                    User ID</th>
+                                <th class="py-3.5 px-6 text-[9px] font-bold tracking-[0.18em] text-gray-400 uppercase">
+                                    Status</th>
+                                <th class="py-3.5 px-6 text-[9px] font-bold tracking-[0.18em] text-gray-400 uppercase">
+                                    Joined At</th>
+                                <th
+                                    class="py-3.5 px-8 text-[9px] font-bold tracking-[0.18em] text-gray-400 uppercase text-right">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody" class="divide-y divide-gray-100">
+                            {{#each users}}
+                            <tr class="user-row {{#if isBlocked}}blocked-row{{/if}} group">
+                                <td class="py-4 px-8 text-[12px] font-medium text-gray-300">{{slNo}}</td>
+                                <td class="py-4 px-6">
+                                    <div class="flex items-center gap-3.5">
+                                        <div
+                                            class="w-10 h-10 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                                            {{#if profilePhoto}}
+                                            <img src="{{profilePhoto}}" alt="{{username}}"
+                                                class="w-full h-full object-cover {{#if isBlocked}}grayscale{{/if}}">
+                                            {{else}}
+                                            <span class="text-[12px] font-black text-gray-500">{{initials}}</span>
+                                            {{/if}}
+                                        </div>
+                                        <div>
+                                            <div class="text-[13px] font-bold text-black">{{username}}</div>
+                                            <div class="text-[11px] text-gray-400 mt-0.5">{{email}}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="py-4 px-6">
+                                    <span
+                                        class="px-2.5 py-1 bg-gray-50 text-gray-400 rounded-md text-[11px] font-medium border border-gray-100">{{shortId}}</span>
+                                </td>
+                                <td class="py-4 px-6">
+                                    {{#if isBlocked}}
+                                    <span class="status-badge blocked">Blocked</span>
+                                    {{else}}
+                                    <span class="status-badge active">Active</span>
+                                    {{/if}}
+                                </td>
+                                <td class="py-4 px-6">
+                                    <div class="text-[13px] font-bold text-black">{{dateLabel}}</div>
+                                    <div class="text-[10px] text-gray-400 font-bold tracking-wider mt-1 uppercase">
+                                        {{timeLabel}}</div>
+                                </td>
+                                <td class="py-4 px-8 text-right">
+                                    <div class="flex items-center justify-end gap-2.5">
+                                        {{#if isBlocked}}
+                                        <button onclick="openModal('{{_id}}', 'unblock', '{{username}}', '{{email}}')"
+                                            class="w-8 h-8 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-black transition-colors"
+                                            title="Unblock user">
+                                            <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                                        </button>
+                                        {{else}}
+                                        <button onclick="openModal('{{_id}}', 'block', '{{username}}', '{{email}}')"
+                                            class="w-8 h-8 flex items-center justify-center rounded-md bg-red-50 text-red-400 hover:bg-red-100 transition-colors"
+                                            title="Block user">
+                                            <span class="material-symbols-outlined text-[16px]">block</span>
+                                        </button>
+                                        {{/if}}
+                                    </div>
+                                </td>
+                            </tr>
+                            {{else}}
+                            <tr>
+                                <td colspan="6" class="py-16 text-center">
+                                    <div
+                                        class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                                        <span
+                                            class="material-symbols-outlined text-gray-400 text-[28px]">manage_search</span>
+                                    </div>
+                                    <p class="text-[14px] font-bold text-gray-400">No users found</p>
+                                    <p class="text-[12px] text-gray-300 mt-1">Try a different search or filter</p>
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="px-8 py-4 border-t border-gray-100 flex items-center justify-between bg-white">
+                    <div class="text-[10px] font-bold tracking-[0.12em] text-gray-400 uppercase">
+                        Showing <span id="showingCount">{{pagination.totalFiltered}}</span> users — Page <span id="currentPageLabel">{{pagination.currentPage}}</span> of <span id="totalPagesLabel">{{pagination.totalPages}}</span>
+                    </div>
+                    <div id="paginationContainer" class="flex items-center gap-1">
+                        {{#if pagination.hasPrev}}
+                        <a href="/admin/usermanagement?page={{pagination.prevPage}}&filter={{filters.filter}}&search={{filters.search}}&sort={{filters.sort}}"
+                            class="page-btn w-8 h-8 rounded-lg flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+                        </a>
+                        {{/if}}
+
+                        {{#each pagination.pages}}
+                        <a href="/admin/usermanagement?page={{num}}&filter={{../filters.filter}}&search={{../filters.search}}&sort={{../filters.sort}}"
+                            class="page-btn w-8 h-8 rounded-lg flex items-center justify-center text-[12px] font-bold {{#if isCurrent}}current{{else}}text-gray-600{{/if}}">
+                            {{num}}
+                        </a>
+                        {{/each}}
+
+                        {{#if pagination.hasNext}}
+                        <a href="/admin/usermanagement?page={{pagination.nextPage}}&filter={{filters.filter}}&search={{filters.search}}&sort={{filters.sort}}"
+                            class="page-btn w-8 h-8 rounded-lg flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+                        </a>
+                        {{/if}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== MODAL ===== -->
+    <div id="confirmModal" class="fixed inset-0 z-50 hidden items-center justify-center"
+        style="background:rgba(0,0,0,0.45);" onclick="handleBackdropClick(event)">
+        <div class="modal-box bg-white rounded-2xl shadow-2xl w-[380px] max-w-[90vw] overflow-hidden">
+            <div id="modalBar" class="h-1.5 w-full"></div>
+            <div class="p-7">
+                <div class="flex items-start gap-4 mb-5">
+                    <div id="modalIconWrap" class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0">
+                        <span id="modalIcon" class="material-symbols-outlined text-[24px]"></span>
+                    </div>
+                    <div>
+                        <h4 id="modalTitle" class="text-[16px] font-black text-black tracking-tight"></h4>
+                        <p id="modalDesc" class="text-[13px] text-gray-500 leading-relaxed mt-1.5"></p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 mb-6">
+                    <div id="previewAvatar"
+                        class="w-9 h-9 rounded-lg bg-gray-200 flex-shrink-0 flex items-center justify-center text-[11px] font-black text-gray-500">
+                    </div>
+                    <div>
+                        <div id="previewName" class="text-[13px] font-bold text-black"></div>
+                        <div id="previewEmail" class="text-[11px] text-gray-400 mt-0.5"></div>
+                    </div>
+                    <div class="ml-auto">
+                        <span id="previewBadge"
+                            class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase"></span>
+                    </div>
+                </div>
+                <div class="flex items-center justify-end gap-2.5">
+                    <button onclick="closeModal()"
+                        class="px-5 py-2.5 rounded-lg border border-gray-200 bg-gray-50 text-[12px] font-bold text-gray-600 hover:bg-gray-100">Cancel</button>
+                    <button id="confirmBtn" onclick="confirmAction()"
+                        class="px-5 py-2.5 rounded-lg text-[12px] font-bold text-white transition-all"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        let pendingAction = null;
+
+        // ─── CUSTOM DROPDOWNS ───────────────────────────────────────
+        function toggleDropdown(toggle) {
+            const menu = toggle.nextElementSibling;
+            const isOpen = menu.classList.contains('show');
+
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+
+            if (!isOpen) {
+                menu.classList.add('show');
+                toggle.classList.add('active');
+            }
+        }
+
+        // ─── STATE (seeded from the initial server render) ────────────
+let currentPage   = {{pagination.currentPage}};
+let currentSearch = '{{filters.search}}';
+let currentFilter = '{{filters.filter}}';
+let currentSort   = '{{filters.sort}}';
+
+// ─── FETCH (AJAX, no reload) ───────────────────────────────────
+async function fetchUsers(page = 1) {
+    currentPage = page;
+    try {
+        const res = await axios.get('/admin/usermanagement', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            params: {
+                search: currentSearch,
+                filter: currentFilter,
+                sort: currentSort,
+                page: currentPage
+            }
+        });
+
+        if (res.data.success) {
+            renderUsers(res.data.users);
+            updateStats(res.data.stats);
+            updatePagination(res.data.pagination);
+        }
+    } catch (err) {
+        console.error('fetchUsers error:', err);
+        showToast('error', 'Failed to load users');
+    }
+}
+
+// ─── RENDER TABLE ───────────────────────────────────────────────
+function renderUsers(users) {
+    const tbody = document.getElementById('usersTableBody');
+
+    if (!users || users.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="py-16 text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                        <span class="material-symbols-outlined text-gray-400 text-[28px]">manage_search</span>
+                    </div>
+                    <p class="text-[14px] font-bold text-gray-400">No users found</p>
+                    <p class="text-[12px] text-gray-300 mt-1">Try a different search or filter</p>
+                </td>
+            </tr>`;
+        return;
+    }
+
+    tbody.innerHTML = users.map(u => `
+        <tr class="user-row ${u.isBlocked ? 'blocked-row' : ''} group">
+            <td class="py-4 px-8 text-[12px] font-medium text-gray-300">${u.slNo}</td>
+            <td class="py-4 px-6">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-10 h-10 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden flex items-center justify-center">
+                        ${u.profilePhoto
+                            ? `<img src="${u.profilePhoto}" alt="${u.username}" class="w-full h-full object-cover ${u.isBlocked ? 'grayscale' : ''}">`
+                            : `<span class="text-[12px] font-black text-gray-500">${u.initials}</span>`}
+                    </div>
+                    <div>
+                        <div class="text-[13px] font-bold text-black">${u.username}</div>
+                        <div class="text-[11px] text-gray-400 mt-0.5">${u.email}</div>
+                    </div>
+                </div>
+            </td>
+            <td class="py-4 px-6">
+                <span class="px-2.5 py-1 bg-gray-50 text-gray-400 rounded-md text-[11px] font-medium border border-gray-100">${u.shortId}</span>
+            </td>
+            <td class="py-4 px-6">
+                ${u.isBlocked ? `<span class="status-badge blocked">Blocked</span>` : `<span class="status-badge active">Active</span>`}
+            </td>
+            <td class="py-4 px-6">
+                <div class="text-[13px] font-bold text-black">${u.dateLabel}</div>
+                <div class="text-[10px] text-gray-400 font-bold tracking-wider mt-1 uppercase">${u.timeLabel}</div>
+            </td>
+            <td class="py-4 px-8 text-right">
+                <div class="flex items-center justify-end gap-2.5">
+                    ${u.isBlocked
+                        ? `<button onclick="openModal('${u._id}', 'unblock', '${u.username}', '${u.email}')" class="w-8 h-8 flex items-center justify-center rounded-md bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-black transition-colors" title="Unblock user"><span class="material-symbols-outlined text-[16px]">check_circle</span></button>`
+                        : `<button onclick="openModal('${u._id}', 'block', '${u.username}', '${u.email}')" class="w-8 h-8 flex items-center justify-center rounded-md bg-red-50 text-red-400 hover:bg-red-100 transition-colors" title="Block user"><span class="material-symbols-outlined text-[16px]">block</span></button>`}
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// ─── STATS & PAGINATION ─────────────────────────────────────────
+function updateStats(stats) {
+    document.getElementById('totalAllCount').textContent = stats.totalAll;
+    document.getElementById('totalActiveCount').textContent = stats.totalActive;
+    document.getElementById('totalBlockedCount').textContent = stats.totalBlocked;
+}
+
+function updatePagination(p) {
+    document.getElementById('filteredCountBadge').textContent = `${p.totalFiltered} users`;
+    document.getElementById('showingCount').textContent = p.totalFiltered;
+    document.getElementById('currentPageLabel').textContent = p.currentPage;
+    document.getElementById('totalPagesLabel').textContent = p.totalPages;
+
+    const container = document.getElementById('paginationContainer');
+    container.innerHTML = '';
+
+    if (p.hasPrev) {
+        const prev = document.createElement('button');
+        prev.className = 'page-btn w-8 h-8 rounded-lg flex items-center justify-center';
+        prev.innerHTML = '<span class="material-symbols-outlined text-[18px]">chevron_left</span>';
+        prev.onclick = () => fetchUsers(p.currentPage - 1);
+        container.appendChild(prev);
+    }
+
+    p.pages.forEach(pg => {
+        const btn = document.createElement('button');
+        btn.className = `page-btn w-8 h-8 rounded-lg flex items-center justify-center text-[12px] font-bold ${pg.isCurrent ? 'current' : 'text-gray-600'}`;
+        btn.textContent = pg.num;
+        btn.onclick = () => fetchUsers(pg.num);
+        container.appendChild(btn);
+    });
+
+    if (p.hasNext) {
+        const next = document.createElement('button');
+        next.className = 'page-btn w-8 h-8 rounded-lg flex items-center justify-center';
+        next.innerHTML = '<span class="material-symbols-outlined text-[18px]">chevron_right</span>';
+        next.onclick = () => fetchUsers(p.currentPage + 1);
+        container.appendChild(next);
+    }
+}
+
+// ─── FILTER / SORT DROPDOWNS ────────────────────────────────────
+function setFilter(value, label) {
+    currentFilter = value;
+    document.getElementById('filterSelectedLabel').textContent = label;
+    document.querySelectorAll('#filterMenu .dropdown-item').forEach(item =>
+        item.classList.toggle('selected', item.textContent.trim() === label));
+    closeAllDropdowns();
+    fetchUsers(1);
+}
+
+function setSort(value, label) {
+    currentSort = value;
+    document.getElementById('sortSelectedLabel').textContent = label;
+    document.querySelectorAll('#sortMenu .dropdown-item').forEach(item =>
+        item.classList.toggle('selected', item.textContent.trim() === label));
+    closeAllDropdowns();
+    fetchUsers(1);
+}
+
+function closeAllDropdowns() {
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+    document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+}
+
+// ─── LIVE SEARCH (debounced, no reload) ─────────────────────────
+let searchDebounce;
+
+document.getElementById('searchInput').addEventListener('input', function () {
+    const query = this.value.trim();
+
+    const clearBtn = document.getElementById('clearSearch');
+    if (query) clearBtn.classList.remove('hidden');
+    else clearBtn.classList.add('hidden');
+
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(() => {
+        currentSearch = query;
+        fetchUsers(1);
+    }, 400);
+});
+
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('clearSearch').classList.add('hidden');
+    currentSearch = '';
+    fetchUsers(1);
+}
+
+// ─── INIT ────────────────────────────────────────────────────────
+fetchUsers(currentPage);
+
+
+        // Close dropdowns on click outside
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.custom-dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+                document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+            }
+        });
+
+        function openModal(userId, action, name, email) {
+            pendingAction = { userId, action };
+
+            const isBlock = action === 'block';
+
+            document.getElementById('modalBar').style.background = isBlock ? '#ef4444' : '#10b981';
+            document.getElementById('modalIconWrap').className = `w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${isBlock ? 'bg-red-50' : 'bg-emerald-50'}`;
+            document.getElementById('modalIcon').textContent = isBlock ? 'block' : 'check_circle';
+            document.getElementById('modalIcon').className = `material-symbols-outlined text-[24px] ${isBlock ? 'text-red-400' : 'text-emerald-500'}`;
+            document.getElementById('modalTitle').textContent = isBlock ? 'Block this user?' : 'Unblock this user?';
+            document.getElementById('modalDesc').textContent = isBlock ? 'They will immediately lose access to the platform.' : 'They will regain full access to the platform.';
+            document.getElementById('confirmBtn').textContent = isBlock ? 'Yes, block user' : 'Yes, unblock user';
+            document.getElementById('confirmBtn').className = `px-5 py-2.5 rounded-lg text-[12px] font-bold text-white transition-all ${isBlock ? 'bg-red-500 hover:bg-red-600 btn-confirm-danger' : 'bg-emerald-500 hover:bg-emerald-600 btn-confirm-success'}`;
+            document.getElementById('previewName').textContent = name;
+            document.getElementById('previewEmail').textContent = email;
+            document.getElementById('previewAvatar').textContent = name.substring(0, 2).toUpperCase();
+            document.getElementById('previewBadge').textContent = isBlock ? 'Active' : 'Blocked';
+            document.getElementById('previewBadge').className = `inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase ${isBlock ? 'bg-emerald-50 text-emerald-600' : 'bg-black text-white'}`;
+
+            const modal = document.getElementById('confirmModal');
+            modal.style.display = 'flex';
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            pendingAction = null;
+        }
+
+        function handleBackdropClick(e) {
+            if (e.target === document.getElementById('confirmModal')) closeModal();
+        }
+
+       async function confirmAction() {
+    if (!pendingAction) return;
+    const { userId, action } = pendingAction;
+
+    try {
+        const res = await axios.patch(`/admin/userManagement/${action}/${userId}`);
+        const data = res.data;
+
+        if (data.success) {
+            closeModal();
+            showToast("success", data.message);
+            fetchUsers(currentPage); // was: location.reload()
+        } else {
+            showToast("error", data.message || "Action failed");
+        }
+    } catch (err) {
+        console.error(err);
+        showToast("error", "Something went wrong");
+    }
+}
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+      
+
+</script>
+
+</body>
+
+</html>

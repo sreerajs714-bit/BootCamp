@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bootcamp Login | BOOT CAMP</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- Toastify -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #000;
+            overflow: hidden;
+        }
+
+        .glass {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes pulse-glow {
+
+            0%,
+            100% {
+                opacity: 0.75;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .animate-pulse-glow {
+            animation: pulse-glow 5s infinite;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Video Background */
+        .video-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .video-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        video {
+            min-width: 100%;
+            min-height: 100%;
+            object-fit: cover;
+        }
+
+        /* Toggle Switch */
+        .toggle-checkbox:checked+.toggle-label {
+            background-color: #9333ea;
+            /* purple-600 */
+        }
+
+        .toggle-checkbox:checked+.toggle-label .toggle-dot {
+            transform: translateX(20px);
+        }
+
+        /* Custom Input focus */
+        .custom-input:focus {
+            border-color: rgba(147, 51, 234, 0.5);
+            outline: none;
+        }
+
+        /* Animation for success */
+        @keyframes success-pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+                background-color: #10b981;
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .animate-success {
+            animation: success-pop 0.5s ease-in-out forwards;
+        }
+    </style>
+</head>
+
+<body class="text-white min-h-screen flex items-center justify-center p-4">
+
+    <!-- Video Background -->
+    <div class="video-container" style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:0;">
+    <img src="/uploads/images/login.png" alt="" style="width:100%; height:100%; object-fit:cover;">
+</div>
+
+    <!-- Main Container -->
+    <div class="relative z-20 w-full max-w-md animate-fadeIn">
+        <div class="p-8 rounded-2xl glass">
+
+            <!-- Logo/Header Area -->
+            <div class="mb-8 text-center">
+                <h2 class="text-3xl font-bold mb-2 relative group inline-block">
+                    <!-- Glow effect -->
+                    <span
+                        class="absolute -inset-1 bg-gradient-to-r from-purple-600/30 via-pink-500/30 to-blue-500/30 blur-xl opacity-75 group-hover:opacity-100 transition-all duration-500 animate-pulse-glow"></span>
+
+                    <span class="relative inline-block text-3xl font-black tracking-tighter text-white">
+                        BootCamp
+                    </span>
+
+                    <!-- Subtle underline glow -->
+                    <span
+                        class="absolute -inset-0.5 bg-gradient-to-r from-purple-500/20 to-pink-500/20 blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300"></span>
+                </h2>
+
+                <div class="mt-4 flex flex-col items-center space-y-1">
+                    <div class="relative group cursor-default">
+                        <span
+                            class="absolute -inset-1 bg-gradient-to-r from-purple-600/20 to-pink-600/20 blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+                        <span class="relative inline-block text-white/80 font-medium tracking-wide">Your sports universe
+                            awaits</span>
+                    </div>
+
+                    <span class="text-[10px] text-white/40 uppercase tracking-[0.2em] font-black animate-pulse">
+                        [ Press Enter to Join ]
+                    </span>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="space-y-6" action="/users/login" method="POST">
+
+                <!-- Email Input -->
+                <div class="relative">
+                    <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+                        <span class="material-symbols-outlined text-[20px]">mail</span>
+                    </div>
+                    <input type="text" id="email" name="email" placeholder="Email address"
+                        class="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 custom-input transition-all duration-300">
+                        <p id="email-error" class="hidden mt-1.5 ml-1 text-[11px] font-bold text-red-400 tracking-wide"></p>
+                </div>
+
+                <!-- Password Input -->
+                <div class="relative">
+                    <div class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+                        <span class="material-symbols-outlined text-[20px]">lock</span>
+                    </div>
+                    <input type="password" id="password" name="password" placeholder="Password"
+                        class="w-full pl-11 pr-12 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 custom-input transition-all duration-300">
+                    <button type="button" id="toggle-password"
+                        class="absolute right-4 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">visibility</span>
+                    </button>
+                    <p id="password-error" class="hidden mt-1.5 ml-1 text-[11px] font-bold text-red-400 tracking-wide"></p>
+                </div>
+
+                <!-- Remember & Forgot -->
+                <div class="flex justify-end">
+                    <a href="/users/resetPassword"
+                        class="text-[11px] font-black uppercase tracking-widest text-white/50 hover:text-white transition-colors">
+                        Forgot Password?
+                    </a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn"
+                    class="w-full py-4 bg-purple-600 hover:bg-purple-700 text-white font-black uppercase tracking-widest text-[11px] rounded-xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 focus:ring-offset-black">
+                    Enter BOOTCAMP
+                </button>
+            </form>
+
+            <!-- Social Logins -->
+            <div class="mt-8">
+                <div class="relative flex items-center justify-center">
+                    <div class="border-t border-white/10 w-full"></div>
+                    <div
+                        class="absolute bg-black/0 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
+                        Quick Access
+                    </div>
+                </div>
+
+                <div class="mt-8 flex justify-center">
+                    <a href="/users/auth/google"
+                        class="flex items-center justify-center w-fit px-8 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white/60 hover:bg-white/10 hover:text-white transition-all group">
+                        <svg class="w-5 h-5 group-hover:scale-110 transition-transform mr-2" viewBox="0 0 24 24"
+                            fill="currentColor">
+                            <path
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                                fill="#4285F4" />
+                            <path
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                                fill="#34A853" />
+                            <path
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.27.81-.57z"
+                                fill="#FBBC05" />
+                            <path
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 12-4.53z"
+                                fill="#EA4335" />
+                        </svg>
+                        <span class="text-[11px] font-black uppercase tracking-widest">Sign in with Google</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Footer Link -->
+            <p class="mt-8 text-center text-sm text-white/40">
+                Don't have an account?
+                <a href="/users/signup"
+                    class="font-bold text-white hover:text-purple-400 transition-colors uppercase tracking-widest text-[10px]">
+                    Create Account
+                </a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Page Footer -->
+    <footer
+        class="absolute bottom-6 left-0 right-0 text-center text-white/20 text-[10px] font-black uppercase tracking-[0.3em] z-20">
+        © 2026 Boot Camp Protocol
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+
+        function showError(id, message) {
+            const errorElement = document.getElementById(`${id}-error`);
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+            }
+        }
+
+        function clearError(id) {
+            const errorElement = document.getElementById(`${id}-error`);
+            if (errorElement) {
+                errorElement.textContent = '';
+                errorElement.classList.add('hidden');
+            }
+        }
+
+        // ─── Form Submission via Axios ────────────────────────────────────────────
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelector("form").addEventListener("submit", formValidate);
+            
+            // Clear errors on input
+            document.getElementById('email').addEventListener('input', () => clearError('email'));
+            document.getElementById('password').addEventListener('input', () => clearError('password'));
+
+            // Toggle password listener
+            const toggleBtn = document.getElementById('toggle-password');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', togglePassword);
+            }
+        });
+
+        async function formValidate(e) {
+            e.preventDefault();
+
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            // Clear previous errors
+            clearError('email');
+            clearError('password');
+
+            let isValid = true;
+
+            if (!email) {
+                showError('email', 'Email is required');
+                isValid = false;
+            } 
+             if (!password) {
+                showError('password', 'Password is required');
+                isValid = false;
+            }
+            if (!isValid) return;
+
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'LOGGING IN...';
+
+                const response = await axios.post(form.action || window.location.href, {
+                    email,
+                    password,
+                });
+
+                showToast("success", "Login successful!");
+
+                if (response.data?.redirect) {
+                    setTimeout(() => {
+                        window.location.href = response.data.redirect;
+                    }, 1000);
+                }
+
+            } catch (error) {
+                const message =
+                    error.response?.data?.message ||
+                    error.response?.data?.error ||
+                    "Something went wrong. Please try again.";
+
+                showToast("error", message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = originalText;
+            }
+        }
+        function togglePassword() {
+
+            const password = document.getElementById("password");
+            const icon = document.querySelector("#toggle-password span");
+
+            if (password.type === "password") {
+                password.type = "text";
+                if(icon) icon.textContent = "visibility_off";
+            } else {
+                password.type = "password";
+                if(icon) icon.textContent = "visibility";
+            }
+
+        }
+
+        window.addEventListener("pageshow", (e) => {
+            if (e.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
+                window.location.reload();
+            }
+        });
+
+    </script>
+
+    {{#if message}}
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            showToast("error", "{{message}}");
+        });
+    </script>
+    {{/if}}
+
+</body>
+
+</html>

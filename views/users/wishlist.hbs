@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WISHLIST - BOOT CAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+
+        .wishlist-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .wishlist-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-black selection:text-white flex flex-col min-h-screen">
+
+    {{>navbar}}
+    {{>breadCrumbs}}
+
+    <main class="flex-1 w-full max-w-[1500px] mx-auto px-6 py-16 lg:py-20 lg:px-12">
+        <div class="max-w-[1250px] mx-auto">
+
+            <h1 class="text-[32px] md:text-[40px] font-black uppercase tracking-tighter mb-4 text-center">Your Wishlist
+            </h1>
+            <p class="text-gray-500 text-sm font-medium text-center mb-16">Save your favorite items here for later.</p>
+
+            <div class="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
+                <span class="text-[12px] font-bold uppercase tracking-[0.2em]">{{wishlistItems.length}} ITEMS
+                    SAVED</span>
+                <button onclick="clearWishlist()"
+                    class="text-[11px] font-bold uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-colors underline-offset-4 pointer-events-auto">CLEAR
+                    ALL</button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 xl:gap-8">
+
+                {{#each wishlistItems}}
+                <div class="wishlist-card relative rounded-[16px] overflow-hidden group" data-id="{{this.id}}">
+                    <div class="aspect-[3/4] bg-[#f4f4f5] relative">
+
+                        <div
+                            class="carousel-container absolute inset-0 w-full h-full transition-transform duration-700 group-hover:scale-105 z-0">
+                            {{#each this.images}}
+                            <img src="{{this}}"
+                                class="carousel-img absolute inset-0 w-full h-full object-cover transition-opacity duration-300 {{#if @first}}opacity-100{{else}}opacity-0{{/if}}"
+                                alt="Product Image">
+                            {{/each}}
+                        </div>
+
+                        <button onclick="removeFromWishlist('{{this.id}}')"
+                            class="absolute top-4 right-4 w-[34px] h-[34px] bg-white/70 backdrop-blur-md rounded-full flex items-center justify-center text-gray-800 hover:bg-white hover:shadow-md transition-all z-20">
+                            <span class="material-symbols-outlined text-[16px]">close</span>
+                        </button>
+
+                        <div
+                            class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-gray-900/80 via-gray-900/40 to-transparent pointer-events-none z-0">
+                        </div>
+
+                        <div class="absolute bottom-0 left-0 right-0 p-5 flex flex-col justify-end z-10">
+
+                            {{#if this.isInactive}}
+                            <div
+                                class="absolute right-0 bottom-[75px] bg-gray-500 text-white text-[9px] font-black uppercase tracking-[0.1em] px-2.5 py-1 rounded-l shadow-sm flex items-center">
+                                UNAVAILABLE
+                            </div>
+                            {{else if this.isOutOfStock}}
+                            <div
+                                class="absolute right-0 bottom-[75px] bg-[#f26363] text-white text-[9px] font-black uppercase tracking-[0.1em] px-2.5 py-1 rounded-l shadow-sm flex items-center">
+                                OUT OF STOCK
+                            </div>
+                            {{/if}}
+
+                            <div class="flex justify-between items-end mb-4 pr-1 gap-2">
+                                <h3 class="text-white text-[12px] font-bold uppercase tracking-widest leading-tight">
+                                    {{this.productName}}</h3>
+                                <div class="flex flex-col items-end">
+                                    <span class="text-white text-[13px] font-black">{{this.price}}</span>
+                                    {{#if this.hasOffer}}
+                                    <span class="text-white/50 text-[11px] line-through">₹{{this.rawPrice}}</span>
+                                    <span class="text-emerald-400 text-[10px] font-black">{{this.offerPercentage}}% OFF</span>
+                                    {{/if}}
+                                </div>
+                            </div>
+
+                            {{#if this.isInactive}}
+                            <button disabled
+                                class="w-full border border-white/40 bg-gray-500/30 backdrop-blur-sm text-white/90 text-[11px] font-bold uppercase tracking-[0.2em] py-3.5 rounded-lg transition-all text-center cursor-not-allowed">
+                                UNAVAILABLE
+                            </button>
+                            {{else if this.isOutOfStock}}
+                            <button disabled
+                                class="w-full border border-white/40 bg-gray-500/30 backdrop-blur-sm text-white/90 text-[11px] font-bold uppercase tracking-[0.2em] py-3.5 rounded-lg transition-all text-center cursor-not-allowed">
+                                OUT OF STOCK
+                            </button>
+                            {{else}}
+                            <!-- FIX: pass size as third argument — use empty string fallback if not available -->
+                            <button
+                                onclick="moveToBag('{{this.id}}', '{{this.variantId}}', '{{this.size}}')"
+                                class="w-full bg-white text-black hover:bg-gray-100 text-[11px] font-bold uppercase tracking-[0.2em] py-3.5 border border-white rounded-lg transition-all text-center shadow-lg">
+                                ADD TO CART
+                            </button>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+                {{else}}
+                <div
+                    class="col-span-full py-20 text-center bg-white border border-dashed border-gray-200 rounded-[32px]">
+                    <span class="material-symbols-outlined text-[48px] text-gray-200 mb-4">heart_broken</span>
+                    <h2 class="text-xl font-bold mb-2">Your wishlist is empty</h2>
+                    <p class="text-gray-400 mb-8">Save items you love to find them easily later.</p>
+                    <a href="/"
+                        class="inline-block bg-black text-white px-8 py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest hover:bg-black/90 transition-all">Start
+                        Exploring</a>
+                </div>
+                {{/each}}
+
+            </div>
+        </div>
+    </main>
+
+    {{>footer}}
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+     <script src="/toast/toast.js"></script>
+
+    <script>
+
+        // Ensures fetchNavCounts is always available even if navbar loads late
+    function safeFetchNavCounts() {
+    if (typeof window.fetchNavCounts === 'function') {
+        window.fetchNavCounts();
+    } else {
+        // Fallback — update directly
+        axios.get('/users/getCounts', { withCredentials: true }).then(res => {
+            const { cartCount, wishlistCount } = res.data;
+
+            const cartBadge = document.getElementById('cart-badge');
+            if (cartBadge) {
+                cartBadge.textContent = cartCount;
+                cartCount > 0
+                    ? cartBadge.classList.remove('opacity-0', 'scale-0')
+                    : cartBadge.classList.add('opacity-0', 'scale-0');
+            }
+
+            const wishlistBadge = document.getElementById('wishlist-badge');
+            if (wishlistBadge) {
+                wishlistBadge.textContent = wishlistCount;
+                wishlistCount > 0
+                    ? wishlistBadge.classList.remove('opacity-0', 'scale-0')
+                    : wishlistBadge.classList.add('opacity-0', 'scale-0');
+            }
+        }).catch(() => {});
+    }
+   }
+
+
+        const isLoggedIn = {{#if user}}true{{else }} false{{/if }};
+
+        // ── Remove from wishlist ──────────────────────────────
+        async function removeFromWishlist(productId, silent = false) {
+            try {
+                const card = document.querySelector(`.wishlist-card[data-id="${productId}"]`);
+
+                const response = await axios.delete('/users/removeFromWishlist', {
+                    data: { productId }
+                });
+
+                if (response.data.success) {
+                    if (card) {
+                        card.style.transition = "all 0.3s ease";
+                        card.style.opacity = "0";
+                        card.style.transform = "scale(0.95)";
+                        setTimeout(() => {
+                            card.remove();
+                            if (!silent) showToast("success", "Removed from wishlist");
+                            safeFetchNavCounts()
+                            const remaining = document.querySelectorAll('.wishlist-card').length;
+                            if (remaining === 0) {
+                                setTimeout(() => window.location.reload(), 500);
+                            }
+                        }, 300);
+                    }
+                }
+            } catch (err) {
+                if (!silent) showToast("error", "Something went wrong");
+            }
+        }
+
+        // ── Move to bag ───────────────────────────────────────
+        // FIX: added 'size' as third parameter with default empty string
+        async function moveToBag(productId, variantId, size = '') {
+
+            if (!isLoggedIn) {
+                showToast("error", "Please login first");
+                return;
+            }
+
+            try {
+                const response = await axios.post('/users/addCart', {
+                    productId,
+                    variantId,
+                    size: size || '',   // FIX: safe fallback so it never sends undefined
+                    quantity: 1
+                });
+
+                if (response.data.success) {
+                    showToast("success", "Moved to Bag Successfully");
+                   safeFetchNavCounts()
+                    await removeFromWishlist(productId, true);
+                } else if (response.data.alreadyInCart) {
+                    showToast("info", "Already in Bag");
+                    await removeFromWishlist(productId, true);
+                } else if (response.data.cartLimit) {
+                    showToast("error", "Cart is full! Maximum 10 items allowed.");
+                } else {
+                    showToast("error", response.data.message || "Failed to add to cart");
+                }
+            } catch (error) {
+                const data = error.response?.data;
+                if (data?.alreadyInCart) {
+                    showToast("info", "Already in Bag");
+                    await removeFromWishlist(productId, true);
+                } else if (data?.cartLimit) {
+                    showToast("error", "Cart is full! Maximum 10 items allowed.");
+                } else if (data?.outOfStock) {
+                    showToast("error", "This item is out of stock!");
+                } else {
+                    showToast("error", "Something went wrong");
+                }
+            }
+        }
+
+        // ── Clear Wishlist ──────────────────────────────────
+        async function clearWishlist() {
+            if (!isLoggedIn) {
+                showToast("error", "Please login first");
+                return;
+            }
+
+            const result = await Swal.fire({
+                title: 'Clear Wishlist?',
+                text: "Are you sure you want to remove all items?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#000000',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'YES, CLEAR ALL',
+                borderRadius: '16px'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const response = await axios.post('/users/clearWishlist');
+                    if (response.data.success) {
+                        showToast("success", "Wishlist cleared successfully");
+                        setTimeout(() => window.location.reload(), 1000);
+                    } else {
+                        showToast("error", response.data.message || "Failed to clear");
+                    }
+                } catch (err) {
+                    showToast("error", "Something went wrong");
+                }
+            }
+        }
+
+        // ── Image Carousel ────────────────────────────────────
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.wishlist-card');
+
+            cards.forEach(card => {
+                const images = card.querySelectorAll('.carousel-img');
+                if (images.length <= 1) return;
+
+                let intervalId;
+                let currentIndex = 0;
+
+                card.addEventListener('mouseenter', () => {
+                    intervalId = setInterval(() => {
+                        images[currentIndex].classList.remove('opacity-100');
+                        images[currentIndex].classList.add('opacity-0');
+                        currentIndex = (currentIndex + 1) % images.length;
+                        images[currentIndex].classList.remove('opacity-0');
+                        images[currentIndex].classList.add('opacity-100');
+                    }, 1500);
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    clearInterval(intervalId);
+                    images.forEach((img, idx) => {
+                        if (idx === 0) {
+                            img.classList.remove('opacity-0');
+                            img.classList.add('opacity-100');
+                        } else {
+                            img.classList.remove('opacity-100');
+                            img.classList.add('opacity-0');
+                        }
+                    });
+                    currentIndex = 0;
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

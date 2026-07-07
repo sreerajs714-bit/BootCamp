@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Management | Admin | BOOTCAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #111827;
+            overflow: hidden;
+        }
+
+        .sidebar-item {
+            transition: all 0.18s ease;
+        }
+
+        .sidebar-item:hover:not(.active) {
+            background-color: #f9fafb;
+        }
+
+        .sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-item.active .material-symbols-outlined {
+            color: #fff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        .category-row {
+            transition: background 0.12s;
+        }
+
+        .category-row:hover {
+            background: rgba(249, 250, 251, 0.8);
+        }
+
+        .modal-box {
+            animation: slideUp 0.2s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .page-btn {
+            transition: all 0.12s;
+        }
+
+        .page-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .page-btn.current {
+            background: #000;
+            color: #fff;
+        }
+
+        .filter-btn {
+            transition: all 0.15s ease;
+        }
+
+        .filter-btn.active {
+            background: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .custom-dropdown {
+            position: relative;
+            min-width: 150px;
+        }
+
+        .dropdown-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fdfdfd;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-toggle:hover {
+            border-color: #000;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .dropdown-toggle.active {
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 6px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background: #f9fafb;
+            color: #000;
+        }
+
+        .dropdown-item.selected {
+            background: #000;
+            color: #fff;
+        }
+
+        .filter-label {
+            position: absolute;
+            top: -7px;
+            left: 12px;
+            background: white;
+            padding: 0 6px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased h-screen flex">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+        <div class="h-24 flex flex-col justify-center px-8 border-b border-gray-100">
+            <h1 class="font-sans font-black text-2xl tracking-tight uppercase text-black">BOOTCAMP</h1>
+            <span class="text-[10px] font-bold tracking-widest text-emerald-500 mt-1">SYSTEM ADMIN</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <a href="/admin/dashboard"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard
+            </a>
+            <a href="/admin/productManagement"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">sports_soccer</span>Products
+            </a>
+            <a href="/admin/category"
+                class="sidebar-item active flex items-center px-4 py-3 text-[13px] font-bold uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">category</span>Categories
+            </a>
+            <a href="/admin/orders"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">shopping_bag</span>Orders
+            </a>
+            <a href="/admin/offers"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">local_offer</span>Offers
+            </a>
+            <a href="/admin/coupons"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">confirmation_number</span>Coupons
+            </a>
+            <a href="/admin/usermanagement"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">group</span>Users
+            </a>
+            <a href="/admin/returns"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">assignment_return</span>Returns
+            </a>
+            <a href="/admin/brand"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">sell</span>Brand
+            </a>
+        </nav>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-[#f8f9fa]">
+
+        <!-- Header -->
+        <header
+            class="h-[88px] bg-white border-b border-gray-200 flex items-center justify-between px-10 flex-shrink-0 z-10">
+            <div>
+                <h2 class="font-sans font-black text-[17px] tracking-tight uppercase text-black">Category Management
+                </h2>
+                <p class="text-[11px] text-gray-400 font-medium mt-0.5">Manage and organize your product catalog
+                    architecture.</p>
+            </div>
+            <div class="relative w-[360px]">
+                <span
+                    class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[19px] pointer-events-none">search</span>
+                <input id="searchInput" type="text" placeholder="Search categories..." value="{{search}}"
+                    class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-11 pr-10 text-[13px] font-medium text-gray-700 outline-none placeholder-gray-400 focus:bg-white focus:border-gray-300 transition-colors">
+            </div>
+        </header>
+
+        <!-- Body -->
+        <div class="flex-1 overflow-y-auto p-8 lg:px-12 lg:py-10">
+
+            <!-- Action area -->
+            <div class="flex justify-end mb-8">
+                <button onclick="openAddModal()"
+                    class="px-6 py-3 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px]">add</span>
+                    Add Category
+                </button>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <!-- Total -->
+                <div
+                    class="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden">
+                    <div class="absolute bottom-0 left-0 right-0 h-[3px] bg-black rounded-b-2xl"></div>
+                    <div>
+                        <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center mb-3">
+                            <span class="material-symbols-outlined text-gray-600 text-[20px]">category</span>
+                        </div>
+                        <div class="text-[36px] font-black text-black tracking-tight leading-none">{{totalCount}}</div>
+                    </div>
+                    <div class="text-[10px] font-bold tracking-[0.15em] text-gray-300 uppercase self-start mt-1">
+                        Total<br>Categories</div>
+                </div>
+
+                <!-- Active -->
+                <div
+                    class="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden">
+                    <div>
+                        <div class="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center mb-3">
+                            <span class="material-symbols-outlined text-emerald-500 text-[20px]">check_circle</span>
+                        </div>
+                        <div class="text-[36px] font-black text-black tracking-tight leading-none">{{activeCount}}</div>
+                        <div class="flex items-center gap-1.5 mt-2">
+                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-[11px] font-bold text-emerald-500">Active categories</span>
+                        </div>
+                    </div>
+                    <div class="text-[10px] font-bold tracking-[0.15em] text-gray-300 uppercase self-start mt-1">
+                        Active<br>Categories</div>
+                </div>
+
+                <!-- Inactive -->
+                <div
+                    class="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden">
+                    <div>
+                        <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center mb-3">
+                            <span class="material-symbols-outlined text-red-400 text-[20px]">visibility_off</span>
+                        </div>
+                        <div class="text-[36px] font-black text-black tracking-tight leading-none">{{inactiveCount}}
+                        </div>
+                        <div class="text-[11px] font-bold text-red-400 mt-2">Inactive categories</div>
+                    </div>
+                    <div class="text-[10px] font-bold tracking-[0.15em] text-gray-300 uppercase self-start mt-1">
+                        Inactive<br>Categories</div>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+                <!-- Controls -->
+                <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between gap-4 flex-wrap">
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-[15px] font-black text-black">All Categories</h3>
+                        <span
+                            class="text-[10px] font-bold tracking-widest text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full uppercase">
+                            {{totalCategories}} categories
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-5 flex-wrap">
+                        <input type="hidden" id="statusFilter" value="{{filter}}">
+                        <input type="hidden" id="sortSelect"   value="{{sort}}">
+
+                        <!-- Filter Dropdown -->
+                        <div class="custom-dropdown min-w-[140px]">
+                            <span class="filter-label">Filter</span>
+                            <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                                <span class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                                    {{#if (eq filter 'all')}}All Status{{/if}}
+                                    {{#if (eq filter 'active')}}Active{{/if}}
+                                    {{#if (eq filter 'inactive')}}Inactive{{/if}}
+                                    {{#if (eq filter 'deleted')}}Deleted{{/if}}
+                                </span>
+                                <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+                            </div>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item {{#if (eq filter 'all')}}selected{{/if}}" onclick="selectOption('status', 'all', 'All Status')">All Status</div>
+                                <div class="dropdown-item {{#if (eq filter 'active')}}selected{{/if}}" onclick="selectOption('status', 'active', 'Active')">Active</div>
+                                <div class="dropdown-item {{#if (eq filter 'inactive')}}selected{{/if}}" onclick="selectOption('status', 'inactive', 'Inactive')">Inactive</div>
+                                <div class="dropdown-item {{#if (eq filter 'deleted')}}selected{{/if}}" onclick="selectOption('status', 'deleted', 'Deleted')">Deleted</div>
+                            </div>
+                        </div>
+
+                        <!-- Sort Dropdown -->
+                        <div class="custom-dropdown min-w-[160px]">
+                            <span class="filter-label">Sort</span>
+                            <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                                <span class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                                    {{#if (eq sort 'default')}}Default{{/if}}
+                                    {{#if (eq sort 'name-asc')}}Newest first{{/if}}
+                                    {{#if (eq sort 'name-desc')}}Oldest first{{/if}}
+                                </span>
+                                <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+                            </div>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item {{#if (eq sort 'default')}}selected{{/if}}" onclick="selectOption('sort', 'default', 'Default')">Default</div>
+                                <div class="dropdown-item {{#if (eq sort 'name-asc')}}selected{{/if}}" onclick="selectOption('sort', 'name-asc', 'Newest first')">Newest first</div>
+                                <div class="dropdown-item {{#if (eq sort 'name-desc')}}selected{{/if}}" onclick="selectOption('sort', 'name-desc', 'Oldest first')">Oldest first</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[600px]">
+                        <thead>
+                            <tr class="bg-[#f9fafb]">
+                                <th
+                                    class="py-4 px-8 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase w-24">
+                                    Sl.No</th>
+                                <th class="py-4 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">
+                                    Category Name</th>
+                                <th class="py-4 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">
+                                    Products</th>
+                                <th class="py-4 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">
+                                    Status</th>
+                                <th
+                                    class="py-4 px-8 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase text-right w-32">
+                                    Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {{#each categories}}
+                            <tr class="category-row group">
+                                <td class="py-5 px-8 text-[13px] font-medium text-gray-400">{{add @index 1}}</td>
+                                <td class="py-5 px-6">
+                                    <div class="text-[14px] font-bold text-black">{{this.name}}</div>
+                                </td>
+                                <td class="py-5 px-6">
+                                    <div class="text-[14px] font-bold text-black">{{this.productCount}}</div>
+                                </td>
+                                <td class="py-5 px-6">
+                                    <div class="flex items-center gap-3">
+                                        {{#if this.isDeleted}}
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase bg-red-50 text-red-600">Deleted</span>
+                                        {{else if this.isActive}}
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase bg-emerald-50 text-emerald-600">Active</span>
+                                        {{else}}
+                                        <span
+                                            class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase bg-gray-100 text-gray-500">Inactive</span>
+                                        {{/if}}
+                                    </div>
+                                </td>
+                                <td class="py-5 px-8 text-right">
+                                    <div class="flex items-center justify-end gap-4">
+                                        {{#if this.isDeleted}}
+                                        <button onclick="openRestoreModal('{{this.name}}', '{{this._id}}')"
+                                            class="text-emerald-500 hover:text-emerald-600 transition-colors flex items-center gap-1.5"
+                                            title="Restore">
+                                            <span
+                                                class="material-symbols-outlined text-[18px]">settings_backup_restore</span>
+                                            <span class="text-[10px] font-bold uppercase tracking-wider">Restore</span>
+                                        </button>
+                                        {{else}}
+                                        <button
+                                            onclick="openEditModal('{{this.name}}', {{this.isActive}}, '{{this._id}}')"
+                                            class="text-gray-400 hover:text-black transition-colors" title="Edit">
+                                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                                        </button>
+                                        <button onclick="openDeleteModal('{{this.name}}', '{{this._id}}')"
+                                            class="text-red-300 hover:text-red-500 transition-colors" title="Delete">
+                                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                                        </button>
+                                        {{/if}}
+                                    </div>
+                                </td>
+                            </tr>
+                            {{else}}
+                            <tr>
+                                <td colspan="5" class="py-12 text-center text-[13px] font-medium text-gray-400">
+                                    No categories found
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="px-8 py-5 border-t border-gray-100 flex items-center justify-between bg-white">
+                    <div class="text-[11px] font-medium text-gray-500">
+                        Showing <span class="font-bold text-black">{{totalCategories}}</span> of <span
+                            class="font-bold text-black">{{totalCount}}</span> categories
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        {{#if hasPrevPage}}
+                        <button onclick="changePage({{prevPage}})"
+                            class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-400 hover:text-black">
+                            <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                        </button>
+                        {{else}}
+                        <button disabled
+                            class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-200 cursor-not-allowed">
+                            <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                        </button>
+                        {{/if}}
+
+                        {{#each pageNumbers}}
+                        <button onclick="changePage({{this}})"
+                            class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-[12px] font-bold {{#if (eq this ../currentPage)}}current{{else}}text-gray-600{{/if}}">
+                            {{this}}
+                        </button>
+                        {{/each}}
+
+                        {{#if hasNextPage}}
+                        <button onclick="changePage({{nextPage}})"
+                            class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-400 hover:text-black">
+                            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                        </button>
+                        {{else}}
+                        <button disabled
+                            class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-200 cursor-not-allowed">
+                            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                        </button>
+                        {{/if}}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== MODAL OVERLAY ===== -->
+    <div id="modalOverlay" class="fixed inset-0 z-50 hidden items-center justify-center"
+        style="background:rgba(0,0,0,0.5); backdrop-filter: blur(2px);" onclick="handleModalBackdropClick(event)">
+
+        <!-- ADD CATEGORY MODAL -->
+        <div id="addModal"
+            class="modal-box hidden bg-white rounded-xl shadow-2xl w-[480px] max-w-[90vw] overflow-hidden p-8 relative">
+            <button onclick="closeModals()"
+                class="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+
+            <h4 class="text-[20px] font-black text-black tracking-tight uppercase mb-6">Add New Category</h4>
+            <div class="w-12 h-[3px] bg-black mb-8"></div>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">Category
+                        Name</label>
+                    <input id="addCategoryInput" type="text" placeholder="e.g. PERFORMANCE WEAR"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3.5 px-4 text-[13px] font-medium text-black outline-none focus:bg-white focus:border-black transition-colors">
+                    <p id="addCategoryError" class="text-red-500 text-[11px] font-medium mt-1.5 hidden"></p>
+                </div>
+
+                <div class="flex items-center justify-between border-t border-gray-100 pt-6">
+                    <div>
+                        <div class="text-[10px] font-bold tracking-widest text-gray-500 uppercase mb-0.5">Status</div>
+                        <div class="text-[12px] font-bold text-black">Mark as Active</div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input id="addCategoryStatus" type="checkbox" checked class="sr-only peer">
+                        <div
+                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black">
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-5 mt-10">
+                <button onclick="closeModals()"
+                    class="text-[11px] font-bold text-gray-500 uppercase tracking-wider hover:text-black transition-colors">Cancel</button>
+                <button id="submitAddCategory"
+                    class="px-6 py-3 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-sm hover:bg-gray-800 transition-colors">Add
+                    Category</button>
+            </div>
+        </div>
+
+        <!-- EDIT CATEGORY MODAL -->
+        <div id="editModal"
+            class="modal-box hidden bg-white rounded-xl shadow-2xl w-[480px] max-w-[90vw] overflow-hidden p-8 relative">
+            <button onclick="closeModals()"
+                class="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors">
+                <span class="material-symbols-outlined text-[20px]">close</span>
+            </button>
+
+            <h4 class="text-[20px] font-black text-black tracking-tight uppercase mb-8">Edit Category</h4>
+
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-[10px] font-bold tracking-widest text-black uppercase mb-2">Category
+                        Name</label>
+                    <input id="editCategoryName" type="text"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-lg py-3.5 px-4 text-[13px] font-medium text-black outline-none focus:bg-white focus:border-black transition-colors">
+                    <p id="editCategoryError" class="text-red-500 text-[11px] font-medium mt-1.5 hidden"></p>
+                </div>
+
+                <div class="flex items-center justify-between border-t border-gray-100 pt-6">
+                    <div>
+                        <div class="text-[10px] font-bold tracking-widest text-black uppercase mb-0.5">Mark as Active
+                        </div>
+                        <div class="text-[11px] font-medium text-gray-400">Visible on store frontend</div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input id="editCategoryStatus" type="checkbox" checked class="sr-only peer">
+                        <div
+                            class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black">
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <input type="hidden" id="editCategoryId">
+
+            <div class="flex items-center justify-end gap-5 mt-10">
+                <button onclick="closeModals()"
+                    class="text-[11px] font-bold text-gray-500 uppercase tracking-wider hover:text-black transition-colors">Cancel</button>
+                <button id="submitEditCategory"
+                    class="px-6 py-3 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-sm hover:bg-gray-800 transition-colors">Update
+                    Category</button>
+            </div>
+        </div>
+
+        <!-- DELETE CATEGORY MODAL -->
+        <div id="deleteModal"
+            class="modal-box hidden bg-white rounded-xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden p-8 relative text-center">
+            <div class="w-16 h-16 rounded-full bg-red-50 mx-auto flex items-center justify-center mb-5">
+                <span class="material-symbols-outlined text-[32px] text-red-500">warning</span>
+            </div>
+            <h4 class="text-[20px] font-black text-black tracking-tight uppercase mb-2">Delete Category?</h4>
+            <p class="text-[13px] text-gray-500 leading-relaxed mb-8">Are you sure you want to delete <span
+                    id="deleteCategoryName" class="font-bold text-black"></span>? This action cannot be undone.</p>
+
+            <input type="hidden" id="deleteCategoryId">
+
+            <div class="flex items-center justify-center gap-3">
+                <button onclick="closeModals()"
+                    class="px-6 py-3 bg-gray-100 text-gray-600 text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
+                <button id="confirmDeleteBtn"
+                    class="px-6 py-3 bg-red-500 text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-red-600 transition-colors">Delete</button>
+            </div>
+        </div>
+
+        <!-- RESTORE CATEGORY MODAL -->
+        <div id="restoreModal"
+            class="modal-box hidden bg-white rounded-xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden p-8 relative text-center">
+            <div class="w-16 h-16 rounded-full bg-emerald-50 mx-auto flex items-center justify-center mb-5">
+                <span class="material-symbols-outlined text-[32px] text-emerald-500">settings_backup_restore</span>
+            </div>
+            <h4 class="text-[20px] font-black text-black tracking-tight uppercase mb-2">Restore Category?</h4>
+            <p class="text-[13px] text-gray-500 leading-relaxed mb-8">Are you sure you want to restore <span
+                    id="restoreCategoryName" class="font-bold text-black"></span>? This will make the category available
+                again.</p>
+
+            <input type="hidden" id="restoreCategoryId">
+
+            <div class="flex items-center justify-center gap-3">
+                <button onclick="closeModals()"
+                    class="px-6 py-3 bg-gray-100 text-gray-600 text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
+                <button id="confirmRestoreBtn"
+                    class="px-6 py-3 bg-emerald-500 text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-emerald-600 transition-colors">Restore</button>
+            </div>
+        </div>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script>
+        // ─── MODAL CONTROLS ─────────────────────────────────────────
+        function openAddModal() {
+            document.getElementById('addCategoryInput').value = '';
+            document.getElementById('addCategoryError').classList.add('hidden');
+            document.getElementById('addCategoryStatus').checked = true;
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            document.getElementById('addModal').classList.remove('hidden');
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('deleteModal').classList.add('hidden');
+            document.getElementById('restoreModal').classList.add('hidden');
+        }
+
+        function openEditModal(name, isActive, id) {
+            document.getElementById('editCategoryName').value = name;
+            document.getElementById('editCategoryStatus').checked = isActive;
+            document.getElementById('editCategoryId').value = id;
+            document.getElementById('editCategoryError').classList.add('hidden');
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            document.getElementById('editModal').classList.remove('hidden');
+            document.getElementById('addModal').classList.add('hidden');
+            document.getElementById('deleteModal').classList.add('hidden');
+            document.getElementById('restoreModal').classList.add('hidden');
+        }
+
+        function openDeleteModal(name, id) {
+            document.getElementById('deleteCategoryName').textContent = "'" + name + "'";
+            document.getElementById('deleteCategoryId').value = id;
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            document.getElementById('deleteModal').classList.remove('hidden');
+            document.getElementById('addModal').classList.add('hidden');
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('restoreModal').classList.add('hidden');
+        }
+
+        function openRestoreModal(name, id) {
+            document.getElementById('restoreCategoryName').textContent = "'" + name + "'";
+            document.getElementById('restoreCategoryId').value = id;
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            document.getElementById('restoreModal').classList.remove('hidden');
+            document.getElementById('addModal').classList.add('hidden');
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        function closeModals() {
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.getElementById('addModal').classList.add('hidden');
+            document.getElementById('editModal').classList.add('hidden');
+            document.getElementById('deleteModal').classList.add('hidden');
+            document.getElementById('restoreModal').classList.add('hidden');
+        }
+
+        function handleModalBackdropClick(e) {
+            if (e.target === document.getElementById('modalOverlay')) closeModals();
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+
+        // ─── CUSTOM DROPDOWNS ───────────────────────────────────────
+        function toggleDropdown(toggle) {
+            const menu = toggle.nextElementSibling;
+            const isOpen = menu.classList.contains('show');
+
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+
+            if (!isOpen) {
+                menu.classList.add('show');
+                toggle.classList.add('active');
+            }
+        }
+
+    function selectOption(filterId, value, label) {
+    const input = document.getElementById(filterId + (filterId === 'sort' ? 'Select' : 'Filter'));
+    input.value = value;
+
+    // Update the toggle label
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+    document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+
+    // Filter/sort still needs server — navigate
+    const search = document.getElementById('searchInput').value.trim();
+    const filter = document.getElementById('statusFilter').value;
+    const sort   = document.getElementById('sortSelect').value;
+    window.location.href = `/admin/category?page=1&search=${encodeURIComponent(search)}&filter=${filter}&sort=${sort}`;
+    }
+
+        // Close dropdowns on click outside
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.custom-dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+                document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+            }
+        });
+
+        // ─── FILTERING & SORTING ────────────────────────────────────
+        function applyFilters() {
+            const search = document.getElementById('searchInput').value.trim();
+            const filter = document.getElementById('statusFilter').value;
+            const sort = document.getElementById('sortSelect').value;
+            window.location.href = `/admin/category?page=1&search=${search}&filter=${filter}&sort=${sort}`;
+        }
+
+        // ─── PAGINATION ─────────────────────────────────────────────
+        function changePage(page) {
+            const search = document.getElementById('searchInput').value.trim();
+            const filter = document.getElementById('statusFilter') ? document.getElementById('statusFilter').value : 'all';
+            const sort = document.getElementById('sortSelect') ? document.getElementById('sortSelect').value : 'default';
+            window.location.href = `/admin/category?page=${page}&search=${search}&filter=${filter}&sort=${sort}`;
+        }
+
+        // ─── DEBOUNCED SEARCH (no reload) ─────────────────────────────
+    let debounceTimer;
+
+    document.getElementById('searchInput').addEventListener('input', function () {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        filterTable();
+    }, 300);
+    });
+
+    function filterTable() {
+    const query = document.getElementById('searchInput').value.trim().toLowerCase();
+    const rows = document.querySelectorAll('.category-row');
+    let visibleCount = 0;
+
+    rows.forEach(row => {
+        const name = row.querySelector('td:nth-child(2)')?.textContent?.toLowerCase() || '';
+        const matches = name.includes(query);
+        row.style.display = matches ? '' : 'none';
+        if (matches) visibleCount++;
+    });
+
+    // Update the categories count badge
+    const badge = document.querySelector('.bg-gray-100.px-2\\.5');
+    if (badge) badge.textContent = `${visibleCount} categories`;
+
+    // Show/hide empty state
+    let emptyRow = document.getElementById('empty-search-row');
+    if (visibleCount === 0) {
+        if (!emptyRow) {
+            emptyRow = document.createElement('tr');
+            emptyRow.id = 'empty-search-row';
+            emptyRow.innerHTML = `<td colspan="5" class="py-12 text-center text-[13px] font-medium text-gray-400">No categories match your search</td>`;
+            document.querySelector('tbody').appendChild(emptyRow);
+        }
+        emptyRow.style.display = '';
+    } else if (emptyRow) {
+        emptyRow.style.display = 'none';
+    }
+    }
+
+        // ─── VALIDATION CLEARING ────────────────────────────────────
+        document.getElementById('addCategoryInput').addEventListener('input', () => {
+            document.getElementById('addCategoryError').classList.add('hidden');
+        });
+
+        document.getElementById('editCategoryName').addEventListener('input', () => {
+            document.getElementById('editCategoryError').classList.add('hidden');
+        });
+
+        // ─── ADD CATEGORY ────────────────────────────────────────────
+        document.getElementById('submitAddCategory').addEventListener('click', async () => {
+            const name = document.getElementById('addCategoryInput').value.trim();
+            const isActive = document.getElementById('addCategoryStatus').checked;
+            const errorEl = document.getElementById('addCategoryError');
+
+        if (!name) {
+            errorEl.textContent = 'Category name is required.';
+            errorEl.classList.remove('hidden');
+            return;
+            } 
+        if (name.length < 3) {
+            errorEl.textContent = 'Category name must be at least 3 characters.';
+            errorEl.classList.remove('hidden');
+            return;
+            }
+        if (/[^a-zA-Z\s]/.test(name)) {
+            errorEl.textContent = 'Category name can only contain letters.';
+            errorEl.classList.remove('hidden');
+            return;
+            }
+        if (/^\s+$/.test(name)) {
+            errorEl.textContent = 'Category name cannot be only spaces.';
+            errorEl.classList.remove('hidden');
+            return;
+            }
+            errorEl.classList.add('hidden');
+
+            try {
+
+                const response = await axios.post('/admin/category', {
+                    name,
+                    isActive
+                });
+
+                const data = response.data;
+
+                if (data.success) {
+
+                    showToast("success", data.message);
+
+                    setTimeout(() => {
+                        closeModals();
+                        location.reload();
+                    }, 500);
+
+                }
+
+            } catch (error) {
+
+                const message =
+                    error.response?.data?.message ||
+                    "Something went wrong";
+
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+            }
+
+        });
+
+        // ─── EDIT CATEGORY ───────────────────────────────────────────
+        document.getElementById('submitEditCategory').addEventListener('click', async () => {
+            const id = document.getElementById('editCategoryId').value;
+            const name = document.getElementById('editCategoryName').value.trim();
+            const isActive = document.getElementById('editCategoryStatus').checked;
+            const errorEl = document.getElementById('editCategoryError');
+
+           if (!name) {
+            errorEl.textContent = 'Category name is required.';
+            errorEl.classList.remove('hidden');
+            return;
+            }
+           if (name.length < 3) {
+            errorEl.textContent = 'Category name must be at least 3 characters.';
+            errorEl.classList.remove('hidden');
+            return;
+            }
+            if (/[^a-zA-Z\s]/.test(name)) {
+            errorEl.textContent = 'Category name can only contain letters.';
+            errorEl.classList.remove('hidden');
+             return;
+            }
+            if (/^\s+$/.test(name)) {
+            errorEl.textContent = 'Category name cannot be only spaces.';
+            errorEl.classList.remove('hidden');
+            return;
+            }
+            errorEl.classList.add('hidden');
+
+            try {
+                const res = await axios.put(`/admin/category/edit/${id}`, {
+                    name,
+                    isActive
+                });
+                const data = await res.data;
+
+                if (data.success) {
+
+                    showToast("success", data.message);
+
+                    setTimeout(() => {
+                        closeModals();
+                        location.reload();
+                    }, 500);
+
+                }
+            } catch (err) {
+                const message =
+                    error.response?.data?.message ||
+                    "Something went wrong";
+
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden')
+            }
+        });
+
+        // ─── DELETE CATEGORY ──────
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+            const id = document.getElementById('deleteCategoryId').value;
+
+            try {
+                const res = await axios.delete(`/admin/category/delete/${id}`);
+
+                const data = await res.data;
+
+                if (data.success) {
+
+                    showToast("success", data.message);
+
+                    setTimeout(() => {
+                        closeModals();
+                        location.reload();
+                    }, 500);
+                }
+            } catch (err) {
+                showToast('error', 'Something went wrong. Try again.');
+            }
+        });
+
+        // ─── RESTORE CATEGORY ──────
+        document.getElementById('confirmRestoreBtn').addEventListener('click', async () => {
+            const id = document.getElementById('restoreCategoryId').value;
+
+            try {
+                const res = await axios.put(`/admin/category/restore/${id}`);
+
+                const data = await res.data;
+
+                if (data.success) {
+
+                    showToast("success", data.message);
+
+                    setTimeout(() => {
+                        closeModals();
+                        location.reload();
+                    }, 500);
+
+                }
+            } catch (err) {
+                showToast('error', 'Something went wrong. Try again.');
+            }
+        });
+
+    </script>
+</body>
+
+</html>

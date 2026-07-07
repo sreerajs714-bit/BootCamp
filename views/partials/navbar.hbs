@@ -1,0 +1,128 @@
+<!-- Navigation -->
+<header id="main-navbar" class="w-full bg-white fixed top-0 z-50 border-b border-gray-200 shadow-sm transition-all duration-300">
+    
+    <div class="w-full px-6 h-20 flex items-center justify-between">
+
+        <!-- Logo (Left) -->
+        <a href="/" class="flex-shrink-0 group">
+            <h1 class="font-display font-black text-2xl tracking-tighter uppercase text-black transition-all duration-300 group-hover:scale-105">
+                BOOT<span class="font-light">CAMP</span>
+            </h1>
+        </a>
+
+        <!-- Menu Items (Center) -->
+        <nav class="hidden lg:flex items-center space-x-10 font-bold text-[11px] tracking-[0.4em] uppercase">
+            <a href="/" class="text-gray-900 hover:text-gray-500 transition-colors duration-300">Home</a>
+            <a href="/users/allProduct" class="text-gray-900 hover:text-gray-500 transition-colors duration-300">Explore</a>
+        </nav>
+
+        <!-- Icons Container (Right) -->
+        <div class="flex items-center space-x-6">
+            
+            <!-- EXPANDABLE SEARCH BAR -->
+            <div id="search-container" class="flex items-center overflow-hidden transition-all duration-500 ease-in-out w-0 opacity-0 bg-[#f9f9f9] border border-gray-200 rounded-full h-10 px-0">
+                <input type="text" id="search-input" placeholder="SEARCH PRODUCT..." 
+                    class="bg-transparent border-none outline-none text-[10px] font-black tracking-widest pl-5 w-64 placeholder:text-gray-400">
+                <button onclick="toggleSearch()" class="pr-3 text-gray-400 hover:text-black transition-colors">
+                    <span class="material-symbols-outlined text-[18px]">close</span>
+                </button>
+            </div>
+
+            <!-- Wishlist -->
+            <a href="/users/wishlist" class="icon-btn relative group" aria-label="Wishlist">
+                <span class="material-symbols-outlined font-light text-[22px] text-black group-hover:text-gray-500 transition-colors duration-300">favorite</span>
+                <!-- Dynamic Wishlist Badge -->
+                <span id="wishlist-badge" class="badge absolute -top-1 -right-1 bg-red-500 text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all {{#unless wishlistCount}}opacity-0 scale-0{{/unless}}">
+                    {{wishlistCount}}
+                </span>
+            </a>
+
+            <!-- Cart -->
+            <a href="/users/cart" class="icon-btn relative group" aria-label="Cart">
+                <span class="material-symbols-outlined font-light text-[22px] text-black group-hover:text-gray-500 transition-colors duration-300">shopping_bag</span>
+                <!-- Dynamic Cart Badge -->
+                <span id="cart-badge" class="badge absolute -top-1 -right-1 bg-black text-white text-[8px] font-black w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all {{#unless cartCount}}opacity-0 scale-0{{/unless}}">
+                    {{cartCount}}
+                </span>
+            </a>
+
+            {{#if user}}
+            <a href="/users/profile" class="icon-btn group" aria-label="Profile">
+                <span class="material-symbols-outlined font-light text-[22px] text-black group-hover:text-gray-500 transition-colors duration-300">person</span>
+            </a>
+            {{else}}
+            <a href="/users/login"
+                class="px-5 py-2 text-[11px] font-black tracking-widest uppercase rounded-full bg-black text-white hover:bg-gray-800 transition-all duration-300">
+                Login
+            </a>
+            {{/if}}
+
+        </div>
+    </div>
+</header>
+
+<style>
+    /* Expand Animation */
+    #search-container.search-active {
+        width: 320px; 
+        opacity: 1;
+        margin-right: -4px;
+        background-color: #f9f9f9;
+        box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.05);
+    }
+
+    /* Hide trigger icon when search is open */
+    .search-open-state #search-trigger {
+        display: none;
+    }
+
+    /* Badge Transition with Scale effect */
+    .badge {
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+</style>
+
+<script>
+    function toggleSearch() {
+        const container = document.getElementById('search-container');
+        const header = document.getElementById('main-navbar');
+        const input = document.getElementById('search-input');
+        container.classList.toggle('search-active');
+        header.classList.toggle('search-open-state');
+        if (container.classList.contains('search-active')) {
+            setTimeout(() => input.focus(), 300);
+        } else {
+            input.value = '';
+        }
+    }
+
+    window.fetchNavCounts = async function () {
+        if (typeof axios === 'undefined') return;
+        try {
+            const res = await axios.get('/users/getCounts', { withCredentials: true });
+            if (!res.data) return;
+
+            const { cartCount, wishlistCount } = res.data;
+
+            const cartBadge = document.getElementById('cart-badge');
+            if (cartBadge) {
+                cartBadge.textContent = cartCount;
+                cartCount > 0
+                    ? cartBadge.classList.remove('opacity-0', 'scale-0')
+                    : cartBadge.classList.add('opacity-0', 'scale-0');
+            }
+
+            const wishlistBadge = document.getElementById('wishlist-badge');
+            if (wishlistBadge) {
+                wishlistBadge.textContent = wishlistCount;
+                wishlistCount > 0
+                    ? wishlistBadge.classList.remove('opacity-0', 'scale-0')
+                    : wishlistBadge.classList.add('opacity-0', 'scale-0');
+            }
+        } catch (err) {
+            console.error('fetchNavCounts error:', err);
+        }
+    };
+
+    window.addEventListener('load', fetchNavCounts);
+</script>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BOOT CAMP | ADMIN LOGIN</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Toastify -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #ffffff;
+            overflow: hidden;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .custom-input:focus {
+            border-color: #000000;
+            outline: none;
+        }
+
+        /* Hide scrollbar but keep functionality */
+        .overflow-y-auto::-webkit-scrollbar {
+            display: none;
+        }
+        .overflow-y-auto {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .input-group:focus-within .material-symbols-outlined {
+            color: #000000;
+        }
+    </style>
+</head>
+
+<body class="text-black min-h-screen flex items-center justify-center p-4">
+
+    <!-- Main Container -->
+    <div class="relative z-20 w-full max-w-md animate-fadeIn my-auto">
+        <div class="p-10 rounded-3xl glass-card">
+            
+            <!-- Logo/Header Area -->
+            <div class="mb-10 text-center">
+                <h2 class="text-3xl font-black mb-2 tracking-tighter uppercase">
+                    BootCamp
+                </h2>
+                
+                <div class="mt-4 flex flex-col items-center space-y-1">
+                    <span class="text-[11px] text-black/50 uppercase tracking-[0.2em] font-bold">
+                        Admin Protocol
+                    </span>
+                    <h1 class="text-xl font-bold tracking-tight mt-2">ADMIN LOGIN</h1>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="space-y-6" action="/admin/login" method="POST">
+                
+                <!-- Email Input -->
+                <div class="group input-group">
+                    <div class="relative">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-black/30 transition-colors">
+                            <span class="material-symbols-outlined text-[22px]">mail</span>
+                        </div>
+                        <input type="text" id="email" name="email" placeholder="Admin Email" 
+                            class="w-full pl-12 pr-4 py-4 bg-black/5 border border-transparent rounded-2xl text-black placeholder-black/30 custom-input transition-all duration-300">
+                    </div>
+                    <p id="email-error" class="text-red-500 text-[10px] mt-1 hidden uppercase tracking-wider font-bold"></p>
+                </div>
+
+                <!-- Password Input -->
+                <div class="group input-group">
+                    <div class="relative">
+                        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-black/30 transition-colors">
+                            <span class="material-symbols-outlined text-[22px]">lock</span>
+                        </div>
+                        <input type="password" id="password" name="password" placeholder="Password"
+                            class="w-full pl-12 pr-14 py-4 bg-black/5 border border-transparent rounded-2xl text-black placeholder-black/30 custom-input transition-all duration-300">
+                        <button type="button" id="toggle-password"
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-black/30 hover:text-black transition-colors">
+                            <span class="material-symbols-outlined text-[22px]">visibility</span>
+                        </button>
+                    </div>
+                    <p id="password-error" class="text-red-500 text-[10px] mt-1 hidden uppercase tracking-wider font-bold"></p>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submit-btn"
+                    class="w-full py-5 bg-black hover:bg-zinc-800 text-white font-bold uppercase tracking-widest text-[11px] rounded-2xl transition-all duration-300 transform active:scale-95 shadow-xl shadow-black/10">
+                    Access Terminal
+                </button>
+            </form>
+
+            <!-- Footer Link -->
+            <p class="mt-10 text-center text-[11px] text-black/30 uppercase tracking-widest font-bold">
+                Unauthorized access is restricted
+            </p>
+        </div>
+    </div>
+
+    <!-- Page Footer -->
+    <footer class="absolute bottom-6 left-0 right-0 text-center text-black/10 text-[9px] font-black uppercase tracking-[0.4em] z-20">
+        © 2026 Admin Secure Protocol
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script>
+        // Password Visibility Toggle
+        function setupVisibility(btnId, inputId) {
+            const btn = document.getElementById(btnId);
+            const input = document.getElementById(inputId);
+            btn.addEventListener('click', () => {
+                const isPassword = input.type === 'password';
+                input.type = isPassword ? 'text' : 'password';
+                btn.querySelector('.material-symbols-outlined').textContent = isPassword ? 'visibility_off' : 'visibility';
+            });
+        }
+        setupVisibility('toggle-password', 'password');
+
+        // Validation Helpers
+        function showError(id, message) {
+            const el = document.getElementById(`${id}-error`);
+            if (el) {
+                el.textContent = message;
+                el.classList.remove('hidden');
+            }
+        }
+        function clearError(id) {
+            const el = document.getElementById(`${id}-error`);
+            if (el) {
+                el.textContent = '';
+                el.classList.add('hidden');
+            }
+        }
+
+        // Input Listeners
+        ['email', 'password'].forEach(id => {
+            document.getElementById(id).addEventListener('input', () => clearError(id));
+        });
+
+        // Form Logic
+        const form = document.getElementById('login-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value;
+
+            // Simple Validation
+            let isValid = true;
+            if (!email) { showError('email', 'Email required'); isValid = false; }
+            if (!password) { showError('password', 'Password required'); isValid = false; }
+
+            if (!isValid) return;
+
+            // Execution
+            submitBtn.disabled = true;
+            const originalText = submitBtn.innerText;
+            submitBtn.innerText = 'AUTHENTICATING...';
+
+            try {
+                const response = await axios.post(form.action, { email, password });
+                
+                if (response.data.success) {
+                    showToast("success", "Access Granted.");
+                    setTimeout(() => {
+                        window.location.href = "/admin/dashboard";
+                    }, 1000);
+                } else {
+                    throw new Error(response.data.message || "Access Denied");
+                }
+            } catch (err) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = originalText;
+                const msg = err.response?.data?.message || err.message || "System error";
+                showToast("error", msg);
+                showError('password', msg);
+            }
+        });
+
+        window.addEventListener("pageshow", (e) => {
+            if (e.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
+                window.location.reload();
+            }
+        });
+    </script>
+</body>
+
+</html>

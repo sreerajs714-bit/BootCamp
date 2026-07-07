@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Management | Admin | BOOTCAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #111827;
+            overflow: hidden;
+        }
+
+        .sidebar-item {
+            transition: all 0.18s ease;
+        }
+
+        .sidebar-item:hover:not(.active) {
+            background-color: #f9fafb;
+        }
+
+        .sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-item.active .material-symbols-outlined {
+            color: #fff;
+        }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 4px;
+        }
+
+        .product-row {
+            transition: background 0.12s;
+        }
+
+        .product-row:hover {
+            background: rgba(249, 250, 251, 0.8);
+        }
+
+        .modal-box {
+            animation: slideUp 0.2s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(12px) scale(0.98);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .page-btn {
+            transition: all 0.12s;
+        }
+
+        .page-btn:hover {
+            background: #f3f4f6;
+        }
+
+        .page-btn.current {
+            background: #000;
+            color: #fff;
+        }
+
+        .custom-dropdown {
+            position: relative;
+            min-width: 160px;
+        }
+
+        .dropdown-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fdfdfd;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-toggle:hover {
+            border-color: #000;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .dropdown-toggle.active {
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 6px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background: #f9fafb;
+            color: #000;
+        }
+
+        .dropdown-item.selected {
+            background: #000;
+            color: #fff;
+        }
+
+        .filter-label {
+            position: absolute;
+            top: -7px;
+            left: 12px;
+            background: white;
+            padding: 0 6px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased h-screen flex">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+        <div class="h-24 flex flex-col justify-center px-8 border-b border-gray-100">
+            <h1 class="font-sans font-black text-2xl tracking-tight uppercase text-black">BOOTCAMP</h1>
+            <span class="text-[10px] font-bold tracking-widest text-emerald-500 mt-1">SYSTEM ADMIN</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <a href="/admin/dashboard"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard
+            </a>
+            <a href="/admin/productManagement"
+                class="sidebar-item active flex items-center px-4 py-3 text-[13px] font-bold uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">sports_soccer</span>Products
+            </a>
+            <a href="/admin/category"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">category</span>Categories
+            </a>
+            <a href="/admin/orders"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">shopping_bag</span>Orders
+            </a>
+            <a href="/admin/offers"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">local_offer</span>Offers
+            </a>
+            <a href="/admin/coupons"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">confirmation_number</span>Coupons
+            </a>
+            <a href="/admin/usermanagement"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">group</span>Users
+            </a>
+            <a href="/admin/returns"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">assignment_return</span>Returns
+            </a>
+            <a href="/admin/brand"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[19px]">sell</span>Brand
+            </a>
+        </nav>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-[#f8f9fa]">
+
+        <!-- Header -->
+        <header
+            class="h-[88px] bg-white border-b border-gray-200 flex items-center justify-between px-10 flex-shrink-0 z-10">
+            <div>
+                <h2 class="font-sans font-black text-[17px] tracking-tight uppercase text-black">Product Management
+                </h2>
+                <p class="text-[11px] text-gray-400 font-medium mt-0.5">Curate and monitor the performance of elite footwear.</p>
+            </div>
+            <div class="relative w-[360px]">
+                <span
+                    class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[19px] pointer-events-none">search</span>
+                <input id="searchInput" type="text" placeholder="Search by name or sku..." value="{{search}}"
+                    class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-11 pr-10 text-[13px] font-medium text-gray-700 outline-none placeholder-gray-400 focus:bg-white focus:border-gray-300 transition-colors">
+            </div>
+        </header>
+
+        <!-- Body -->
+        <div class="flex-1 overflow-y-auto p-8 lg:px-12 lg:py-10">
+
+            <!-- Action area -->
+            <div class="flex justify-end mb-8">
+                <a href="/admin/addProduct"
+                    class="px-6 py-3 bg-black text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2">
+                    <span class="material-symbols-outlined text-[16px]">add</span>
+                    Add Product
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                <!-- Total -->
+                <div
+                    class="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden">
+                    <div class="absolute bottom-0 left-0 right-0 h-[3px] bg-black rounded-b-2xl"></div>
+                    <div>
+                        <div class="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center mb-3">
+                            <span class="material-symbols-outlined text-gray-600 text-[20px]">inventory_2</span>
+                        </div>
+                        <div class="text-[36px] font-black text-black tracking-tight leading-none">{{totalProducts}}</div>
+                    </div>
+                    <div class="text-[10px] font-bold tracking-[0.15em] text-gray-300 uppercase self-start mt-1">
+                        Total<br>Products</div>
+                </div>
+
+                <!-- Active -->
+                <div
+                    class="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden">
+                    <div>
+                        <div class="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center mb-3">
+                            <span class="material-symbols-outlined text-emerald-500 text-[20px]">check_circle</span>
+                        </div>
+                        <div class="text-[36px] font-black text-black tracking-tight leading-none">{{activeCount}}</div>
+                        <div class="flex items-center gap-1.5 mt-2">
+                            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-[11px] font-bold text-emerald-500">Live products</span>
+                        </div>
+                    </div>
+                    <div class="text-[10px] font-bold tracking-[0.15em] text-gray-300 uppercase self-start mt-1">
+                        Active<br>Status</div>
+                </div>
+
+                <!-- Low Stock -->
+                <div
+                    class="bg-white rounded-2xl p-7 shadow-sm border border-gray-100 flex items-center justify-between relative overflow-hidden">
+                    <div>
+                        <div class="w-9 h-9 rounded-lg bg-red-50 flex items-center justify-center mb-3">
+                            <span class="material-symbols-outlined text-red-400 text-[20px]">warning</span>
+                        </div>
+                        <div class="text-[36px] font-black text-black tracking-tight leading-none">{{lowStockCount}}</div>
+                        <div class="text-[11px] font-bold text-red-400 mt-2">Critical stock levels</div>
+                    </div>
+                    <div class="text-[10px] font-bold tracking-[0.15em] text-gray-300 uppercase self-start mt-1">
+                        Low<br>Stock</div>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+                <!-- Controls -->
+                <div class="px-8 py-5 border-b border-gray-100 flex items-center justify-between gap-4 flex-wrap">
+                    <div class="flex items-center gap-3">
+                        <h3 class="text-[15px] font-black text-black">Product Inventory</h3>
+                        <span id="itemsBadge"
+                            class="text-[10px] font-bold tracking-widest text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full uppercase">
+                            {{products.length}} items shown
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-5 flex-wrap">
+                        <input type="hidden" id="categoryFilter" value="{{category}}">
+                        <input type="hidden" id="brandFilter"    value="{{brand}}">
+                        <input type="hidden" id="statusFilter"   value="{{status}}">
+
+                        <!-- Category Dropdown -->
+                        <div class="custom-dropdown min-w-[200px]">
+                            <span class="filter-label">Category</span>
+                            <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                                <span class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                                    {{#if (eq category 'all')}}All Categories{{/if}}
+                                    {{#each categories}}
+                                        {{#if (eq ../category this._id)}}{{this.name}}{{/if}}
+                                    {{/each}}
+                                </span>
+                                <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+                            </div>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item {{#if (eq category 'all')}}selected{{/if}}" onclick="selectOption('category', 'all', 'All Categories')">All Categories</div>
+                                {{#each categories}}
+                                <div class="dropdown-item {{#if (eq ../category this._id)}}selected{{/if}}" onclick="selectOption('category', '{{this._id}}', '{{this.name}}')">{{this.name}}</div>
+                                {{/each}}
+                            </div>
+                        </div>
+
+                        <!-- Brand Dropdown -->
+                        <div class="custom-dropdown min-w-[180px]">
+                            <span class="filter-label">Brand</span>
+                            <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                                <span class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                                    {{#if (eq brand 'all')}}All Brands{{/if}}
+                                    {{#each brands}}
+                                        {{#if (eq ../brand this._id)}}{{this.name}}{{/if}}
+                                    {{/each}}
+                                </span>
+                                <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+                            </div>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item {{#if (eq brand 'all')}}selected{{/if}}" onclick="selectOption('brand', 'all', 'All Brands')">All Brands</div>
+                                {{#each brands}}
+                                <div class="dropdown-item {{#if (eq ../brand this._id)}}selected{{/if}}" onclick="selectOption('brand', '{{this._id}}', '{{this.name}}')">{{this.name}}</div>
+                                {{/each}}
+                            </div>
+                        </div>
+
+                        <!-- Status Dropdown -->
+                        <div class="custom-dropdown min-w-[150px]">
+                            <span class="filter-label">Status</span>
+                            <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                                <span class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                                    {{#if (eq status 'all')}}All Status{{/if}}
+                                    {{#if (eq status 'active')}}Active{{/if}}
+                                    {{#if (eq status 'inactive')}}Inactive{{/if}}
+                                    {{#if (eq status 'deleted')}}Deleted{{/if}}
+                                </span>
+                                <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+                            </div>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item {{#if (eq status 'all')}}selected{{/if}}" onclick="selectOption('status', 'all', 'All Status')">All Status</div>
+                                <div class="dropdown-item {{#if (eq status 'active')}}selected{{/if}}" onclick="selectOption('status', 'active', 'Active')">Active</div>
+                                <div class="dropdown-item {{#if (eq status 'inactive')}}selected{{/if}}" onclick="selectOption('status', 'inactive', 'Inactive')">Inactive</div>
+                                <div class="dropdown-item {{#if (eq status 'deleted')}}selected{{/if}}" onclick="selectOption('status', 'deleted', 'Deleted')">Deleted</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[1000px]">
+                        <thead>
+                            <tr class="bg-[#f9fafb]">
+                                <th class="py-4 px-8 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase w-20">Sl.No</th>
+                                <th class="py-4 px-4 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase w-24">Image</th>
+                                <th class="py-4 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">Product Details</th>
+                                <th class="py-4 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">Category</th>
+                                <th class="py-4 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">Price</th>
+                                <th class="py-4 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">Stock</th>
+                                <th class="py-4 px-6 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase">Status</th>
+                                <th class="py-4 px-8 text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase text-right w-44">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTbody" class="divide-y divide-gray-100">
+                            {{#each products}}
+                            <tr class="product-row group" data-id="{{this._id}}">
+                                <td class="py-5 px-8 text-[13px] font-medium text-gray-400">
+                                    {{addIndex @index ../currentPage 5}}
+                                </td>
+                                <td class="py-5 px-4">
+                                    <div class="w-12 h-12 bg-gray-50 flex items-center justify-center p-1 border border-gray-100 rounded-lg overflow-hidden group-hover:border-gray-200 transition-colors">
+                                        {{#if defaultVariant.images}}
+                                            <img src="{{defaultVariant.images.[0]}}" alt="{{this.productName}}" class="max-w-full max-h-full object-contain" />
+                                        {{else}}
+                                            <span class="material-symbols-outlined text-gray-300 text-[20px]">image</span>
+                                        {{/if}}
+                                    </div>
+                                </td>
+                                <td class="py-5 px-6">
+                                    <div class="text-[14px] font-bold text-black leading-tight">{{this.productName}}</div>
+                                    <div class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">{{defaultVariant.sku}}</div>
+                                </td>
+                                <td class="py-5 px-6">
+                                    <span class="text-[11px] font-bold text-black uppercase tracking-wider bg-gray-50 px-2 py-1 rounded">{{this.category.name}}</span>
+                                </td>
+                                <td class="py-5 px-6">
+                                    <div class="text-[14px] font-black text-black tracking-tight">₹{{defaultVariant.price}}</div>
+                                </td>
+                                <td class="py-5 px-6">
+                                    {{#if (lte defaultVariant.stock 10)}}
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                                        <span class="text-[13px] font-bold text-red-500">{{defaultVariant.stock}}</span>
+                                    </div>
+                                    {{else}}
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                                        <span class="text-[13px] font-bold text-black">{{defaultVariant.stock}}</span>
+                                    </div>
+                                    {{/if}}
+                                </td>
+                                <td class="py-5 px-6">
+                                    <div class="flex items-center">
+                                        {{#if this.isDeleted}}
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase bg-red-50 text-red-600">Deleted</span>
+                                        {{else if (eq this.status "active")}}
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase bg-emerald-50 text-emerald-600">Active</span>
+                                        {{else}}
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase bg-gray-100 text-gray-500">Inactive</span>
+                                        {{/if}}
+                                    </div>
+                                </td>
+                                <td class="py-5 px-8 text-right">
+                                    <div class="flex items-center justify-end gap-4">
+                                        {{#if this.isDeleted}}
+                                        <button onclick="openRestoreModal('{{this.productName}}', '{{this._id}}', '{{defaultVariant.images.[0]}}')"
+                                            class="text-emerald-500 hover:text-emerald-600 transition-colors flex items-center gap-1.5"
+                                            title="Restore">
+                                            <span class="material-symbols-outlined text-[18px]">settings_backup_restore</span>
+                                            <span class="text-[10px] font-bold uppercase tracking-wider">Restore</span>
+                                        </button>
+                                        {{else}}
+                                        <a href="/admin/productView/{{this._id}}" class="text-gray-400 hover:text-black transition-colors" title="View">
+                                            <span class="material-symbols-outlined text-[18px]">visibility</span>
+                                        </a>
+                                        <a href="/admin/editProduct/{{this._id}}" class="text-gray-400 hover:text-black transition-colors" title="Edit">
+                                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                                        </a>
+                                        <button onclick="openDeleteModal('{{this.productName}}', '{{this._id}}', '{{defaultVariant.images.[0]}}')"
+                                            class="text-red-300 hover:text-red-500 transition-colors" title="Delete">
+                                            <span class="material-symbols-outlined text-[18px]">delete</span>
+                                        </button>
+                                        {{/if}}
+                                    </div>
+                                </td>
+                            </tr>
+                            {{else}}
+                            <tr>
+                                <td colspan="8" class="py-12 text-center text-[13px] font-medium text-gray-400">
+                                    No products found
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="px-8 py-5 border-t border-gray-100 flex items-center justify-between bg-white">
+                    <div id="showingText" class="text-[11px] font-medium text-gray-500">
+                        Showing <span class="font-bold text-black">{{products.length}}</span> of <span
+                        class="font-bold text-black">{{totalProducts}}</span> products
+                    </div>
+                    <div id="paginationWrap" class="flex items-center gap-1.5">
+                        {{#if hasPrevPage}}
+                        <button onclick="changePage({{prevPage}})"
+                            class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-400 hover:text-black">
+                            <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                        </button>
+                        {{else}}
+                        <button disabled
+                            class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-200 cursor-not-allowed">
+                            <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                        </button>
+                        {{/if}}
+
+                        {{#each pageNumbers}}
+                        <button onclick="changePage({{this}})"
+                            class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-[12px] font-bold {{#if (eq this ../currentPage)}}current{{else}}text-gray-600{{/if}}">
+                            {{this}}
+                        </button>
+                        {{/each}}
+
+                        {{#if hasNextPage}}
+                        <button onclick="changePage({{nextPage}})"
+                            class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-400 hover:text-black">
+                            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                        </button>
+                        {{else}}
+                        <button disabled
+                            class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-200 cursor-not-allowed">
+                            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                        </button>
+                        {{/if}}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </main>
+
+    <!-- ===== MODAL OVERLAY ===== -->
+    <div id="modalOverlay" class="fixed inset-0 z-50 hidden items-center justify-center"
+        style="background:rgba(0,0,0,0.5); backdrop-filter: blur(2px);" onclick="handleModalBackdropClick(event)">
+
+        <!-- DELETE PRODUCT MODAL -->
+        <div id="deleteModal"
+            class="modal-box hidden bg-white rounded-xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden p-8 relative text-center">
+            <div class="w-16 h-16 rounded-full bg-red-50 mx-auto flex items-center justify-center mb-5">
+                <span class="material-symbols-outlined text-[32px] text-red-500">warning</span>
+            </div>
+            <h4 class="text-[20px] font-black text-black tracking-tight uppercase mb-2">Delete Product?</h4>
+            <p class="text-[13px] text-gray-500 leading-relaxed mb-8">Are you sure you want to delete <span
+                    id="deleteProductName" class="font-bold text-black"></span>? This action cannot be undone.</p>
+
+            <div class="flex items-center justify-center mb-6">
+                <div class="w-16 h-16 bg-gray-50 rounded-lg border border-gray-100 p-1 flex items-center justify-center overflow-hidden">
+                    <img id="deleteProductImage" src="" alt="" class="max-w-full max-h-full object-contain" />
+                </div>
+            </div>
+
+            <input type="hidden" id="deleteProductId">
+
+            <div class="flex items-center justify-center gap-3">
+                <button onclick="closeModals()"
+                    class="px-6 py-3 bg-gray-100 text-gray-600 text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
+                <button id="confirmDeleteBtn"
+                    class="px-6 py-3 bg-red-500 text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-red-600 transition-colors">Delete</button>
+            </div>
+        </div>
+
+        <!-- RESTORE PRODUCT MODAL -->
+        <div id="restoreModal"
+            class="modal-box hidden bg-white rounded-xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden p-8 relative text-center">
+            <div class="w-16 h-16 rounded-full bg-emerald-50 mx-auto flex items-center justify-center mb-5">
+                <span class="material-symbols-outlined text-[32px] text-emerald-500">settings_backup_restore</span>
+            </div>
+            <h4 class="text-[20px] font-black text-black tracking-tight uppercase mb-2">Restore Product?</h4>
+            <p class="text-[13px] text-gray-500 leading-relaxed mb-8">Are you sure you want to restore <span
+                    id="restoreProductName" class="font-bold text-black"></span>? This will make the product available
+                again.</p>
+
+            <div class="flex items-center justify-center mb-6">
+                 <div class="w-16 h-16 bg-gray-50 rounded-lg border border-gray-100 p-1 flex items-center justify-center overflow-hidden">
+                    <img id="restoreProductImage" src="" alt="" class="max-w-full max-h-full object-contain" />
+                </div>
+            </div>
+
+            <input type="hidden" id="restoreProductId">
+
+            <div class="flex items-center justify-center gap-3">
+                <button onclick="closeModals()"
+                    class="px-6 py-3 bg-gray-100 text-gray-600 text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
+                <button id="confirmRestoreBtn"
+                    class="px-6 py-3 bg-emerald-500 text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-emerald-600 transition-colors">Restore</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        // ─── MODAL CONTROLS ─────────────────────────────────────────
+        function openDeleteModal(name, id, image) {
+            document.getElementById('deleteProductName').textContent = "'" + name + "'";
+            document.getElementById('deleteProductId').value = id;
+            document.getElementById('deleteProductImage').src = image || '';
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            document.getElementById('deleteModal').classList.remove('hidden');
+            document.getElementById('restoreModal').classList.add('hidden');
+        }
+
+        function openRestoreModal(name, id, image) {
+            document.getElementById('restoreProductName').textContent = "'" + name + "'";
+            document.getElementById('restoreProductId').value = id;
+            document.getElementById('restoreProductImage').src = image || '';
+            document.getElementById('modalOverlay').style.display = 'flex';
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            document.getElementById('restoreModal').classList.remove('hidden');
+            document.getElementById('deleteModal').classList.add('hidden');
+        }
+
+        function closeModals() {
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.getElementById('deleteModal').classList.add('hidden');
+            document.getElementById('restoreModal').classList.add('hidden');
+        }
+
+        function handleModalBackdropClick(e) {
+            if (e.target === document.getElementById('modalOverlay')) closeModals();
+        }
+
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+
+        // ─── CUSTOM DROPDOWNS ───────────────────────────────────────
+        function toggleDropdown(toggle) {
+            const menu = toggle.nextElementSibling;
+            const isOpen = menu.classList.contains('show');
+
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+
+            if (!isOpen) {
+                menu.classList.add('show');
+                toggle.classList.add('active');
+            }
+        }
+
+    let currentParams = {
+    page: {{currentPage}},
+    search: "{{search}}",
+    category: "{{category}}",
+    brand: "{{brand}}",
+    status: "{{status}}"
+};
+
+function selectOption(filterId, value, label) {
+    document.getElementById(filterId + 'Filter').value = value;
+
+    document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        if (menu && menu.contains(event.target)) {
+            dropdown.querySelector('.selected-value').textContent = label;
+        }
+    });
+
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+    document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+
+    fetchProducts(1);
+}
+
+async function fetchProducts(page = 1) {
+    currentParams.page     = page;
+    currentParams.search   = document.getElementById('searchInput').value.trim();
+    currentParams.category = document.getElementById('categoryFilter').value;
+    currentParams.brand    = document.getElementById('brandFilter').value;
+    currentParams.status   = document.getElementById('statusFilter').value;
+
+    try {
+        const res = await axios.get('/admin/productManagement', {
+            params: { ...currentParams, ajax: 'true' }
+        });
+        const data = res.data;
+        if (data.success) {
+            renderTable(data);
+            renderPagination(data);
+            history.replaceState(null, '', `/admin/productManagement?${new URLSearchParams(currentParams)}`);
+        }
+    } catch (err) {
+        console.error('fetchProducts error:', err);
+        showToast('error', 'Failed to load products');
+    }
+}
+
+function changePage(page) { fetchProducts(page); }
+
+let debounceTimer;
+document.getElementById('searchInput').addEventListener('input', function () {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => fetchProducts(1), 400);
+});
+
+function statusBadge(p) {
+    if (p.isDeleted) return `<span class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase bg-red-50 text-red-600">Deleted</span>`;
+    if (p.status === 'active') return `<span class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase bg-emerald-50 text-emerald-600">Active</span>`;
+    return `<span class="inline-flex items-center px-2.5 py-1 rounded-sm text-[9px] font-bold tracking-widest uppercase bg-gray-100 text-gray-500">Inactive</span>`;
+}
+
+function stockCell(stock) {
+    const dot = stock <= 10 ? 'bg-red-500 animate-pulse' : 'bg-emerald-400';
+    const txt = stock <= 10 ? 'text-red-500' : 'text-black';
+    return `<div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full ${dot}"></span><span class="text-[13px] font-bold ${txt}">${stock}</span></div>`;
+}
+
+function escAttr(str = '') { return String(str).replace(/'/g, "\\'"); }
+
+function actionsCell(p) {
+    const img = p.defaultVariant?.images?.[0] || '';
+    if (p.isDeleted) {
+        return `<button onclick="openRestoreModal('${escAttr(p.productName)}', '${p._id}', '${img}')" class="text-emerald-500 hover:text-emerald-600 transition-colors flex items-center gap-1.5" title="Restore">
+                    <span class="material-symbols-outlined text-[18px]">settings_backup_restore</span>
+                    <span class="text-[10px] font-bold uppercase tracking-wider">Restore</span>
+                </button>`;
+    }
+    return `<a href="/admin/productView/${p._id}" class="text-gray-400 hover:text-black transition-colors" title="View"><span class="material-symbols-outlined text-[18px]">visibility</span></a>
+            <a href="/admin/editProduct/${p._id}" class="text-gray-400 hover:text-black transition-colors" title="Edit"><span class="material-symbols-outlined text-[18px]">edit</span></a>
+            <button onclick="openDeleteModal('${escAttr(p.productName)}', '${p._id}', '${img}')" class="text-red-300 hover:text-red-500 transition-colors" title="Delete"><span class="material-symbols-outlined text-[18px]">delete</span></button>`;
+}
+
+function renderTable(data) {
+    const tbody = document.getElementById('productsTbody');
+
+    if (!data.products.length) {
+        tbody.innerHTML = `<tr><td colspan="8" class="py-12 text-center text-[13px] font-medium text-gray-400">No products found</td></tr>`;
+    } else {
+        tbody.innerHTML = data.products.map((p, idx) => {
+            const v = p.defaultVariant || {};
+            const serial = (data.currentPage - 1) * 5 + idx + 1;
+            return `<tr class="product-row group" data-id="${p._id}">
+                <td class="py-5 px-8 text-[13px] font-medium text-gray-400">${serial}</td>
+                <td class="py-5 px-4">
+                    <div class="w-12 h-12 bg-gray-50 flex items-center justify-center p-1 border border-gray-100 rounded-lg overflow-hidden group-hover:border-gray-200 transition-colors">
+                        ${v.images?.[0] ? `<img src="${v.images[0]}" alt="${p.productName}" class="max-w-full max-h-full object-contain" />` : `<span class="material-symbols-outlined text-gray-300 text-[20px]">image</span>`}
+                    </div>
+                </td>
+                <td class="py-5 px-6">
+                    <div class="text-[14px] font-bold text-black leading-tight">${p.productName}</div>
+                    <div class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">${v.sku || ''}</div>
+                </td>
+                <td class="py-5 px-6"><span class="text-[11px] font-bold text-black uppercase tracking-wider bg-gray-50 px-2 py-1 rounded">${p.category?.name || ''}</span></td>
+                <td class="py-5 px-6"><div class="text-[14px] font-black text-black tracking-tight">₹${v.price ?? ''}</div></td>
+                <td class="py-5 px-6">${stockCell(v.stock ?? 0)}</td>
+                <td class="py-5 px-6"><div class="flex items-center">${statusBadge(p)}</div></td>
+                <td class="py-5 px-8 text-right"><div class="flex items-center justify-end gap-4">${actionsCell(p)}</div></td>
+            </tr>`;
+        }).join('');
+    }
+
+    document.getElementById('itemsBadge').textContent = `${data.products.length} items shown`;
+    document.getElementById('showingText').innerHTML =
+        `Showing <span class="font-bold text-black">${data.products.length}</span> of <span class="font-bold text-black">${data.totalProducts}</span> products`;
+}
+
+function renderPagination(data) {
+    const wrap = document.getElementById('paginationWrap');
+    let html = data.hasPrevPage
+        ? `<button onclick="changePage(${data.prevPage})" class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-400 hover:text-black"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>`
+        : `<button disabled class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-200 cursor-not-allowed"><span class="material-symbols-outlined text-[16px]">chevron_left</span></button>`;
+
+    data.pageNumbers.forEach(n => {
+        html += `<button onclick="changePage(${n})" class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-[12px] font-bold ${n === data.currentPage ? 'current' : 'text-gray-600'}">${n}</button>`;
+    });
+
+    html += data.hasNextPage
+        ? `<button onclick="changePage(${data.nextPage})" class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-400 hover:text-black"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>`
+        : `<button disabled class="page-btn w-8 h-8 rounded border border-gray-200 flex items-center justify-center text-gray-200 cursor-not-allowed"><span class="material-symbols-outlined text-[16px]">chevron_right</span></button>`;
+
+    wrap.innerHTML = html;
+}
+
+        // ─── DELETE PRODUCT ──────────────────────────────────────────
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+            const id = document.getElementById('deleteProductId').value;
+            try {
+                const res = await axios.delete(`/admin/deleteProduct/${id}`);
+                const data = res.data;
+                if (data.success) {
+                    showToast('success', data.message || 'Product deleted successfully');
+                    setTimeout(() => {
+                        closeModals();
+                        fetchProducts(currentParams.page);
+                    }, 500);
+                } else {
+                    showToast('error', data.message || 'Failed to delete product.');
+                }
+            } catch (err) {
+                console.error('deleteProduct error:', err);
+                showToast('error', err.response?.data?.message || 'Something went wrong. Try again.');
+            }
+        });
+
+        // ─── RESTORE PRODUCT ──────────────────────────────────────────
+        document.getElementById('confirmRestoreBtn').addEventListener('click', async () => {
+            const id = document.getElementById('restoreProductId').value;
+            try {
+                const res = await axios.put(`/admin/restoreProduct/${id}`);
+                const data = res.data;
+                if (data.success) {
+                    showToast('success', data.message || 'Product restored successfully');
+                    setTimeout(() => {
+                        closeModals();
+                        location.reload();
+                    }, 500);
+                } else {
+                    showToast('error', data.message || 'Failed to restore product.');
+                    }
+                } catch (err) {
+                    console.error('restoreProduct error:', err);
+                    showToast('error', err.response?.data?.message || 'Something went wrong. Try again.');
+                }
+            });
+
+        // ─── PAGE SHOW (RELOAD) ────────────────────────────────────────
+        window.addEventListener("pageshow", function (event) {
+            const navType = performance.getEntriesByType("navigation")[0]?.type;
+            if (event.persisted || navType === "back_forward") {
+                window.location.reload();
+            }
+        });
+
+    </script>
+</body>
+
+</html>

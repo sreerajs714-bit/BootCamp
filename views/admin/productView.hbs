@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details | Admin | BOOTCAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
+    <style>
+        * { box-sizing: border-box; }
+        body { background-color: #f8f9fa; color: #111827; overflow: hidden; }
+        .sidebar-item { transition: all 0.18s ease; }
+        .sidebar-item:hover:not(.active) { background-color: #f9fafb; }
+        .sidebar-item.active { background-color: #000; color: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .sidebar-item.active .material-symbols-outlined { color: #fff; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
+        .modal-box { animation: slideUp 0.2s ease; }
+        @keyframes slideUp { from { opacity:0; transform: translateY(12px) scale(0.98); } to { opacity:1; transform: translateY(0) scale(1); } }
+    </style>
+</head>
+
+<body class="font-sans antialiased h-screen flex">
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="w-64 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+    <div class="h-24 flex flex-col justify-center px-8 border-b border-gray-100">
+        <h1 class="font-sans font-black text-2xl tracking-tight uppercase text-black">BOOTCAMP</h1>
+        <span class="text-[10px] font-bold tracking-widest text-emerald-500 mt-1">SYSTEM ADMIN</span>
+    </div>
+    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+        <a href="/admin/dashboard" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">dashboard</span>Dashboard
+        </a>
+        <a href="/admin/productManagement" class="sidebar-item active flex items-center px-4 py-3 text-[13px] font-bold uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">sports_soccer</span>Products
+        </a>
+        <a href="/admin/category" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">category</span>Categories
+        </a>
+        <a href="/admin/orders" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">shopping_bag</span>Orders
+        </a>
+        <a href="/admin/offers" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">local_offer</span>Offers
+        </a>
+        <a href="/admin/coupons" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">confirmation_number</span>Coupons
+        </a>
+        <a href="/admin/userManagement" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">group</span>Users
+        </a>
+        <a href="/admin/returns" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">assignment_return</span>Returns
+        </a>
+        <a href="/admin/brand" class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+            <span class="material-symbols-outlined mr-3.5 text-[19px]">sell</span>Brand
+        </a>
+    </nav>
+</aside>
+
+<!-- ===== MAIN ===== -->
+<main class="flex-1 flex flex-col h-full overflow-hidden bg-white">
+    
+    <!-- Top Bar -->
+    <header class="h-[80px] bg-white flex items-center justify-end px-12 flex-shrink-0 z-10 sticky top-0 bg-white/90 backdrop-blur-md">
+        <div class="flex items-center gap-3">
+            <a href="/admin/viewVariants/{{product._id}}" class="px-5 py-2.5 bg-white border border-gray-200 text-black text-[12px] font-bold rounded-lg hover:border-gray-400 transition-colors flex items-center gap-2">
+                View Variants
+            </a>
+            <a href="/admin/editPRoduct/{{product._id}}" class="px-5 py-2.5 bg-black border border-black text-white text-[12px] font-bold rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 shadow-lg shadow-black/10">
+                <span class="material-symbols-outlined text-[16px]">edit</span>
+                Edit Product
+            </a>
+            <button onclick="openDeleteModal()" class="w-10 h-10 flex items-center justify-center border border-gray-200 text-gray-400 rounded-lg hover:border-red-200 hover:text-red-500 hover:bg-red-50 transition-colors ml-2" title="Delete Product">
+                <span class="material-symbols-outlined text-[20px]">delete</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Body -->
+    <div class="flex-1 overflow-y-auto px-12 py-6">
+        
+        <!-- Title -->
+        <h1 class="font-sans font-black text-[40px] tracking-tight text-black leading-[1.1] mb-10 max-w-4xl">
+            {{product.productName}}
+        </h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            
+            <!-- Left: Image Gallery -->
+            <div class="lg:col-span-4 xl:col-span-3">
+                <!-- Main Image -->
+                <div class="aspect-[4/5] bg-[#f7f7f7] rounded-2xl overflow-hidden mb-4 p-4 flex items-center justify-center">
+                   {{#if defaultVariant.images.[0]}}
+                      <img id="mainProductImage" src="{{defaultVariant.images.[0]}}" alt="{{product.productName}}" class="w-full h-full object-contain mix-blend-multiply transition-all duration-200 ease-in-out">
+                     {{else}}
+                      <img id="mainProductImage" src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800" alt="Placeholder" class="w-full h-full object-cover rounded-xl transition-all duration-200 ease-in-out">
+                      {{/if}}
+                </div>
+                
+                <!-- Thumbnails -->
+                <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                    {{#each defaultVariant.images.[0]}}
+                    <div class="thumbnail-item w-20 h-24 flex-shrink-0 bg-[#f7f7f7] rounded-xl p-2 {{#if @first}}border-[1.5px] border-black shadow-sm{{else}}border border-transparent hover:border-gray-300{{/if}} cursor-pointer transition-colors flex items-center justify-center">
+                        <img src="{{this}}" class="w-full h-full object-contain mix-blend-multiply pointer-events-none">
+                    </div>
+                    {{/each}}
+                    <!-- Placeholder if no images or single image -->
+                    {{#unless defaultVariant.images.[0]}}
+                    <div class="thumbnail-item w-20 h-24 flex-shrink-0 bg-[#f7f7f7] rounded-xl p-2 border-[1.5px] border-black shadow-sm cursor-pointer flex items-center justify-center">
+                        <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=800" class="w-full h-full object-cover rounded-lg pointer-events-none">
+                    </div>
+                    {{/unless}}
+                </div>
+            </div>
+            
+            <!-- Right: Details -->
+            <div class="lg:col-span-8 xl:col-span-9">
+                
+                <!-- Top Box: Price & Colors -->
+                <div class="flex flex-col md:flex-row items-stretch gap-6 mb-8">
+                    <!-- Price Box -->
+                    <div class="flex-1 rounded-3xl p-8 flex flex-col justify-between" style="box-shadow: 0 4px 40px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02);">
+                        <div>
+                            <div class="text-[10px] font-bold tracking-[0.1em] text-gray-400 uppercase mb-3">Base Price</div>
+                            <div class="flex items-center gap-4">
+                                <span class="text-[42px] font-black text-black leading-none">₹{{defaultVariant.price}}</span>
+                                <span class="px-2.5 py-1 bg-gray-100 text-gray-600 text-[9px] font-black tracking-widest uppercase rounded">Current</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-10 bg-[#f8f9fa] rounded-2xl p-6 flex items-center justify-between border border-gray-100/50">
+                            <span class="text-[11px] font-bold tracking-widest text-gray-500 uppercase">Total Stock Allocation</span>
+                            <span class="text-[20px] font-black text-black leading-none">{{defaultVariant.stock}} <span class="text-[10px] text-gray-400 font-bold ml-1">UNITS</span></span>
+                        </div>
+                    </div>
+
+                    <!-- Palette Box -->
+                    <div class="w-full md:w-72 rounded-3xl p-8 relative overflow-hidden flex flex-col" style="box-shadow: 0 4px 40px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02);">
+                         <div class="text-[10px] font-bold tracking-[0.1em] text-gray-400 uppercase mb-6 relative z-10">Available Colours ({{product.variants.length}})</div>
+                            <div class="flex-1 flex items-start relative z-10 mt-2 flex-wrap gap-4">
+                              {{#each product.variants}}
+                               <div class="flex flex-col items-center gap-2">
+                                 <div class="w-12 h-12 rounded-full border-[1.5px] border-black flex items-center justify-center font-bold text-[11px] text-black bg-white overflow-hidden">
+                                    {{substring this.color 0 3}}
+                                  </div>
+                                 <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{{this.color}}</span>
+                              </div>
+                           {{/each}}
+                         </div>
+                        <!-- Decorative large circle -->
+                        <div class="absolute right-[-60px] top-1/2 -translate-y-1/2 w-48 h-48 rounded-full border-[24px] border-[#f8f9fa] z-0"></div>
+                    </div>
+                </div>
+
+                <!-- Overview -->
+                <div class="mb-8">
+                    <h3 class="text-[18px] font-bold text-black mb-6 flex items-center gap-5">
+                        Product Overview
+                        <div class="flex-1 h-px bg-gray-100"></div>
+                    </h3>
+                    
+                    <div class="bg-[#f8f9fa] rounded-3xl p-8 mb-6 border border-gray-100/50">
+                        <div class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-4">description</div>
+                        <p class="text-[14px] leading-[1.8] text-gray-600 font-medium">
+                            {{product.description}}
+                        </p>
+                    </div>
+
+                    <!-- Specs Grid (Bottom Box) -->
+                    <div class="bg-[#f8f9fa] rounded-3xl p-8 grid grid-cols-2 md:grid-cols-4 gap-8 border border-gray-100/50">
+                        <div>
+                            <div class="text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Category</div>
+                            <div class="text-[14px] font-bold text-black capitalize">{{product.category.name}}</div>
+                        </div>
+                        <div>
+                            <div class="text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Brand</div>
+                            <div class="text-[14px] font-bold text-black capitalize">{{product.brand.name}}</div>
+                        </div>
+                        <div>
+                            <div class="text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">SKU</div>
+                            <div class="text-[14px] font-bold text-emerald-500 uppercase tracking-wider">{{defaultVariant.sku}}</div>
+                        </div>
+                        <div>
+                            <div class="text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Product ID</div>
+                            <div class="text-[14px] font-bold text-gray-600 uppercase tracking-wider">{{substring product._id 0 8}}</div>
+                        </div>
+                        
+                        <div class="col-span-2 md:col-span-4 h-px bg-gray-200/50 my-1"></div>
+                        
+                        <div>
+                            <div class="text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">System Status</div>
+                            {{#if (eq product.status "active")}}
+                            <div class="text-[14px] font-bold text-black flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Active
+                            </div>
+                            {{else}}
+                            <div class="text-[14px] font-bold text-gray-500 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-red-500"></span> Inactive
+                            </div>
+                            {{/if}}
+                        </div>
+                        <div>
+                            <div class="text-[9px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-2">Edition</div>
+                            {{#if product.isLimitedEdition}}
+                            <div class="text-[14px] font-bold text-purple-600 uppercase tracking-wider">Limited</div>
+                            {{else}}
+                            <div class="text-[14px] font-bold text-gray-600 uppercase tracking-wider">Standard</div>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- ===== MODAL OVERLAY ===== -->
+<div id="modalOverlay" class="fixed inset-0 z-50 hidden items-center justify-center" style="background:rgba(0,0,0,0.5); backdrop-filter: blur(2px);" onclick="handleModalBackdropClick(event)">
+    
+    <!-- DELETE PRODUCT MODAL -->
+    <div id="deleteModal" class="modal-box hidden bg-white rounded-2xl shadow-2xl w-[400px] max-w-[90vw] overflow-hidden p-8 relative text-center">
+        <div class="w-16 h-16 rounded-full bg-red-50 mx-auto flex items-center justify-center mb-5">
+            <span class="material-symbols-outlined text-[32px] text-red-500">warning</span>
+        </div>
+        <h4 class="text-[20px] font-black text-black tracking-tight uppercase mb-2">Delete Product?</h4>
+        <p class="text-[13px] text-gray-500 leading-relaxed mb-8">Are you sure you want to delete <span class="font-bold text-black">"{{product.productName}}"</span>? This will permanently remove the product and all its variants. This action cannot be undone.</p>
+        
+        <input type="hidden" id="deleteProductId" value="{{product._id}}">
+
+        <div class="flex items-center justify-center gap-3">
+            <button onclick="closeModals()" class="px-6 py-3 bg-gray-100 text-gray-600 text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-gray-200 transition-colors">Cancel</button>
+            <button id="confirmDeleteBtn" class="px-6 py-3 bg-red-500 text-white text-[11px] font-bold tracking-widest uppercase rounded-lg hover:bg-red-600 transition-colors">Delete</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // ─── IMAGE GALLERY SELECTION WITH ANIMATION ─────────────────
+    const mainImg = document.getElementById('mainProductImage');
+    const thumbnails = document.querySelectorAll('.thumbnail-item');
+
+    thumbnails.forEach(thumb => {
+        thumb.addEventListener('click', function() {
+            // Remove active border styles from all thumbnails
+            thumbnails.forEach(t => {
+                t.classList.remove('border-black', 'shadow-sm');
+                t.classList.add('border-transparent');
+            });
+            // Add active border styles to clicked thumbnail
+            this.classList.remove('border-transparent');
+            this.classList.add('border-black', 'shadow-sm');
+
+            const newSrc = this.querySelector('img').src;
+
+            if (mainImg.src !== newSrc) {
+                // Apply fade & scale animation
+                mainImg.classList.add('opacity-0', 'scale-[0.98]');
+                
+                setTimeout(() => {
+                    mainImg.src = newSrc;
+                    mainImg.classList.remove('opacity-0', 'scale-[0.98]');
+                }, 200);
+            }
+        });
+    });
+
+    // ─── MODALS ──────────────────────────────────────────────────
+    function openDeleteModal() {
+        document.getElementById('modalOverlay').style.display = 'flex';
+        document.getElementById('modalOverlay').classList.remove('hidden');
+        document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    function closeModals() {
+        document.getElementById('modalOverlay').style.display = 'none';
+        document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    function handleModalBackdropClick(e) {
+        if (e.target === document.getElementById('modalOverlay')) closeModals();
+    }
+
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModals(); });
+
+    // ─── API HANDLERS ───────────────────────────────────────────
+    document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+        const id = document.getElementById('deleteProductId').value;
+        const btn = document.getElementById('confirmDeleteBtn');
+        const originalText = btn.innerHTML;
+        
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[16px]">sync</span> Deleting...';
+        btn.disabled = true;
+
+        try {
+            const res  = await axios.delete(`/admin/deleteProduct/${id}`);
+            const data = await res.data;
+
+            if (data.success) {
+            showToast(data.message || "Product deleted successfully", "success");
+
+            setTimeout(() => {
+                window.location.href = "/admin/productManagement";
+            }, 500);
+            } else {
+                showToast(data.message || "Failed to delete product", "error");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        } catch (err) {
+            console.error(err);
+            showToast('Something went wrong. Try again.');
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    });
+     //page reload
+    window.addEventListener("pageshow", function (event) {
+    const navType = performance.getEntriesByType("navigation")[0]?.type;
+
+    if (event.persisted || navType === "back_forward") {
+        window.location.reload();
+    }
+});
+</script>
+
+</body>
+</html>

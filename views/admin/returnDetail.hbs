@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Return Details | Admin | BOOTCAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/dark.css">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #fcfcfc;
+            color: #111827;
+        }
+
+        /* SweetAlert2 Nexus Customization */
+        .swal2-popup.nexus-modal {
+            border-radius: 24px !important;
+            padding: 2.5rem !important;
+            font-family: 'Inter', sans-serif !important;
+        }
+
+        .swal2-title.nexus-title {
+            font-size: 20px !important;
+            font-weight: 800 !important;
+            color: #000 !important;
+            text-transform: uppercase !important;
+            letter-spacing: -0.02em !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        .swal2-html-container.nexus-text {
+            font-size: 14px !important;
+            font-weight: 500 !important;
+            color: #6b7280 !important;
+        }
+
+        .swal2-confirm.nexus-confirm-btn {
+            background-color: #000 !important;
+            border-radius: 12px !important;
+            padding: 12px 32px !important;
+            font-size: 12px !important;
+            font-weight: 800 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.1em !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        .swal2-cancel.nexus-cancel-btn {
+            background-color: transparent !important;
+            color: #9ca3af !important;
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.05em !important;
+            transition: all 0.2s !important;
+        }
+
+        .swal2-cancel.nexus-cancel-btn:hover {
+            color: #000 !important;
+            background-color: #f9fafb !important;
+        }
+
+        .swal2-input.nexus-input, .swal2-textarea.nexus-input {
+            border-radius: 14px !important;
+            border: 1px solid #e5e7eb !important;
+            font-size: 13px !important;
+            box-shadow: none !important;
+            margin-top: 1.5rem !important;
+        }
+
+        .swal2-input.nexus-input:focus, .swal2-textarea.nexus-input:focus {
+            border-color: #000 !important;
+        }
+
+        .swal2-icon.nexus-icon {
+            border-color: #000 !important;
+            color: #000 !important;
+            transform: scale(0.8) !important;
+        }
+
+        .sidebar {
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item {
+            transition: all 0.18s ease;
+        }
+
+        .sidebar-item:hover:not(.active) {
+            background-color: #f9fafb;
+        }
+
+        .sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .header-section {
+            background-color: #1a1b1b;
+            color: white;
+            border-radius: 16px 16px 0 0;
+            padding: 40px;
+            margin-bottom: -16px;
+        }
+
+        .breadcrumb {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #9ca3af;
+            margin-bottom: 12px;
+        }
+
+        .card {
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-title {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .status-badge-header {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #f59e0b;
+        }
+
+        .order-id-badge {
+            background: #dcfce7;
+            color: #166534;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+        .refund-amount {
+            color: #16a34a;
+            font-weight: 900;
+            font-size: 18px;
+        }
+
+        .info-label {
+            font-size: 11px;
+            font-weight: 500;
+            color: #9ca3af;
+        }
+
+        .info-value {
+            font-size: 12px;
+            font-weight: 800;
+            color: #111827;
+            text-transform: uppercase;
+        }
+
+        .reason-box {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .reason-title {
+            font-size: 9px;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .reason-text {
+            font-size: 13px;
+            font-weight: 800;
+            color: #374151;
+        }
+
+        .customer-quote {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+        }
+
+        .quote-icon {
+            font-size: 28px;
+            color: #e5e7eb;
+            position: absolute;
+            left: 24px;
+            top: 20px;
+        }
+
+        .quote-text {
+            margin-left: 48px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .admin-actions-header {
+            background: #233529;
+            color: white;
+            border-radius: 12px 12px 0 0;
+            padding: 18px 24px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+        }
+
+        .btn-approve {
+            background: #38a169;
+            color: white;
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn-approve:hover {
+            background: #2f855a;
+        }
+
+        .btn-reject {
+            width: 100%;
+            border: 1px solid #fed7d7;
+            color: #e53e3e;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            transition: background 0.2s;
+        }
+
+        .btn-reject:hover {
+            background: #fff5f5;
+        }
+
+        /* Workflow States */
+        .logistics-title {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            color: #cbd5e1;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+        }
+
+        .logistics-label {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            color: #94a3b8;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .input-logistics {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1e293b;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .input-logistics:focus {
+            border-color: #94a3b8;
+            background: white;
+        }
+
+        .btn-schedule {
+            background: #13161c;
+            color: white;
+            width: 100%;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            margin-top: 24px;
+            transition: background 0.2s;
+        }
+
+        .btn-schedule:hover {
+            background: #000;
+        }
+
+        .scheduled-card {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-radius: 16px;
+            padding: 24px;
+        }
+
+        .scheduled-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #d97706;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 20px;
+        }
+
+        .scheduled-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .scheduled-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #94a3b8;
+        }
+
+        .scheduled-value {
+            font-size: 13px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .btn-picked {
+            background: #233529;
+            color: white;
+            width: 100%;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 20px;
+            transition: background 0.2s;
+        }
+
+        .success-card {
+            background: #f0fdf4;
+            border: 1px solid #dcfce7;
+            border-radius: 16px;
+            padding: 40px 24px;
+            text-align: center;
+        }
+
+        .success-icon {
+            width: 48px;
+            height: 48px;
+            background: #dcfce7;
+            color: #16a34a;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+
+        .success-title {
+            font-size: 11px;
+            font-weight: 800;
+            color: #16a34a;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 12px;
+        }
+
+        .success-text {
+            font-size: 15px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        /* Flatpickr Custom */
+        .flatpickr-calendar.dark {
+            background: #13161c;
+            border-color: #13161c;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .flatpickr-day.selected {
+            background: #38a169 !important;
+            border-color: #38a169 !important;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .gallery-empty {
+            border: 2px dashed #f3f4f6;
+            border-radius: 12px;
+            padding: 60px;
+            text-align: center;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased min-h-screen flex text-[#111]">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+        <div class="h-24 flex flex-col justify-center px-8">
+            <h1 class="font-sans font-black text-2xl tracking-tight uppercase text-black mt-2">BOOTCAMP</h1>
+            <span class="text-[9px] font-bold tracking-[0.2em] text-emerald-500 mt-1 uppercase">System Admin</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <a href="/admin/dashboard"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">grid_view</span>Dashboard
+            </a>
+            <a href="/admin/productManagement"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">sports_soccer</span>Products
+            </a>
+            <a href="/admin/category"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">category</span>Categories
+            </a>
+            <a href="/admin/orders"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">shopping_bag</span>Orders
+            </a>
+            <a href="/admin/offers"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">local_offer</span>Offers
+            </a>
+            <a href="/admin/coupons"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">confirmation_number</span>Coupons
+            </a>
+            <a href="/admin/usermanagement"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">group</span>Users
+            </a>
+            <a href="/admin/returns"
+                class="sidebar-item active flex items-center px-4 py-3 text-[11px] font-bold uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">assignment_return</span>Returns
+            </a>
+            <a href="/admin/brand"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">sell</span>Brand
+            </a>
+        </nav>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="flex-1 flex flex-col min-h-screen">
+
+        <div class="px-10 py-10">
+            <!-- Header Section (Black as requested) -->
+            <header class="header-section flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                    <div class="breadcrumb">
+                        <a href="/admin/orders">ORDERS</a> /
+                        <span class="text-gray-500">#{{returnRequest.orderId}}</span> /
+                        <span class="text-white">RET-{{returnRequest._id}}</span>
+                    </div>
+                    <h2 class="text-4xl font-serif text-white mb-2 leading-none">Return Details</h2>
+                    <p class="text-gray-400 text-[13px] font-medium">Manage and review return request</p>
+                </div>
+                <div class="status-badge-header mt-4 md:mt-0">
+                    <span class="status-dot"></span>
+                    <span>{{returnRequest.status}}</span>
+                </div>
+            </header>
+
+            <!-- Body Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-8">
+
+                <!-- Left Side main content (Grid 8) -->
+                <div class="lg:col-span-8 space-y-8">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Order Info -->
+                        <div class="card h-full">
+                            <div class="card-title">
+                                <span class="material-symbols-outlined text-[18px] text-emerald-500">inventory_2</span>
+                                Order Info
+                            </div>
+                            <div class="space-y-6">
+                                <div class="flex justify-between items-center">
+                                    <span class="info-label">Return ID</span>
+                                    <span class="info-value">#RET-{{slice returnRequest._id 0 6}}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="info-label">Order ID</span>
+                                    <span class="order-id-badge">#{{returnRequest.orderId}}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="info-label">Requested On</span>
+                                    <span class="info-value">{{formatDate returnRequest.createdAt}}</span>
+                                </div>
+                                <div class="pt-6 border-t border-gray-50 flex justify-between items-center">
+                                    <span class="text-[13px] font-bold text-gray-900">Refund Amount</span>
+                                    <span class="refund-amount">₹{{returnRequest.refundAmount}}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Customer Info -->
+                        <div class="card h-full">
+                            <div class="card-title">
+                                <span class="material-symbols-outlined text-[18px] text-blue-500">person</span>
+                                Customer Info
+                            </div>
+                            <div class="flex flex-col items-center py-4">
+                                <div
+                                    class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center text-xl font-bold text-gray-400 mb-4">
+                                    {{initials returnRequest.user.name}}
+                                </div>
+                                <h4 class="text-[15px] font-black text-gray-900 leading-none">
+                                    {{returnRequest.user.name}}</h4>
+                                <p class="text-[11px] font-medium text-gray-400 mt-2">{{returnRequest.user.email}}</p>
+
+                                <div class="w-full mt-8 pt-6 border-t border-gray-50 text-center">
+                                    <p class="text-[9px] font-bold text-gray-300 uppercase tracking-widest mb-2">
+                                        Shipping From</p>
+                                    <p class="text-[11px] font-bold text-gray-500 uppercase">
+                                        {{returnRequest.address.city}}, {{returnRequest.address.state}}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Product Details -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span class="material-symbols-outlined text-[18px] text-gray-400">package_2</span>
+                            Product Details
+                        </div>
+
+                        <div class="space-y-6">
+                            {{#each returnRequest.products}}
+                            <div
+                                class="flex items-center gap-6 {{#unless @first}}pt-6 border-t border-gray-50{{/unless}}">
+                                <div
+                                    class="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100 p-2">
+                                    <img src="{{this.image}}" class="w-full h-full object-contain" alt="">
+                                </div>
+                                <div class="flex-grow">
+                                    <h4 class="text-xl font-serif text-gray-900 leading-tight mb-2">{{this.name}}</h4>
+                                    <div class="flex items-center gap-4">
+                                        <div class="inline-flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-md">
+                                            <span
+                                                class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Size:</span>
+                                            <span class="text-[11px] font-black text-gray-900">{{this.size}}</span>
+                                        </div>
+                                        <div class="inline-flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-md">
+                                            <span
+                                                class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Qty:</span>
+                                            <span class="text-[11px] font-black text-gray-900">{{this.quantity}}</span>
+                                        </div>
+                                        <div class="inline-flex items-center gap-2 bg-gray-100 px-3 py-1.5 rounded-md">
+                                            <span
+                                                class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Price:</span>
+                                            <span class="text-[11px] font-black text-gray-900">₹{{this.price}}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-right flex-shrink-0">
+                                    <p class="text-[9px] font-bold text-gray-300 uppercase tracking-widest mb-1">Refund
+                                    </p>
+                                    <p class="text-lg font-black text-gray-900">
+                                        ₹{{mul this.price this.quantity}}
+                                    </p>
+                                </div>
+                            </div>
+                            {{/each}}
+                        </div>
+                    </div>
+
+                    <!-- Reason & Condition -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span class="material-symbols-outlined text-[18px] text-orange-400">warning</span>
+                            Reason & Condition
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="reason-box">
+                                <p class="reason-title">Reason</p>
+                                <p class="reason-text">{{returnRequest.reason}}</p>
+                            </div>
+                            <div class="reason-box">
+                                <p class="reason-title">Condition</p>
+                                <p class="reason-text">{{returnRequest.condition}}</p>
+                            </div>
+                        </div>
+
+                        {{#if returnRequest.description}}
+                        <div class="mt-6">
+                            <div class="customer-quote">
+                                <span class="material-symbols-outlined quote-icon">format_quote</span>
+                                <p class="quote-text italic">"{{returnRequest.description}}"</p>
+                            </div>
+                        </div>
+                        {{/if}}
+                    </div>
+
+                </div>
+
+                <!-- Right Side Sidebar Content (Grid 4) -->
+                <div class="lg:col-span-4 space-y-8">
+
+                    <!-- Admin Actions -->
+                    <div class="shadow-sm">
+                        <div class="admin-actions-header">
+                            <span class="material-symbols-outlined text-[18px]">build</span>
+                            Admin Actions
+                        </div>
+                        <div
+                            class="bg-white border border-gray-100 border-t-0 rounded-b-xl p-8 min-h-[300px] flex flex-col justify-center">
+
+                            <!-- State 1: Initial Actions -->
+                            <div id="state-initial">
+                                <button onclick="approveReturn()" class="btn-approve">
+                                    <span class="material-symbols-outlined text-[18px]">check</span>
+                                    Approve Return
+                                </button>
+                                <button onclick="rejectReturn()" class="btn-reject">
+                                    <span class="material-symbols-outlined text-[18px]">close</span>
+                                    Reject
+                                </button>
+                            </div>
+
+                            <!-- State 2 -->
+                            <div id="state-logistics" class="hidden">
+                                <h5 class="logistics-title">Pickup Logistics</h5>
+                                <div class="space-y-6">
+                                    <div>
+                                        <label class="logistics-label">Pickup Date</label>
+                                        <input type="text" id="pickupDate" class="input-logistics"
+                                            placeholder="Select Date">
+                                    </div>
+                                    <div>
+                                        <label class="logistics-label">Pickup Time</label>
+                                        <div class="relative">
+                                            <input type="text" id="pickupTime" class="input-logistics"
+                                                placeholder="Select Time">
+                                            <span
+                                                class="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-[20px] pointer-events-none">schedule</span>
+                                        </div>
+                                    </div>
+                                    <button onclick="schedulePickup()" class="btn-schedule">Schedule Pickup</button>
+                                </div>
+                            </div>
+
+                            <!-- State 3 -->
+                            <div id="state-scheduled" class="hidden">
+                                <div class="scheduled-card">
+                                    <h5 class="scheduled-title">Pickup Scheduled</h5>
+                                    <div class="space-y-4">
+                                        <div class="scheduled-row">
+                                            <span class="scheduled-label">Date</span>
+                                            <span class="scheduled-value" id="display-date">—</span>
+                                        </div>
+                                        <div class="scheduled-row">
+                                            <span class="scheduled-label">Time</span>
+                                            <span class="scheduled-value" id="display-time">—</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button onclick="markPickedUp()" class="btn-picked">Mark as Picked Up</button>
+                            </div>
+
+                            <!-- State 4: Refund Success -->
+                            <div id="state-success" class="hidden">
+                                <div class="success-card">
+                                    <div class="success-icon">
+                                        <span class="material-symbols-outlined text-[28px]">check</span>
+                                    </div>
+                                    <h5 class="success-title">Pickup Completed</h5>
+                                    <p class="success-text">Refund processed & stock restored</p>
+                                </div>
+                            </div>
+
+                            <!-- State 5: Rejected -->
+                            <div id="state-rejected" class="hidden">
+                                <div class="bg-red-50 border border-red-100 rounded-2xl p-10 text-center">
+                                    <div
+                                        class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <span class="material-symbols-outlined text-red-500">block</span>
+                                    </div>
+                                    <h5 class="text-[11px] font-black text-red-500 uppercase tracking-widest mb-2">
+                                        Return Rejected</h5>
+                                    <p class="text-[13px] font-bold text-gray-600">This return request was rejected.</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Inspection Gallery -->
+                    <div class="card">
+                        <div class="card-title">
+                            <span class="material-symbols-outlined text-[18px] text-indigo-400">image</span>
+                            Inspection Gallery
+                        </div>
+                        {{#if returnRequest.images.length}}
+                        <div class="grid grid-cols-2 gap-3">
+                            {{#each returnRequest.images}}
+                            <div class="aspect-square bg-gray-50 rounded-lg overflow-hidden border border-gray-100">
+                                <img src="{{this}}" class="w-full h-full object-cover">
+                            </div>
+                            {{/each}}
+                        </div>
+                        {{else}}
+                        <div class="gallery-empty">
+                            <span class="material-symbols-outlined text-[48px] mb-4">image</span>
+                            <p class="text-[11px] font-bold uppercase tracking-widest">No Image Provided</p>
+                        </div>
+                        {{/if}}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const ORDER_ID = '{{returnRequest._id}}';
+        const CURRENT_STATUS = '{{returnRequest.status}}';
+
+        // Restore UI state on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            if (CURRENT_STATUS === 'Approved') transitionTo('logistics');
+            else if (CURRENT_STATUS === 'Picked Up') transitionTo('scheduled');
+            else if (CURRENT_STATUS === 'Refunded') transitionTo('success');
+            else if (CURRENT_STATUS === 'Rejected') transitionTo('rejected');
+            // 'Requested' → shows initial by default
+        });
+
+        flatpickr("#pickupDate", {
+            theme: "dark",
+            minDate: "today",
+            maxDate: new Date().fp_incr(10),
+            dateFormat: "Y-m-d",
+            onChange: (_, dateStr) => {
+                document.getElementById('display-date').innerText = dateStr;
+            }
+        });
+
+        flatpickr("#pickupTime", {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "h:i K",
+            onChange: (_, dateStr) => {
+                document.getElementById('display-time').innerText = dateStr;
+            }
+        });
+
+        function transitionTo(state) {
+            ['initial', 'logistics', 'scheduled', 'success', 'rejected'].forEach(s => {
+                document.getElementById(`state-${s}`)?.classList.add('hidden');
+            });
+            const target = document.getElementById(`state-${state}`);
+            if (!target) return;
+            target.classList.remove('hidden');
+            target.style.opacity = '0';
+            target.style.transform = 'translateY(10px)';
+            target.style.transition = 'all 0.4s ease';
+            setTimeout(() => {
+                target.style.opacity = '1';
+                target.style.transform = 'translateY(0)';
+            }, 50);
+        }
+
+        async function approveReturn() {
+            const result = await Swal.fire({
+                title: 'Approve Return?',
+                html: 'The customer will be notified and pickup will be scheduled. This action is irreversible.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Approve',
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    popup: 'nexus-modal',
+                    title: 'nexus-title',
+                    htmlContainer: 'nexus-text',
+                    confirmButton: 'nexus-confirm-btn',
+                    cancelButton: 'nexus-cancel-btn',
+                    icon: 'nexus-icon'
+                }
+            });
+            if (!result.isConfirmed) return;
+
+            try {
+                const res = await axios.put(`/admin/returns/${ORDER_ID}/approve`);
+                if (res.data.success) {
+                    showToast('success', 'Return approved successfully');
+                    setTimeout(() => transitionTo('logistics'), 1500);
+                } else {
+                    showToast('error', res.data.message);
+                }
+            } catch (e) {
+                showToast('error', 'Something went wrong');
+            }
+        }
+
+        async function rejectReturn() {
+            const confirm = await Swal.fire({
+                title: 'Reject Return?',
+                html: 'This will deny the request and notify the customer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Reject',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#e53e3e',
+                customClass: {
+                    popup: 'nexus-modal',
+                    title: 'nexus-title',
+                    htmlContainer: 'nexus-text',
+                    confirmButton: 'nexus-confirm-btn',
+                    cancelButton: 'nexus-cancel-btn'
+                }
+            });
+            if (!confirm.isConfirmed) return;
+
+            const { value: note } = await Swal.fire({
+                title: 'Reason for Rejection',
+                input: 'textarea',
+                inputPlaceholder: 'Please explain why this return is being rejected...',
+                showCancelButton: true,
+                confirmButtonText: 'Submit Rejection',
+                customClass: {
+                    popup: 'nexus-modal',
+                    title: 'nexus-title',
+                    input: 'nexus-input',
+                    confirmButton: 'nexus-confirm-btn',
+                    cancelButton: 'nexus-cancel-btn'
+                }
+            });
+            if (note === undefined) return;
+
+            try {
+                const res = await axios.put(`/admin/returns/${ORDER_ID}/reject`, {
+                    rejectionReason: note
+                });
+                if (res.data.success) {
+                    showToast("success", 'Rejected Successfully');
+                    window.location.reload();
+                } else {
+                    showToast('error', res.data.message);
+                }
+            } catch (e) {
+                showToast('error', 'Something went wrong');
+            }
+        }
+
+        async function schedulePickup() {
+            const date = document.getElementById('pickupDate').value;
+            const time = document.getElementById('pickupTime').value;
+
+            if (!date || !time) {
+                showToast('info', 'Please select both date and time');
+                return;
+            }
+
+            try {
+                const res = await axios.put(`/admin/returns/${ORDER_ID}/pickup`, {
+                    pickupDate: date,
+                    pickupTime: time
+                });
+                if (res.data.success) {
+                    transitionTo('scheduled');
+                } else {
+                    showToast('error', res.data.message);
+                }
+            } catch (e) {
+                showToast('error', 'Something went wrong');
+            }
+        }
+
+        async function markPickedUp() {
+            const result = await Swal.fire({
+                title: 'Confirm Pickup?',
+                html: 'This will finalize the return, initiate the refund process, and restore product stock.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, Confirm',
+                cancelButtonText: 'Cancel',
+                customClass: {
+                    popup: 'nexus-modal',
+                    title: 'nexus-title',
+                    htmlContainer: 'nexus-text',
+                    confirmButton: 'nexus-confirm-btn',
+                    cancelButton: 'nexus-cancel-btn',
+                    icon: 'nexus-icon'
+                }
+            });
+            if (!result.isConfirmed) return;
+
+            try {
+                const res = await axios.put(`/admin/returns/${ORDER_ID}/refund`);
+                if (res.data.success) {
+                    showToast("success", "Refund processed and stock restored");
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showToast('error', res.data.message);
+                }
+            } catch (e) {
+                showToast('error', 'Something went wrong');
+            }
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Management | Admin | BOOTCAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #fcfcfc;
+            color: #111827;
+            overflow-x: hidden;
+        }
+
+        .sidebar-item {
+            transition: all 0.18s ease;
+        }
+
+        .sidebar-item:hover:not(.active) {
+            background-color: #f9fafb;
+        }
+
+        .sidebar-item.active {
+            background-color: #000;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar-item.active .material-symbols-outlined {
+            color: #fff;
+        }
+
+        .stats-card {
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+        }
+
+        .order-row {
+            transition: background 0.12s;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .order-row:hover {
+            background: rgba(249, 250, 251, 0.8);
+        }
+
+        .status-pill {
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-Confirmed {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-shipped {
+            background: #e0f2fe;
+            color: #075985;
+        }
+
+        .status-delivered {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-cancelled {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-returned {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .custom-dropdown {
+            position: relative;
+            min-width: 150px;
+        }
+
+        .dropdown-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fdfdfd;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-toggle:hover {
+            border-color: #000;
+            background-color: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .dropdown-toggle.active {
+            border-color: #000;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            width: 100%;
+            background: white;
+            border: 1px solid #f3f4f6;
+            border-radius: 14px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            padding: 6px;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dropdown-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .dropdown-item:hover {
+            background: #f9fafb;
+            color: #000;
+        }
+
+        .dropdown-item.selected {
+            background: #000;
+            color: #fff;
+        }
+
+        .filter-label {
+            position: absolute;
+            top: -7px;
+            left: 12px;
+            background: white;
+            padding: 0 6px;
+            font-size: 9px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #9ca3af;
+            z-index: 10;
+        }
+
+        .main-bg {
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+
+<body class="font-sans antialiased min-h-screen flex">
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside class="w-64 bg-white border-r border-gray-100 flex flex-col h-screen sticky top-0 flex-shrink-0 z-20">
+        <div class="h-24 flex flex-col justify-center px-8">
+            <h1 class="font-sans font-black text-2xl tracking-tight uppercase text-black mt-2">BOOTCAMP</h1>
+            <span class="text-[9px] font-bold tracking-[0.2em] text-emerald-500 mt-1 uppercase">System Admin</span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+            <a href="/admin/dashboard"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">grid_view</span>Dashboard
+            </a>
+            <a href="/admin/productManagement"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">sports_soccer</span>Products
+            </a>
+            <a href="/admin/category"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">category</span>Categories
+            </a>
+            <a href="/admin/orders"
+                class="sidebar-item active flex items-center px-4 py-3 text-[13px] font-bold uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">shopping_bag</span>Orders
+            </a>
+            <a href="/admin/offers"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">local_offer</span>Offers
+            </a>
+            <a href="/admin/coupons"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">confirmation_number</span>Coupons
+            </a>
+            <a href="/admin/usermanagement"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">group</span>Users
+            </a>
+            <a href="/admin/returns"
+                class="sidebar-item flex items-center px-4 py-3 text-[13px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">assignment_return</span>Returns
+            </a>
+            <a href="/admin/brand"
+                class="sidebar-item flex items-center px-4 py-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide rounded-lg">
+                <span class="material-symbols-outlined mr-3.5 text-[20px]">sell</span>Brand
+            </a>
+        </nav>
+    </aside>
+
+    <!-- ===== MAIN ===== -->
+    <main class="flex-1 flex flex-col min-h-screen main-bg">
+
+        <!-- Header -->
+        <header
+            class="h-[88px] bg-white border-b border-gray-200 flex items-center justify-between px-10 flex-shrink-0 z-10 sticky top-0">
+            <div>
+                <h2 class="font-sans font-black text-[24px] tracking-tight text-black">Order Management</h2>
+                <p class="text-[11px] text-gray-400 font-medium mt-0.5">Monitor and manage all customer orders and
+                    fulfillments.</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative w-[360px]">
+                    <span
+                        class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-[19px] pointer-events-none">search</span>
+                    <input id="searchInput" type="text" placeholder="Search by name or sku..." value="{{search}}"
+                        class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-11 pr-10 text-[13px] font-medium text-gray-700 outline-none placeholder-gray-400 focus:bg-white focus:border-gray-300 transition-colors">
+                </div>
+            </div>
+        </header>
+
+        <!-- Body -->
+        <div class="flex-1 px-10 py-10 space-y-8">
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Total Orders -->
+                <div class="stats-card p-8 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase mb-2">Total Orders</p>
+                        <h3 class="text-4xl font-black text-black">{{totalOrdersCount}}</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
+                        <span class="material-symbols-outlined text-[24px]">shopping_bag</span>
+                    </div>
+                </div>
+                <!-- Pending -->
+                <div class="stats-card p-8 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase mb-2">Pending</p>
+                        <h3 class="text-4xl font-black text-black">{{pendingOrdersCount}}</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
+                        <span class="material-symbols-outlined text-[24px]">schedule</span>
+                    </div>
+                </div>
+                <!-- Completed -->
+                <div class="stats-card p-8 flex items-center justify-between">
+                    <div>
+                        <p class="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase mb-2">Completed</p>
+                        <h3 class="text-4xl font-black text-black">{{completedOrdersCount}}</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
+                        <span class="material-symbols-outlined text-[24px]">check_circle</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filters & Table Section -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-5 flex-wrap">
+                        <input type="hidden" id="statusFilterValue" value="{{status}}">
+                        
+                        <!-- Status Dropdown -->
+                        <div class="custom-dropdown min-w-[200px]" id="statusDropdown">
+                            <span class="filter-label">Filter</span>
+                            <div class="dropdown-toggle" onclick="toggleDropdown(this)">
+                                <span class="selected-value text-[11px] font-bold text-black uppercase tracking-widest">
+                                   {{#if status}}{{status}}{{else}}All Status{{/if}}
+                                </span>
+                                <span class="material-symbols-outlined text-[18px] text-gray-400">expand_more</span>
+                            </div>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-item {{#if (eq status 'all')}}selected{{/if}}" onclick="selectDropdownOption('all', 'All Status')">All Status</div>
+                                <div class="dropdown-item {{#if (eq status 'Confirmed')}}selected{{/if}}" onclick="selectDropdownOption('Confirmed', 'Confirmed')">Confirmed</div>
+                                <div class="dropdown-item {{#if (eq status 'Shipped')}}selected{{/if}}" onclick="selectDropdownOption('Shipped', 'Shipped')">Shipped</div>
+                                <div class="dropdown-item {{#if (eq status 'Delivered')}}selected{{/if}}" onclick="selectDropdownOption('Delivered', 'Delivered')">Delivered</div>
+                                <div class="dropdown-item {{#if (eq status 'Cancelled')}}selected{{/if}}" onclick="selectDropdownOption('Cancelled', 'Cancelled')">Cancelled</div>
+                                <div class="dropdown-item {{#if (eq status 'Returned')}}selected{{/if}}" onclick="selectDropdownOption('Returned', 'Returned')">Returned</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Table Card -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr
+                                    class="bg-[#fcfcfc] border-b border-gray-50 text-[9px] font-black tracking-[0.2em] text-gray-400 uppercase">
+                                    <th class="py-6 px-8">ID</th>
+                                    <th class="py-6 px-8">Customer</th>
+                                    <th class="py-6 px-8">Products</th>
+                                    <th class="py-6 px-8">Date</th>
+                                    <th class="py-6 px-8">Amount</th>
+                                    <th class="py-6 px-8">Payment</th>
+                                    <th class="py-6 px-8">Status</th>
+                                    <th class="py-6 px-8 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                {{#each orders}}
+                                <tr class="order-row group">
+                                    <td class="py-6 px-8 text-[12px] font-bold text-black uppercase">#{{slice this._id
+                                        16 24}}</td>
+                                    <td class="py-6 px-8">
+                                        <div class="flex items-center gap-3">
+                                            <div>
+                                                <p class="text-[13px] font-bold text-black leading-tight">
+                                                    {{this.user.username}}</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-6 px-8">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 bg-gray-50 rounded p-1 flex-shrink-0">
+                                                {{#if this.items.[0].product.variants.[0].images.[0]}}
+                                                <img src="{{this.items.[0].product.variants.[0].images.[0]}}"
+                                                    class="w-full h-full object-contain" alt="">
+                                                {{else}}
+                                                <span
+                                                    class="material-symbols-outlined text-gray-300 text-[24px]">image_not_supported</span>
+                                                {{/if}}
+                                            </div>
+                                            <div class="max-w-[200px]">
+                                                <p class="text-[12px] font-medium text-gray-900 truncate">
+                                                    {{this.items.[0].product.productName}}</p>
+                                                {{#if (gt this.items.length 1)}}
+                                                <p class="text-[10px] font-bold text-brand-400 uppercase mt-0.5">+{{sub
+                                                    this.items.length 1}} more</p>
+                                                {{/if}}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-6 px-8 text-[13px] font-medium text-gray-600">{{formatDate
+                                        this.createdAt}}</td>
+                                    <td class="py-6 px-8 text-[14px] font-black text-black">₹{{this.totalAmount}}</td>
+                                    <td class="py-6 px-8 text-[11px] font-bold text-gray-400 uppercase tracking-widest">
+                                        {{this.paymentMethod}}</td>
+                                    <td class="py-6 px-8">
+                                        <span class="status-pill
+                                       {{#if (eq this.orderStatus 'Confirmed')}}status-Confirmed
+                                       {{else if (eq this.orderStatus 'Shipped')}}status-shipped
+                                       {{else if (eq this.orderStatus 'Delivered')}}status-delivered
+                                       {{else if (eq this.orderStatus 'Cancelled')}}status-cancelled
+                                       {{else if (eq this.orderStatus 'Returned')}}status-returned
+                                       {{/if}}">
+                                            <span class="w-1.5 h-1.5 rounded-full
+                                        {{#if (eq this.orderStatus 'Confirmed')}}bg-amber-500
+                                        {{else if (eq this.orderStatus 'Shipped')}}bg-blue-500
+                                        {{else if (eq this.orderStatus 'Delivered')}}bg-green-500
+                                        {{else if (eq this.orderStatus 'Cancelled')}}bg-red-500
+                                        {{else if (eq this.orderStatus 'Returned')}}bg-gray-500
+                                        {{/if}}"></span>
+                                            {{this.orderStatus}}
+                                        </span>
+                                    </td>
+                                    <td class="py-6 px-8 text-right">
+                                        <a href="/admin/orderDetail/{{this._id}}"
+                                            class="text-gray-400 hover:text-black transition-colors">
+                                            <span class="material-symbols-outlined text-[20px]">visibility</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {{/each}}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Table Footer / Pagination -->
+                    <div class="px-8 py-6 bg-[#fcfcfc] border-t border-gray-50 flex items-center justify-between">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                            Showing {{orders.length}} of {{totalFiltered}} orders
+                        </p>
+                        <div class="flex items-center gap-2 pagination-container">
+                            {{#if hasPrev}}
+                            <button onclick="goToPage({{prevPage}})"
+                                class="w-8 h-8 rounded-lg border border-gray-100 text-[12px] font-bold hover:bg-black hover:text-white transition-all">
+                                <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+                            </button>
+                            {{/if}}
+
+                            {{#each pages}}
+                            <button onclick="goToPage({{this.number}})"
+                                class="w-8 h-8 rounded-lg text-[12px] font-bold {{#if this.isCurrent}}bg-black text-white{{else}}border border-gray-100 hover:bg-black hover:text-white transition-all{{/if}}">
+                                {{this.number}}
+                            </button>
+                            {{/each}}
+
+                            {{#if hasNext}}
+                            <button onclick="goToPage({{nextPage}})"
+                                class="w-8 h-8 rounded-lg border border-gray-100 text-[12px] font-bold hover:bg-black hover:text-white transition-all">
+                                <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+                            </button>
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        let currentStatus = document.getElementById('statusFilterValue').value || 'all';
+        let searchTimeout;
+
+        const searchInput = document.getElementById('searchInput');
+        const tbody = document.querySelector('tbody');
+
+        // Status pill classes
+        function getStatusClass(status) {
+            const map = {
+                'Confirmed': 'status-Confirmed',
+                'Shipped': 'status-shipped',
+                'Delivered': 'status-delivered',
+                'Cancelled': 'status-cancelled',
+                'Returned': 'status-returned'
+            };
+            return map[status] || '';
+        }
+
+        function getDotClass(status) {
+            const map = {
+                'Confirmed': 'bg-amber-500',
+                'Shipped': 'bg-blue-500',
+                'Delivered': 'bg-green-500',
+                'Cancelled': 'bg-red-500',
+                'Returned': 'bg-gray-500'
+            };
+            return map[status] || 'bg-gray-300';
+        }
+
+        function formatDate(dateStr) {
+            return new Date(dateStr).toLocaleDateString('en-IN', {
+                day: '2-digit', month: 'short', year: 'numeric'
+            });
+        }
+
+        // Render table rows from JSON
+       function renderOrders(orders) {
+        if (orders.length === 0) {
+        tbody.innerHTML = `
+        <tr>
+            <td colspan="8" class="py-20 text-center text-[12px] font-bold text-gray-300 uppercase tracking-widest">
+                No orders found
+            </td>
+        </tr>`;
+        return;
+    }
+
+    tbody.innerHTML = orders.map(o => {
+        const image = o.items?.[0]?.product?.variants?.[0]?.images?.[0] || '';
+        const productName = o.items?.[0]?.product?.productName || '—';
+        const username = o.user?.username || '—';
+
+        return `
+        <tr class="order-row group">
+            <td class="py-6 px-8 text-[12px] font-bold text-black uppercase">#${o._id.toString().slice(16, 24)}</td>
+            <td class="py-6 px-8">
+                <p class="text-[13px] font-bold text-black leading-tight">${username}</p>
+            </td>
+            <td class="py-6 px-8">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gray-50 rounded p-1 flex-shrink-0">
+                        ${image
+                            ? `<img src="${image}" class="w-full h-full object-contain" alt="">`
+                            : `<span class="material-symbols-outlined text-gray-300 text-[24px]">image_not_supported</span>`
+                        }
+                    </div>
+                    <div class="max-w-[200px]">
+                        <p class="text-[12px] font-medium text-gray-900 truncate">${productName}</p>
+                        ${o.items.length > 1
+                            ? `<p class="text-[10px] font-bold uppercase mt-0.5 text-gray-400">+${o.items.length - 1} more</p>`
+                            : ''
+                        }
+                    </div>
+                </div>
+            </td>
+            <td class="py-6 px-8 text-[13px] font-medium text-gray-600">${formatDate(o.createdAt)}</td>
+            <td class="py-6 px-8 text-[14px] font-black text-black">₹${o.totalAmount}</td>
+            <td class="py-6 px-8 text-[11px] font-bold text-gray-400 uppercase tracking-widest">${o.paymentMethod}</td>
+            <td class="py-6 px-8">
+                <span class="status-pill ${getStatusClass(o.orderStatus)}">
+                    <span class="w-1.5 h-1.5 rounded-full ${getDotClass(o.orderStatus)}"></span>
+                    ${o.orderStatus}
+                </span>
+            </td>
+            <td class="py-6 px-8 text-right">
+                <a href="/admin/orderDetail/${o._id}" class="text-gray-400 hover:text-black transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">visibility</span>
+                </a>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+        async function fetchOrders(search, status, page = 1) {
+            const params = { search, status, page };
+            try {
+                const res = await axios.get('/admin/orders', {
+                    params,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                const data = res.data;
+                if (data.success) {
+                    renderOrders(data.orders);
+                    updatePagination(data);
+                    window.history.replaceState({}, '', `/admin/orders?${new URLSearchParams(params).toString()}`);
+                }
+            } catch (err) {
+                console.error('fetchOrders error:', err);
+            }
+        }
+
+        function goToPage(page) {
+        fetchOrders(searchInput.value.trim(), currentStatus, page);
+}
+
+        function updatePagination(data) {
+            const showingText = document.querySelector('.pagination-container')
+                ?.closest('.px-8')
+                ?.querySelector('p');
+            if (showingText) {
+                showingText.textContent = `Showing ${data.orders.length} of ${data.totalFiltered} orders`;
+            }
+
+            const footer = document.querySelector('.pagination-container');
+            if (!footer) return;
+
+            let html = '';
+            if (data.hasPrev) {
+                html += `<button onclick="fetchOrders('${searchInput.value.trim()}', '${currentStatus}', ${data.prevPage})"
+            class="w-8 h-8 rounded-lg border border-gray-100 text-[12px] font-bold hover:bg-black hover:text-white transition-all">
+            <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+        </button>`;
+            }
+
+            for (let i = 1; i <= data.totalPages; i++) {
+                html += `<button onclick="fetchOrders('${searchInput.value.trim()}', '${currentStatus}', ${i})"
+            class="w-8 h-8 rounded-lg text-[12px] font-bold ${i === data.currentPage ? 'bg-black text-white' : 'border border-gray-100 hover:bg-black hover:text-white transition-all'}">
+            ${i}
+        </button>`;
+            }
+
+            if (data.hasNext) {
+                html += `<button onclick="fetchOrders('${searchInput.value.trim()}', '${currentStatus}', ${data.nextPage})"
+            class="w-8 h-8 rounded-lg border border-gray-100 text-[12px] font-bold hover:bg-black hover:text-white transition-all">
+            <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+        </button>`;
+            }
+
+            footer.innerHTML = html;
+        }
+
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                fetchOrders(searchInput.value.trim(), currentStatus, 1);
+            }, 400);
+        });
+
+        // ─── CUSTOM DROPDOWNS ───────────────────────────────────────
+        function toggleDropdown(toggle) {
+            const menu = toggle.nextElementSibling;
+            const isOpen = menu.classList.contains('show');
+
+            // Close all other dropdowns
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+            document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+
+            if (!isOpen) {
+                menu.classList.add('show');
+                toggle.classList.add('active');
+            }
+        }
+
+        function selectDropdownOption(value, label) {
+            currentStatus = value;
+            document.getElementById('statusFilterValue').value = value;
+            
+            // Update display text
+            document.querySelector('#statusDropdown .selected-value').textContent = label;
+            
+            // Highlight selected item
+            document.querySelectorAll('#statusDropdown .dropdown-item').forEach(item => {
+                item.classList.toggle('selected', item.textContent === label);
+            });
+
+            // Close menu
+            document.querySelector('#statusDropdown .dropdown-menu').classList.remove('show');
+            document.querySelector('#statusDropdown .dropdown-toggle').classList.remove('active');
+
+            // Trigger AJAX fetch
+            fetchOrders(searchInput.value.trim(), currentStatus, 1);
+        }
+
+        // Close dropdowns on click outside
+        window.addEventListener('click', e => {
+            if (!e.target.closest('.custom-dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(m => m.classList.remove('show'));
+                document.querySelectorAll('.dropdown-toggle').forEach(t => t.classList.remove('active'));
+            }
+        });
+    </script>
+
+</body>
+
+</html>

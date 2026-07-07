@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SHOPPING BAG - BOOT CAMP</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <!-- Playfair Display for Order Summary title if needed, else Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,600&display=swap"
+        rel="stylesheet">
+    <!-- Material Symbols -->
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fafafa;
+            color: #000000;
+        }
+
+        .icon-fill {
+            font-variation-settings: 'FILL' 1;
+        }
+
+        /* Font for Order Summary */
+        .summary-title {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+        }
+
+        /* Number input hide arrows */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        /* Modal transitions */
+        .modal {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            transform: scale(0.95) translateY(10px);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-black selection:text-white flex flex-col min-h-screen">
+
+    <!-- Navbar -->
+    {{>navbar}}
+    {{>breadCrumbs}}
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-[1250px] mx-auto px-6 pt-8 lg:pt-8">
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+
+            <!-- Left Side: Items List -->
+            <div class="lg:col-span-7 xl:col-span-8 flex flex-col gap-6">
+                <!-- Header -->
+                <div class="mb-4">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-[0.2em] mb-1">REVIEW & ADJUST</p>
+                    <h1 class="text-[32px] font-black tracking-tight">Your Items</h1>
+                </div>
+
+                <!-- Dynamic Items -->
+                {{#each cartItems}}
+                <div class="cart-item flex flex-col sm:flex-row gap-6 p-5 sm:p-6 bg-white border {{#if this.isUnavailable}}border-red-100{{else}}border-gray-100{{/if}} rounded-[24px] shadow-sm hover:shadow-md transition-shadow relative"
+                    data-item-id="{{this._id}}"
+                    data-id="{{this.productId._id}}"
+                    data-price="{{this.price}}"
+                    data-variant="{{this.variantId}}"
+                    data-size="{{this.size}}"
+                    data-stock="{{this.stock}}"
+                    data-unavailable="{{this.isUnavailable}}">
+
+                    <!-- Image -->
+                    <a href="/users/productDetail/{{this.productId._id}}"
+                        class="relative w-full sm:w-[130px] h-[150px] bg-[#f0f4f8] rounded-[16px] overflow-hidden flex-shrink-0 flex items-center justify-center hover:opacity-80 transition-opacity">
+                        <img src="{{this.productId.images.[0]}}" class="w-full h-full object-cover mix-blend-multiply {{#if this.isUnavailable}}opacity-40{{/if}}"
+                            alt="{{this.productId.name}}">
+                        {{#if this.isUnavailable}}
+                        <!-- Unavailable overlay -->
+                        <div class="absolute inset-0 bg-white/60 rounded-[16px] flex items-center justify-center">
+                            <span class="text-red-500 text-[9px] font-black uppercase tracking-widest bg-white px-2 py-1 rounded-full border border-red-100 shadow-sm">Unavailable</span>
+                        </div>
+                        {{/if}}
+                    </a>
+
+                    <!-- Details Space -->
+                    <div class="flex flex-col flex-1">
+                        <!-- Top Row: Title + Price -->
+                        <div class="flex justify-between items-start gap-4">
+                            <div>
+                                <a href="/users/productDetail/{{this.productId._id}}" class="hover:underline">
+                                    <h3 class="text-[15px] font-bold {{#if this.isUnavailable}}text-gray-400{{else}}text-gray-900{{/if}} leading-tight">
+                                        {{this.productId.brand}} - {{this.productId.name}}
+                                    </h3>
+                                </a>
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">SIZE : {{this.size}}</p>
+
+                                {{#if this.isUnavailable}}
+                                <!-- Out of stock badge -->
+                                <span class="inline-flex items-center gap-1 mt-2 px-2 py-0.5 bg-red-50 text-red-500 rounded-full text-[9px] font-black uppercase tracking-widest border border-red-100">
+                                    <span class="material-symbols-outlined text-[11px]">block</span>
+                                    Out of Stock
+                                </span>
+                                {{/if}}
+                            </div>
+
+                            <!-- Price Block -->
+                            <div class="text-right flex flex-col items-end">
+                                <span class="text-[16px] font-black {{#if this.isUnavailable}}text-gray-300{{/if}}">₹{{this.price}}</span>
+                                {{#if this.productId.price}}
+                                <span class="text-[11px] text-gray-400 font-bold line-through mt-0.5">₹{{this.productId.price}}</span>
+                                {{/if}}
+                            </div>
+                        </div>
+
+                        <div class="flex-1"></div> <!-- Spacer -->
+
+                        <!-- Bottom Row: Qty + Remove -->
+                        <div class="flex items-center justify-between mt-6">
+
+                            {{#if this.isUnavailable}}
+                            <!-- Disabled qty controls when unavailable -->
+                            <div class="flex items-center bg-gray-100 rounded-full px-5 py-2 opacity-40 cursor-not-allowed">
+                                <button disabled class="text-gray-400 font-medium text-[18px] leading-none cursor-not-allowed">−</button>
+                                <input type="number" id="qty-{{this.productId._id}}" value="{{this.quantity}}" readonly
+                                    class="w-10 text-center bg-transparent text-[13px] font-black outline-none pointer-events-none text-gray-400">
+                                <button disabled class="text-gray-400 font-medium text-[18px] leading-none cursor-not-allowed">+</button>
+                            </div>
+                            {{else}}
+                            <!-- Active qty controls -->
+                            <div class="flex items-center bg-[#f7f7f7] rounded-full px-5 py-2">
+                                <button
+                                    class="text-gray-500 hover:text-black font-medium transition-colors text-[18px] leading-none"
+                                    onclick="updateQty('{{this.productId._id}}', -1)">−</button>
+                                <input type="number" id="qty-{{this.productId._id}}" value="{{this.quantity}}" readonly
+                                    class="w-10 text-center bg-transparent text-[13px] font-black outline-none pointer-events-none">
+                                <button
+                                    class="text-gray-500 hover:text-black font-medium transition-colors text-[18px] leading-none"
+                                    onclick="updateQty('{{this.productId._id}}', 1)">+</button>
+                            </div>
+                            {{/if}}
+
+                            <!-- Remove Button -->
+                            <button
+                                class="flex items-center gap-1.5 text-gray-400 hover:text-red-500 transition-colors group"
+                                onclick="openRemoveModal('{{this._id}}', '{{this.productId.name}}')">
+                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                                <span class="text-[10px] font-bold uppercase tracking-[0.1em]">REMOVE</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {{else}}
+                <!-- Empty State -->
+                <div class="p-20 text-center bg-white border border-dashed border-gray-200 rounded-[32px]">
+                    <span class="material-symbols-outlined text-[48px] text-gray-200 mb-4">shopping_cart_off</span>
+                    <h2 class="text-xl font-bold mb-2">Your bag is empty</h2>
+                    <p class="text-gray-400 mb-8">Looks like you haven't added anything yet.</p>
+                    <a href="/"
+                        class="bg-black text-white px-8 py-4 rounded-2xl text-[11px] font-bold uppercase tracking-widest">Start
+                        Shopping</a>
+                </div>
+                {{/each}}
+
+            </div>
+
+            <!-- Right Side: Order Summary -->
+            <div class="lg:col-span-5 xl:col-span-4 sticky top-32">
+
+                <div class="flex flex-col shadow-2xl shadow-gray-200/50 rounded-[32px] overflow-hidden">
+                    <!-- Top Black Header -->
+                    <div class="bg-[#1a1a1a] text-white p-8 pb-10">
+                        <h2 class="summary-title text-[32px] font-semibold mb-1">Order Summary</h2>
+                        <p class="text-[9px] text-[#888888] font-bold uppercase tracking-[0.2em]">YOUR SELECTION AT A
+                            GLANCE</p>
+                    </div>
+
+                    <!-- Bottom White Content -->
+                    <div class="bg-white p-8 pt-10 rounded-[32px] -mt-6 z-10 relative flex flex-col gap-5">
+
+                        <!-- Line items -->
+                        <div class="flex justify-between items-center text-[13px] font-medium text-gray-500">
+                            <span>Subtotal</span>
+                            <span class="text-black font-bold" id="subtotal-display">₹{{subtotal}}</span>
+                        </div>
+                        {{#if savings}}
+                        <div class="flex justify-between items-center text-[13px] font-bold text-[#1b9a67]">
+                            <span>Offer Savings</span>
+                            <span>- ₹{{savings}}</span>
+                        </div>
+                        {{/if}}
+                        <div class="flex justify-between items-center text-[13px] font-medium text-gray-500">
+                            <span class="flex items-center gap-1.5">Shipping <span
+                                    class="material-symbols-outlined text-[14px]">help</span></span>
+                            <span class="text-[9px] font-bold uppercase tracking-[0.1em] text-gray-400">TBD AT
+                                CHECKOUT</span>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="h-px bg-gray-100 my-2"></div>
+
+                        <!-- Total -->
+                        <div class="flex justify-between items-end mb-4">
+                            <div class="flex flex-col">
+                                <span class="text-[10px] font-black uppercase tracking-[0.15em] mb-1">TOTAL</span>
+                                <span class="text-[9px] font-bold text-gray-400">INR</span>
+                            </div>
+                            <span class="text-[32px] font-black tracking-tighter leading-none"
+                                id="total-display">₹{{total}}</span>
+                        </div>
+
+                        <!-- Button -->
+                        <a href="/users/checkout"
+   class="w-full bg-[#1a1a1a] hover:bg-black text-white rounded-2xl py-5 flex items-center justify-center gap-3 transition-colors shadow-lg shadow-black/10 mx-auto mt-2 h-[64px]">
+    <span class="material-symbols-outlined text-[18px]">lock</span>
+    <span class="text-[11px] font-bold uppercase tracking-[0.15em]">PROCEED TO CHECKOUT</span>
+</a>
+
+                        <!-- Little Divider Text -->
+                        <div class="flex items-center gap-4 mt-6">
+                            <div class="h-px bg-gray-100 flex-1"></div>
+                            <span class="text-[9px] font-bold text-gray-300 uppercase tracking-[0.15em]"
+                                id="bag-count-text">
+                                {{bagCount}} ITEMS IN YOUR BAG
+                            </span>
+                            <div class="h-px bg-gray-100 flex-1"></div>
+                        </div>
+
+                        <!-- Trust Icons -->
+                        <div class="flex justify-center items-center gap-8 mt-5 pb-2 text-gray-300">
+                            <span class="material-symbols-outlined text-[20px]">shield</span>
+                            <span class="material-symbols-outlined text-[20px]">local_shipping</span>
+                            <span class="material-symbols-outlined text-[20px]">military_tech</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Remove Item Modal -->
+    <div id="removeModal" class="modal fixed inset-0 z-50 flex items-center justify-center">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" onclick="closeRemoveModal()"></div>
+
+        <!-- Box -->
+        <div
+            class="modal-content bg-white p-8 rounded-[24px] shadow-2xl relative z-10 w-[90%] max-w-sm flex flex-col text-center">
+            <div class="w-12 h-12 rounded-full bg-red-100 text-red-500 flex items-center justify-center mx-auto mb-5">
+                <span class="material-symbols-outlined">delete</span>
+            </div>
+
+            <h3 class="text-lg font-black tracking-tight mb-2">Remove Item?</h3>
+            <p class="text-[13px] text-gray-500 font-medium mb-8">Are you sure you want to remove <span
+                    id="modalItemName" class="font-bold text-black">this item</span> from your bag?</p>
+
+            <div class="flex gap-3">
+                <button onclick="closeRemoveModal()"
+                    class="flex-1 py-3.5 border border-gray-200 rounded-xl text-[12px] font-bold hover:bg-gray-50 transition-colors">CANCEL</button>
+                <button onclick="confirmRemoveItem()"
+                    class="flex-1 py-3.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-[12px] font-bold transition-colors shadow-md shadow-red-500/20">REMOVE</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Logic Script -->
+    <script>
+        let itemToRemoveId = null;
+
+        // Qty changer logic
+       async function updateQty(itemId, change) {
+       const input = document.getElementById(`qty-${itemId}`);
+       const cartItem = document.querySelector(`.cart-item[data-id="${itemId}"]`);
+
+    if (cartItem?.dataset.unavailable === 'true' || parseInt(cartItem?.dataset.stock) === 0) {
+        showToast("error", "This item is out of stock");
+        return;
+    }
+
+    const stock = parseInt(cartItem?.dataset.stock) || 5;
+    const maxQty = Math.min(5, stock);
+
+    let newVal = parseInt(input.value) + change;
+    if (newVal < 1) newVal = 1;
+    if (newVal > maxQty) {
+        newVal = maxQty;
+        showToast("error", `Only ${maxQty} items available in stock`);
+    }
+
+    input.value = newVal;
+    recalculateTotals();
+
+    // ✅ Save to DB
+    try {
+        const itemObjectId = cartItem?.dataset.itemId; // uses data-item-id
+        await axios.put('/users/updateCartQty', {
+            itemId: itemObjectId,
+            quantity: newVal
+        });
+    } catch (err) {
+        showToast("error", "Failed to update quantity");
+        // revert UI
+        input.value = newVal - change;
+        recalculateTotals();
+    }
+}
+
+        function recalculateTotals() {
+            let subtotal = 0;
+
+            document.querySelectorAll('.cart-item').forEach(item => {
+                // ✅ Skip unavailable items from subtotal
+                if (item.dataset.unavailable === 'true') return;
+
+                const price = parseFloat(item.dataset.price);
+                const itemId = item.dataset.id;
+                const qty = parseInt(document.getElementById(`qty-${itemId}`).value);
+                subtotal += price * qty;
+            });
+
+            // Update DOM
+            document.getElementById('subtotal-display').textContent = '₹' + subtotal.toLocaleString('en-IN');
+            document.getElementById('total-display').textContent = '₹' + subtotal.toLocaleString('en-IN');
+
+            // Update bag count — only count available items
+        let totalItems = 0;
+            document.querySelectorAll('.cart-item').forEach(item => {
+            if (item.dataset.unavailable === 'true') return;
+            totalItems += 1; // count the item itself, not its quantity
+        });
+            const bagEl = document.getElementById('bag-count-text');
+            if (bagEl) bagEl.textContent = `${totalItems} ITEMS IN YOUR BAG`;
+        }
+
+        // Modal triggers
+        function openRemoveModal(itemId, itemName) {
+            itemToRemoveId = itemId;
+            document.getElementById('modalItemName').textContent = itemName;
+            document.getElementById('removeModal').classList.add('active');
+        }
+
+        function closeRemoveModal() {
+            document.getElementById('removeModal').classList.remove('active');
+            itemToRemoveId = null;
+        }
+
+        async function confirmRemoveItem() {
+            if (!itemToRemoveId) return;
+
+            // ✅ Save BEFORE closeRemoveModal resets it
+            const idToRemove = itemToRemoveId;
+            const itemEl = document.querySelector(`.cart-item[data-item-id="${idToRemove}"]`);
+
+            closeRemoveModal();
+
+            try {
+                const response = await axios.delete("/users/removeFromCart", {
+                    data: { itemId: idToRemove }
+                });
+
+                if (response.data.success) {
+                    if (typeof fetchNavCounts === 'function') fetchNavCounts();
+                    if (itemEl) {
+                        itemEl.style.transition = 'all 0.3s ease';
+                        itemEl.style.opacity = '0';
+                        itemEl.style.transform = 'translateY(10px)';
+
+                        setTimeout(() => {
+                            itemEl.remove();
+                            const remaining = document.querySelectorAll('.cart-item').length;
+                            if (remaining === 0) {
+                                showToast("success", "Item removed from cart");
+                                setTimeout(() => window.location.reload(), 1000);
+                                return;
+                            }
+                            recalculateTotals();
+                            showToast("success", "Item removed from cart");
+                        }, 300);
+                    }
+                } else {
+                    showToast("error", response.data.message || "Failed to remove item");
+                }
+
+            } catch (err) {
+                console.error("Remove error:", err.response?.data);
+                showToast("error", "Something went wrong");
+            }
+        }
+    </script>
+    {{#if cartNotice}}
+     <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const messages = {{{ json cartNotice }}};
+        messages.forEach((msg, i) => {
+            setTimeout(() => showToast("error", msg), i * 400);
+        });
+       });
+    </script>
+    {{/if}}
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+{{#if breadcrumbs}}
+<nav class="w-full px-6 pt-24 max-w-[1400px] mx-auto ">
+    <ol class="flex items-center justify-start gap-2">
+        {{#each breadcrumbs}}
+        <li class="flex items-center gap-2">
+            {{#if this.url}}
+            <a href="{{this.url}}"
+               class="text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:text-black transition-colors">
+                {{this.label}}
+            </a>
+            {{else}}
+            <span class="text-[10px] font-bold uppercase tracking-widest text-black">
+                {{this.label}}
+            </span>
+            {{/if}}
+            {{#unless @last}}
+            <span class="text-gray-300 text-[10px] font-bold">›</span>
+            {{/unless}}
+        </li>
+        {{/each}}
+    </ol>
+</nav>
+{{/if}}

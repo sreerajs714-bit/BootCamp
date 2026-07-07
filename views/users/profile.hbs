@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile | BOOT CAMP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;800;900&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,300,0,0" />
+    
+    <!-- Toastify -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f9f9f9',
+                            100: '#e7e7e7',
+                            200: '#d1d1d1',
+                            300: '#b0b0b0',
+                            400: '#888888',
+                            500: '#6d6d6d',
+                            600: '#5d5d5d',
+                            700: '#4f4f4f',
+                            800: '#454545',
+                            900: '#3d3d3d',
+                            950: '#000000',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #fbfbfb;
+            color: #000000;
+        }
+
+        .nav-link {
+            position: relative;
+            padding-bottom: 4px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background-color: #000000;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .icon-btn {
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.15);
+            color: #5d5d5d;
+        }
+
+        .sidebar-link {
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-link:hover {
+            color: #000000;
+        }
+
+        .photo-wrapper:hover .photo-overlay {
+            opacity: 1;
+        }
+
+        .photo-overlay { opacity: 0; transition: opacity 0.3s ease; }
+
+        /* Premium Modal Styles */
+        .modal-glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .dark-modal-glass {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes modal-in {
+            from { opacity: 0; transform: translate(-50%, -45%) scale(0.95); }
+            to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .animate-modal-in {
+            animation: modal-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* OTP Input Styling */
+        .otp-box:focus {
+            border-color: #000;
+            box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+            outline: none;
+        }
+
+        /* Password Requirement Styles */
+        .requirement-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+        }
+
+        .requirement-valid { color: #10b981; }
+        .requirement-invalid { color: rgba(0, 0, 0, 0.2); }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col font-sans selection:bg-brand-950 selection:text-white">
+
+    <!-- Navigation -->
+    {{>navbar}}
+    {{>breadCrumbs}}
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-6  flex flex-col lg:block relative">
+
+        <!-- Sidebar -->
+        <aside class="w-full lg:w-48 lg:fixed lg:top-32 h-fit mb-10 lg:mb-0 pt-12">
+            <h3 class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-8">Account</h3>
+            <nav class="flex flex-col space-y-6">
+                <a href="/users/profile"
+                    class="sidebar-link flex items-center text-[13px] font-bold text-black tracking-widest uppercase">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">person</span>Profile
+                </a>
+                <a href="/users/address"
+                    class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">location_on</span>Address
+                </a>
+                <a href="/users/myOrders"
+                    class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">inventory_2</span>My Orders
+                </a>
+                <a href="/users/wallet"
+                    class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">account_balance_wallet</span>Wallet
+                </a>
+                <a href="/users/referal"
+                    class="sidebar-link flex items-center text-[13px] font-medium text-gray-400 tracking-widest uppercase hover:text-black">
+                    <span class="material-symbols-outlined mr-4 text-[20px]">share</span>Refer & Earn
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Right Content Area -->
+        <div class="w-full lg:pl-[16rem]">
+
+            <!-- Header Section -->
+            <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                <div>
+                    <h3 class="text-[10px] font-bold tracking-[0.2em] text-gray-400 uppercase mb-4">Account Overview
+                    </h3>
+                    <h1 class="text-5xl font-serif text-black">My Profile</h1>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="/users/editProfile"
+                        class="px-6 py-3 bg-black text-white text-[11px] font-bold tracking-widest uppercase hover:bg-gray-800 transition-colors inline-block">
+                        Edit Profile
+                    </a>
+                    <form action="/users/logout" method="post" id="logoutForm">
+                        <button type="button" onclick="confirmLogout()"
+                            class="px-6 py-3 bg-transparent border border-gray-300 text-black text-[11px] font-bold tracking-widest uppercase hover:border-black transition-colors">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Profile Cards Section -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+
+                <!-- Main Profile Card -->
+                <div class="md:col-span-2 bg-[#f6f6f6] p-12 flex items-center gap-10">
+                    <div class="relative flex-shrink-0 photo-wrapper cursor-pointer"
+                        onclick="document.getElementById('profilePhotoInput').click()">
+                        <div class="w-40 h-40 overflow-hidden shadow-sm" id="photoContainer">
+                            {{#if user.profilePhoto}}
+                            <img id="profilePreview" src="{{user.profilePhoto}}" alt="Profile"
+                                class="w-full h-full object-cover grayscale">
+                            {{else}}
+                            <div id="profileInitial" class="w-full h-full bg-black flex items-center justify-center">
+                                <span class="text-white font-serif text-6xl font-light select-none">
+                                    {{slice user.username 0 1}}
+                                </span>
+                            </div>
+                            {{/if}}
+                        </div>
+                        <div
+                            class="photo-overlay absolute inset-0 bg-black/50 flex flex-col items-center justify-center">
+                            <span class="material-symbols-outlined text-white text-[28px]">photo_camera</span>
+                            <span class="text-white text-[10px] font-bold tracking-widest uppercase mt-1">Change</span>
+                        </div>
+                        <input type="file" id="profilePhotoInput" accept="image/jpeg,image/jpg,image/png,image/webp"
+                            class="hidden">
+                    </div>
+                    <div>
+                        <h2 class="text-4xl font-serif mb-3 text-black">{{user.username}}</h2>
+                        {{#if isGoogleUser}}
+                        <div class="flex items-center gap-2 mt-2">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z">
+                                </path>
+                                <path
+                                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z">
+                                </path>
+                                <path
+                                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z">
+                                </path>
+                                <path
+                                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z">
+                                </path>
+                            </svg>
+                            <span class="text-[11px] font-medium text-gray-500 tracking-wide">Signed in with
+                                Google</span>
+                        </div>
+                        {{/if}}
+                        <p id="uploadStatus" class="text-[11px] tracking-wide mt-2 hidden"></p>
+                    </div>
+                </div>
+
+                <!-- Right Widgets -->
+                <div class="flex flex-col gap-6">
+
+                    <!-- Password Management Widget -->
+                    <div class="bg-[#f6f6f6] p-8 flex-grow flex flex-col justify-center border-l-[3px] border-black">
+                        <h3 class="text-[10px] font-bold tracking-[0.15em] text-black uppercase mb-5">Password
+                            Management</h3>
+                        <div class="flex items-end justify-between mb-3">
+                            <span class="text-2xl font-serif">Password</span>
+                            {{#if isGoogleUser}}
+                            <!-- ✅ Disabled for Google users -->
+                            <span
+                                class="text-[10px] font-bold tracking-[0.1em] text-gray-300 uppercase cursor-not-allowed mb-1"
+                                title="Managed by Google">Unavailable</span>
+                            {{else}}
+                            <button type="button" onclick="openModal('passwordModal')"
+                                class="text-[10px] font-bold tracking-[0.1em] text-black underline uppercase hover:text-gray-600 mb-1 cursor-pointer">
+                                Change
+                            </button>
+                            {{/if}}
+                        </div>
+                    </div>
+
+                    <!-- Email Management -->
+                    <div class="bg-black text-white p-8 flex-grow flex flex-col justify-center">
+                        <h3 class="text-[10px] font-bold tracking-[0.15em] text-white uppercase mb-5">Email Management
+                        </h3>
+                        <div class="flex items-center justify-between">
+                            <span class="text-2xl font-serif">Email</span>
+                            {{#if isGoogleUser}}
+                            <!-- ✅ Disabled for Google users -->
+                            <span
+                                class="text-[10px] font-bold tracking-[0.1em] text-gray-500 uppercase cursor-not-allowed mb-1"
+                                title="Managed by Google">Unavailable</span>
+                            {{else}}
+                            <button type="button" onclick="openModal('emailModal')"
+                                class="text-[10px] font-bold tracking-[0.1em] text-white underline uppercase hover:text-gray-300 mb-1 cursor-pointer">
+                                Change
+                            </button>
+                            {{/if}}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Personal Details Section -->
+            <div class="mt-8">
+                <div class="flex items-center gap-8 mb-10">
+                    <h2 class="text-3xl font-serif text-black">Personal Details</h2>
+                    <div class="flex-grow h-px bg-gray-200"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                    <div class="border-b border-gray-200 pb-5">
+                        <h3 class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-4">Full Name</h3>
+                        <p class="text-[15px] font-medium text-black">{{user.username}}</p>
+                    </div>
+                    <div class="border-b border-gray-200 pb-5">
+                        <h3 class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-4">Email Address
+                        </h3>
+                        <p class="text-[15px] font-medium text-black">{{user.email}}</p>
+                    </div>
+                    <div class="border-b border-gray-200 pb-5">
+                        <h3 class="text-[10px] font-bold tracking-[0.15em] text-gray-400 uppercase mb-4">Phone Number
+                        </h3>
+                        <p class="text-[15px] font-medium text-black">{{user.phoneNO}}</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Modal Backdrop -->
+    <div id="modalBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] hidden opacity-0 transition-opacity duration-500" onclick="closeAllModals()"></div>
+
+    <!-- Redesigned Modals Wrapper -->
+    <div id="modals-container">
+        
+        <!-- Logout Confirmation Modal (Premium Dark) -->
+        <div id="logoutModal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm dark-modal-glass z-[70] hidden opacity-0 transition-all duration-300 p-10 text-center rounded-3xl">
+            <div class="mb-6">
+                <span class="material-symbols-outlined text-white/20 text-6xl">logout</span>
+            </div>
+            <h2 class="text-2xl font-serif text-white mb-2">Leaving so soon?</h2>
+            <p class="text-white/40 text-[11px] font-bold uppercase tracking-widest mb-8">Are you sure you want to terminate your current session?</p>
+            <div class="flex flex-col gap-3">
+                <button onclick="executeLogout()" class="w-full py-4 bg-white text-black font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-gray-200 transition-all">LOGOUT</button>
+                <button onclick="closeModal('logoutModal')" class="w-full py-4 bg-white/5 text-white/40 font-black uppercase tracking-widest text-[11px] rounded-xl hover:bg-white/10 hover:text-white transition-all">STAY ACTIVE</button>
+            </div>
+        </div>
+
+        <!-- Password Modal (Redesigned with Live Validation) -->
+        <div id="passwordModal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white z-[70] hidden opacity-0 transition-all duration-300 p-10 rounded-[32px] shadow-2xl">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h3 class="text-[9px] font-black tracking-[0.2em] text-gray-400 uppercase mb-1">Security Update</h3>
+                    <h2 class="text-3xl font-serif text-black">Credentials</h2>
+                </div>
+                <button type="button" onclick="closeModal('passwordModal')" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+                    <span class="material-symbols-outlined text-black">close</span>
+                </button>
+            </div>
+
+            <form id="passwordForm" class="space-y-6">
+                <!-- Current Password -->
+<div class="space-y-1">
+    <label class="text-[10px] font-black tracking-widest text-gray-400 uppercase px-1">Current Password</label>
+    <div class="relative">
+        <input id="currentPassword" type="password" placeholder="••••••••" 
+            class="w-full px-5 py-4 pr-14 bg-gray-50 border-0 border-b-2 border-transparent focus:border-black rounded-2xl text-[14px] transition-all outline-none">
+        <button type="button" onclick="togglePassword('currentPassword', this)"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors">
+            <span class="material-symbols-outlined text-[20px]">visibility</span>
+        </button>
+    </div>
+    <p id="currentPassword-error" class="hidden text-[11px] font-bold text-red-400 mt-1 px-1"></p>
+</div>
+
+<!-- New Password -->
+<div class="space-y-1">
+    <label class="text-[10px] font-black tracking-widest text-gray-400 uppercase px-1">New Password</label>
+    <div class="relative">
+        <input id="newPassword" type="password" placeholder="••••••••" 
+            class="w-full px-5 py-4 pr-14 bg-gray-50 border-0 border-b-2 border-transparent focus:border-black rounded-2xl text-[14px] transition-all outline-none">
+        <button type="button" onclick="togglePassword('newPassword', this)"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors">
+            <span class="material-symbols-outlined text-[20px]">visibility</span>
+        </button>
+        <p id="newPassword-error" class="hidden text-[11px] font-bold text-red-400 mt-1 px-1"></p>
+        <div id="password-reqs" class="hidden mt-4 grid grid-cols-2 gap-y-2 gap-x-4 p-4 bg-gray-50 rounded-2xl border border-gray-100">
+            <div class="requirement-item requirement-invalid" data-req="length"><span class="material-symbols-outlined text-[14px]">circle</span> 8+ Chars</div>
+            <div class="requirement-item requirement-invalid" data-req="uppercase"><span class="material-symbols-outlined text-[14px]">circle</span> Uppercase</div>
+            <div class="requirement-item requirement-invalid" data-req="lowercase"><span class="material-symbols-outlined text-[14px]">circle</span> Lowercase</div>
+            <div class="requirement-item requirement-invalid" data-req="number"><span class="material-symbols-outlined text-[14px]">circle</span> Number</div>
+            <div class="requirement-item requirement-invalid" data-req="special"><span class="material-symbols-outlined text-[14px]">circle</span> Special</div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Password -->
+<div class="space-y-1">
+    <label class="text-[10px] font-black tracking-widest text-gray-400 uppercase px-1">Confirm New Password</label>
+    <div class="relative">
+        <input id="confirmPassword" type="password" placeholder="••••••••" 
+            class="w-full px-5 py-4 pr-14 bg-gray-50 border-0 border-b-2 border-transparent focus:border-black rounded-2xl text-[14px] transition-all outline-none">
+        <button type="button" onclick="togglePassword('confirmPassword', this)"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-black transition-colors">
+            <span class="material-symbols-outlined text-[20px]">visibility</span>
+        </button>
+    </div>
+    <p id="confirmPassword-error" class="hidden text-[11px] font-bold text-red-400 mt-1 px-1"></p>
+</div>
+
+                <button type="submit" id="passwordSubmitBtn" class="w-full py-5 bg-black text-white font-black uppercase tracking-widest text-[11px] rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-2 group">
+                    <span>Update Password</span>
+                    <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Email Modal (Redesigned) -->
+        <div id="emailModal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white z-[70] hidden opacity-0 transition-all duration-300 p-10 rounded-[32px] shadow-2xl">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h3 class="text-[9px] font-black tracking-[0.2em] text-gray-400 uppercase mb-1">Communication</h3>
+                    <h2 class="text-3xl font-serif text-black">New Email</h2>
+                </div>
+                <button type="button" onclick="closeModal('emailModal')" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+                    <span class="material-symbols-outlined text-black">close</span>
+                </button>
+            </div>
+
+            <p class="text-[13px] text-gray-500 mb-8 lowercase tracking-tight">We'll send a verification protocol to your new address to secure your account updates.</p>
+
+            <form id="emailForm" class="space-y-8">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black tracking-widest text-gray-400 uppercase px-1">Email Address</label>
+                    <input type="email" id="newEmailInput" placeholder="operator@example.com" class="w-full px-5 py-4 bg-gray-50 border-0 border-b-2 border-transparent focus:border-black rounded-2xl text-[14px] transition-all outline-none font-bold">
+                    <p id="newEmail-error" class="hidden text-[11px] font-bold text-red-400 mt-1 px-1"></p>
+                </div>
+                <button type="submit" id="emailSubmitBtn" class="w-full py-5 bg-black text-white font-black uppercase tracking-widest text-[11px] rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-black/10 flex items-center justify-center gap-3">
+                    <span>Send Verification Code</span>
+                    <span class="material-symbols-outlined text-[18px]">verified_user</span>
+                </button>
+            </form>
+        </div>
+
+        <!-- OTP Modal (Refined with 6-digit Animated Input) -->
+        <div id="otpModal" class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-md bg-white z-[70] hidden opacity-0 transition-all duration-300 p-10 rounded-[32px] shadow-2xl overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1.5 bg-gray-100">
+                <div id="otp-timer-progress" class="h-full bg-black transition-all duration-1000 w-full"></div>
+            </div>
+            
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h3 class="text-[9px] font-black tracking-[0.2em] text-gray-400 uppercase mb-1">Authorization</h3>
+                    <h2 class="text-3xl font-serif text-black">Verify OTP</h2>
+                </div>
+                <button type="button" onclick="closeModal('otpModal')" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+                    <span class="material-symbols-outlined text-black">close</span>
+                </button>
+            </div>
+
+            <p class="text-[13px] text-gray-500 mb-8 lowercase tracking-tight">Access code dispatched to your new inbox. Enter the 6-digit signature below.</p>
+
+            <form id="otpVerifyForm" class="space-y-10">
+                <input type="hidden" name="email" id="hiddenEmailInput">
+                <div class="flex justify-between gap-3">
+                    <input type="text" maxlength="1" class="otp-box w-12 h-16 bg-gray-50 border-2 border-transparent rounded-2xl text-center text-2xl font-serif transition-all">
+                    <input type="text" maxlength="1" class="otp-box w-12 h-16 bg-gray-50 border-2 border-transparent rounded-2xl text-center text-2xl font-serif transition-all">
+                    <input type="text" maxlength="1" class="otp-box w-12 h-16 bg-gray-50 border-2 border-transparent rounded-2xl text-center text-2xl font-serif transition-all">
+                    <input type="text" maxlength="1" class="otp-box w-12 h-16 bg-gray-50 border-2 border-transparent rounded-2xl text-center text-2xl font-serif transition-all">
+                    <input type="text" maxlength="1" class="otp-box w-12 h-16 bg-gray-50 border-2 border-transparent rounded-2xl text-center text-2xl font-serif transition-all">
+                    <input type="text" maxlength="1" class="otp-box w-12 h-16 bg-gray-50 border-2 border-transparent rounded-2xl text-center text-2xl font-serif transition-all">
+                </div>
+                <p id="otp-error" class="hidden text-[11px] font-bold text-red-400 mt-1 px-1"></p>
+                <input type="hidden" name="otp" id="fullOtpInput">
+                
+                <div class="space-y-4">
+                    <button type="submit" id="otpVerifyBtn" class="w-full py-5 bg-black text-white font-black uppercase tracking-widest text-[11px] rounded-2xl hover:bg-gray-800 transition-all shadow-xl shadow-black/10">Verify & Update</button>
+                    
+                    <div class="flex flex-col items-center gap-2">
+                        <p id="otpTimerText" class="text-[10px] font-black text-gray-300 uppercase tracking-widest">
+                            Link expires in <span id="otpCountdown" class="text-black">60</span>s
+                        </p>
+                        <button type="button" id="resendOtpBtn" onclick="resendOtp()" disabled class="text-[10px] font-black text-gray-300 uppercase tracking-widest opacity-50 cursor-not-allowed hover:text-black transition-colors">Request New code</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/toast/toast.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        const isGoogleUser = {{#if isGoogleUser}}true{{else}}false{{/if}};
+
+    function showFieldError(id, msg) {
+    const el = document.getElementById(`${id}-error`);
+    const input = document.getElementById(id);
+    if (el) { el.textContent = msg; el.classList.remove('hidden'); }
+    if (input) { input.classList.add('border-red-400'); }
+    }
+
+    function clearFieldError(id) {
+    const el = document.getElementById(`${id}-error`);
+    const input = document.getElementById(id);
+    if (el) { el.textContent = ''; el.classList.add('hidden'); }
+    if (input) { input.classList.remove('border-red-400'); }
+    }
+
+        // ─── Modal Logic ──────────────────────────────────────────────────────────
+        function openModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const backdrop = document.getElementById('modalBackdrop');
+            backdrop.classList.remove('hidden');
+            setTimeout(() => backdrop.classList.remove('opacity-0'), 10);
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('animate-modal-in');
+            setTimeout(() => modal.classList.remove('opacity-0'), 10);
+
+            const firstInput = modal.querySelector('input:not([type="hidden"])');
+            if (firstInput) setTimeout(() => firstInput.focus(), 400);
+            
+            if (modalId === 'otpModal') startOtpTimer(60);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const backdrop = document.getElementById('modalBackdrop');
+            
+            modal.classList.add('opacity-0');
+            modal.classList.remove('animate-modal-in');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                const openModals = document.querySelectorAll('[id$="Modal"]:not(.hidden)');
+                if (openModals.length === 0) {
+                    backdrop.classList.add('opacity-0');
+                    setTimeout(() => backdrop.classList.add('hidden'), 500);
+                }
+            }, 300);
+
+            if (modalId === 'otpModal' && otpTimerInterval) {
+                clearInterval(otpTimerInterval);
+                otpTimerInterval = null;
+            }
+        }
+
+        function closeAllModals() {
+            const modals = ['passwordModal', 'emailModal', 'otpModal', 'logoutModal'];
+            modals.forEach(id => {
+                const modal = document.getElementById(id);
+                if (modal && !modal.classList.contains('hidden')) closeModal(id);
+            });
+        }
+
+        // ─── Logout Logic ──────────────────────────────────────────────────────────
+        function confirmLogout() {
+            openModal('logoutModal');
+        }
+
+        async function executeLogout() {
+            const btn = document.querySelector('#logoutModal button:first-of-type');
+            const originalText = btn.textContent;
+            try {
+                btn.disabled = true;
+                btn.textContent = 'TERMINATING...';
+                await axios.post('/users/logout');
+                showToast("success", "logout success");
+                setTimeout(() => window.location.href = '/users/login', 1000);
+            } catch (err) {
+                showToast("error", "Failed to Logout");
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+        // ─── Password Logic ────────────────────────────────────────────────────────
+        const newPasswordInput = document.getElementById('newPassword');
+        const reqsContainer = document.getElementById('password-reqs');
+        const submitPassBtn = document.getElementById('passwordSubmitBtn');
+
+        if (newPasswordInput) {
+            newPasswordInput.addEventListener('focus', () => reqsContainer.classList.remove('hidden'));
+            newPasswordInput.addEventListener('input', validateLivePassword);
+        }
+
+        function validateLivePassword() {
+            const val = newPasswordInput.value;
+            const reqs = {
+                length: val.length >= 8,
+                uppercase: /[A-Z]/.test(val),
+                lowercase: /[a-z]/.test(val),
+                number: /[0-9]/.test(val),
+                special: /[!@#$%^&*(),.?":{}|<>]/.test(val)
+            };
+
+            let allValid = true;
+            Object.keys(reqs).forEach(key => {
+                const item = document.querySelector(`[data-req="${key}"]`);
+                const icon = item.querySelector('.material-symbols-outlined');
+                if (item) {
+                    if (reqs[key]) {
+                        item.classList.replace('requirement-invalid', 'requirement-valid');
+                        icon.textContent = 'check_circle';
+                        icon.classList.add('fill-1');
+                    } else {
+                        item.classList.replace('requirement-valid', 'requirement-invalid');
+                        icon.textContent = 'circle';
+                        icon.classList.remove('fill-1');
+                        allValid = false;
+                    }
+                }
+            });
+
+            submitPassBtn.disabled = !allValid;
+            submitPassBtn.style.opacity = allValid ? '1' : '0.5';
+            return allValid;
+        }
+    document.getElementById('passwordForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Clear all errors first
+    ['currentPassword', 'newPassword', 'confirmPassword'].forEach(clearFieldError);
+
+    const currentPassword = document.getElementById('currentPassword').value.trim();
+    const newPassword = newPasswordInput.value.trim();
+    const confirmPassword = document.getElementById('confirmPassword').value.trim();
+
+    let isValid = true;
+
+    if (!currentPassword) {
+        showFieldError('currentPassword', 'Current password is required');
+        isValid = false;
+    }
+    if (!validateLivePassword()) {
+        showFieldError('newPassword', 'Password does not meet all requirements');
+        isValid = false;
+    }
+    if (!confirmPassword) {
+        showFieldError('confirmPassword', 'Please confirm your password');
+        isValid = false;
+    } else if (newPassword !== confirmPassword) {
+        showFieldError('confirmPassword', 'Passwords do not match');
+        isValid = false;
+    }
+
+    if (!isValid) return;
+
+    try {
+        submitPassBtn.disabled = true;
+        const response = await axios.post('/users/changePassword', {
+            currentPassword, newPassword, confirmPassword
+        });
+
+        if (!response.data.success) {
+        showToast("error", response.data.message || "Update Failed");
+        return;
+    }
+
+        showToast("success", response.data.message || "Password Updated");
+        document.getElementById('passwordForm').reset();
+        setTimeout(() => closeModal('passwordModal'), 1500);
+    } catch (err) {
+        showToast("error", err.response?.data?.message || "Update Failed");
+    } finally {
+        submitPassBtn.disabled = false;
+    }
+    });
+
+        // Clear errors on input
+        ['currentPassword', 'newPassword', 'confirmPassword'].forEach(id => {
+        document.getElementById(id)?.addEventListener('input', () => clearFieldError(id));
+        });
+
+        // ─── Email Logic ──────────────────────────────────────────────────────────
+        document.getElementById('emailForm')?.addEventListener('submit', async (e) => {
+         e.preventDefault();
+         clearFieldError('newEmail');
+
+    const email = document.getElementById('newEmailInput').value.trim();
+    const btn = document.getElementById('emailSubmitBtn');
+
+    if (!email) {
+        showFieldError('newEmail', 'Email is required');
+        return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showFieldError('newEmail', 'Please enter a valid email address');
+        return;
+    }
+
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<span>INITIALIZING...</span>';
+        const response = await axios.post('/users/changeEmail', { newEmail: email });
+        showToast("success", "Verification Code Sent");
+        document.getElementById('hiddenEmailInput').value = email;
+        setTimeout(() => { closeModal('emailModal'); openModal('otpModal'); }, 1000);
+    } catch (err) {
+        showToast("error", err.response?.data?.message || "Request Failed");
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>Initialize Verification</span><span class="material-symbols-outlined text-[18px]">verified_user</span>';
+    }
+    });
+
+      document.getElementById('newEmailInput')?.addEventListener('input', () => clearFieldError('newEmail'));
+
+        // ─── OTP Logic ─────────────────────────────────────────────────────────────
+        const otpBoxes = document.querySelectorAll('.otp-box');
+        otpBoxes.forEach((box, i) => {
+            box.addEventListener('input', (e) => {
+                if (e.target.value && i < otpBoxes.length - 1) otpBoxes[i+1].focus();
+            });
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && i > 0) otpBoxes[i-1].focus();
+            });
+            box.addEventListener('paste', (e) => {
+                const data = e.clipboardData.getData('text').slice(0, 6);
+                data.split('').forEach((char, j) => {
+                    if (otpBoxes[i+j]) otpBoxes[i+j].value = char;
+                });
+                if (otpBoxes[i+data.length-1]) otpBoxes[i+data.length-1].focus();
+                e.preventDefault();
+            });
+        });
+
+        let otpTimerInterval = null;
+        function startOtpTimer(seconds) {
+            const countdownEl = document.getElementById('otpCountdown');
+            const progressEl = document.getElementById('otp-timer-progress');
+            const resendBtn = document.getElementById('resendOtpBtn');
+            let remaining = seconds;
+            
+            clearInterval(otpTimerInterval);
+            resendBtn.disabled = true;
+            resendBtn.style.opacity = '0.3';
+            
+            otpTimerInterval = setInterval(() => {
+                remaining--;
+                countdownEl.textContent = remaining;
+                progressEl.style.width = `${(remaining/seconds) * 100}%`;
+
+                if (remaining <= 0) {
+                    clearInterval(otpTimerInterval);
+                    resendBtn.disabled = false;
+                    resendBtn.style.opacity = '1';
+                    resendBtn.classList.remove('cursor-not-allowed');
+                }
+            }, 1000);
+        }
+
+        async function resendOtp() {
+            const email = document.getElementById('hiddenEmailInput').value;
+            try {
+                await axios.post('/users/changeEmail', { newEmail: email });
+                showToast("success", "New code sent");
+                startOtpTimer(60);
+            } catch (err) {
+                showToast("error", "Dispatch failed");
+            }
+        }
+
+    document.getElementById('otpVerifyForm')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const otpError = document.getElementById('otp-error');
+    otpError.classList.add('hidden');
+
+    const otp = Array.from(otpBoxes).map(b => b.value).join('');
+    const email = document.getElementById('hiddenEmailInput').value;
+    const btn = document.getElementById('otpVerifyBtn');
+
+    if (otp.length < 6) {
+        otpError.textContent = 'Please enter the complete 6-digit code';
+        otpError.classList.remove('hidden');
+        return;
+    }
+
+    try {
+        btn.disabled = true;
+        btn.textContent = 'SYNCHRONIZING...';
+        await axios.post('/users/verifyChangeEmailotp', { email, otp });
+        showToast("success", "Email Updated Successfully");
+        setTimeout(() => window.location.reload(), 1500);
+    } catch (err) {
+        otpError.textContent = err.response?.data?.message || 'Invalid code. Please try again.';
+        otpError.classList.remove('hidden');
+        otpBoxes.forEach(b => b.value = '');
+        otpBoxes[0].focus();
+        btn.disabled = false;
+        btn.textContent = 'Synchronize & Update';
+    }
+    });
+
+        // ─── Profile Photo Logic ──────────────────────────────────────────────────
+        document.getElementById('profilePhotoInput')?.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('profilePhoto', file);
+
+            try {
+                const response = await axios.post('/users/uploadProfilePhoto', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                
+                if (response.data.success) {
+                     showToast("success", "Profile Updated");
+    
+                 const container = document.getElementById('photoContainer');
+                 let img = document.getElementById('profilePreview');
+    
+                if (!img) {
+                 // First time upload — no <img> exists yet, create one
+                 container.innerHTML = '';
+                 img = document.createElement('img');
+                 img.id = 'profilePreview';
+                 img.alt = 'Profile';
+                 img.className = 'w-full h-full object-cover grayscale';
+                 container.appendChild(img);
+                }
+    
+                img.src = response.data.profilePhoto;
+        }
+            } catch (err) {
+                showToast("error", "Upload Failed");
+            }
+        });
+
+        window.addEventListener("pageshow", (e) => {
+            if (e.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
+                window.location.reload();
+            }
+        });
+
+
+    function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('.material-symbols-outlined');
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    icon.textContent = isHidden ? 'visibility_off' : 'visibility';
+}
+    </script>
+</body>
+
+</html>
