@@ -1,6 +1,6 @@
-import Product from "../../Model/productModel.js";
-import Category from "../../Model/categoryModel.js";
-import Brand from "../../Model/brandModel.js";
+import Product from "../../model/productModel.js";
+import Category from "../../model/categoryModel.js";
+import Brand from "../../model/brandModel.js";
 
 
 

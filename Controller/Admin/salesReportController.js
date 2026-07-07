@@ -1,7 +1,7 @@
 import PDFDocument from "pdfkit";
 import ExcelJS from 'exceljs';
-import Order from "../../Model/orderModel.js";
-import User from "../../Model/userModel.js";
+import Order from "../../model/orderModel.js";
+import User from "../../model/userModel.js";
 import { growthAnalysis, buildChartData, buildCouponUsage, fmtDate, getDateRange} from "../../utils/salesReport.js"
 
 export const loadSalesReport = async (req, res) => {

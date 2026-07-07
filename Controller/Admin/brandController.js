@@ -1,6 +1,6 @@
 
-import Product from "../../Model/productModel.js"
-import Brand from "../../Model/brandModel.js";
+import Product from "../../model/productModel.js"
+import Brand from "../../model/brandModel.js";
 
 
 export const loadBrand = async (req, res) => {

@@ -1,5 +1,5 @@
-import Category from "../../Model/categoryModel.js";
-import Product from "../../Model/productModel.js";
+import Category from "../../model/categoryModel.js";
+import Product from "../../model/productModel.js";
 
 export const loadCategory = async (req, res) => {
   try {

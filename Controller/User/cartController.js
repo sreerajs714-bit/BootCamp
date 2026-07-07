@@ -1,7 +1,7 @@
-import Product from "../../Model/productModel.js";
-import User from "../../Model/userModel.js";
-import Cart from "../../Model/cartModel.js";
-import Wishlist from "../../Model/wishlistModel.js";
+import Product from "../../model/productModel.js";
+import User from "../../model/userModel.js";
+import Cart from "../../model/cartModel.js";
+import Wishlist from "../../model/wishlistModel.js";
 
 import { getActiveOffers, calculateOfferPrice } from "../../utils/offer.js";
 

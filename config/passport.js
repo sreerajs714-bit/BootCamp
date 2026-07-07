@@ -3,7 +3,7 @@ dotenv.config();
 
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import userSchema from "../Model/userModel.js";
+import userSchema from "../model/userModel.js";
 import { generateReferralCode } from "./referalCode.js";
 
 passport.use(

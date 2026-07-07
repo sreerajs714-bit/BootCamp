@@ -1,22 +1,22 @@
 import express from "express";
 const route=express.Router();
-import { loadHome, loadRegister, loadResetPassword, loadSetNew, loadVerifyOtp, LoginUser, Logout, resetPassword,SetNew} from "../Controller/User/authController.js";
-import { loadLogin } from "../Controller/User/authController.js";
-import { RegisterUser } from "../Controller/User/authController.js";
-import { resendOTP, verifyOTP } from "../Controller/otpcontroller.js";
-import { checkSession, checkUserBlocked, islogin, noCache } from "../Middleware/userAuth.js";
-import { changeEmail, changePassword, editProfile, loadEditProfile, loadProfile, removeProfilePhoto, uploadProfilePhoto } from "../Controller/User/profileController.js";
-import { uploadProfile ,uploadReturn } from "../Middleware/multer.js";
+import { loadHome, loadRegister, loadResetPassword, loadSetNew, loadVerifyOtp, loginUser, logout, resetPassword,setNew} from "../controller/user/authController.js";
+import { loadLogin } from "../controller/user/authController.js";
+import { registerUser } from "../controller/user/authController.js";
+import { resendOTP, verifyOTP } from "../controller/otpcontroller.js";
+import { checkSession, checkUserBlocked, islogin, noCache } from "../middleware/userAuth.js";
+import { changeEmail, changePassword, editProfile, loadEditProfile, loadProfile, removeProfilePhoto, uploadProfilePhoto } from "../controller/user/profileController.js";
+import { uploadProfile ,uploadReturn } from "../middleware/multer.js";
 import passport from "../config/passport.js";
-import { addAddress, deleteAddress, editAddress, loadAddress } from "../Controller/User/addressController.js";
-import { loadAllProducts, loadLimitedEdition, loadMens, loadProductDetail, loadWomens, searchProducts } from "../Controller/User/productController.js";
-import { clearWishlist, loadWishlist, removeFromWishlist, toggleWishlist } from "../Controller/User/wishlistController.js";
-import { addToCart, loadCart, removeFromCart, updateCartQty } from "../Controller/User/cartController.js";
-import { applyCoupon, createRazorpayOrder, getAvailableCoupons, loadCheckout, loadOrderSuccess, loadPaymentFailed, placeOrder, removeCoupon, retryRazorpayPayment, verifyRazorpayPayment } from "../Controller/User/checkoutController.js";
-import { cancelOrder, downloadInvoice, loadMyOrders, loadOrderDetail, loadReturnPage, returnRequest } from "../Controller/User/ordersController.js";
-import { getCounts } from "../Controller/User/navController.js";
-import { createWalletOrder, loadWallet, verifyWalletPayment } from "../Controller/User/walletController.js";
-import { loadReferal } from "../Controller/User/referalController.js";
+import { addAddress, deleteAddress, editAddress, loadAddress } from "../controller/user/addressController.js";
+import { loadAllProducts, loadLimitedEdition, loadMens, loadProductDetail, loadWomens, searchProducts } from "../controller/user/productController.js";
+import { clearWishlist, loadWishlist, removeFromWishlist, toggleWishlist } from "../controller/user/wishlistController.js";
+import { addToCart, loadCart, removeFromCart, updateCartQty } from "../controller/user/cartController.js";
+import { applyCoupon, createRazorpayOrder, getAvailableCoupons, loadCheckout, loadOrderSuccess, loadPaymentFailed, placeOrder, removeCoupon, retryRazorpayPayment, verifyRazorpayPayment } from "../controller/user/checkoutController.js";
+import { cancelOrder, downloadInvoice, loadMyOrders, loadOrderDetail, loadReturnPage, returnRequest } from "../controller/user/ordersController.js";
+import { getCounts } from "../controller/user/navController.js";
+import { createWalletOrder, loadWallet, verifyWalletPayment } from "../controller/user/walletController.js";
+import { loadReferal } from "../controller/user/referalController.js";
 
 
 route.get("/auth/google",
@@ -44,18 +44,18 @@ route.use(checkUserBlocked);
 route.get("/",loadHome)
 route.get("/signup",islogin,loadRegister)
 route.get("/login",noCache,islogin,loadLogin)
-route.post("/signup",RegisterUser)
+route.post("/signup",registerUser)
 route.get("/home",noCache,loadHome)
 route.get("/profile",noCache,checkSession,loadProfile)
-route.post("/login",LoginUser)
-route.post("/logout",noCache,Logout)
+route.post("/login",loginUser)
+route.post("/logout",noCache,logout)
 route.get("/resetPassword",islogin,loadResetPassword)
 route.post("/resetPassword",resetPassword)
 route.get("/otpVerify",loadVerifyOtp)
 route.post("/otpVerify",verifyOTP)
 route.post("/resendOtp",resendOTP)
 route.get("/setNew",noCache,loadSetNew)
-route.post("/setNew",SetNew)
+route.post("/setNew",setNew)
 
 route.get("/search",searchProducts);
 

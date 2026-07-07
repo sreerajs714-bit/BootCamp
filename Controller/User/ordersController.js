@@ -1,7 +1,7 @@
 import PDFDocument from "pdfkit";
-import Order from "../../Model/orderModel.js";
-import Product from "../../Model/productModel.js";
-import Wallet from "../../Model/walletModel.js";
+import Order from "../../model/orderModel.js";
+import Product from "../../model/productModel.js";
+import Wallet from "../../model/walletModel.js";
 import axios from "axios";
 
 

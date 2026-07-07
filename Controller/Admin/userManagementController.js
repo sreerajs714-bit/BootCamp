@@ -1,5 +1,5 @@
-import Admin from "../../Model/adminModel.js"
-import User from "../../Model/userModel.js"
+import Admin from "../../model/adminModel.js"
+import User from "../../model/userModel.js"
 
 
 export const loadUsers = async (req, res) => {

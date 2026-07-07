@@ -1,7 +1,7 @@
-import Product from "../../Model/productModel.js";
-import User from "../../Model/userModel.js";
-import Category from "../../Model/categoryModel.js";
-import Brand from "../../Model/brandModel.js";
+import Product from "../../model/productModel.js";
+import User from "../../model/userModel.js";
+import Category from "../../model/categoryModel.js";
+import Brand from "../../model/brandModel.js";
 
 import { getActiveOffers, calculateOfferPrice } from "../../utils/offer.js";
 

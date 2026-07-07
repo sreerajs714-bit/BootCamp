@@ -1,6 +1,6 @@
-import Order from "../../Model/orderModel.js";
-import User from "../../Model/userModel.js";
-import Product from "../../Model/productModel.js";
+import Order from "../../model/orderModel.js";
+import User from "../../model/userModel.js";
+import Product from "../../model/productModel.js";
 
 const ORDERS_PER_PAGE = 5;
 

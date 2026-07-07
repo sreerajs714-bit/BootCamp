@@ -1,20 +1,20 @@
 import express from "express"
-import { Adminlogin, adminLogout, loadDasboard, loadLogin } from "../Controller/Admin/authController.js";
-import { blockUser, loadUsers, unblockUser } from "../Controller/Admin/userManagementController.js";
-import { isAdmin } from "../Middleware/adminAuth.js";
-import { addCategory, deleteCategory, editCategory, loadCategory, restoreCategory } from "../Controller/Admin/categoryController.js";
-import { addProduct,addVariant,editVariant,deleteVariant,deleteProduct,editProduct,loadAddProduct,loadEditProduct, loadProduct, loadProductView, loadVariants, restoreProduct, setDefaultVariant } from "../Controller/Admin/productController.js";
-import { addBrand, deleteBrand, editBrand, loadBrand, restoreBrand } from "../Controller/Admin/brandController.js";
-import { uploadProduct } from "../Middleware/multer.js";
-import { loadOrderDetail, loadOrders,updateOrderStatus } from "../Controller/Admin/orderController.js";
-import { approveReturn, loadReturnDetail, loadReturnManagement, processRefund, rejectReturn, schedulePickup } from "../Controller/Admin/returnController.js";
-import { createCoupon, deleteCoupon, getCouponById, loadCoupon, toggleCouponStatus, updateCoupon } from "../Controller/Admin/couponController.js";
-import { createOffer, deleteOffer, getCategoriesMetadata, getOfferById, getProductsMetadata, loadOffer, toggleOfferStatus, updateOffer } from "../Controller/Admin/offerController.js";
-import { exportSalesReportExcel, exportSalesReportPDF, loadSalesReport, loadSalesReportPage } from "../Controller/Admin/salesReportController.js";
+import { adminlogin, adminLogout, loadDasboard, loadLogin } from "../controller/admin/authController.js";
+import { blockUser, loadUsers, unblockUser } from "../controller/admin/userManagementController.js";
+import { isAdmin } from "../middleware/adminAuth.js";
+import { addCategory, deleteCategory, editCategory, loadCategory, restoreCategory } from "../controller/admin/categoryController.js";
+import { addProduct,addVariant,editVariant,deleteVariant,deleteProduct,editProduct,loadAddProduct,loadEditProduct, loadProduct, loadProductView, loadVariants, restoreProduct, setDefaultVariant } from "../controller/admin/productController.js";
+import { addBrand, deleteBrand, editBrand, loadBrand, restoreBrand } from "../controller/admin/brandController.js";
+import { uploadProduct } from "../middleware/multer.js";
+import { loadOrderDetail, loadOrders,updateOrderStatus } from "../controller/admin/orderController.js";
+import { approveReturn, loadReturnDetail, loadReturnManagement, processRefund, rejectReturn, schedulePickup } from "../controller/admin/returnController.js";
+import { createCoupon, deleteCoupon, getCouponById, loadCoupon, toggleCouponStatus, updateCoupon } from "../controller/admin/couponController.js";
+import { createOffer, deleteOffer, getCategoriesMetadata, getOfferById, getProductsMetadata, loadOffer, toggleOfferStatus, updateOffer } from "../controller/admin/offerController.js";
+import { exportSalesReportExcel, exportSalesReportPDF, loadSalesReport, loadSalesReportPage } from "../controller/admin/salesReportController.js";
 const route=express.Router();
 
 route.get("/",loadLogin);
-route.post("/login",Adminlogin);
+route.post("/login",adminlogin);
 route.get("/login", loadLogin);
 route.get("/dashboard",isAdmin,loadDasboard);
 route.get('/logout', adminLogout);

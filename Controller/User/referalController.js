@@ -1,7 +1,7 @@
 // controllers/user/referralController.js
 import mongoose from "mongoose";
-import User from "../../Model/userModel.js";
-import Wallet from "../../Model/walletModel.js";
+import User from "../../model/userModel.js";
+import Wallet from "../../model/walletModel.js";
 
 
 

@@ -1,4 +1,4 @@
-import Address from "../../Model/addressModel.js"
+import Address from "../../model/addressModel.js"
 import mongoose from "mongoose";
 
 export const loadAddress = async (req, res) => {

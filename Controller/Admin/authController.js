@@ -1,8 +1,8 @@
-import Admin from "../../Model/adminModel.js"
-import Order from "../../Model/orderModel.js";
-import Product from "../../Model/productModel.js";
-import Category from "../../Model/categoryModel.js";
-import User from "../../Model/userModel.js";
+import Admin from "../../model/adminModel.js"
+import Order from "../../model/orderModel.js";
+import Product from "../../model/productModel.js";
+import Category from "../../model/categoryModel.js";
+import User from "../../model/userModel.js";
 import bcrypt from "bcrypt";
 import { generateOTP } from "../service/mail.js";
 import { sendOTPEmail } from "../service/mail.js";
@@ -23,7 +23,7 @@ export const loadLogin = async (req, res) => {
   }
 };
 
-export const Adminlogin = async (req, res) => {
+export const adminlogin = async (req, res) => {
   try {
     const { email, password } = req.body;
 

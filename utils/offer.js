@@ -1,4 +1,4 @@
-import Offer from "../Model/offerModel.js";
+import Offer from "../model/offerModel.js";
 
 export async function getActiveOffers() {
     const now = new Date();

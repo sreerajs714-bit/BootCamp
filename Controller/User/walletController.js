@@ -1,4 +1,4 @@
-import Wallet from "../../Model/walletModel.js";
+import Wallet from "../../model/walletModel.js";
 import crypto from "crypto";
 import Razorpay from "razorpay";
 

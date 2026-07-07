@@ -1,5 +1,5 @@
-import User from "../Model/userModel.js";
-import Order from "../Model/orderModel.js";
+import User from "../model/userModel.js";
+import Order from "../model/orderModel.js";
 
 
 export function getDateRange(period, startDate, endDate) {

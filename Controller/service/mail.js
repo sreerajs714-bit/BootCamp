@@ -3,9 +3,9 @@ import dotenv from "dotenv"
 dotenv.config();
 
 
-    export const generateOTP =()=>{
-     return Math.floor(100000 + Math.random() * 900000).toString();
-    };
+export const generateOTP =()=>{
+    return Math.floor(100000 + Math.random() * 900000).toString();
+};
     
      const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -15,13 +15,17 @@ dotenv.config();
       },
     });
 
-  export const sendOTPEmail = async (email, otp) => {
+export const sendOTPEmail = async (email, otp) => {
   try {
-    const info= await transporter.sendMail({
+    await transporter.sendMail({
       from: process.env.APP_MAIL,
       to: email,
       subject: "OTP Verification",
-      text: `Where style meets performance — welcome to BOOT CAMP.Your OTP is ${otp}`,
+      text: `Welcome to BOOT CAMP!
+
+Your One-Time Password (OTP) is: ${otp}
+
+This OTP is valid for 60 seconds. Please do not share it with anyone.`,
     });
   } catch (error) {
     console.log("EMAIL ERROR:", error.message);

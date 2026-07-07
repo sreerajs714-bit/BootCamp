@@ -4,10 +4,10 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import passport from "./config/passport.js";
-import { connectDB } from "./MongoDb/ConnectDB.js";
-import UserRoute from "./Routes/User.js";
+import { connectDB } from "./mongo_db/ConnectDB.js";
+import UserRoute from "./routes/user.js";
 import path from "path";
-import AdminRoute from "./Routes/Admin.js";
+import AdminRoute from "./routes/admin.js";
 import nocache from "nocache";
 import { registerHbsHelpers } from "./config/hbsHelpers.js";
 

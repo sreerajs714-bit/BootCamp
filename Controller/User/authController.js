@@ -1,13 +1,13 @@
-import User from "../../Model/userModel.js";
-import Product from "../../Model/productModel.js";
-import Brand from "../../Model/brandModel.js";
-import Category from "../../Model/categoryModel.js";
-import Cart from "../../Model/cartModel.js";
-import Wishlist from "../../Model/wishlistModel.js";
+import User from "../../model/userModel.js";
+import Product from "../../model/productModel.js";
+import Brand from "../../model/brandModel.js";
+import Category from "../../model/categoryModel.js";
+import Cart from "../../model/cartModel.js";
+import Wishlist from "../../model/wishlistModel.js";
 import session from "express-session";
 import { generateOTP }  from "../service/mail.js";
 import { sendOTPEmail } from "../service/mail.js";
-import OTP from "../../Model/otpModel.js"
+import OTP from "../../model/otpModel.js"
 import bcrypt from "bcrypt";
 const saltround=10;
 
@@ -28,7 +28,7 @@ export const loadLogin = (req, res) => {
   res.render("users/login", { message });
 };
 
-export const RegisterUser = async (req, res) => {
+export const registerUser = async (req, res) => {
 
   try {
 
@@ -106,10 +106,10 @@ export const RegisterUser = async (req, res) => {
     success: false,
     message: "Something went wrong. Please try again."
   });
-}
+ }
 };
 
-export const LoginUser = async (req, res) => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -327,7 +327,7 @@ export const loadSetNew = (req, res) => {
   res.render("users/SetNewPassword", { email });
 };
 
-export const SetNew = async (req, res) => {
+export const setNew = async (req, res) => {
   try {
 
     if (!req.session.resetVerified) {
@@ -378,7 +378,7 @@ export const SetNew = async (req, res) => {
   }
 };
 
-export const Logout = (req, res) => {
+export const logout = (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       console.log(err);

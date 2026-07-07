@@ -1,10 +1,10 @@
-import User from "../../Model/userModel.js";
-import Product from "../../Model/productModel.js";
-import Cart from "../../Model/cartModel.js";
-import Address from "../../Model/addressModel.js";
-import Order from "../../Model/orderModel.js";
-import Wallet from "../../Model/walletModel.js";
-import Coupon from "../../Model/couponModel.js";
+import User from "../../model/userModel.js";
+import Product from "../../model/productModel.js";
+import Cart from "../../model/cartModel.js";
+import Address from "../../model/addressModel.js";
+import Order from "../../model/orderModel.js";
+import Wallet from "../../model/walletModel.js";
+import Coupon from "../../model/couponModel.js";
 import crypto from "crypto";
 import Razorpay from "razorpay";
 

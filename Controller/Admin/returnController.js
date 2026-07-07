@@ -1,7 +1,7 @@
-import Order from "../../Model/orderModel.js";
-import Product from "../../Model/productModel.js";
-import User from "../../Model/userModel.js";
-import Wallet from "../../Model/walletModel.js";
+import Order from "../../model/orderModel.js";
+import Product from "../../model/productModel.js";
+import User from "../../model/userModel.js";
+import Wallet from "../../model/walletModel.js";
 
 
 function calculateItemRefund(order, itemsToRefund) {

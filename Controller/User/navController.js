@@ -1,5 +1,5 @@
-import Cart from "../../Model/cartModel.js";
-import Wishlist from "../../Model/wishlistModel.js";
+import Cart from "../../model/cartModel.js";
+import Wishlist from "../../model/wishlistModel.js";
 
 
 export const getCounts= async (req, res) => {

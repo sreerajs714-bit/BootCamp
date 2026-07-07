@@ -1,4 +1,4 @@
-import userSchema from "../Model/userModel.js"
+import userSchema from "../model/userModel.js"
 
 
 export const checkSession = (req, res, next) => {

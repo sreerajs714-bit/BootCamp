@@ -1,6 +1,6 @@
-import Offer from "../../Model/offerModel.js";
-import Product from "../../Model/productModel.js";
-import Category from "../../Model/categoryModel.js";
+import Offer from "../../model/offerModel.js";
+import Product from "../../model/productModel.js";
+import Category from "../../model/categoryModel.js";
 
 
 

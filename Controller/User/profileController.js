@@ -1,8 +1,8 @@
 import bcrypt from "bcrypt";
 const saltround=10;
 import fs from "fs";
-import userSchema from "../../Model/userModel.js"
-import OTP from "../../Model/otpModel.js"
+import userSchema from "../../model/userModel.js"
+import OTP from "../../model/otpModel.js"
 import { generateOTP } from "../service/mail.js";
 import { sendOTPEmail } from "../service/mail.js";
 

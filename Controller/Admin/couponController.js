@@ -1,4 +1,4 @@
-import Coupon from "../../Model/couponModel.js";
+import Coupon from "../../model/couponModel.js";
 
 
 function parseDMY(str) {

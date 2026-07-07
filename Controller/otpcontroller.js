@@ -1,9 +1,9 @@
-import OTP from "../Model/otpModel.js";
+import OTP from "../model/otpModel.js";
 import { generateOTP } from "./service/mail.js";
 import { sendOTPEmail } from "./service/mail.js";
 import { generateReferralCode } from "../config/referalCode.js";
-import User from "../Model/userModel.js"
-import Wallet from "../Model/walletModel.js";
+import User from "../model/userModel.js"
+import Wallet from "../model/walletModel.js";
 import bcrypt from "bcrypt"
 
 export const verifyOTP = async (req, res) => {
@@ -65,7 +65,7 @@ export const verifyOTP = async (req, res) => {
 
         await OTP.deleteOne({ _id: otpRecord._id });
 
-        // ================= REGISTER =================
+        //  REGISTER 
 
        if (purpose === "register") {
 
@@ -162,9 +162,8 @@ export const verifyOTP = async (req, res) => {
         success: true,
         redirectUrl: "/users/home"
     });
-}
-
-        // ================= RESET PASSWORD =================
+  }
+        //  RESET PASSWORD 
         if (purpose === "reset") {
             req.session.resetVerified = true;
             req.session.otpEmail = email;
@@ -185,7 +184,7 @@ export const verifyOTP = async (req, res) => {
             return;
         }
 
-        // ================= CHANGE EMAIL =================
+        // CHANGE EMAIL
         if (purpose === "changeEmail") {
 
             const userId = req.session.user.id;
@@ -244,7 +243,7 @@ export const resendOTP = async (req, res) => {
       email,
       otp: hashedOTP,
       purpose,
-      expiresAt: Date.now() + 60 * 100
+      expiresAt: Date.now() + 60 * 1000
     });
 
     await sendOTPEmail(email, otp);
