@@ -47,7 +47,7 @@ Views
 
 File Storage & Media
 
-*Cloudinary + multer-storage-cloudinary — image uploads (products, profile photos, return proofs)
+* Cloudinary + multer-storage-cloudinary — image uploads (products, profile photos, return proofs)
 * Multer — multipart form handling
 
 Payments
