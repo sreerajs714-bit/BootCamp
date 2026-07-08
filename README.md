@@ -64,22 +64,24 @@ Dev Tools
 * nodemon — auto-restart in development
 * dotenv — environment variable management
 
-BootCamp/
-├── Controller/
-│   ├── Admin/              
-│   ├── User/               
-│   ├── service/
-│   └── otpcontroller.js
-├── Middleware/              
-├── Model/                   
-├── Routes/                  
-├── Views/
-│   ├── Admin/                
-│   ├── users/                
-│   └── partials/
-├── config/                  
-├── mongo_db/                 
-├── utils/                    
-├── public/                   
-├── Server.js                 
-└── package.json
+
+Project Structure
+
+* Controller/ — business logic
+  * Admin/ — admin-side business logic
+  * User/ — user-side business logic
+  * service/
+  * otpcontroller.js
+* Middleware/ — auth guards, multer upload config
+* Model/ — Mongoose schemas
+* Routes/ — Express routers (Admin.js, User.js)
+* Views/
+  * admin/ — admin panel .hbs templates
+  * users/ — storefront .hbs templates
+  * partials/
+* config/ — Passport, hbs helpers, referral code generator
+* mongo_db/ — DB connection
+* utils/ — offer & sales report helpers
+* public/ — static assets & uploads
+* Server.js — app entry point
+* package.json
