@@ -28,3 +28,60 @@ Admin
 * Dashboard with earnings, order status breakdown, top categories, and best-selling products
 
   
+Tech Stack
+
+Backend
+
+* Node.js — runtime
+* Express 5 — web framework
+* Mongoose — MongoDB ODM
+* Passport.js (passport-google-oauth20) — Google OAuth login
+* express-session — separate user/admin sessions
+* bcrypt — password hashing
+* nodemailer — OTP / email delivery
+* nocache — disable browser caching on protected routes
+
+Views
+
+* hbs (Handlebars) — server-rendered views, with custom helpers (config/hbsHelpers.js)
+
+File Storage & Media
+
+* Cloudinary + multer-storage-cloudinary — image uploads (products, profile photos, return proofs)
+* Multer — multipart form handling
+
+Payments
+
+* Razorpay — online payments, retries, wallet top-ups
+
+Reporting & Documents
+
+* ExcelJS — sales report export
+* PDFKit — invoice generation
+
+Dev Tools
+
+* nodemon — auto-restart in development
+* dotenv — environment variable management
+
+
+Project Structure
+
+* Controller/ — business logic
+  * Admin/ — admin-side business logic
+  * User/ — user-side business logic
+  * service/
+  * otpcontroller.js
+* Middleware/ — auth guards, multer upload config
+* Model/ — Mongoose schemas
+* Routes/ — Express routers (Admin.js, User.js)
+* Views/
+  * admin/ — admin panel .hbs templates
+  * users/ — storefront .hbs templates
+  * partials/
+* config/ — Passport, hbs helpers, referral code generator
+* mongo_db/ — DB connection
+* utils/ — offer & sales report helpers
+* public/ — static assets & uploads
+* Server.js — app entry point
+* package.json
