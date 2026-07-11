@@ -3,7 +3,7 @@ import User from "../../model/userModel.js";
 import Product from "../../model/productModel.js";
 import Wallet from "../../model/walletModel.js";
 
-import { calculateItemRefund } from "../User/ordersController.js";
+import { calculateItemRefund } from "../user/ordersController.js";
 
 const ORDERS_PER_PAGE = 5;
 
