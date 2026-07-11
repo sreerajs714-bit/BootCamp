@@ -841,84 +841,137 @@
     }
 
     function clearAllErrors() {
-        ['label', 'target', 'amount', 'startDate', 'endDate'].forEach(f => clearErr(f));
+        ['label', 'target', 'amount', 'maxCap', 'minOrder', 'startDate', 'endDate'].forEach(f => clearErr(f));
     }
 
-    // Live-clear errors as user types / changes
-    function attachLiveClear() {
-        const fieldMap = {
-            'label':     () => document.querySelector('[name="label"]'),
-            'amount':    () => document.querySelector('[name="amount"]'),
-            'target':    () => document.getElementById('targetSelect'),
-            'startDate': () => document.getElementById('startDate'),
-            'endDate':   () => document.getElementById('endDate'),
-        };
+   function attachLiveClear() {
+    const fieldMap = {
+        'label':     () => document.querySelector('[name="label"]'),
+        'amount':    () => document.querySelector('[name="amount"]'),
+        'maxCap':    () => document.querySelector('[name="maxCap"]'),
+        'minOrder':  () => document.querySelector('[name="minOrder"]'),
+        'target':    () => document.getElementById('targetSelect'),
+        'startDate': () => document.getElementById('startDate'),
+        'endDate':   () => document.getElementById('endDate'),
+    };
 
-        Object.entries(fieldMap).forEach(([field, getEl]) => {
-            const el = getEl();
-            if (!el) return;
-            ['input', 'change'].forEach(evt => {
-                el.addEventListener(evt, () => {
-                    if (el.value && el.value.trim() !== '') clearErr(field);
-                });
+    Object.entries(fieldMap).forEach(([field, getEl]) => {
+        const el = getEl();
+        if (!el) return;
+        ['input', 'change'].forEach(evt => {
+            el.addEventListener(evt, () => {
+                if (el.value && el.value.trim() !== '') clearErr(field);
             });
         });
+    });
 
-        // Flatpickr fires onChange, not native 'change', so hook via config callbacks
-        fpStart.config.onChange.push(() => clearErr('startDate'));
-        fpEnd.config.onChange.push(() => clearErr('endDate'));
+    fpStart.config.onChange.push(() => clearErr('startDate'));
+    fpEnd.config.onChange.push(() => clearErr('endDate'));
+   }
+
+    const LABEL_REGEX = /^[A-Za-z][A-Za-z\s'&-]{2,49}$/;
+
+   function validateOfferForm(f) {
+    let ok = true;
+
+    // ── Offer Label ──────────────────────────────
+    const labelVal = f.label.value.trim();
+    if (!labelVal) {
+        showErr('label', 'Offer label is required');
+        ok = false;
+    } else if (!/[a-zA-Z]/.test(labelVal)) {
+        showErr('label', 'Offer label must contain letters, not just numbers/symbols');
+        ok = false;
+    } else if (!LABEL_REGEX.test(labelVal)) {
+        showErr('label', "Use 3–50 letters (spaces, - and ' allowed), starting with a letter");
+        ok = false;
+    } else {
+        clearErr('label');
     }
 
-    function validateOfferForm(f) {
-        let ok = true;
+    // ── Target ───────────────────────────────────
+    if (!f.target.value) {
+        const scopeLabel = selectedScope === 'product' ? 'product' : 'category';
+        showErr('target', `Please select a ${scopeLabel}`);
+        ok = false;
+    } else {
+        clearErr('target');
+    }
 
-        // Offer Label
-        if (!f.label.value.trim()) {
-            showErr('label', 'Offer label is required');
+    // ── Discount amount ──────────────────────────
+    const amtRaw = f.amount.value.trim();
+    const amt = parseFloat(amtRaw);
+    if (!amtRaw || isNaN(amt)) {
+        showErr('amount', 'Enter a valid discount (1–100%)');
+        ok = false;
+    } else if (amt <= 0) {
+        showErr('amount', 'Discount must be greater than 0%');
+        ok = false;
+    } else if (amt > 100) {
+        showErr('amount', 'Percentage discount cannot exceed 100%');
+        ok = false;
+    } else {
+        clearErr('amount');
+    }
+
+    // ── Max cap (optional) ───────────────────────
+    const maxCapRaw = f.maxCap.value.trim();
+    if (maxCapRaw !== '') {
+        const cap = parseFloat(maxCapRaw);
+        if (isNaN(cap) || cap <= 0) {
+            showErr('maxCap', 'Max cap must be a positive number');
             ok = false;
         } else {
-            clearErr('label');
+            clearErr('maxCap');
         }
+    } else {
+        clearErr('maxCap');
+    }
 
-        // Target product / category
-        if (!f.target.value) {
-            const scopeLabel = selectedScope === 'product' ? 'product' : 'category';
-            showErr('target', `Please select a ${scopeLabel}`);
+    // ── Min order (optional) ─────────────────────
+    const minOrderRaw = f.minOrder.value.trim();
+    if (minOrderRaw !== '') {
+        const minOrd = parseFloat(minOrderRaw);
+        if (isNaN(minOrd) || minOrd < 0) {
+            showErr('minOrder', 'Min order must be 0 or a positive number');
             ok = false;
         } else {
-            clearErr('target');
+            clearErr('minOrder');
         }
+    } else {
+        clearErr('minOrder');
+    }
 
-        // Discount amount
-        const amt = parseFloat(f.amount.value);
-if (!f.amount.value || isNaN(amt) || amt <= 0) {
-    showErr('amount', 'Enter a valid discount (1–100%)');
-    ok = false;
-} else if (amt > 100) {
-    showErr('amount', 'Percentage discount cannot exceed 100%');
-    ok = false;
-} else {
-    clearErr('amount');
+    // ── Start date ────────────────────────────────
+    if (!f.startDate.value) {
+        showErr('startDate', 'Start date is required');
+        ok = false;
+    } else {
+        clearErr('startDate');
+    }
+
+    // ── End date ──────────────────────────────────
+    if (!f.endDate.value) {
+        showErr('endDate', 'End date is required');
+        ok = false;
+    } else {
+        clearErr('endDate');
+    }
+
+    // ── Cross-field: end must be after start ─────
+    if (f.startDate.value && f.endDate.value) {
+        const [sd, sm, sy] = f.startDate.value.split('/').map(Number);
+        const [ed, em, ey] = f.endDate.value.split('/').map(Number);
+        const startD = new Date(sy, sm - 1, sd);
+        const endD = new Date(ey, em - 1, ed);
+        if (endD <= startD) {
+            showErr('endDate', 'End date must be after start date');
+            ok = false;
+        }
+    }
+
+    return ok;
 }
-
-        // Start date
-        if (!f.startDate.value) {
-            showErr('startDate', 'Start date is required');
-            ok = false;
-        } else {
-            clearErr('startDate');
-        }
-
-        // End date
-        if (!f.endDate.value) {
-            showErr('endDate', 'End date is required');
-            ok = false;
-        } else {
-            clearErr('endDate');
-        }
-
-        return ok;
-    }
 
     // ══════════════════════════════════════════
     // FETCH & RENDER

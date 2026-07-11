@@ -744,31 +744,27 @@ const stock       = document.getElementById('stock').value.trim();
     showError('brandError',    !brand    ? 'Please select a brand.'    : null);
 
    // Color
-    if (!color)
+if (!color)
     showError('colorError', 'Color is required.');
-    else if (color.length < 3)
+else if (color.length < 3)
     showError('colorError', 'Color must be at least 3 characters.');
-    else if (color.length > 30)
+else if (color.length > 30)
     showError('colorError', 'Color name is too long.');
-    else if (/[^a-zA-Z\s\-\/]/.test(color))
-    showError('colorError', 'Color should only contain letters, spaces, or hyphens.');
-    else
+else if (!/^[A-Za-z]+(\s[A-Za-z]+)*$/.test(color))
+    showError('colorError', 'Color must contain letters only (no numbers or symbols).');
+else
     showError('colorError', null);
 
-   // SKU
-    if (!sku)
+// SKU
+if (!sku)
     showError('skuError', 'SKU is required.');
-    else if (sku.length < 4)
+else if (sku.length < 4)
     showError('skuError', 'SKU must be at least 4 characters.');
-    else if (sku.length > 40)
+else if (sku.length > 40)
     showError('skuError', 'SKU cannot exceed 40 characters.');
-    else if (/\s/.test(sku))
-    showError('skuError', 'SKU cannot contain spaces.');
-    else if (/^\d+$/.test(sku))
-    showError('skuError', 'SKU cannot be only numbers.');
-    else if (!/^[a-zA-Z0-9\-_]+$/.test(sku))
-    showError('skuError', 'SKU can only contain letters, numbers, hyphens, or underscores.');
-    else
+else if (!/^[A-Za-z]+$/.test(sku))
+    showError('skuError', 'SKU must contain letters only (no numbers, spaces, or symbols).');
+else
     showError('skuError', null);
 
    // Price
@@ -858,26 +854,23 @@ const stock       = document.getElementById('stock').value.trim();
     else err.style.display = 'none';
     }
 
-    function validateColor(el) {
+   function validateColor(el) {
     const val = el.value.trim();
     const err = document.getElementById('colorError');
     if (!val) { err.style.display = 'none'; return; }
     if (val.length < 3) { err.textContent = 'At least 3 characters required.'; err.style.display = 'block'; }
-    else if (/[^a-zA-Z\s\-\/]/.test(val)) { err.textContent = 'Letters and hyphens only.'; err.style.display = 'block'; }
+    else if (!/^[A-Za-z]+(\s[A-Za-z]+)*$/.test(val)) { err.textContent = 'Letters only, no numbers or symbols.'; err.style.display = 'block'; }
     else err.style.display = 'none';
-    }
+}
 
-    function validateSKU(el) {
+function validateSKU(el) {
     const val = el.value.trim();
     const err = document.getElementById('skuError');
-    el.value = el.value.toUpperCase();
     if (!val) { err.style.display = 'none'; return; }
     if (val.length < 4) { err.textContent = 'At least 4 characters required.'; err.style.display = 'block'; }
-    else if (/^\d+$/.test(val)) { err.textContent = 'SKU cannot be only numbers.'; err.style.display = 'block'; }
-    else if (/\s/.test(val)) { err.textContent = 'No spaces allowed.'; err.style.display = 'block'; }
-    else if (!/^[a-zA-Z0-9\-_]+$/.test(val)) { err.textContent = 'Letters, numbers, hyphens only.'; err.style.display = 'block'; }
+    else if (!/^[A-Za-z]+$/.test(val)) { err.textContent = 'Letters only, no numbers or symbols.'; err.style.display = 'block'; }
     else err.style.display = 'none';
-    }
+}
     </script>
 
 </body>

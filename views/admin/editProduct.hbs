@@ -860,33 +860,29 @@
             showError('categoryError', !category ? 'Please select a category.' : null);
             showError('brandError', !brand ? 'Please select a brand.' : null);
 
-            // Color
-            if (!color)
-                showError('colorError', 'Color is required.');
-            else if (color.length < 3)
-                showError('colorError', 'Color must be at least 3 characters.');
-            else if (color.length > 30)
-                showError('colorError', 'Color name is too long.');
-            else if (/[^a-zA-Z\s\-\/]/.test(color))
-                showError('colorError', 'Color should only contain letters, spaces, or hyphens.');
-            else
-                showError('colorError', null);
+           // Color
+if (!color)
+    showError('colorError', 'Color is required.');
+else if (color.length < 3)
+    showError('colorError', 'Color must be at least 3 characters.');
+else if (color.length > 30)
+    showError('colorError', 'Color name is too long.');
+else if (!/^[A-Za-z]+(\s[A-Za-z]+)*$/.test(color))
+    showError('colorError', 'Color must contain letters only (no numbers or symbols).');
+else
+    showError('colorError', null);
 
-            // SKU
-            if (!sku)
-                showError('skuError', 'SKU is required.');
-            else if (sku.length < 4)
-                showError('skuError', 'SKU must be at least 4 characters.');
-            else if (sku.length > 40)
-                showError('skuError', 'SKU cannot exceed 40 characters.');
-            else if (/\s/.test(sku))
-                showError('skuError', 'SKU cannot contain spaces.');
-            else if (/^\d+$/.test(sku))
-                showError('skuError', 'SKU cannot be only numbers.');
-            else if (!/^[a-zA-Z0-9\-_]+$/.test(sku))
-                showError('skuError', 'SKU can only contain letters, numbers, hyphens, or underscores.');
-            else
-                showError('skuError', null);
+// SKU
+if (!sku)
+    showError('skuError', 'SKU is required.');
+else if (sku.length < 4)
+    showError('skuError', 'SKU must be at least 4 characters.');
+else if (sku.length > 40)
+    showError('skuError', 'SKU cannot exceed 40 characters.');
+else if (!/^[A-Za-z]+$/.test(sku))
+    showError('skuError', 'SKU must contain letters only (no numbers, spaces, or symbols).');
+else
+    showError('skuError', null);
 
             // Price
             if (!price)
@@ -982,25 +978,22 @@
         }
 
         function validateColor(el) {
-            const val = el.value.trim();
-            const err = document.getElementById('colorError');
-            if (!val) { err.style.display = 'none'; return; }
-            if (val.length < 3) { err.textContent = 'At least 3 characters required.'; err.style.display = 'block'; }
-            else if (/[^a-zA-Z\s\-\/]/.test(val)) { err.textContent = 'Letters and hyphens only.'; err.style.display = 'block'; }
-            else err.style.display = 'none';
-        }
+    const val = el.value.trim();
+    const err = document.getElementById('colorError');
+    if (!val) { err.style.display = 'none'; return; }
+    if (val.length < 3) { err.textContent = 'At least 3 characters required.'; err.style.display = 'block'; }
+    else if (!/^[A-Za-z]+(\s[A-Za-z]+)*$/.test(val)) { err.textContent = 'Letters only, no numbers or symbols.'; err.style.display = 'block'; }
+    else err.style.display = 'none';
+}
 
-        function validateSKU(el) {
-            const val = el.value.trim();
-            const err = document.getElementById('skuError');
-            el.value = el.value.toUpperCase();
-            if (!val) { err.style.display = 'none'; return; }
-            if (val.length < 4) { err.textContent = 'At least 4 characters required.'; err.style.display = 'block'; }
-            else if (/^\d+$/.test(val)) { err.textContent = 'SKU cannot be only numbers.'; err.style.display = 'block'; }
-            else if (/\s/.test(val)) { err.textContent = 'No spaces allowed.'; err.style.display = 'block'; }
-            else if (!/^[a-zA-Z0-9\-_]+$/.test(val)) { err.textContent = 'Letters, numbers, hyphens only.'; err.style.display = 'block'; }
-            else err.style.display = 'none';
-        }
+function validateSKU(el) {
+    const val = el.value.trim();
+    const err = document.getElementById('skuError');
+    if (!val) { err.style.display = 'none'; return; }
+    if (val.length < 4) { err.textContent = 'At least 4 characters required.'; err.style.display = 'block'; }
+    else if (!/^[A-Za-z]+$/.test(val)) { err.textContent = 'Letters only, no numbers or symbols.'; err.style.display = 'block'; }
+    else err.style.display = 'none';
+}
 
         // ─── ACCORDION TOGGLE ────────────────────────────────────────
         function toggleVariantAccordion(index) {
@@ -1037,41 +1030,57 @@
             if (errEl) errEl.classList.add('hidden');
         }
 
-        // ─── SAVE SUB-VARIANT INLINE VIA AXIOS ─────────────────────────
         async function saveSubVariant(variantId, index) {
-            const colorInput = document.getElementById(`var-color-${index}`);
-            const skuInput = document.getElementById(`var-sku-${index}`);
-            const priceInput = document.getElementById(`var-price-${index}`);
-            const stockInput = document.getElementById(`var-stock-${index}`);
-            const sizeInput = document.getElementById(`var-size-${index}`);
-            const imagesInput = document.getElementById(`var-images-${index}`);
-            
-            if (!colorInput || !skuInput || !priceInput || !stockInput || !sizeInput) return;
-            
-            const color = colorInput.value.trim();
-            const sku = skuInput.value.trim();
-            const price = priceInput.value.trim();
-            const stock = stockInput.value.trim();
-            const size = sizeInput.value;
-            const imagesVal = imagesInput ? imagesInput.value : '';
-            
-            let valid = true;
-            const setValError = (id, show) => {
-                const el = document.getElementById(id);
-                if (el) {
-                    if (show) el.classList.remove('hidden');
-                    else el.classList.add('hidden');
-                }
-                if (show) valid = false;
-            };
-            
-            setValError(`var-color-error-${index}`, !color);
-            setValError(`var-sku-error-${index}`, !sku);
-            setValError(`var-price-error-${index}`, !price || isNaN(price) || parseFloat(price) < 0);
-            setValError(`var-stock-error-${index}`, !stock || isNaN(stock) || parseInt(stock) < 0);
-            setValError(`var-size-error-${index}`, !size);
-            
-            if (!valid) return;
+    const colorInput = document.getElementById(`var-color-${index}`);
+    const skuInput = document.getElementById(`var-sku-${index}`);
+    const priceInput = document.getElementById(`var-price-${index}`);
+    const stockInput = document.getElementById(`var-stock-${index}`);
+    const sizeInput = document.getElementById(`var-size-${index}`);
+    const imagesInput = document.getElementById(`var-images-${index}`);
+
+    if (!colorInput || !skuInput || !priceInput || !stockInput || !sizeInput) return;
+
+    const color = colorInput.value.trim();
+    const sku = skuInput.value.trim().toUpperCase();
+    const price = priceInput.value.trim();
+    const stock = stockInput.value.trim();
+    const size = sizeInput.value;
+    const imagesVal = imagesInput ? imagesInput.value : '';
+
+    const COLOR_REGEX = /^[A-Za-z]+(\s[A-Za-z]+)*$/;
+    const SKU_REGEX = /^[A-Za-z]+$/;
+
+    let valid = true;
+    const setValError = (id, show, msg) => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (show) { el.textContent = msg || el.textContent; el.classList.remove('hidden'); }
+            else el.classList.add('hidden');
+        }
+        if (show) valid = false;
+    };
+
+    if (!color) setValError(`var-color-error-${index}`, true, 'Color is required.');
+    else if (color.length < 3) setValError(`var-color-error-${index}`, true, 'At least 3 characters required.');
+    else if (!COLOR_REGEX.test(color)) setValError(`var-color-error-${index}`, true, 'Letters only, no numbers or symbols.');
+    else setValError(`var-color-error-${index}`, false);
+
+    if (!sku) setValError(`var-sku-error-${index}`, true, 'SKU is required.');
+    else if (sku.length < 4) setValError(`var-sku-error-${index}`, true, 'At least 4 characters required.');
+    else if (!SKU_REGEX.test(sku)) setValError(`var-sku-error-${index}`, true, 'Letters only, no numbers or symbols.');
+    else setValError(`var-sku-error-${index}`, false);
+
+    setValError(`var-price-error-${index}`, 
+    !price || isNaN(price) || parseFloat(price) <= 0 || parseFloat(price) > 99999, 
+    parseFloat(price) > 99999 ? 'Price cannot exceed ₹99,999.' : 'Enter a valid price.');
+
+    setValError(`var-stock-error-${index}`, 
+    !stock || isNaN(stock) || parseInt(stock) < 0 || parseInt(stock) > 9999, 
+    parseInt(stock) > 9999 ? 'Stock cannot exceed 9,999 units.' : 'Enter a valid stock quantity.');
+    setValError(`var-size-error-${index}`, !size, 'Size is required.');
+
+    if (!valid) return;
+
             
             const saveBtn = document.getElementById(`save-var-btn-${index}`);
             const originalText = saveBtn.textContent;

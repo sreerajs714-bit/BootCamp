@@ -2,16 +2,9 @@ import Offer from "../../model/offerModel.js";
 import Product from "../../model/productModel.js";
 import Category from "../../model/categoryModel.js";
 
+import { validateOfferPayload } from "../../utils/offer.js";
 
 
-function parseDMY(str) {
-  if (!str) return null;
-  const parts = str.split("/");
-  if (parts.length !== 3) return null;
-  const [day, month, year] = parts.map(Number);
-  const d = new Date(year, month - 1, day);
-  return isNaN(d.getTime()) ? null : d;
-}
 
 export const loadOffer = async (req, res) => {
   try {
@@ -112,55 +105,26 @@ export const getOfferById = async (req, res) => {
 
 export const createOffer = async (req, res) => {
   try {
+    const validation = validateOfferPayload(req.body);
+    if (validation.error) {
+      return res.status(400).json({ success: false, message: validation.error });
+    }
+
     const {
       label, applicableTo, target,
-      discountType, amount,
-      maxCap, minOrder,
-      startDate, endDate,
-    } = req.body;
-
-    // ── Validations ───────────────────────────────────
-    if (!label || !applicableTo || !target || !discountType || !amount || !startDate || !endDate) {
-      return res.status(400).json({ success: false, message: "All required fields must be filled" });
-    }
-
-    if (!["product", "category"].includes(applicableTo)) {
-      return res.status(400).json({ success: false, message: "Invalid scope" });
-    }
-
-    if (discountType !== "percentage") {
-      return res.status(400).json({ success: false, message: "Invalid discount type" });
-    }
-
-    if (Number(amount) > 100) {
-      return res.status(400).json({ success: false, message: "Percentage cannot exceed 100%" });
-    }
-
-    if (Number(amount) <= 0) {
-      return res.status(400).json({ success: false, message: "Discount amount must be greater than 0" });
-    }
-
-    const parsedStart = parseDMY(startDate);
-    const parsedEnd   = parseDMY(endDate);
-
-    if (!parsedStart || !parsedEnd) {
-      return res.status(400).json({ success: false, message: "Invalid date format (use dd/mm/yyyy)" });
-    }
-
-    if (parsedEnd <= parsedStart) {
-      return res.status(400).json({ success: false, message: "End date must be after start date" });
-    }
+      discountType, numAmount,
+      numMaxCap, numMinOrder,
+      parsedStart, parsedEnd,
+    } = validation.data;
 
     // ── Resolve targetName ────────────────────────────
     let targetName = "";
-
     if (applicableTo === "product") {
       const product = await Product.findById(target).lean();
       if (!product) {
         return res.status(404).json({ success: false, message: "Product not found" });
       }
       targetName = product.productName || product.name;
-
     } else {
       const category = await Category.findById(target).lean();
       if (!category) {
@@ -169,16 +133,27 @@ export const createOffer = async (req, res) => {
       targetName = category.name;
     }
 
-    // ── Create offer ──────────────────────────────────
+    // ── Optional: block duplicate active offer on same target ─
+    const existing = await Offer.findOne({
+      targetId: target,
+      isActive: true,
+    }).lean();
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: `An active offer ("${existing.label}") already exists for this ${applicableTo}`,
+      });
+    }
+
     const offer = await Offer.create({
-      label:         label.trim(),
+      label,
       applicableTo,
       targetId:      target,
       targetName,
       discountType,
-      discountValue: Number(amount),
-      maxCap:        maxCap   ? Number(maxCap)   : null,
-      minOrder:      minOrder ? Number(minOrder) : 0,
+      discountValue: numAmount,
+      maxCap:        numMaxCap,
+      minOrder:      numMinOrder,
       startDate:     parsedStart,
       expiryDate:    parsedEnd,
       isActive:      true,
@@ -194,54 +169,26 @@ export const createOffer = async (req, res) => {
 
 export const updateOffer = async (req, res) => {
   try {
+    const validation = validateOfferPayload(req.body);
+    if (validation.error) {
+      return res.status(400).json({ success: false, message: validation.error });
+    }
+
     const {
       label, applicableTo, target,
-      discountType, amount,
-      maxCap, minOrder,
-      startDate, endDate,
-    } = req.body;
-
-    if (!label || !applicableTo || !target || !discountType || !amount || !startDate || !endDate) {
-      return res.status(400).json({ success: false, message: "All required fields must be filled" });
-    }
-
-    if (!["product", "category"].includes(applicableTo)) {
-      return res.status(400).json({ success: false, message: "Invalid scope" });
-    }
-
-    if (discountType !== "percentage") {
-      return res.status(400).json({ success: false, message: "Invalid discount type" });
-    }
-
-    if (Number(amount) > 100) {
-      return res.status(400).json({ success: false, message: "Percentage cannot exceed 100%" });
-    }
-
-    if (Number(amount) <= 0) {
-      return res.status(400).json({ success: false, message: "Discount amount must be greater than 0" });
-    }
-
-    const parsedStart = parseDMY(startDate);
-    const parsedEnd   = parseDMY(endDate);
-
-    if (!parsedStart || !parsedEnd) {
-      return res.status(400).json({ success: false, message: "Invalid date format (use dd/mm/yyyy)" });
-    }
-
-    if (parsedEnd <= parsedStart) {
-      return res.status(400).json({ success: false, message: "End date must be after start date" });
-    }
+      discountType, numAmount,
+      numMaxCap, numMinOrder,
+      parsedStart, parsedEnd,
+    } = validation.data;
 
     // ── Resolve targetName ────────────────────────────
     let targetName = "";
-
     if (applicableTo === "product") {
       const product = await Product.findById(target).lean();
       if (!product) {
         return res.status(404).json({ success: false, message: "Product not found" });
       }
       targetName = product.productName || product.name;
-
     } else {
       const category = await Category.findById(target).lean();
       if (!category) {
@@ -250,22 +197,34 @@ export const updateOffer = async (req, res) => {
       targetName = category.name;
     }
 
-    // ── Update offer ──────────────────────────────────
+    // ── Optional: block duplicate active offer on same target (excluding this offer) ─
+    const existing = await Offer.findOne({
+      targetId: target,
+      isActive: true,
+      _id: { $ne: req.params.id },
+    }).lean();
+    if (existing) {
+      return res.status(400).json({
+        success: false,
+        message: `An active offer ("${existing.label}") already exists for this ${applicableTo}`,
+      });
+    }
+
     const updated = await Offer.findByIdAndUpdate(
       req.params.id,
       {
-        label:         label.trim(),
+        label,
         applicableTo,
         targetId:      target,
         targetName,
         discountType,
-        discountValue: Number(amount),
-        maxCap:        maxCap   ? Number(maxCap)   : null,
-        minOrder:      minOrder ? Number(minOrder) : 0,
+        discountValue: numAmount,
+        maxCap:        numMaxCap,
+        minOrder:      numMinOrder,
         startDate:     parsedStart,
         expiryDate:    parsedEnd,
       },
-      { returnDocument: "after", runValidators: true }
+      { new: true, runValidators: true }
     );
 
     if (!updated) {

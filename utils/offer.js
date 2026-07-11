@@ -54,3 +54,98 @@ export function calculateOfferPrice(originalPrice, product, activeOffers) {
         offer: appliedOffer,
     };
 }
+
+export function parseDMY(str) {
+  if (!str) return null;
+  const parts = str.split("/");
+  if (parts.length !== 3) return null;
+  const [day, month, year] = parts.map(Number);
+  const d = new Date(year, month - 1, day);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+const LABEL_REGEX = /^[A-Za-z][A-Za-z\s'&-]{2,49}$/;
+
+export function validateOfferPayload(body) {
+  const {
+    label, applicableTo, target,
+    discountType, amount,
+    maxCap, minOrder,
+    startDate, endDate,
+  } = body;
+
+  // ── Required fields ────────────────────────────────
+  if (!label || !applicableTo || !target || !discountType || !amount || !startDate || !endDate) {
+    return { error: "All required fields must be filled" };
+  }
+
+  // ── Label ────────────────────────────────────────────
+  const trimmedLabel = label.trim();
+  if (!/[a-zA-Z]/.test(trimmedLabel)) {
+    return { error: "Offer label must contain letters" };
+  }
+  if (!LABEL_REGEX.test(trimmedLabel)) {
+    return {
+      error: "Offer label must be 3-50 characters, letters only (spaces, - and ' allowed), starting with a letter",
+    };
+  }
+
+  if (!["product", "category"].includes(applicableTo)) {
+    return { error: "Invalid scope" };
+  }
+
+  if (discountType !== "percentage") {
+    return { error: "Invalid discount type" };
+  }
+
+  // ── Amount ───────────────────────────────────────────
+  const numAmount = Number(amount);
+  if (isNaN(numAmount) || numAmount <= 0) {
+    return { error: "Discount amount must be greater than 0" };
+  }
+  if (numAmount > 100) {
+    return { error: "Percentage cannot exceed 100%" };
+  }
+
+  // ── Optional numeric fields ──────────────────────────
+  let numMaxCap = null;
+  if (maxCap !== undefined && maxCap !== null && maxCap !== "") {
+    numMaxCap = Number(maxCap);
+    if (isNaN(numMaxCap) || numMaxCap <= 0) {
+      return { error: "Max cap must be a positive number" };
+    }
+  }
+
+  let numMinOrder = 0;
+  if (minOrder !== undefined && minOrder !== null && minOrder !== "") {
+    numMinOrder = Number(minOrder);
+    if (isNaN(numMinOrder) || numMinOrder < 0) {
+      return { error: "Min order must be 0 or a positive number" };
+    }
+  }
+
+  // ── Dates ────────────────────────────────────────────
+  const parsedStart = parseDMY(startDate);
+  const parsedEnd   = parseDMY(endDate);
+
+  if (!parsedStart || !parsedEnd) {
+    return { error: "Invalid date format (use dd/mm/yyyy)" };
+  }
+  if (parsedEnd <= parsedStart) {
+    return { error: "End date must be after start date" };
+  }
+
+  return {
+    data: {
+      label: trimmedLabel,
+      applicableTo,
+      target,
+      discountType,
+      numAmount,
+      numMaxCap,
+      numMinOrder,
+      parsedStart,
+      parsedEnd,
+    },
+  };
+}

@@ -2,6 +2,8 @@ import Product from "../../model/productModel.js";
 import Category from "../../model/categoryModel.js";
 import Brand from "../../model/brandModel.js";
 
+import { validateProductPayload } from "../../utils/product.js";
+
 
 
 export const loadProduct = async (req, res) => {
@@ -114,34 +116,17 @@ export const loadAddProduct = async (req, res) => {
 
 export const addProduct = async (req, res) => {
     try {
+        const validation = validateProductPayload(req.body);
+        if (validation.error) {
+            return res.status(400).json({ success: false, message: validation.error });
+        }
 
         const {
-            productName,
-            description,
-            category,
-            brand,
-            color,
-            sku,
-            price,
-            stock,
-            sizes,
-        } = req.body;
+            productName, description, color, sku,
+            price, stock, sizes,
+        } = validation.data;
 
-        if (
-            !productName ||
-            !description ||
-            !category ||
-            !brand ||
-            !color ||
-            !sku ||
-            !price ||
-            !stock
-        ) {
-            return res.status(400).json({
-                success: false,
-                message: "All required fields must be filled."
-            });
-        }
+        const { category, brand } = req.body;
 
         if (!req.files || req.files.length < 3) {
             return res.status(400).json({
@@ -151,7 +136,7 @@ export const addProduct = async (req, res) => {
         }
 
         const skuExists = await Product.findOne({
-            "variants.sku": sku.toUpperCase()
+            "variants.sku": sku
         });
 
         if (skuExists) {
@@ -162,13 +147,11 @@ export const addProduct = async (req, res) => {
         }
 
         const rawStatus = req.body.status;
-
         const status = Array.isArray(rawStatus)
             ? rawStatus[rawStatus.length - 1]
             : rawStatus || "active";
 
         const rawLimited = req.body.isLimitedEdition;
-
         const isLimitedEdition = Array.isArray(rawLimited)
             ? rawLimited[rawLimited.length - 1] === "true"
             : rawLimited === "true";
@@ -178,19 +161,17 @@ export const addProduct = async (req, res) => {
         );
 
         const variant = {
-            color: color.trim(),
-            sku: sku.trim().toUpperCase(),
-            price: Number(price),
-            stock: Number(stock),
-            sizes: Array.isArray(sizes)
-                ? sizes.map(Number)
-                : [Number(sizes)],
+            color,
+            sku,
+            price,
+            stock,
+            sizes,
             images: imageUrls,
         };
 
         const product = new Product({
-            productName: productName.trim(),
-            description: description.trim(),
+            productName,
+            description,
             category,
             brand,
             isLimitedEdition,
@@ -206,9 +187,7 @@ export const addProduct = async (req, res) => {
         });
 
     } catch (error) {
-
         console.error("addProduct error:", error);
-
         return res.status(500).json({
             success: false,
             message: "Failed to add product"
@@ -244,58 +223,43 @@ export const editProduct = async (req, res) => {
     try {
         const { id } = req.params;
         const {
-            productName,
-            description,
             category,
             brand,
             isLimitedEdition,
             status,
             variantId,
-            color,
-            sku,
-            price,
-            stock,
-            sizes,
-            existingImages,  // JSON string: array of cloudinary URLs already saved
+            existingImages, // JSON string: array of cloudinary URLs already saved
         } = req.body;
- 
+
         // ── Find product ─────────────────────────────────────
         const product = await Product.findById(id);
         if (!product || product.isDeleted) {
             return res.status(404).json({ success: false, message: "Product not found." });
         }
- 
-        // ── Validate required fields ──────────────────────────
-        if (!productName?.trim())  return res.status(400).json({ success: false, message: "Product name is required." });
-        if (!description?.trim())  return res.status(400).json({ success: false, message: "Description is required." });
-        if (!category)             return res.status(400).json({ success: false, message: "Category is required." });
-        if (!brand)                return res.status(400).json({ success: false, message: "Brand is required." });
-        if (!color?.trim())        return res.status(400).json({ success: false, message: "Color is required." });
-        if (!sku?.trim())          return res.status(400).json({ success: false, message: "SKU is required." });
-        if (!price || isNaN(Number(price))) return res.status(400).json({ success: false, message: "Valid price is required." });
-        if (!stock || isNaN(Number(stock))) return res.status(400).json({ success: false, message: "Valid stock is required." });
- 
-        // ── Parse sizes ───────────────────────────────────────
-        // body-parser gives a string when one value, array when multiple
-        const parsedSizes = Array.isArray(sizes)
-            ? sizes.map(Number)
-            : sizes
-                ? [Number(sizes)]
-                : [];
- 
-        if (parsedSizes.length === 0) {
-            return res.status(400).json({ success: false, message: "At least one size is required." });
+
+        // ── Shared validation (name, description, color, sku, price, stock, sizes) ──
+        const validation = validateProductPayload(req.body);
+        if (validation.error) {
+            return res.status(400).json({ success: false, message: validation.error });
         }
- 
+
+        const {
+            productName, description, color, sku,
+            price, stock, sizes: parsedSizes,
+        } = validation.data;
+
+        if (!category) return res.status(400).json({ success: false, message: "Category is required." });
+        if (!brand)    return res.status(400).json({ success: false, message: "Brand is required." });
+
         // ── Duplicate SKU check (exclude self) ───
         const skuConflict = await Product.findOne({
             _id: { $ne: id },
-            "variants.sku": sku.trim().toUpperCase(),
+            "variants.sku": sku,
         });
         if (skuConflict) {
             return res.status(400).json({ success: false, message: "SKU already in use by another product." });
         }
- 
+
         // ── Parse existing images (URLs to keep) ──
         let kept = [];
         if (existingImages) {
@@ -306,11 +270,10 @@ export const editProduct = async (req, res) => {
                 kept = [];
             }
         }
- 
+
         const newUrls = req.files ? req.files.map(f => f.path) : [];
- 
         const allImages = [...kept, ...newUrls];
- 
+
         if (allImages.length < 3) {
             // Clean up newly uploaded files from Cloudinary since we're rejecting
             for (const file of req.files || []) {
@@ -325,42 +288,43 @@ export const editProduct = async (req, res) => {
                 message: `Minimum 3 images required. Got ${allImages.length}.`,
             });
         }
- 
+
         // ── Update base product fields ────────────────────────
-        product.productName      = productName.trim();
-        product.description      = description.trim();
-        product.category         = category;
-        product.brand            = brand;
+        product.productName = productName;
+        product.description = description;
+        product.category    = category;
+        product.brand       = brand;
+
         const limitedValues = Array.isArray(isLimitedEdition) ? isLimitedEdition : [isLimitedEdition];
         product.isLimitedEdition = limitedValues.includes("true");
+
         const statusValues = Array.isArray(status) ? status : [status];
         product.status = statusValues.includes("active") ? "active" : "inactive";
 
-       // ── Update variant ────────────────────────────────────
-         const variant = variantId 
-         ? product.variants.id(variantId) 
-         : product.variants[0];  // ← fallback to first variant
+        // ── Update variant ────────────────────────────────────
+        const variant = variantId
+            ? product.variants.id(variantId)
+            : product.variants[0]; // ← fallback to first variant
 
-           if (!variant) {
-          return res.status(404).json({ success: false, message: "Variant not found." });
+        if (!variant) {
+            return res.status(404).json({ success: false, message: "Variant not found." });
         }
- 
-        variant.color    = color.trim();
-        variant.sku      = sku.trim().toUpperCase();
-        variant.price    = Number(price);
-        variant.stock    = Number(stock);
+
+        variant.color    = color;
+        variant.sku      = sku;
+        variant.price    = price;
+        variant.stock    = stock;
         variant.sizes    = parsedSizes;
         variant.images   = allImages;
         variant.isActive = true;
-        product.variants.forEach(v => {
-        v.isDefault = false;
-        });
+
+        product.variants.forEach(v => { v.isDefault = false; });
         variant.isDefault = true;
 
         await product.save();
- 
+
         return res.json({ success: true, message: "Product updated successfully." });
- 
+
     } catch (error) {
         console.error("editProduct error:", error);
         return res.status(500).json({ success: false, message: "Internal server error." });
