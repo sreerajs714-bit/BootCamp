@@ -158,12 +158,12 @@ export const loadReturnDetail = async (req, res) => {
         if (!order) return res.redirect('/admin/returns');
 
         const itemsToShow = (order.isFullReturn === true)
-            ? order.items
-            : order.items.filter(i =>
-                (i.returnStatus && i.returnStatus !== 'None') ||
-                i.status === 'Return Requested' ||
-                (i.returnRequest?.status && i.returnRequest.status !== 'None')
-              );
+    ? order.items.filter(i => i.status !== 'Cancelled')
+    : order.items.filter(i =>
+        (i.returnStatus && i.returnStatus !== 'None') ||
+        i.status === 'Return Requested' ||
+        (i.returnRequest?.status && i.returnRequest.status !== 'None')
+      );
 
         const products = itemsToShow.map(item => {
             const product  = item.product;

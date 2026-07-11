@@ -5,7 +5,7 @@ import Wallet from "../../model/walletModel.js";
 import axios from "axios";
 
 
-function calculateItemRefund(order, itemsToRefund) {
+export function calculateItemRefund(order, itemsToRefund) {
     const refundRawTotal = itemsToRefund.reduce((sum, item) =>
         sum + ((item.price || 0) * (item.quantity || 1)), 0
     );

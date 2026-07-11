@@ -110,8 +110,7 @@ export const loadCart = async (req, res) => {
 
 export const addToCart = async (req, res) => {
     try {
-        console.log('addToCart body:', req.body); // ← add this
-    console.log('existing cart items:', await Cart.findOne({ userId: req.session?.user?.id }));
+    
         const userId = req.session?.user?.id || null;
         const { productId, variantId, size, quantity = 1 } = req.body;
 

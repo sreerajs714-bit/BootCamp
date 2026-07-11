@@ -322,11 +322,14 @@
 
             <!-- Right: Search & Sort -->
             <div class="flex items-center justify-end pl-4">
-                <div class="refine-search-container">
-                    <input type="text" id="bar-search-input" placeholder="SEARCH PRODUCT..." oninput="applyFilters()"
-                        onkeyup="if(event.key==='Escape') toggleBarSearch()"
-                        class="w-full bg-transparent border-none outline-none text-[10px] font-black tracking-widest text-right placeholder:text-gray-300">
-                </div>
+                <div class="refine-search-container flex items-center">
+    <input type="text" id="bar-search-input" placeholder="SEARCH PRODUCT..."
+        onkeyup="if(event.key==='Escape') closeBarSearch()"
+        class="w-full bg-transparent border-none outline-none text-[10px] font-black tracking-widest text-right placeholder:text-gray-300">
+    <button onclick="closeBarSearch()" class="ml-2 shrink-0" title="Close search">
+        <span class="material-symbols-outlined text-[16px] text-gray-400 hover:text-black transition-colors">close</span>
+    </button>
+</div>
 
                 <div class="flex items-center space-x-4">
                     <button onclick="toggleBarSearch()" class="icon-btn">
@@ -719,6 +722,15 @@ function toggleBarSearch() {
     }
 }
 
+function closeBarSearch() {
+    clearTimeout(searchDebounceTimer);
+    const bar = document.getElementById('refine-bar');
+    const input = document.getElementById('bar-search-input');
+    bar.classList.remove('search-active');
+    input.value = '';
+    applyFilters();
+}
+
 
 function toggleSortDropdown() {
     document.getElementById('sort-dropdown').classList.toggle('active');
@@ -745,6 +757,14 @@ document.querySelectorAll('.brand-chip').forEach(chip => {
     });
 });
 
+document.querySelectorAll('.sort-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+        document.querySelectorAll('.sort-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        document.getElementById('active-sort-label').innerText = chip.dataset.sort;
+    });
+});
+
 const minRange = document.getElementById('price-min');
 const maxRange = document.getElementById('price-max');
 const rangeFill = document.getElementById('range-fill');
@@ -763,6 +783,17 @@ function updateDualSlider() {
 minRange.addEventListener('input', updateDualSlider);
 maxRange.addEventListener('input', updateDualSlider);
 updateDualSlider();
+
+let searchDebounceTimer = null;
+const SEARCH_DEBOUNCE_MS = 500;
+
+const barSearchInput = document.getElementById('bar-search-input');
+barSearchInput.addEventListener('input', () => {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+        applyFilters();
+    }, SEARCH_DEBOUNCE_MS);
+});
 
 let currentView = 'grid';
 
@@ -786,8 +817,11 @@ function toggleView(view) {
 document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
 
-    const search = params.get('search') || '';
-    document.getElementById('bar-search-input').value = search;
+const search = params.get('search') || '';
+document.getElementById('bar-search-input').value = search;
+if (search) {
+    document.getElementById('refine-bar').classList.add('search-active');
+}
 
     const sortLabelMap = {
         'price-asc': 'Price Low - High', 'price-desc': 'Price High - Low',

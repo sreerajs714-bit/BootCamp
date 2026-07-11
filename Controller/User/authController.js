@@ -29,24 +29,67 @@ export const loadLogin = (req, res) => {
 };
 
 export const registerUser = async (req, res) => {
-
   try {
+    const { username, email, password, cfmpassword, referralCode } = req.body;
 
-    const { username, email, password,referralCode } = req.body;
+    
+    const usernameRegex = /^[a-zA-Z_ ]{3,16}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!username || !usernameRegex.test(username.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: "Username must be 3-16 characters, letters only."
+      });
+    }
+
+    if (!email || !emailRegex.test(email.trim())) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide a valid email address."
+      });
+    }
+
+    if (!password) {
+      return res.status(400).json({
+        success: false,
+        message: "Password is required."
+      });
+    }
+
+    const passwordChecks = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+      special: /[^A-Za-z0-9]/.test(password)
+    };
+
+    if (!Object.values(passwordChecks).every(Boolean)) {
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character."
+      });
+    }
+
+    if (cfmpassword !== undefined && password !== cfmpassword) {
+      return res.status(400).json({
+        success: false,
+        message: "Passwords do not match."
+      });
+    }
+   
 
     const cleanEmail = email.trim().toLowerCase();
 
     // Check existing user
-    const existingUser = await User.findOne({
-      email: cleanEmail
-    });
+    const existingUser = await User.findOne({ email: cleanEmail });
 
     if (existingUser) {
-
-       return res.status(409).json({
-      success: false,
-      message: "An account with this email already exists."
-     });
+      return res.status(409).json({
+        success: false,
+        message: "An account with this email already exists."
+      });
     }
 
     // Hash password
@@ -54,59 +97,50 @@ export const registerUser = async (req, res) => {
 
     // Save session data
     req.session.pendingUser = {
-      username,
+      username: username.trim(),
       email: cleanEmail,
       password: hashedPassword,
       referralCode: referralCode || req.session.referralCode || null
     };
 
     req.session.otpEmail = cleanEmail;
-
     req.session.otpPurpose = "register";
 
     // Generate OTP
     const otp = generateOTP();
-
     const hashedOTP = await bcrypt.hash(otp, 10);
 
     // Remove old OTPs
-    await OTP.deleteMany({
-      email: cleanEmail,
-      purpose: "register"
-    });
+    await OTP.deleteMany({ email: cleanEmail, purpose: "register" });
 
     // Save OTP
     await OTP.create({
       email: cleanEmail,
       otp: hashedOTP,
       purpose: "register",
-       expiresAt: Date.now() + 1 * 60 * 1000 
+      expiresAt: Date.now() + 1 * 60 * 1000
     });
 
-    // Send email
     await sendOTPEmail(cleanEmail, otp);
 
-    // SAVE SESSION BEFORE RENDER
     req.session.save((err) => {
-
       if (err) {
-       return res.status(500).json({ success: false, message: "Session error. Please try again." });
+        return res.status(500).json({ success: false, message: "Session error. Please try again." });
       }
 
-      return res.status(200).json({ 
-      success: true, 
-      redirectUrl: "/users/otpVerify",
-      message: "OTP sent successfully to your email."
+      return res.status(200).json({
+        success: true,
+        redirectUrl: "/users/otpVerify",
+        message: "OTP sent successfully to your email."
       });
     });
 
   } catch (error) {
-
-  return res.status(500).json({
-    success: false,
-    message: "Something went wrong. Please try again."
-  });
- }
+    return res.status(500).json({
+      success: false,
+      message: "Something went wrong. Please try again."
+    });
+  }
 };
 
 export const loginUser = async (req, res) => {

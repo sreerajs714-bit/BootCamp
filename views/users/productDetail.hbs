@@ -238,9 +238,8 @@
                     <!-- Card Top (Image + Icons) -->
                     <div class="relative aspect-square bg-[#f8f8f8] rounded-2xl overflow-hidden mb-5">
 
-                        <button
-                            onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('{{this.id}}',this)"
-                            class="absolute top-3 right-3 z-20 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-all shadow-sm">
+                        <button onclick="event.preventDefault(); event.stopPropagation(); toggleWishlist('{{this.id}}', null, this)"
+                             class="absolute top-3 right-3 z-20 w-8 h-8 bg-white/80 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 transition-all shadow-sm">
                             <span
                                 class="material-symbols-outlined text-[18px] {{#if this.isWishlisted}}icon-fill text-red-500{{/if}}">favorite</span>
                         </button>

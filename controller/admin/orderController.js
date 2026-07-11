@@ -1,6 +1,9 @@
 import Order from "../../model/orderModel.js";
 import User from "../../model/userModel.js";
 import Product from "../../model/productModel.js";
+import Wallet from "../../model/walletModel.js";
+
+import { calculateItemRefund } from "../User/ordersController.js";
 
 const ORDERS_PER_PAGE = 5;
 
@@ -177,20 +180,65 @@ export const updateOrderStatus = async (req, res) => {
         const { id } = req.params;
         const { status } = req.body;
 
-        const validStatuses = ["Confirmed", "Processing", "Shipped","Out for Delivery","Delivered", "Cancelled"];
+        const validStatuses = ["Confirmed", "Processing", "Shipped", "Out for Delivery", "Delivered", "Cancelled"];
         if (!validStatuses.includes(status)) {
             return res.status(400).json({ success: false, message: "Invalid status" });
         }
 
-        await Order.findByIdAndUpdate(id, {
-            orderStatus: status,
-            $push: {
-                trackingHistory: {
-                    $each: [{ status, time: new Date() }],
-                    $position: 0  
+        const order = await Order.findById(id);
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        if (order.orderStatus === "Cancelled") {
+            return res.status(400).json({ success: false, message: "Order is already cancelled" });
+        }
+
+        // ── Admin Cancelling the Order ──────────────────────────
+        if (status === "Cancelled") {
+            const itemsToCancel = order.items.filter(i => i.status === 'Active');
+            const refundAmount = calculateItemRefund(order, itemsToCancel);
+
+            for (const item of itemsToCancel) {
+                const product = await Product.findById(item.product);
+                if (product) {
+                    const variant = product.variants.find(v =>
+                        v.sizes && v.sizes.map(s => s.toString()).includes(item.size.toString())
+                    );
+                    if (variant) {
+                        variant.stock += item.quantity;
+                        await product.save();
+                    }
                 }
+                item.status = 'Cancelled';
+                item.cancelReason = 'Cancelled by admin';
+                item.cancelNote = '';
             }
-        });
+
+            order.cancelReason = 'Cancelled by admin';
+            order.totalAmount = Math.max(0, order.totalAmount - refundAmount);
+
+            if (['wallet', 'razorpay'].includes(order.paymentMethod) && refundAmount > 0) {
+                let wallet = await Wallet.findOne({ userId: order.user });
+                if (!wallet) wallet = await Wallet.create({ userId: order.user, balance: 0, transactions: [] });
+
+                wallet.balance += refundAmount;
+                wallet.transactions.push({
+                    transactionId: `REFUND-${order._id}`,
+                    type: 'credit',
+                    amount: refundAmount,
+                    description: 'Order Cancelled by Admin - Refund',
+                    orderId: order._id,
+                    date: new Date()
+                });
+                await wallet.save();
+            }
+        }
+
+        order.orderStatus = status;
+        order.trackingHistory.unshift({ status, time: new Date() });
+
+        await order.save();
 
         res.json({ success: true });
 

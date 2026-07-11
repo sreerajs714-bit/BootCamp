@@ -2,6 +2,7 @@ import Product from "../../model/productModel.js";
 import User from "../../model/userModel.js";
 import Category from "../../model/categoryModel.js";
 import Brand from "../../model/brandModel.js";
+import Wishlist from "../../model/wishlistModel.js";
 
 import { getActiveOffers, calculateOfferPrice } from "../../utils/offer.js";
 
@@ -66,9 +67,12 @@ function shapeProduct(product, wishlistedIds, activeOffers) {
 async function getWishlistedIds(req) {
     const sessionUser = req.session?.user;
     if (!sessionUser) return [];
+
     const userId = sessionUser._id || sessionUser.id;
-    const user = await User.findById(userId).select('wishlist').lean();
-    return (user?.wishlist || []).map(id => String(id));
+
+    const wishlist = await Wishlist.findOne({ userId }).lean();
+
+    return (wishlist?.products || []).map(p => String(p.productId));
 }
 
 function buildPages(totalPages, page) {
@@ -99,8 +103,6 @@ async function getPaginatedProducts(baseMatch, query, { categoryName } = {}) {
     const activeCategoryIds = activeCategories.map(c => c._id);
     const activeBrandIds    = activeBrands.map(b => b._id);
 
-    // Restrict to a specific category by name (used by Men's/Women's pages).
-    // Defensive against both `name` and `categoryName` field variants.
     const allowedCategoryIds = categoryName
         ? activeCategories
             .filter(c => (c.name || c.categoryName || '').toLowerCase() === categoryName.toLowerCase())
@@ -130,7 +132,7 @@ async function getPaginatedProducts(baseMatch, query, { categoryName } = {}) {
         sort === 'name-desc'  ? { productName: -1 } :
         sort === 'brand-asc'  ? { brandName: 1 } :
         sort === 'brand-desc' ? { brandName: -1 } :
-                                 { createdAt: -1 }; // "newest" / default
+                                 { createdAt: -1 }; 
 
     const pipeline = [
         { $match: match },
@@ -363,12 +365,13 @@ export const loadProductDetail = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const [product, activeOffers] = await Promise.all([
+        const [product, activeOffers,wishlistedIds] = await Promise.all([
             Product.findById(id)
                 .populate("brand",    "name brandName")
                 .populate("category", "name categoryName")
                 .lean(),
             getActiveOffers(),
+            getWishlistedIds(req),
         ]);
 
         if (!product || product.isDeleted || product.status !== "active") {
@@ -465,7 +468,8 @@ export const loadProductDetail = async (req, res) => {
             stock:    variant.stock,
             sizes:    variant.sizes || [],
             images:   variant.images || [],
-            variants: groupedVariants
+            variants: groupedVariants,
+            isWishlisted: wishlistedIds.includes(String(product._id))
         };
 
         // ── Similar products with offer pricing ───────────────────────────
@@ -493,7 +497,8 @@ export const loadProductDetail = async (req, res) => {
                 discountedPrice: sPricing.discountedPrice,
                 hasOffer:        sPricing.hasOffer,
                 discount:        sPricing.discount,
-                images:          firstVariant?.images || []
+                images:          firstVariant?.images || [],
+                isWishlisted:    wishlistedIds.includes(String(p._id))
             };
         });
 

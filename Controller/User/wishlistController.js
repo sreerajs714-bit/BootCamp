@@ -143,9 +143,6 @@ export const toggleWishlist = async (req, res) => {
     try {
         const userId = req.session?.user?.id;
         const { productId, variantId  } = req.body;
-
-        console.log("productId:", productId);
-console.log("variantId:", variantId);
  
         if (!userId) {
             return res.status(401).json({

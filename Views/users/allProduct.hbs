@@ -322,11 +322,14 @@
 
             <!-- Right: Search & Sort -->
             <div class="flex items-center justify-end pl-4">
-                <div class="refine-search-container">
-                    <input type="text" id="bar-search-input" placeholder="SEARCH PRODUCT..." oninput="applyFilters()"
-                        onkeyup="if(event.key==='Escape') toggleBarSearch()" value="{{searchQuery}}"
-                        class="w-full bg-transparent border-none outline-none text-[10px] font-black tracking-widest text-right placeholder:text-gray-300">
-                </div>
+                <div class="refine-search-container flex items-center">
+    <input type="text" id="bar-search-input" placeholder="SEARCH PRODUCT..."
+        onkeyup="if(event.key==='Escape') closeBarSearch()"
+        class="w-full bg-transparent border-none outline-none text-[10px] font-black tracking-widest text-right placeholder:text-gray-300">
+    <button onclick="closeBarSearch()" class="ml-2 shrink-0" title="Close search">
+        <span class="material-symbols-outlined text-[16px] text-gray-400 hover:text-black transition-colors">close</span>
+    </button>
+</div>
 
                 <div class="flex items-center space-x-4">
                     <button onclick="toggleBarSearch()" class="icon-btn">
@@ -396,13 +399,6 @@
         </div>
 
         <div class="flex-1 overflow-y-auto p-8 space-y-12">
-
-            <!-- Search -->
-    <div class="space-y-4">
-        <label class="text-[10px] font-black tracking-[0.2em] text-gray-400 uppercase">Search Product</label>
-        <input type="text" id="filter-search" placeholder="Enter keywords..." oninput="syncSearchAndFilter()"
-            class="w-full bg-[#f8f9fc] border-none outline-none rounded-2xl py-5 px-6 text-[14px] font-medium transition-all focus:ring-2 focus:ring-black/5">
-    </div>
 
 
             <!-- Categories -->
@@ -630,8 +626,7 @@ function toggleView(view) {
 function buildParamsFromUI() {
     const params = new URLSearchParams();
 
-    const searchQuery = (document.getElementById('bar-search-input').value
-        || document.getElementById('filter-search').value || '').trim();
+    const searchQuery = (document.getElementById('bar-search-input').value || '').trim();
     if (searchQuery) params.set('search', searchQuery);
 
     const activeSort = document.getElementById('active-sort-label').innerText.toUpperCase();
@@ -763,10 +758,25 @@ function toggleBarSearch() {
         applyFilters();
     }
 }
-function syncSearchAndFilter() {
-    document.getElementById('bar-search-input').value = document.getElementById('filter-search').value;
+
+function closeBarSearch() {
+    clearTimeout(searchDebounceTimer);
+    const bar = document.getElementById('refine-bar');
+    const input = document.getElementById('bar-search-input');
+    bar.classList.remove('search-active');
+    input.value = '';
     applyFilters();
 }
+
+let searchDebounceTimer = null;
+const SEARCH_DEBOUNCE_MS = 500;
+
+document.getElementById('bar-search-input').addEventListener('input', () => {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(() => {
+        applyFilters();
+    }, SEARCH_DEBOUNCE_MS);
+});
 
 function toggleSortDropdown() {
     document.getElementById('sort-dropdown').classList.toggle('active');
@@ -809,7 +819,6 @@ function renderFilterTags(search, sort, minP, maxP, catLabels, brandLabels) {
 
     if (search) makeTag(`"${search}"`, () => {
         document.getElementById('bar-search-input').value = '';
-        document.getElementById('filter-search').value = '';
         applyFilters();
     });
     catLabels.forEach(c => makeTag(c.label, () => {
@@ -829,7 +838,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
 
     const search = params.get('search') || '';
-    document.getElementById('filter-search').value = search;
     document.getElementById('bar-search-input').value = search;
     if (search) document.getElementById('refine-bar').classList.add('search-active');
 

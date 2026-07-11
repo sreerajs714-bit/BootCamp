@@ -430,7 +430,7 @@
             submitBtn.innerText = 'Initializing...';
 
             try {
-                const response = await axios.post(form.action, { username, email, password, referralCode });
+                const response = await axios.post(form.action, { username, email, password,cfmpassword, referralCode });
 
                 if (response.data.success || response.status === 200) {
                     submitBtn.classList.add('animate-success');

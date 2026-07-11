@@ -126,31 +126,32 @@ let offerSavings = 0;
 
         const effectiveSubtotal = subtotal - offerSavings;
 
-        // ── Coupon ────────────────────────────────────────────────────────
-        let couponDiscount = 0;
-        let appliedCoupon = null;
+// ── Coupon ────────────────────────────────────────────────────────
+let couponDiscount = 0;
+let appliedCoupon = null;
+let couponRemovedReason = null;
 
-        if (req.session.appliedCoupon) {
-            const coupon = await Coupon.findOne({
-                code: req.session.appliedCoupon,
-                isActive: true,
-                expiryDate: { $gte: new Date() },
-            }).lean();
+if (req.session.appliedCoupon) {
+    const coupon = await Coupon.findOne({
+        code: req.session.appliedCoupon,
+        isActive: true,
+        expiryDate: { $gte: new Date() },
+    }).lean();
 
-            if (coupon) {
-                couponDiscount = coupon.discountType === 'percentage'
-                    ? Math.round((effectiveSubtotal * coupon.discountValue) / 100)
-                    : coupon.discountValue;
+    if (!coupon) {
+        delete req.session.appliedCoupon;
+        couponRemovedReason = "Applied coupon is no longer valid and was removed.";
+    } else if (coupon.minOrder && effectiveSubtotal < coupon.minOrder) {
+        delete req.session.appliedCoupon;
+        couponRemovedReason = `Coupon "${coupon.code}" requires a minimum order of ₹${coupon.minOrder}. It was removed since your cart total dropped below this.`;
+    } else {
+        couponDiscount = coupon.discountType === 'percentage'
+            ? Math.round((effectiveSubtotal * coupon.discountValue) / 100)
+            : coupon.discountValue;
 
-                if (coupon.maxDiscount && couponDiscount > coupon.maxDiscount) {
-                    couponDiscount = coupon.maxDiscount;
-                }
-                appliedCoupon = coupon.code;
-            } else {
-                delete req.session.appliedCoupon;
-            }
-        }
-
+        appliedCoupon = coupon.code;
+    }
+}
         const total = Math.max(0, effectiveSubtotal - couponDiscount);
 
         // ── Addresses ─────────────────────────────────────────────────────
@@ -173,6 +174,7 @@ let offerSavings = 0;
             savings: offerSavings || null,
             couponDiscount: couponDiscount || null,
             appliedCoupon,
+            couponRemovedReason,
             walletBalance,
             walletInsufficient: walletBalance < total,
             total,
