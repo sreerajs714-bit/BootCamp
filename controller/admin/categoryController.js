@@ -1,83 +1,23 @@
-import Category from "../../model/categoryModel.js";
-import Product from "../../model/productModel.js";
+import {
+    loadCategoryService,
+    addCategoryService,
+    editCategoryService,
+    deleteCategoryService,
+    restoreCategoryService
+} from "../../services/admin/categoryService.js";
+import { statuscodes } from "../../utils/status_codes.js";
 
 export const loadCategory = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 5;
-    const skip = (page - 1) * limit;
-    const search = req.query.search || "";
-    const filterParam = req.query.filter || "all";
-    const sort = req.query.sort || "default";
+    const { page, search, filter, sort } = req.query;
 
-    let dbFilter = {};
+    const payload = await loadCategoryService({ page, search, filter, sort });
 
-    if (filterParam === "deleted") {
-      dbFilter.isDeleted = true;
-    } else if (filterParam === "active") {
-      dbFilter.isDeleted = false;
-      dbFilter.isActive = true;
-    } else if (filterParam === "inactive") {
-      dbFilter.isDeleted = false;
-      dbFilter.isActive = false;
-    } else {
-      dbFilter.isDeleted = false;
-    }
-
-    if (search) {
-      dbFilter.name = { $regex: search, $options: "i" };
-    }
-
-    
-    let sortOrder = { createdAt: -1 };
-    if (sort === "name-asc")  sortOrder = { createdAt: -1 };
-    if (sort === "name-desc") sortOrder = { createdAt: 1 };
-
-    
-    const [categories, totalCategories] = await Promise.all([
-      Category.find(dbFilter).sort(sortOrder).skip(skip).limit(limit).lean(),
-      Category.countDocuments(dbFilter),
-    ]);
-
-    
-for (let category of categories) {
-  const count = await Product.countDocuments({
-    category: category._id,
-    isDeleted: false,
-  });
-  category.productCount = count;
-}
-
-    
-    const [totalCount, activeCount, inactiveCount] = await Promise.all([
-      Category.countDocuments({ isDeleted: false }),
-      Category.countDocuments({ isDeleted: false, isActive: true }),
-      Category.countDocuments({ isDeleted: false, isActive: false }),
-    ]);
-
-    const totalPages = Math.ceil(totalCategories / limit);
-
-    res.render("admin/category", {
-      categories,
-      currentPage: page,
-      totalPages,
-      totalCount,
-      activeCount,
-      inactiveCount,
-      totalCategories,
-      search,
-      filter: filterParam,
-      sort,
-      hasPrevPage: page > 1,
-      hasNextPage: page < totalPages,
-      prevPage: page - 1,
-      nextPage: page + 1,
-      pageNumbers: Array.from({ length: totalPages }, (_, i) => i + 1),
-    });
+    return res.render("admin/category", payload);
 
   } catch (error) {
     console.error("loadCategory error:", error);
-    res.status(500).send("Internal server error");
+    return res.status(statuscodes.SERVER_ERROR).send("Internal server error");
   }
 };
 
@@ -85,52 +25,18 @@ export const addCategory = async (req, res) => {
   try {
     const { name, isActive } = req.body;
 
-    
-    if (!name || name.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        message: "Category name is required",
-      });
-    }
+    const result = await addCategoryService({ name, isActive });
 
-    
-    const existing = await Category.findOne({
-      name: { $regex: `^${name.trim()}$`, $options: "i" },
-      isDeleted: false,
-    });
-
-    if (existing) {
-      return res.status(409).json({
-        success: false,
-        message: "Category already exists",
-      });
-    }
-
-    
-    const category = new Category({
-      name: name.trim(),
-      isActive: isActive ?? true,
-    });
-
-    await category.save();
-
-    return res.status(201).json({
+    return res.status(statuscodes.CREATED).json({
       success: true,
-      message: "Category added successfully",
-      data: category,
+      ...result
     });
 
   } catch (error) {
-    if (error.code === 11000) {
-      return res.status(409).json({
-        success: false,
-        message: "Category already exists",
-      });
-    }
     console.error("addCategory error:", error);
-    return res.status(500).json({
+    return res.status(error.statusCode || statuscodes.SERVER_ERROR).json({
       success: false,
-      message: "Internal server error",
+      message: error.message || "Internal server error",
     });
   }
 };
@@ -140,59 +46,18 @@ export const editCategory = async (req, res) => {
     const { id } = req.params;
     const { name, isActive } = req.body;
 
-    
-    if (!name || name.trim() === "") {
-      return res.status(400).json({
-        success: false,
-        message: "Category name is required",
-      });
-    }
+    const result = await editCategoryService({ id, name, isActive });
 
-    
-    const existing = await Category.findOne({
-      _id: { $ne: id },
-      name: { $regex: `^${name.trim()}$`, $options: "i" },
-      isDeleted: false,
-    });
-
-    if (existing) {
-      return res.status(409).json({
-        success: false,
-        message: "Category name already exists",
-      });
-    }
-
-    
-   const updated = await Category.findByIdAndUpdate(
-    id,
-    {
-      name: name.trim(),
-      isActive,
-    },
-    {
-      returnDocument: "after",
-      runValidators: true,
-    }
-   );
-
-    if (!updated) {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found",
-      });
-    }
-
-    return res.status(200).json({
+    return res.status(statuscodes.OK).json({
       success: true,
-      message: "Category updated successfully",
-      data: updated,
+      ...result
     });
 
   } catch (error) {
     console.error("editCategory error:", error);
-    return res.status(500).json({
+    return res.status(error.statusCode || statuscodes.SERVER_ERROR).json({
       success: false,
-      message: "Internal server error",
+      message: error.message || "Internal server error",
     });
   }
 };
@@ -201,28 +66,18 @@ export const deleteCategory = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const category = await Category.findById(id);
+    const result = await deleteCategoryService(id);
 
-    if (!category) {
-      return res.status(404).json({
-        success: false,
-        message: "Category not found",
-      });
-    }
-
-    
-    await Category.findByIdAndUpdate(id, { isDeleted: true });
-
-    return res.status(200).json({
+    return res.status(statuscodes.OK).json({
       success: true,
-      message: "Category deleted successfully",
+      ...result
     });
 
   } catch (error) {
     console.error("deleteCategory error:", error);
-    return res.status(500).json({
+    return res.status(error.statusCode || statuscodes.SERVER_ERROR).json({
       success: false,
-      message: "Internal server error",
+      message: error.message || "Internal server error",
     });
   }
 };
@@ -231,20 +86,18 @@ export const restoreCategory = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const category = await Category.findByIdAndUpdate(
-      id,
-      { isDeleted: false, isActive: true },
-      {returnDocument: "after"}
-    );
+    const result = await restoreCategoryService(id);
 
-    if (!category) {
-      return res.status(404).json({ success: false, message: "Category not found" });
-    }
-
-    res.json({ success: true, message: "Category restored successfully" });
+    return res.json({
+      success: true,
+      ...result
+    });
 
   } catch (error) {
     console.error("restoreCategory error:", error);
-    res.status(500).json({ success: false, message: "Internal server error" });
+    return res.status(error.statusCode || statuscodes.SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Internal server error"
+    });
   }
 };

@@ -1,7 +1,7 @@
 // controllers/user/referralController.js
 import mongoose from "mongoose";
-import User from "../../model/userModel.js";
-import Wallet from "../../model/walletModel.js";
+import { getReferralDetails } from "../../services/user/referalService.js";
+import { statuscodes } from "../../utils/status_codes.js";
 
 
 
@@ -14,29 +14,15 @@ export const loadReferal = async (req, res) => {
             { label: "Refer & Earn" },
         ];
 
-        const user = await User.findById(userId).select('referralCode wallet name email');
-        const wallet = await Wallet.findOne({ userId });
+        const details = await getReferralDetails(userId);
 
-        if (!user) {
-            return res.redirect('/users/login');
-        }
-
-        const totalReferrals = await User.countDocuments({ referredBy: userId });
-        const totalEarned = totalReferrals * 100;
-
-        res.render('users/referal', {
-            user: {
-                referralCode: user.referralCode,
-                walletBalance: wallet?.balance || 0,
-            },
-            stats: {
-                totalReferrals,
-                totalEarned,
-            }
-        });
+        res.render('users/referal', details);
 
     } catch (error) {
         console.error('Referral page load error:', error);
-        res.status(500).render('error', { message: 'Something went wrong.' });
+        if (error.message === "User not found") {
+            return res.redirect('/users/login');
+        }
+        res.status(statuscodes.SERVER_ERROR).render('error', { message: 'Something went wrong.' });
     }
 };

@@ -1,142 +1,46 @@
-import Order from "../../model/orderModel.js";
-import Product from "../../model/productModel.js";
-import Wallet from "../../model/walletModel.js";
-
-
-function calculateItemRefund(order, itemsToRefund) {
-    const refundRawTotal = itemsToRefund.reduce((sum, item) =>
-        sum + ((item.price || 0) * (item.quantity || 1)), 0
-    );
-
-    const orderActiveTotal = order.items
-        .filter(i => i.status !== 'Cancelled')
-        .reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
-
-    if (orderActiveTotal === 0) return refundRawTotal;
-
-    const couponDiscount = order.couponDiscount || 0;
-    const proportionalCoupon = couponDiscount > 0
-        ? (refundRawTotal / orderActiveTotal) * couponDiscount
-        : 0;
-
-    return Math.round(refundRawTotal - proportionalCoupon);
-}
+import {
+    loadReturnManagementService,
+    loadReturnDetailService,
+    approveReturnService,
+    rejectReturnService,
+    schedulePickupService,
+    processRefundService
+} from "../../services/admin/returnService.js";
 
 export const loadReturnManagement = async (req, res) => {
     try {
         const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest';
         const { status = 'all', search = '', page = 1 } = req.query;
-        const ITEMS_PER_PAGE = 5;
-        const currentPage = Math.max(1, parseInt(page));
 
-        const query = { returnStatus: { $nin: ['None'] } };
-        if (status !== 'all') {
-            query.returnStatus = status;
-        }
-
-        const allReturnOrders = await Order.find(query)
-            .populate('user', 'username name email')
-            .populate('items.product', 'productName variants')
-            .lean();
-
-        let returns = allReturnOrders.map(order => {
-            const returnedItem = order.items.find(i =>
-                i.returnStatus && i.returnStatus !== 'None'
-            ) || order.items[0];
-
-            const product = returnedItem?.product;
-            const variant = product?.variants?.find(
-            v => v._id.toString() === returnedItem.variant?.toString()
-            ) || product?.variants?.find(
-            pv => pv.sizes?.some(s => s.toString() === returnedItem.size?.toString())
-            );
-            const rawImage = variant?.images?.[0];
-            const image = typeof rawImage === 'string'
-                ? rawImage : rawImage?.url || rawImage?.path || '';
-
-            return {
-                _id:       order._id,
-                requestId: order._id.toString().slice(-8).toUpperCase(),
-                user: {
-                    name:  order.user?.username || order.user?.name || 'Unknown',
-                    email: order.user?.email || ''
-                },
-                product: { name: product?.productName || 'Unknown Product', image },
-                reason:    returnedItem?.returnRequest?.reason || '—',
-                status:    order.returnStatus,
-                createdAt: order.returnRequestedAt || order.updatedAt
-            };
-        });
-
-        if (search) {
-            const q = search.toLowerCase();
-            returns = returns.filter(r =>
-                r.user.name.toLowerCase().includes(q) ||
-                r.product.name.toLowerCase().includes(q) ||
-                r.requestId.toLowerCase().includes(q) ||
-                r.reason.toLowerCase().includes(q)
-            );
-        }
-
-        returns.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-        const totalFiltered = returns.length;
-        const totalPages = Math.max(1, Math.ceil(totalFiltered / ITEMS_PER_PAGE));
-        const safePage = Math.min(currentPage, totalPages);
-        const paginated = returns.slice((safePage - 1) * ITEMS_PER_PAGE, safePage * ITEMS_PER_PAGE);
-
-        const today = new Date(); today.setHours(0, 0, 0, 0);
-        const allForStats = await Order.find({ returnStatus: { $nin: ['None'] } }).lean();
-       const stats = {
-                 pendingCount: allForStats.filter(o => o.returnStatus === 'Requested').length,
-    
-                 approvedToday: allForStats.filter(o =>
-                   o.returnApprovedAt &&
-                   new Date(o.returnApprovedAt) >= today
-                   ).length,
-    
-    rejectedToday: allForStats.filter(o =>
-        o.returnStatus === 'Rejected' &&
-        o.updatedAt &&
-        new Date(o.updatedAt) >= today
-    ).length,
-    
-    totalCount: allForStats.length
-    };
-
-        const pages = Array.from({ length: totalPages }, (_, i) => ({
-            number: i + 1,
-            isCurrent: i + 1 === safePage
-        }));
+        const payload = await loadReturnManagementService({ status, search, page });
 
         if (isAjax) {
-    return res.json({
-        success: true,
-        returns: paginated,
-        totalFiltered,
-        totalPages,
-        currentPage: safePage,
-        hasPrev: safePage > 1,
-        hasNext: safePage < totalPages,
-        prevPage: safePage - 1,
-        nextPage: safePage + 1
-    });
-    }
+            return res.json({
+                success: true,
+                returns: payload.returns,
+                totalFiltered: payload.totalFiltered,
+                totalPages: payload.totalPages,
+                currentPage: payload.currentPage,
+                hasPrev: payload.hasPrev,
+                hasNext: payload.hasNext,
+                prevPage: payload.prevPage,
+                nextPage: payload.nextPage
+            });
+        }
 
         return res.render('admin/returnManagement', {
-            returns: paginated,
-            stats,
-            
+            returns: payload.returns,
+            stats: payload.stats,
             currentStatus: status,
             currentSearch: search,
-            totalFiltered,
-            currentPage: safePage,
-            totalPages,
-            pages,
-            hasPrev: safePage > 1,
-            hasNext: safePage < totalPages,
-            prevPage: safePage - 1,
-            nextPage: safePage + 1
+            totalFiltered: payload.totalFiltered,
+            currentPage: payload.currentPage,
+            totalPages: payload.totalPages,
+            pages: payload.pages,
+            hasPrev: payload.hasPrev,
+            hasNext: payload.hasNext,
+            prevPage: payload.prevPage,
+            nextPage: payload.nextPage
         });
 
     } catch (error) {
@@ -149,93 +53,7 @@ export const loadReturnDetail = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const order = await Order.findById(id)
-            .populate('user', 'username name email')
-            .populate('items.product', 'productName variants')
-            .lean();
-
-        if (!order) return res.redirect('/admin/returns');
-
-        const itemsToShow = (order.isFullReturn === true)
-    ? order.items.filter(i => i.status !== 'Cancelled')
-    : order.items.filter(i =>
-        (i.returnStatus && i.returnStatus !== 'None') ||
-        i.status === 'Return Requested' ||
-        (i.returnRequest?.status && i.returnRequest.status !== 'None')
-      );
-
-        const products = itemsToShow.map(item => {
-            const product  = item.product;
-            const variant = product.variants.find(v => v._id.toString() === item.variant?.toString())
-            || product.variants.find(pv => pv.sizes?.some(s => s.toString() === item.size?.toString()));
-            const rawImage = variant?.images?.[0];
-            const image    = typeof rawImage === 'string'
-                ? rawImage
-                : rawImage?.url || rawImage?.path || '';
-
-            return {
-                name:      product?.productName || 'Unknown Product',
-                image,
-                quantity:  item.quantity  || 1,
-                price:     item.price     || 0,
-                size:      item.size      || '—',
-                status:    item.returnStatus || item.status || '—',
-                reason:    item.returnRequest?.reason    || order.returnRequest?.reason || '—',
-                condition: item.returnRequest?.condition || '—',
-                comments:  item.returnRequest?.comments  || order.returnRequest?.note  || '—',
-                images:    item.returnRequest?.images    || []
-            };
-        });
-
-       
-        const refundRawTotal = itemsToShow.reduce((sum, item) =>
-            sum + ((item.price || 0) * (item.quantity || 1)), 0
-        );
-
-        const orderActiveTotal = order.items
-            .filter(i => i.status !== 'Cancelled')
-            .reduce((sum, i) => sum + ((i.price || 0) * (i.quantity || 1)), 0);
-
-        const couponDiscount = order.couponDiscount || 0;
-        const proportionalCoupon = (couponDiscount > 0 && orderActiveTotal > 0)
-            ? (refundRawTotal / orderActiveTotal) * couponDiscount
-            : 0;
-
-        const totalRefund = Math.round(refundRawTotal - proportionalCoupon);
-       
-
-        const allImages = itemsToShow.flatMap(i => i.returnRequest?.images || []);
-
-        const returnRequest = {
-            _id:       order._id,
-            orderId:   order._id.toString().slice(-8).toUpperCase(),
-            status:    order.returnStatus || 'Requested',
-            createdAt: order.returnRequestedAt || order.updatedAt,
-
-            user: {
-                name:  order.user?.username || order.user?.name || 'Unknown',
-                email: order.user?.email || ''
-            },
-
-            address: {
-                city:  order.address?.city  || '',
-                state: order.address?.state || ''
-            },
-
-            products,
-            product: products[0],
-
-            reason:      products[0]?.reason    || '—',
-            condition:   products[0]?.condition || '—',
-            description: products[0]?.comments  || '—',
-
-            images:       allImages,
-            
-            refundAmount: totalRefund.toLocaleString('en-IN'),
-            
-            couponDeduction: Math.round(proportionalCoupon),
-            rawRefundAmount: refundRawTotal,
-        };
+        const returnRequest = await loadReturnDetailService(id);
 
         return res.render('admin/returnDetail', { returnRequest });
 
@@ -245,167 +63,60 @@ export const loadReturnDetail = async (req, res) => {
     }
 };
 
-
 export const approveReturn = async (req, res) => {
     try {
         const { id } = req.params;
-        const order = await Order.findById(id);
-        if (!order) return res.json({ success: false, message: 'Order not found' });
 
-        let refundAmount = 0;
+        const result = await approveReturnService(id);
 
-        order.items.forEach(item => {
-            if (item.returnStatus === 'Requested') {
-                item.returnStatus         = 'Approved';
-                item.returnRequest.status = 'Approved';
-                item.status               = 'Returned';
-                refundAmount += item.price * item.quantity;  
-            }
-        });
-
-        order.totalAmount     = Math.max(0, order.totalAmount - refundAmount);  
-        order.returnStatus     = 'Approved';
-        order.returnApprovedAt = new Date();
-        order.orderStatus      = 'Returned';
-
-        await order.save();
-        return res.json({ success: true, message: 'Return approved and refund processed' });
+        return res.json(result);
 
     } catch (error) {
         console.error('approveReturn error:', error);
-        return res.json({ success: false, message: 'Something went wrong' });
+        return res.json({ success: false, message: error.message || 'Something went wrong' });
     }
 };
-
 
 export const rejectReturn = async (req, res) => {
     try {
         const { id } = req.params;
         const { rejectionReason } = req.body;
 
-        const order = await Order.findById(id);
-        if (!order) return res.json({ success: false, message: 'Order not found' });
+        const result = await rejectReturnService({ id, rejectionReason });
 
-        order.returnStatus             = 'Rejected';
-        order.orderStatus              = 'Delivered';
-        order.returnRequest.status     = 'Rejected';
-        order.returnRequest.resolvedAt = new Date();
-        if (rejectionReason) order.returnRequest.note = rejectionReason;
-
-        order.items.forEach(item => {
-            if (item.returnStatus === 'Requested' || item.returnStatus === 'Approved') {
-                item.returnStatus         = 'Rejected';
-                item.returnRequest.status = 'Rejected';
-                item.status               = 'Active';  
-            }
-        });
-
-        
-        await order.save();
-        return res.json({ success: true, message: 'Return rejected' });
+        return res.json(result);
 
     } catch (error) {
         console.error('rejectReturn error:', error);
-        return res.json({ success: false, message: 'Something went wrong' });
+        return res.json({ success: false, message: error.message || 'Something went wrong' });
     }
 };
-
 
 export const schedulePickup = async (req, res) => {
     try {
         const { id } = req.params;
         const { pickupDate, pickupTime } = req.body;
 
-        if (!pickupDate || !pickupTime)
-            return res.json({ success: false, message: 'Pickup date and time are required' });
+        const result = await schedulePickupService({ id, pickupDate, pickupTime });
 
-        const order = await Order.findById(id);
-        if (!order) return res.json({ success: false, message: 'Order not found' });
-
-        order.returnStatus = 'Picked Up';
-        order.pickupDate   = new Date(`${pickupDate} ${pickupTime}`);
-
-        order.items.forEach(item => {
-            if (item.returnStatus === 'Approved') {
-                item.returnStatus         = 'Picked Up';
-                item.returnRequest.status = 'Picked Up';
-            }
-        });
-
-        await order.save();
-        return res.json({ success: true, message: 'Pickup scheduled' });
+        return res.json(result);
 
     } catch (error) {
         console.error('schedulePickup error:', error);
-        return res.json({ success: false, message: 'Something went wrong' });
+        return res.json({ success: false, message: error.message || 'Something went wrong' });
     }
 };
-
 
 export const processRefund = async (req, res) => {
     try {
         const { id } = req.params;
 
-        const order = await Order.findById(id).populate('items.product');
-        if (!order) return res.json({ success: false, message: 'Order not found' });
+        const result = await processRefundService(id);
 
-        
-        const stockUpdates = order.items
-            .filter(item => item.returnStatus === 'Picked Up')
-            .map(async item => {
-                const product = await Product.findById(item.product._id || item.product);
-                if (!product) return;
-                const variant = product.variants?.[0];
-                if (!variant) return;
-                variant.stock = (variant.stock || 0) + (item.quantity || 1);
-                await product.save();
-            });
-
-        await Promise.all(stockUpdates);
-
-    
-        order.items.forEach(item => {
-            if (item.returnStatus === 'Picked Up') {
-                item.returnStatus         = 'Refunded';
-                item.returnRequest.status = 'Refunded';
-                item.status               = 'Returned';
-            }
-        });
-
-      
-        order.returnStatus = 'Refunded';
-        order.orderStatus  = 'Returned';
-        order.refundedAt   = new Date();
-
-    
-        const refundedItems = order.items.filter(item => item.returnStatus === 'Refunded');
-        const refundAmount = calculateItemRefund(order, refundedItems);
-
-        await order.save();
-
-     
-        if (refundAmount > 0) {
-            let wallet = await Wallet.findOne({ userId: order.user });
-            if (!wallet) {
-                wallet = await Wallet.create({ userId: order.user, balance: 0, transactions: [] });
-            }
-
-            wallet.balance += refundAmount;
-            wallet.transactions.push({
-                transactionId: `REFUND-${order._id}-${Date.now()}`,
-                type: 'credit',
-                amount: refundAmount,
-                description: 'Order Return Refund',
-                orderId: order._id,
-                date: new Date()
-            });
-            await wallet.save();
-        }
-
-        return res.json({ success: true, message: 'Refund processed and stock restored' });
+        return res.json(result);
 
     } catch (error) {
         console.error('processRefund error:', error);
-        return res.json({ success: false, message: 'Something went wrong' });
+        return res.json({ success: false, message: error.message || 'Something went wrong' });
     }
 };

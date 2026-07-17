@@ -1,5 +1,10 @@
-import Address from "../../model/addressModel.js"
-import mongoose from "mongoose";
+import {
+    getAddressesService,
+    createAddressService,
+    updateAddressService,
+    deleteAddressService
+} from "../../services/user/addressService.js";
+import { statuscodes } from "../../utils/status_codes.js";
 
 export const loadAddress = async (req, res) => {
   try {
@@ -10,7 +15,7 @@ export const loadAddress = async (req, res) => {
       { label: 'Address' },
     ];
  
-    const addresses = await Address.find({ user: userId }).sort({ isDefault: -1, createdAt: -1 });
+    const addresses = await getAddressesService(userId);
  
     res.render('users/address', {
       addresses,
@@ -20,7 +25,7 @@ export const loadAddress = async (req, res) => {
  
   } catch (error) {
     console.error('Load address error:', error);
-    res.status(500).send('Something went wrong');
+    res.status(statuscodes.SERVER_ERROR).send('Something went wrong');
   }
 };
  
@@ -39,34 +44,21 @@ export const addAddress = async (req, res) => {
       addressType,
     } = req.body;
  
-    
     const isDefault = req.body.isDefault === true || req.body.isDefault === 'true';
- 
-    
-    const existingCount = await Address.countDocuments({ user: userId });
-    const shouldBeDefault = existingCount === 0 ? true : isDefault;
- 
-    
-    if (shouldBeDefault) {
-      await Address.updateMany({ user: userId }, { $set: { isDefault: false } });
-    }
- 
-    const newAddress = new Address({
-      user: userId,
+
+    const newAddress = await createAddressService(userId, {
       fullName,
       phoneNO,
       addressLine1,
-      addressLine2: addressLine2 || '',
+      addressLine2,
       city,
       state,
       pincode,
-      addressType: addressType || 'Home',
-      isDefault: shouldBeDefault,
+      addressType,
+      isDefault
     });
  
-    await newAddress.save();
- 
-    return res.status(201).json({
+    return res.status(statuscodes.CREATED).json({
       success: true,
       message: 'Address added successfully',
       address: newAddress,
@@ -74,7 +66,7 @@ export const addAddress = async (req, res) => {
  
   } catch (error) {
     console.error('Add address error:', error);
-    return res.status(500).json({
+    return res.status(statuscodes.SERVER_ERROR).json({
       success: false,
       message: 'Failed to add address',
       error: error.message,
@@ -85,21 +77,11 @@ export const addAddress = async (req, res) => {
 export const editAddress = async (req, res) => {
   try {
     if (!req.session?.user) {
-      return res.status(401).json({ success: false, message: 'Not authorized' });
+      return res.status(statuscodes.UNAUTHORIZED).json({ success: false, message: 'Not authorized' });
     }
  
     const { id } = req.params;
     const userId = req.session.user.id;
- 
-    
-    const existingAddress = await Address.findOne({
-      _id: new mongoose.Types.ObjectId(id),
-      user: new mongoose.Types.ObjectId(userId),
-    });
- 
-    if (!existingAddress) {
-      return res.status(404).json({ success: false, message: 'Address not found' });
-    }
  
     const {
       fullName,
@@ -112,31 +94,21 @@ export const editAddress = async (req, res) => {
       addressType,
     } = req.body;
  
-    
     const isDefault = req.body.isDefault === true || req.body.isDefault === 'true';
+
+    const updatedAddress = await updateAddressService(id, userId, {
+      fullName,
+      phoneNO,
+      addressLine1,
+      addressLine2,
+      city,
+      state,
+      pincode,
+      addressType,
+      isDefault
+    });
  
-    
-    if (isDefault) {
-      await Address.updateMany({ user: userId }, { $set: { isDefault: false } });
-    }
- 
-    const updatedAddress = await Address.findByIdAndUpdate(
-      id,
-      {
-        fullName,
-        phoneNO,
-        addressLine1,
-        addressLine2: addressLine2 || '',
-        city,
-        state,
-        pincode,
-        addressType: addressType || 'Home',
-        isDefault,
-      },
-      { returnDocument: 'after', runValidators: true }
-    );
- 
-    return res.status(200).json({
+    return res.status(statuscodes.OK).json({
       success: true,
       message: 'Address updated successfully',
       address: updatedAddress,
@@ -144,7 +116,7 @@ export const editAddress = async (req, res) => {
  
   } catch (error) {
     console.error('Edit address error:', error);
-    return res.status(500).json({
+    return res.status(statuscodes.SERVER_ERROR).json({
       success: false,
       message: 'Failed to update address',
       error: error.message,
@@ -155,38 +127,22 @@ export const editAddress = async (req, res) => {
 export const deleteAddress = async (req, res) => {
   try {
     if (!req.session?.user) {
-      return res.status(401).json({ success: false, message: 'Not authorized, please login' });
+      return res.status(statuscodes.UNAUTHORIZED).json({ success: false, message: 'Not authorized, please login' });
     }
  
     const { id } = req.params;
     const userId = req.session.user.id;
  
-    
-    const existingAddress = await Address.findOne({ _id: id, user: userId });
+    await deleteAddressService(id, userId);
  
-    if (!existingAddress) {
-      return res.status(404).json({ success: false, message: 'Address not found' });
-    }
- 
-    await Address.findByIdAndDelete(id);
- 
-    
-    if (existingAddress.isDefault) {
-      const nextAddress = await Address.findOne({ user: userId }).sort({ createdAt: -1 });
-      if (nextAddress) {
-        nextAddress.isDefault = true;
-        await nextAddress.save();
-      }
-    }
- 
-    return res.status(200).json({
+    return res.status(statuscodes.OK).json({
       success: true,
       message: 'Address deleted successfully',
     });
  
   } catch (error) {
     console.error('Delete address error:', error);
-    return res.status(500).json({
+    return res.status(statuscodes.SERVER_ERROR).json({
       success: false,
       message: 'Failed to delete address',
       error: error.message,

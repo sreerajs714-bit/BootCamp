@@ -1,12 +1,11 @@
-import Cart from "../../model/cartModel.js";
-import Wishlist from "../../model/wishlistModel.js";
+import { getNavCountsService } from "../../services/user/navService.js";
+import { statuscodes } from "../../utils/status_codes.js";
 
-
-export const getCounts= async (req, res) => {
+export const getCounts = async (req, res) => {
     try {
         if (!req.session.user) {
-        return res.status(200).json({ cartCount: 0, wishlistCount: 0 });
-    }
+            return res.status(statuscodes.OK).json({ cartCount: 0, wishlistCount: 0 });
+        }
 
         const userId = req.session.user?._id || req.session.user?.id;
         
@@ -14,15 +13,9 @@ export const getCounts= async (req, res) => {
             return res.json({ success: true, cartCount: 0, wishlistCount: 0 });
         }
 
-        const [cart, wishlist] = await Promise.all([
-            Cart.findOne({ userId }).lean(),
-            Wishlist.findOne({ userId }).lean(),
-        ]);
+        const counts = await getNavCountsService(userId);
 
-        const cartCount = cart?.items?.reduce((sum, i) => sum + (i.quantity || 1), 0) ?? 0;
-        const wishlistCount = wishlist?.products?.length ?? 0;
-
-        return res.json({ success: true, cartCount, wishlistCount });
+        return res.json({ success: true, ...counts });
 
     } catch (err) {
         console.error('getCounts error:', err);
