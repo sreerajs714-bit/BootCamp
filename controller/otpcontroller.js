@@ -36,7 +36,7 @@ export const verifyOTP = async (req, res) => {
 
         const otpRecord = await OTP.findOne({ email, purpose });
 
-        // OTP NOT FOUND
+        
         if (!otpRecord) {
             return res.status(400).json({
                 success: false,
@@ -44,7 +44,7 @@ export const verifyOTP = async (req, res) => {
             });
         }
 
-        // CHECK EXPIRY
+       
         if (otpRecord.expiresAt < Date.now()) {
             await OTP.deleteOne({ _id: otpRecord._id });
             return res.status(400).json({
@@ -53,7 +53,7 @@ export const verifyOTP = async (req, res) => {
             });
         }
 
-        // VERIFY OTP
+       
         const isMatch = await bcrypt.compare(otp, otpRecord.otp);
 
         if (!isMatch) {
@@ -65,7 +65,7 @@ export const verifyOTP = async (req, res) => {
 
         await OTP.deleteOne({ _id: otpRecord._id });
 
-        //  REGISTER 
+       
 
        if (purpose === "register") {
 
@@ -92,7 +92,7 @@ export const verifyOTP = async (req, res) => {
         }
     }
 
-    // Generate unique referral code for new user
+   
     let myReferralCode;
     let exists = true;
     while (exists) {
@@ -110,9 +110,9 @@ export const verifyOTP = async (req, res) => {
 
     await newUser.save();
 
-    // ── Referral Reward on Signup ────────────────────────────
+    
     if (referrer) {
-        // Credit referrer ₹100
+        
         let referrerWallet = await Wallet.findOne({ userId: referrer._id });
         if (!referrerWallet) {
             referrerWallet = new Wallet({ userId: referrer._id, balance: 0, transactions: [] });
@@ -126,7 +126,7 @@ export const verifyOTP = async (req, res) => {
         });
          await User.findByIdAndUpdate(newUser._id, { referralRewardGiven: true })
 
-        // Credit new user ₹50
+        
         let userWallet = await Wallet.findOne({ userId: newUser._id });
         if (!userWallet) {
             userWallet = new Wallet({ userId: newUser._id, balance: 0, transactions: [] });
@@ -144,7 +144,7 @@ export const verifyOTP = async (req, res) => {
         newUser.referralRewardGiven = true;
         await newUser.save();
     }
-    // ─────────────────────────────────────────────────────────
+    
 
     req.session.user = {
         id: newUser._id,
@@ -163,7 +163,7 @@ export const verifyOTP = async (req, res) => {
         redirectUrl: "/users/home"
     });
   }
-        //  RESET PASSWORD 
+        
         if (purpose === "reset") {
             req.session.resetVerified = true;
             req.session.otpEmail = email;
@@ -184,7 +184,7 @@ export const verifyOTP = async (req, res) => {
             return;
         }
 
-        // CHANGE EMAIL
+        
         if (purpose === "changeEmail") {
 
             const userId = req.session.user.id;
@@ -235,10 +235,10 @@ export const resendOTP = async (req, res) => {
 
     const hashedOTP = await bcrypt.hash(otp, 10);
 
-    // Delete old OTPs
+    
     await OTP.deleteMany({ email, purpose });
 
-    // Save new OTP
+   
     await OTP.create({
       email,
       otp: hashedOTP,
@@ -254,7 +254,7 @@ export const resendOTP = async (req, res) => {
     });
 
   } catch (err) {
-
+    console.log(err)
     return res.status(500).json({
       success: false,
       message: "Failed to resend OTP"

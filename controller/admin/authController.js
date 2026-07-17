@@ -1,13 +1,8 @@
 import Admin from "../../model/adminModel.js"
 import Order from "../../model/orderModel.js";
 import Product from "../../model/productModel.js";
-import Category from "../../model/categoryModel.js";
 import User from "../../model/userModel.js";
 import bcrypt from "bcrypt";
-import { generateOTP } from "../service/mail.js";
-import { sendOTPEmail } from "../service/mail.js";
-import { growthAnalysis, buildChartData, buildCouponUsage, fmtDate, getDateRange} from "../../utils/salesReport.js"
-
 
 
 
@@ -16,7 +11,7 @@ export const loadLogin = async (req, res) => {
     if (req.session.admin) {
       return res.redirect('/admin/dashboard');
     }
-    res.render('admin/login'); // renders your login.ejs / login.html
+    res.render('admin/login'); 
   } catch (error) {
     console.error('loadLogin error:', error);
     res.status(500).send('Server Error');
@@ -304,7 +299,7 @@ export const adminLogout = async (req, res) => {
                 return res.redirect('/admin/dashboard');
             }
 
-            // CLEAR COOKIE
+            
             res.clearCookie('admin.sid');
 
             return res.redirect('/admin/');

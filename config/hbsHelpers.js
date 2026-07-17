@@ -1,9 +1,7 @@
-import { fileURLToPath } from "url";
 import path from "path";
 import hbs from "hbs"
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+
 
 export const registerHbsHelpers = () => {
 

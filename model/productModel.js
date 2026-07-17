@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-//varient schema
 
 const variantSchema = new mongoose.Schema({
 
@@ -60,7 +59,7 @@ const variantSchema = new mongoose.Schema({
 }, { _id: true });
 
 
-//product schema 
+
 
 const productSchema = new mongoose.Schema({
 

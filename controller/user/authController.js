@@ -1,10 +1,7 @@
 import User from "../../model/userModel.js";
 import Product from "../../model/productModel.js";
-import Brand from "../../model/brandModel.js";
-import Category from "../../model/categoryModel.js";
 import Cart from "../../model/cartModel.js";
 import Wishlist from "../../model/wishlistModel.js";
-import session from "express-session";
 import { generateOTP }  from "../service/mail.js";
 import { sendOTPEmail } from "../service/mail.js";
 import OTP from "../../model/otpModel.js"
@@ -82,7 +79,7 @@ export const registerUser = async (req, res) => {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // Check existing user
+    
     const existingUser = await User.findOne({ email: cleanEmail });
 
     if (existingUser) {
@@ -92,7 +89,7 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // Hash password
+   
     const hashedPassword = await bcrypt.hash(password, saltround);
 
     // Save session data
@@ -106,14 +103,14 @@ export const registerUser = async (req, res) => {
     req.session.otpEmail = cleanEmail;
     req.session.otpPurpose = "register";
 
-    // Generate OTP
+   
     const otp = generateOTP();
     const hashedOTP = await bcrypt.hash(otp, 10);
 
-    // Remove old OTPs
+    
     await OTP.deleteMany({ email: cleanEmail, purpose: "register" });
 
-    // Save OTP
+    
     await OTP.create({
       email: cleanEmail,
       otp: hashedOTP,
@@ -136,6 +133,8 @@ export const registerUser = async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error);
+
     return res.status(500).json({
       success: false,
       message: "Something went wrong. Please try again."
@@ -202,7 +201,7 @@ export const loadHome = async (req, res) => {
         .populate("category", "name")
         .lean(),
 
-      // only query if logged in, otherwise resolve null
+      
       userId
         ? Wishlist.findOne({ userId }).lean()
         : Promise.resolve(null),
@@ -210,14 +209,14 @@ export const loadHome = async (req, res) => {
       getActiveOffers(),
     ]);
 
-    // ── build a Set of wishlisted IDs for fast lookup ──
+    
     const wishlistSet = new Set(
       wishlist?.products?.map((item) =>
         item.productId ? item.productId.toString() : item.toString()
       ) || []
     );
 
-    // ── Real cart count from DB ──
+    
     let cartCount = 0;
     if (userId) {
       const cart = await Cart.findOne({ userId }).lean();
@@ -244,7 +243,7 @@ export const loadHome = async (req, res) => {
 
       const rawPrice = variant?.price || 0;
 
-      // ── Offer pricing ──
+      
       const pricing = calculateOfferPrice(rawPrice, p, activeOffers);
 
       return {
@@ -332,7 +331,7 @@ export const resetPassword = async (req, res) => {
       return res.json({ 
         success: true, 
         message: "OTP sent",
-        redirect: "/users/otpVerify"   // frontend will use this to navigate
+        redirect: "/users/otpVerify"   
       });
     });
 
@@ -397,7 +396,7 @@ export const setNew = async (req, res) => {
     user.password = hashedPassword;
     await user.save();
 
-    // Clear session
+    
     req.session.resetVerified = null;
     req.session.otpEmail = null;
     req.session.otpPurpose = null;

@@ -1,6 +1,5 @@
 import Order from "../../model/orderModel.js";
 import Product from "../../model/productModel.js";
-import User from "../../model/userModel.js";
 import Wallet from "../../model/walletModel.js";
 
 
@@ -188,7 +187,7 @@ export const loadReturnDetail = async (req, res) => {
             };
         });
 
-        // ── Proportional coupon deduction ────────────────────
+       
         const refundRawTotal = itemsToShow.reduce((sum, item) =>
             sum + ((item.price || 0) * (item.quantity || 1)), 0
         );
@@ -203,7 +202,7 @@ export const loadReturnDetail = async (req, res) => {
             : 0;
 
         const totalRefund = Math.round(refundRawTotal - proportionalCoupon);
-        // ────────────────────────────────────────────────────
+       
 
         const allImages = itemsToShow.flatMap(i => i.returnRequest?.images || []);
 
@@ -231,9 +230,9 @@ export const loadReturnDetail = async (req, res) => {
             description: products[0]?.comments  || '—',
 
             images:       allImages,
-            // ── Now shows coupon-adjusted refund ──
+            
             refundAmount: totalRefund.toLocaleString('en-IN'),
-            // Pass breakdown for display if needed
+            
             couponDeduction: Math.round(proportionalCoupon),
             rawRefundAmount: refundRawTotal,
         };
@@ -246,7 +245,7 @@ export const loadReturnDetail = async (req, res) => {
     }
 };
 
-// 1. APPROVE
+
 export const approveReturn = async (req, res) => {
     try {
         const { id } = req.params;
@@ -260,11 +259,11 @@ export const approveReturn = async (req, res) => {
                 item.returnStatus         = 'Approved';
                 item.returnRequest.status = 'Approved';
                 item.status               = 'Returned';
-                refundAmount += item.price * item.quantity;  // ← accumulate refund
+                refundAmount += item.price * item.quantity;  
             }
         });
 
-        order.totalAmount     = Math.max(0, order.totalAmount - refundAmount);  // ← deduct
+        order.totalAmount     = Math.max(0, order.totalAmount - refundAmount);  
         order.returnStatus     = 'Approved';
         order.returnApprovedAt = new Date();
         order.orderStatus      = 'Returned';
@@ -278,7 +277,7 @@ export const approveReturn = async (req, res) => {
     }
 };
 
-// 2. REJECT
+
 export const rejectReturn = async (req, res) => {
     try {
         const { id } = req.params;
@@ -297,11 +296,11 @@ export const rejectReturn = async (req, res) => {
             if (item.returnStatus === 'Requested' || item.returnStatus === 'Approved') {
                 item.returnStatus         = 'Rejected';
                 item.returnRequest.status = 'Rejected';
-                item.status               = 'Active';  // restore item to active
+                item.status               = 'Active';  
             }
         });
 
-        // totalAmount stays untouched on rejection
+        
         await order.save();
         return res.json({ success: true, message: 'Return rejected' });
 
@@ -311,7 +310,7 @@ export const rejectReturn = async (req, res) => {
     }
 };
 
-// 3. SCHEDULE PICKUP
+
 export const schedulePickup = async (req, res) => {
     try {
         const { id } = req.params;
@@ -342,7 +341,7 @@ export const schedulePickup = async (req, res) => {
     }
 };
 
-// 4. MARK PICKED UP & PROCESS REFUND
+
 export const processRefund = async (req, res) => {
     try {
         const { id } = req.params;
@@ -350,7 +349,7 @@ export const processRefund = async (req, res) => {
         const order = await Order.findById(id).populate('items.product');
         if (!order) return res.json({ success: false, message: 'Order not found' });
 
-        // Step 1: Restore stock
+        
         const stockUpdates = order.items
             .filter(item => item.returnStatus === 'Picked Up')
             .map(async item => {
@@ -364,7 +363,7 @@ export const processRefund = async (req, res) => {
 
         await Promise.all(stockUpdates);
 
-        // Step 2: Update item statuses
+    
         order.items.forEach(item => {
             if (item.returnStatus === 'Picked Up') {
                 item.returnStatus         = 'Refunded';
@@ -373,18 +372,18 @@ export const processRefund = async (req, res) => {
             }
         });
 
-        // Step 3: Update order status
+      
         order.returnStatus = 'Refunded';
         order.orderStatus  = 'Returned';
         order.refundedAt   = new Date();
 
-        // Step 4: Calculate refund amount with coupon deduction
+    
         const refundedItems = order.items.filter(item => item.returnStatus === 'Refunded');
         const refundAmount = calculateItemRefund(order, refundedItems);
 
         await order.save();
 
-        // Step 5: Credit wallet
+     
         if (refundAmount > 0) {
             let wallet = await Wallet.findOne({ userId: order.user });
             if (!wallet) {

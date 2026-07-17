@@ -1,6 +1,3 @@
-import User from "../model/userModel.js";
-import Order from "../model/orderModel.js";
-
 
 export function getDateRange(period, startDate, endDate) {
   const now = new Date();

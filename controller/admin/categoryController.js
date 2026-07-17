@@ -10,7 +10,6 @@ export const loadCategory = async (req, res) => {
     const filterParam = req.query.filter || "all";
     const sort = req.query.sort || "default";
 
-    // ── Build the query filter ──────────────────────────────────
     let dbFilter = {};
 
     if (filterParam === "deleted") {
@@ -29,18 +28,18 @@ export const loadCategory = async (req, res) => {
       dbFilter.name = { $regex: search, $options: "i" };
     }
 
-    // ── Build the sort order ────────────────────────────────────
+    
     let sortOrder = { createdAt: -1 };
     if (sort === "name-asc")  sortOrder = { createdAt: -1 };
     if (sort === "name-desc") sortOrder = { createdAt: 1 };
 
-    // ── Fetch paginated categories ──────────────────────────────
+    
     const [categories, totalCategories] = await Promise.all([
       Category.find(dbFilter).sort(sortOrder).skip(skip).limit(limit).lean(),
       Category.countDocuments(dbFilter),
     ]);
 
-    // ── Attach product count to each category ───────────────────
+    
 for (let category of categories) {
   const count = await Product.countDocuments({
     category: category._id,
@@ -49,7 +48,7 @@ for (let category of categories) {
   category.productCount = count;
 }
 
-    // ── Stats cards ─────────────────────────────────────────────
+    
     const [totalCount, activeCount, inactiveCount] = await Promise.all([
       Category.countDocuments({ isDeleted: false }),
       Category.countDocuments({ isDeleted: false, isActive: true }),
@@ -86,7 +85,7 @@ export const addCategory = async (req, res) => {
   try {
     const { name, isActive } = req.body;
 
-     // 1. Presence check ← THIS IS MISSING
+    
     if (!name || name.trim() === "") {
       return res.status(400).json({
         success: false,
@@ -94,7 +93,7 @@ export const addCategory = async (req, res) => {
       });
     }
 
-    // 2. Duplicate check (case-insensitive)
+    
     const existing = await Category.findOne({
       name: { $regex: `^${name.trim()}$`, $options: "i" },
       isDeleted: false,
@@ -107,7 +106,7 @@ export const addCategory = async (req, res) => {
       });
     }
 
-    // 3. Save
+    
     const category = new Category({
       name: name.trim(),
       isActive: isActive ?? true,
@@ -141,7 +140,7 @@ export const editCategory = async (req, res) => {
     const { id } = req.params;
     const { name, isActive } = req.body;
 
-    // 1. Presence check
+    
     if (!name || name.trim() === "") {
       return res.status(400).json({
         success: false,
@@ -149,7 +148,7 @@ export const editCategory = async (req, res) => {
       });
     }
 
-    // 2. Duplicate check — exclude current category from check
+    
     const existing = await Category.findOne({
       _id: { $ne: id },
       name: { $regex: `^${name.trim()}$`, $options: "i" },
@@ -163,7 +162,7 @@ export const editCategory = async (req, res) => {
       });
     }
 
-    // 3. Update
+    
    const updated = await Category.findByIdAndUpdate(
     id,
     {
@@ -211,7 +210,7 @@ export const deleteCategory = async (req, res) => {
       });
     }
 
-    // Soft delete — just sets isDeleted to true
+    
     await Category.findByIdAndUpdate(id, { isDeleted: true });
 
     return res.status(200).json({

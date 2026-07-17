@@ -158,7 +158,7 @@ export const toggleWishlist = async (req, res) => {
             });
         }
  
-        // Check product exists and is active
+        
         const product = await Product.findById(productId).lean();
  
         if (!product || product.isDeleted || product.status !== 'active') {
@@ -179,7 +179,7 @@ export const toggleWishlist = async (req, res) => {
         );
  
         if (existingIndex > -1) {
-            // Already wishlisted — remove it
+           
             wishlist.products.splice(existingIndex, 1);
             await wishlist.save();
  
@@ -190,7 +190,7 @@ export const toggleWishlist = async (req, res) => {
             });
  
         } else {
-            // Not wishlisted — add it
+            
             const variant = product.variants?.find(
                  v => String(v._id) === String(variantId)
                 );
@@ -264,7 +264,7 @@ export const clearWishlist = async (req, res) => {
       req.session?.user?._id ||
       req.user?._id;
 
-       const result= await Wishlist.findOneAndUpdate(
+     await Wishlist.findOneAndUpdate(
             { userId },
             { $set: { products: [] } }
         );

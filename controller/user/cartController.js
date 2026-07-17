@@ -1,5 +1,4 @@
 import Product from "../../model/productModel.js";
-import User from "../../model/userModel.js";
 import Cart from "../../model/cartModel.js";
 import Wishlist from "../../model/wishlistModel.js";
 
@@ -10,7 +9,7 @@ export const loadCart = async (req, res) => {
     try {
         const userId = req.session?.user?.id;
 
-        // NEW — pick up any stock notice left by loadCheckout, then clear it
+       
         const cartNotice = req.session.cartNotice || null;
         delete req.session.cartNotice;
 
@@ -39,7 +38,7 @@ export const loadCart = async (req, res) => {
                 total: 0,
                 savings: 0,
                 bagCount: 0,
-                cartNotice // NEW — also needed in the empty-cart branch
+                cartNotice 
             });
         }
 
@@ -99,7 +98,7 @@ export const loadCart = async (req, res) => {
             total,
             savings,
             bagCount: cartItems.filter(i => !i.isUnavailable).length,
-            cartNotice // NEW
+            cartNotice 
         });
 
     } catch (err) {
@@ -150,11 +149,11 @@ export const addToCart = async (req, res) => {
         }
 
        
-        // GUEST CART
+       
         if (!userId) {
             if (!req.session.cart) req.session.cart = [];
 
-            // Cart limit check
+            
             if (req.session.cart.length >= 10) {
                 return res.status(400).json({
                     success: false,
@@ -196,7 +195,7 @@ export const addToCart = async (req, res) => {
             });
         }
 
-        // USER CART
+       
      
         let cart = await Cart.findOne({ userId });
 
@@ -204,7 +203,7 @@ export const addToCart = async (req, res) => {
             cart = new Cart({ userId, items: [] });
         }
 
-        // Cart limit check
+        
         if (cart.items.length >= 10) {
             return res.status(400).json({
                 success: false,
@@ -240,7 +239,7 @@ export const addToCart = async (req, res) => {
 
         await cart.save();
 
-        // Remove from wishlist if present
+       
         await Wishlist.updateOne(
             { userId },
             { $pull: { products: { productId } } }
@@ -288,7 +287,7 @@ export const removeFromCart = async (req, res) => {
         const userId = req.session?.user?.id || null;
         const { itemId, productId, variantId, size } = req.body;
 
-        // GUEST CART
+       
         if (!userId) {
 
             if (!req.session.cart) {
@@ -319,7 +318,7 @@ export const removeFromCart = async (req, res) => {
             });
         }
 
-        // USER CART
+       
         const cart = await Cart.findOne({ userId });
 
         if (!cart) {

@@ -8,12 +8,12 @@ export function validateProductPayload(body) {
     color, sku, price, stock, sizes,
   } = body;
 
-  // ── Required fields ────────────────────────────────
+  
   if (!productName || !description || !category || !brand || !color || !sku || !price || !stock) {
     return { error: "All required fields must be filled." };
   }
 
-  // ── Product Name ─────────────────────────────────────
+  
   const trimmedName = productName.trim();
   if (trimmedName.length < 4) {
     return { error: "Product name must be at least 4 characters." };
@@ -28,7 +28,7 @@ export function validateProductPayload(body) {
     return { error: "Product name contains invalid characters." };
   }
 
-  // ── Description ───────────────────────────────────────
+  
   const trimmedDescription = description.trim();
   if (trimmedDescription.length < 20) {
     return { error: "Description must be at least 20 characters." };
@@ -37,7 +37,7 @@ export function validateProductPayload(body) {
     return { error: "Description cannot exceed 1000 characters." };
   }
 
-  // ── Color — letters only ─────────────────────────────
+  
   const trimmedColor = color.trim();
   if (trimmedColor.length < 3) {
     return { error: "Color must be at least 3 characters." };
@@ -49,7 +49,7 @@ export function validateProductPayload(body) {
     return { error: "Color must contain letters only (no numbers or symbols)." };
   }
 
-  // ── SKU — letters only ────────────────────────────────
+  
   const trimmedSku = sku.trim();
   if (trimmedSku.length < 4) {
     return { error: "SKU must be at least 4 characters." };
@@ -61,7 +61,7 @@ export function validateProductPayload(body) {
     return { error: "SKU must contain letters only (no numbers, spaces, or symbols)." };
   }
 
-  // ── Price ──────────────────────────────────────────────
+  
   const numPrice = Number(price);
   if (isNaN(numPrice) || numPrice <= 0) {
     return { error: "Price must be a positive number." };
@@ -70,7 +70,7 @@ export function validateProductPayload(body) {
     return { error: "Price cannot exceed ₹99,999." };
   }
 
-  // ── Stock ──────────────────────────────────────────────
+  
   const numStock = Number(stock);
   if (isNaN(numStock) || !Number.isInteger(numStock) || numStock < 0) {
     return { error: "Stock cannot be negative." };
@@ -79,7 +79,7 @@ export function validateProductPayload(body) {
     return { error: "Stock cannot exceed 9,999 units." };
   }
 
-  // ── Sizes ────────────────────────────────────────────
+  
   if (!sizes || (Array.isArray(sizes) && sizes.length === 0)) {
     return { error: "Please select at least one size." };
   }

@@ -23,17 +23,17 @@ export const loadOrders = async (req, res) => {
     if (isValidId) {
         filter._id = search;
     } else {
-        // Search users by username
+        
         const matchingUsers = await User.find({
             username: { $regex: search, $options: 'i' }
         }).select('_id').lean();
 
-        // FIX: Search products by name
+        
         const matchingProducts = await Product.find({
             productName: { $regex: search, $options: 'i' }
         }).select('_id').lean();
 
-        // Find orders that contain matching products
+        
         const ordersWithProduct = await Order.find({
             'items.product': { $in: matchingProducts.map(p => p._id) }
         }).select('_id').lean();
@@ -194,7 +194,7 @@ export const updateOrderStatus = async (req, res) => {
             return res.status(400).json({ success: false, message: "Order is already cancelled" });
         }
 
-        // ── Admin Cancelling the Order ──────────────────────────
+        
         if (status === "Cancelled") {
             const itemsToCancel = order.items.filter(i => i.status === 'Active');
             const refundAmount = calculateItemRefund(order, itemsToCancel);

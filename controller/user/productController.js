@@ -1,5 +1,4 @@
 import Product from "../../model/productModel.js";
-import User from "../../model/userModel.js";
 import Category from "../../model/categoryModel.js";
 import Brand from "../../model/brandModel.js";
 import Wishlist from "../../model/wishlistModel.js";
@@ -36,14 +35,14 @@ function shapeProduct(product, wishlistedIds, activeOffers) {
 
     const originalPrice = variant?.price || 0;
 
-    // ── Offer pricing ──────────────────────────────────────────────────────
+   
     const pricing = calculateOfferPrice(originalPrice, product, activeOffers);
 
     return {
         id:             product._id,
         productName:    product.productName,
         brand:          brandName,
-        category:       product.category,
+        category:       categoryName,
         badge:          product.isLimitedEdition ? "LIMITED" : "STANDARD",
         rawPrice:       originalPrice,
         discountedPrice: pricing.discountedPrice,
@@ -205,7 +204,7 @@ async function getPaginatedProducts(baseMatch, query, { categoryName } = {}) {
     const totalCount   = result.totalCount[0]?.count || 0;
     const totalPages   = Math.max(1, Math.ceil(totalCount / PRODUCTS_PER_PAGE));
 
-    // Aggregation doesn't populate refs — do it in one extra step on the page slice only.
+    
     const products = await Product.populate(rawProducts, [
         { path: "brand",    select: "name" },
         { path: "category", select: "name" }
@@ -395,10 +394,9 @@ export const loadProductDetail = async (req, res) => {
             product.category?.categoryName ||
             "Unknown Category";
 
-        // ── Offer pricing for the default variant ─────────────────────────
+        
         const pricing = calculateOfferPrice(variant.price, product, activeOffers);
 
-        // ── Group variants by color ───────────────────────────────────────
         const groups = {};
         product.variants
             .filter(v => v.isActive)
@@ -406,7 +404,7 @@ export const loadProductDetail = async (req, res) => {
                 const colorKey = (v.color || 'default').toLowerCase().trim();
                 const sizes    = (v.sizes || []).map(s => String(s));
 
-                // Offer price per variant
+               
                 const vPricing = calculateOfferPrice(v.price, product, activeOffers);
 
                 if (!groups[colorKey]) {
@@ -472,7 +470,7 @@ export const loadProductDetail = async (req, res) => {
             isWishlisted: wishlistedIds.includes(String(product._id))
         };
 
-        // ── Similar products with offer pricing ───────────────────────────
+       
         const similarProductsRaw = await Product.find({
             _id:       { $ne: product._id },
             category:  product.category._id,

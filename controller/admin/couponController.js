@@ -8,7 +8,7 @@ export const loadCoupon = async (req, res) => {
     const LIMIT = 5;
     const currentPage = Math.max(1, parseInt(page));
 
-    // ── Filter ──────────────────────────────────────────
+    
     const filter = {};
     if (search.trim()) {
       filter.code = { $regex: search.trim(), $options: "i" };
@@ -16,14 +16,14 @@ export const loadCoupon = async (req, res) => {
     if (status === "active") filter.isActive = true;
     else if (status === "inactive") filter.isActive = false;
 
-    // ── Sort ────────────────────────────────────────────
+    
     let sortOption = { createdAt: -1 };
     if (sort === "newest") sortOption = { createdAt: -1 };
     else if (sort === "oldest") sortOption = { createdAt: 1 };
     else if (sort === "az") sortOption = { code: 1 };
     else if (sort === "za") sortOption = { code: -1 };
 
-    // ── Pagination ──────────────────────────────────────
+    
     const totalFiltered = await Coupon.countDocuments(filter);
     const totalPages = Math.ceil(totalFiltered / LIMIT);
     const skip = (currentPage - 1) * LIMIT;
@@ -34,7 +34,7 @@ export const loadCoupon = async (req, res) => {
       .limit(LIMIT)
       .lean();
 
-    // ── Stats ────────────────────────────────────────────
+    
     const [total, active] = await Promise.all([
       Coupon.countDocuments(),
       Coupon.countDocuments({ isActive: true }),
@@ -58,7 +58,7 @@ export const loadCoupon = async (req, res) => {
       },
     };
 
-    // ── AJAX request → return JSON, page load → render HTML ──
+    
     const isAjax = req.headers['x-requested-with'] === 'XMLHttpRequest';
     if (isAjax) {
       return res.json(payload);
@@ -129,7 +129,7 @@ export const updateCoupon = async (req, res) => {
       parsedStart, parsedEnd,
     } = validation.data;
 
-    // Duplicate check (exclude self)
+    
     const existing = await Coupon.findOne({ code: upperCode, _id: { $ne: req.params.id } });
     if (existing) {
       return res.status(409).json({ success: false, message: "Coupon code already exists" });

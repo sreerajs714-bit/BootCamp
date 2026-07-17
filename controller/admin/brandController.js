@@ -27,8 +27,6 @@ export const loadBrand = async (req, res) => {
             dbFilter.isActive = false;
         } else if (filter === "deleted") {
             dbFilter.isDeleted = true;
-        } else {
-            
         }
 
        
@@ -127,7 +125,7 @@ export const addBrand = async (req, res) => {
             });
         }
 
-        // Create new
+       
         const newBrand = new Brand({
             name,
             isActive,
@@ -164,7 +162,7 @@ export const editBrand = async (req, res) => {
 
         name = name.trim();
 
-        // Duplicate check
+    
         const existingBrand = await Brand.findOne({
             _id: { $ne: id },
             name: { $regex: `^${name}$`, $options: "i" },
@@ -211,7 +209,7 @@ export const deleteBrand = async (req, res) => {
             });
         }
 
-        // Soft delete
+       
         brand.isDeleted = true;
         brand.isActive = false;
 
@@ -224,7 +222,6 @@ export const deleteBrand = async (req, res) => {
 
     } catch (error) {
         console.log("Delete Brand Error:", error);
-          -- add .message
     console.log("Error name:", error.name); 
 
         res.status(500).json({

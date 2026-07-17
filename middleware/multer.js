@@ -9,7 +9,7 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// ── Profile storage (disk) ───────────────────────────────────
+
 const profileStorage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, "public/uploads/profiles"),
     filename: (req, file, cb) => {
@@ -18,7 +18,7 @@ const profileStorage = multer.diskStorage({
     }
 });
 
-// ── Product storage (Cloudinary) ─────────────────────────────
+
 const productStorage = new CloudinaryStorage({
     cloudinary,
     params: {

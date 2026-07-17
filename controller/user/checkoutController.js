@@ -41,14 +41,14 @@ export const loadCheckout = async (req, res) => {
             return res.redirect('/users/cart');
         }
 
-        // Filter invalid/deleted items
+        
 const cartItems = cart.items.filter(
     (item) => item.productId && !item.productId.isDeleted
 );
 
 if (cartItems.length === 0) return res.redirect('/users/cart');
 
-// ── Stock validation (before checkout) ──────────────────────────────────
+
 const stockIssues = [];
 const validItems = [];
 
@@ -75,7 +75,7 @@ for (const item of cartItems) {
             { userId, 'items._id': item._id },
             { $set: { 'items.$.quantity': variant.stock } }
         );
-        item.quantity = variant.stock; // so pricing below reflects the new qty
+        item.quantity = variant.stock; 
     }
 
     validItems.push(item);
@@ -86,21 +86,21 @@ if (stockIssues.length > 0) {
     return res.redirect('/users/cart');
 }
 
-// ── Price breakdown ───────────────────────────────────────────────────
+
 let subtotal = 0;
 let offerSavings = 0;
 
         const enrichedItems = validItems.map((item) => {
             const product = item.productId;
 
-            // Find the matching variant using variantId from cart
+           
             const variant = product.variants.find(
                 (v) => v._id.toString() === item.variantId.toString()
             );
 
             const originalPrice = variant?.price ?? item.price ?? 0;
 
-            // ── Offer pricing ──
+            
             const pricing = calculateOfferPrice(originalPrice, product, activeOffers);
             const finalPrice = pricing.hasOffer ? pricing.discountedPrice : originalPrice;
 
@@ -126,7 +126,7 @@ let offerSavings = 0;
 
         const effectiveSubtotal = subtotal - offerSavings;
 
-// ── Coupon ────────────────────────────────────────────────────────
+
 let couponDiscount = 0;
 let appliedCoupon = null;
 let couponRemovedReason = null;
@@ -154,11 +154,11 @@ if (req.session.appliedCoupon) {
 }
         const total = Math.max(0, effectiveSubtotal - couponDiscount);
 
-        // ── Addresses ─────────────────────────────────────────────────────
+       
         const addresses = await Address.find({ user: userId }).lean();
         const defaultAddress = addresses.find((a) => a.isDefault) || addresses[0] || null;
 
-        // ── Wallet ────────────────────────────────────────────────────────
+        
         const wallet = await Wallet.findOne({ userId });
         const walletBalance = wallet?.balance || 0;
 
@@ -229,7 +229,7 @@ export const placeOrder = async (req, res) => {
             if (!product || product.isDeleted) continue;
 
         const variant = product.variants.find(
-        v => v._id.toString() === item.variantId.toString()   // ← cart items use variantId, not variant
+        v => v._id.toString() === item.variantId.toString()   
         );                                                        
 
             if (!variant) {
@@ -242,7 +242,7 @@ export const placeOrder = async (req, res) => {
 
             const originalPrice = variant.price;
 
-            // ── Offer pricing ──
+          
             const pricing = calculateOfferPrice(originalPrice, product, activeOffers);
             const finalPrice = pricing.hasOffer ? pricing.discountedPrice : originalPrice;
 
@@ -261,11 +261,11 @@ export const placeOrder = async (req, res) => {
 
         const effectiveSubtotal = subtotal - offerSavings;
 
-        // ── Apply coupon ──────────────────────────────────────────────────
+      
         let couponDiscount = 0;
         let appliedCoupon = null;
 
-        // Use session coupon OR coupon sent from frontend
+        
         const couponToApply = req.session.appliedCoupon || couponCode;
 
         if (couponToApply) {
@@ -276,7 +276,7 @@ export const placeOrder = async (req, res) => {
             });
 
             if (coupon) {
-                // Check min order
+               
                 if (coupon.minOrder && effectiveSubtotal < coupon.minOrder) {
                     return res.status(400).json({
                         success: false,
@@ -284,7 +284,7 @@ export const placeOrder = async (req, res) => {
                     });
                 }
 
-                // Calculate discount
+                
                 if (coupon.discountType === 'percentage') {
                     couponDiscount = Math.round((effectiveSubtotal * coupon.discountValue) / 100);
                     if (coupon.maxDiscount && couponDiscount > coupon.maxDiscount) {
@@ -314,7 +314,7 @@ export const placeOrder = async (req, res) => {
             });
         }
 
-        // ── Wallet: check balance ─────────────────────────────────────────
+        
         let wallet = null;
         if (paymentMethod === 'wallet') {
             wallet = await Wallet.findOne({ userId });
@@ -323,7 +323,7 @@ export const placeOrder = async (req, res) => {
             }
         }
 
-        // ── Create order ──────────────────────────────────────────────────
+        
         const order = await Order.create({
             user: userId,
             items: orderItems,
@@ -348,7 +348,7 @@ export const placeOrder = async (req, res) => {
             trackingHistory: [{ status: "Confirmed", time: new Date() }]
         });
 
-        // ── Debit wallet ──────────────────────────────────────────────────
+        
         if (paymentMethod === 'wallet') {
             wallet.balance -= totalAmount;
             wallet.transactions.push({
@@ -362,7 +362,7 @@ export const placeOrder = async (req, res) => {
             await wallet.save();
         }
 
-        // ── Reduce stock ──────────────────────────────────────────────────
+        
         for (const item of cart.items) {
             const product = await Product.findById(item.productId);
             const variant = product.variants.id(item.variantId);
@@ -372,13 +372,13 @@ export const placeOrder = async (req, res) => {
             }
         }
 
-        // ── Clear cart and session coupon ─────────────────────────────────
+        
         cart.items = [];
         await cart.save();
         delete req.session.appliedCoupon;
         delete req.session.couponDiscount;
 
-        // ── Referral reward ───────────────────────────────────────────────
+        
         if (user.referredBy && !user.referralRewardGiven) {
             const referrer = await User.findById(user.referredBy);
             if (referrer) {
@@ -429,7 +429,7 @@ export const loadOrderSuccess = async (req, res) => {
 
         const currentStep = statusStepMap[order.orderStatus?.toLowerCase()] ?? 0;
 
-        // ── Resolve the correct variant per item once, reuse everywhere below ──
+        
         const getVariant = (item) => {
             const product = item.product;
             return (
@@ -535,7 +535,7 @@ export const createRazorpayOrder = async (req, res) => {
 
             const originalPrice = variant.price;
 
-            // ── Offer pricing — was completely missing before ──
+            
             const pricing = calculateOfferPrice(originalPrice, product, activeOffers);
             const finalPrice = pricing.hasOffer ? pricing.discountedPrice : originalPrice;
 
@@ -554,7 +554,7 @@ export const createRazorpayOrder = async (req, res) => {
 
         const effectiveSubtotal = subtotal - offerSavings;
 
-        // ── Coupon — now applied on effectiveSubtotal, not raw subtotal ──
+        
         let couponDiscount = 0;
         let appliedCoupon = null;
 
@@ -586,7 +586,7 @@ export const createRazorpayOrder = async (req, res) => {
 
         const totalAmount = Math.max(0, effectiveSubtotal - couponDiscount);
 
-        // Create Razorpay order
+        
         const razorpayOrder = await razorpay.orders.create({
             amount: Math.round(totalAmount * 100),
             currency: 'INR',
@@ -643,7 +643,7 @@ export const verifyRazorpayPayment = async (req, res) => {
             orderId
         } = req.body;
 
-        // Verify signature
+        
         const body = razorpay_order_id + '|' + razorpay_payment_id;
         const expectedSignature = crypto
             .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -654,7 +654,7 @@ export const verifyRazorpayPayment = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Payment verification failed' });
         }
 
-        // Update order — do this first before anything else
+       
         const order = await Order.findByIdAndUpdate(orderId, {
         orderStatus: 'Confirmed',
         paymentStatus: 'Paid',
@@ -666,7 +666,7 @@ export const verifyRazorpayPayment = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
-        // Stock deduction + cart clear — isolated so it never blocks the success response
+        
         try {
             for (const item of order.items) {
                 const product = await Product.findById(item.product);
@@ -686,7 +686,7 @@ export const verifyRazorpayPayment = async (req, res) => {
                 }
             }
 
-            // Clear cart
+           
             const cart = await Cart.findOne({ userId: order.user });
             if (cart) {
                 cart.items = [];
@@ -694,7 +694,7 @@ export const verifyRazorpayPayment = async (req, res) => {
             }
 
         } catch (stockErr) {
-            // Non-fatal — order is already confirmed, just log it
+            
             console.error('Stock/cart update error (non-fatal):', stockErr.message);
         }
 
@@ -715,7 +715,7 @@ export const loadPaymentFailed = async (req, res) => {
         const { orderId } = req.query;
         const order = await Order.findById(orderId).lean();
 
-        // If order not found or already cancelled/paid, redirect
+        
         if (!order) return res.redirect('/users/myOrders');
         if (order.paymentStatus === 'Paid') return res.redirect(`/users/orderSuccess/${orderId}`);
 
@@ -749,14 +749,14 @@ export const retryRazorpayPayment = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Payment window has expired' });
         }
 
-        // Create new Razorpay order for same amount
+        
         const razorpayOrder = await razorpay.orders.create({
             amount: Math.round(order.totalAmount * 100),
             currency: 'INR',
             receipt: `wlt_${String(order._id).slice(-8)}_${Date.now().toString().slice(-8)}`,
         });
 
-        // Update order with new Razorpay order ID
+        
         order.razorpayOrderId = razorpayOrder.id;
         order.orderStatus = 'Pending';   
         order.paymentStatus = 'Pending';
@@ -813,11 +813,11 @@ export const getAvailableCoupons = async (req, res) => {
         }).lean();
 
         const available = coupons.filter(coupon => {
-            // Skip if global usage limit reached
+            
             if (coupon.usageLimit && (coupon.usedCount || 0) >= coupon.usageLimit) {
                 return false;
             }
-            // Skip if user already used this coupon
+            
             if (coupon.usedBy?.some(id => id.toString() === userId.toString())) {
                 return false;
             }
@@ -854,7 +854,7 @@ export const applyCoupon = async (req, res) => {
 
         const now = new Date();
 
-        // ── Find the coupon ───────────────────────────────────────────
+        
         const coupon = await Coupon.findOne({
             code: couponCode.toUpperCase().trim(),
             isActive: true,
@@ -865,17 +865,17 @@ export const applyCoupon = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Invalid or expired coupon' });
         }
 
-        // ── Check if already used by this user ────────────────────────
+        
         if (coupon.usedBy?.some(id => id.toString() === userId.toString())) {
             return res.status(400).json({ success: false, message: 'You have already used this coupon' });
         }
 
-        // ── Check global usage limit ──────────────────────────────────
+        
         if (coupon.usageLimit && (coupon.usedCount || 0) >= coupon.usageLimit) {
             return res.status(400).json({ success: false, message: 'Coupon usage limit reached' });
         }
 
-        // ── Get cart + active offers ──────────────────────────────────
+        
         const [cart, activeOffers] = await Promise.all([
             Cart.findOne({ userId })
                 .populate({ path: 'items.productId', populate: { path: 'category', model: 'Category' } })
@@ -906,7 +906,7 @@ export const applyCoupon = async (req, res) => {
 
         const effectiveSubtotal = cartSubtotal - offerSavings;
 
-        // ── Check minimum order ───────────────────────────────────────
+        
         if (coupon.minOrder && effectiveSubtotal < coupon.minOrder) {
             return res.status(400).json({
                 success: false,
@@ -914,7 +914,7 @@ export const applyCoupon = async (req, res) => {
             });
         }
 
-        // ── Calculate discount on effectiveSubtotal ───────────────────
+        
         let discount = 0;
 
         if (coupon.discountType === 'percentage') {
@@ -930,7 +930,7 @@ export const applyCoupon = async (req, res) => {
 
         const newTotal = effectiveSubtotal - discount;
 
-        // ── Save to session ───────────────────────────────────────────
+       
         req.session.appliedCoupon = coupon.code;
         req.session.couponDiscount = discount;
 
@@ -956,7 +956,7 @@ export const removeCoupon = async (req, res) => {
             return res.status(400).json({ success: false, message: 'No coupon applied' });
         }
 
-        // ── Get cart + active offers ──────────────────────────────────
+        
         const [cart, activeOffers] = await Promise.all([
             Cart.findOne({ userId })
                 .populate({ path: 'items.productId', populate: { path: 'category', model: 'Category' } })
@@ -985,7 +985,7 @@ export const removeCoupon = async (req, res) => {
             offerSavings += (originalPrice - finalPrice) * item.quantity;
         });
 
-        // ── Clear session ─────────────────────────────────────────────
+        
         req.session.appliedCoupon = null;
         req.session.couponDiscount = 0;
 

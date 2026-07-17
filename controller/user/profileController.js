@@ -110,7 +110,7 @@ export const changeEmail=async (req,res)=>{
 
       const { newEmail } = req.body;
 
-    // EMAIL EXISTS CHECK
+    
     const existingUser = await userSchema.findOne({
       email: newEmail
     });
@@ -133,7 +133,7 @@ export const changeEmail=async (req,res)=>{
   purpose: "changeEmail"
 });
 
-    // SAVE OTP
+   
     await OTP.create({
       email: newEmail,
       otp: hashedOTP,
@@ -169,7 +169,7 @@ export const editProfile = async (req, res) => {
     const userId = req.session.user.id;
     const { username, phoneNO } = req.body;
 
-    // Basic validation on server side too
+    
     if (!username || username.trim().length < 3) {
       return res.status(400).json({ success: false, message: 'Name must be at least 3 characters' });
     }
@@ -182,7 +182,7 @@ export const editProfile = async (req, res) => {
       phoneNO: phoneNO.trim()
     });
 
-    // Update session
+   
     req.session.user.username = username.trim();
     req.session.user.phoneNO = phoneNO.trim();
 
@@ -217,7 +217,7 @@ export const removeProfilePhoto = async (req, res) => {
   try {
     const userId = req.session.user.id;
 
-    // Get current user to find the file path
+    
     const user = await userSchema.findById(userId);
 
     

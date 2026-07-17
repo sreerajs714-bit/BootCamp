@@ -74,12 +74,12 @@ export function validateOfferPayload(body) {
     startDate, endDate,
   } = body;
 
-  // ── Required fields ────────────────────────────────
+  
   if (!label || !applicableTo || !target || !discountType || !amount || !startDate || !endDate) {
     return { error: "All required fields must be filled" };
   }
 
-  // ── Label ────────────────────────────────────────────
+  
   const trimmedLabel = label.trim();
   if (!/[a-zA-Z]/.test(trimmedLabel)) {
     return { error: "Offer label must contain letters" };
@@ -98,7 +98,7 @@ export function validateOfferPayload(body) {
     return { error: "Invalid discount type" };
   }
 
-  // ── Amount ───────────────────────────────────────────
+  
   const numAmount = Number(amount);
   if (isNaN(numAmount) || numAmount <= 0) {
     return { error: "Discount amount must be greater than 0" };
@@ -107,7 +107,7 @@ export function validateOfferPayload(body) {
     return { error: "Percentage cannot exceed 100%" };
   }
 
-  // ── Optional numeric fields ──────────────────────────
+  
   let numMaxCap = null;
   if (maxCap !== undefined && maxCap !== null && maxCap !== "") {
     numMaxCap = Number(maxCap);
@@ -124,7 +124,7 @@ export function validateOfferPayload(body) {
     }
   }
 
-  // ── Dates ────────────────────────────────────────────
+  
   const parsedStart = parseDMY(startDate);
   const parsedEnd   = parseDMY(endDate);
 

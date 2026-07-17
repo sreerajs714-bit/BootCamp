@@ -22,7 +22,7 @@ export const loadSalesReport = async (req, res) => {
 
     const calcFinal = (o) => {
     const subtotal = (o.items || [])
-    .filter(i => i.status === 'Active')  // exclude cancelled items
+    .filter(i => i.status === 'Active')  
     .reduce((s, i) => s + (i.price * i.quantity), 0);
     return Math.max(0, subtotal - (o.couponDiscount || 0));
     };
@@ -90,7 +90,7 @@ export const exportSalesReportExcel = async (req, res) => {
   const { period = 'month', startDate, endDate } = req.query;
   const { start, end, label } = getDateRange(period, startDate, endDate);
 
-  // No orderStatus filter — fetch ALL orders, including Cancelled/Returned/Failed
+  
   const orders = await Order.find({
     createdAt: { $gte: start, $lte: end },
   }).populate('user', 'name email username').lean();
@@ -105,11 +105,11 @@ export const exportSalesReportExcel = async (req, res) => {
   const wb = new ExcelJS.Workbook();
   wb.creator = 'BOOTCAMP';
 
-  // ── Sheet 1: Summary ──────────────────────────────────────────
+  
   const summary = wb.addWorksheet('Summary');
   summary.columns = [{ width: 30 }, { width: 20 }];
 
-  // Summary totals only count valid (non-cancelled/returned/failed) orders
+  
   const validOrders = orders.filter(o => !['Cancelled', 'Failed', 'Returned'].includes(o.orderStatus));
 
   const totalRevenue = validOrders.reduce((s, o) => s + calcFinal(o), 0);
@@ -132,7 +132,7 @@ export const exportSalesReportExcel = async (req, res) => {
     summary.getRow(r).getCell(2).font = { bold: true, size: 11 };
   });
 
-  // ── Sheet 2: Orders (includes ALL statuses) ────────────────────
+  
   const sheet = wb.addWorksheet('Orders');
   sheet.columns = [
     { header: 'Order ID',       key: 'id',       width: 16 },
@@ -170,7 +170,7 @@ export const exportSalesReportExcel = async (req, res) => {
     }
   });
 
-  // ── Sheet 3: Coupon Usage ─────────────────────────────────────
+  
   const couponSheet = wb.addWorksheet('Coupon Usage');
   couponSheet.columns = [
     { header: 'Coupon Code',    key: 'code',     width: 20 },
@@ -203,7 +203,7 @@ export const exportSalesReportPDF = async (req, res) => {
   const { period = 'month', startDate, endDate } = req.query;
   const { start, end, label } = getDateRange(period, startDate, endDate);
 
-  // No orderStatus filter — includes Cancelled, Returned, Failed, everything
+  
   const orders = await Order.find({
     createdAt: { $gte: start, $lte: end },
   }).populate('user', 'fullName name email').lean();
@@ -215,7 +215,7 @@ export const exportSalesReportPDF = async (req, res) => {
     return Math.max(0, subtotal - (o.couponDiscount || 0));
   };
 
-  // Summary totals only count valid (non-cancelled/returned/failed) orders
+  
   const validOrders = orders.filter(o => !['Cancelled', 'Failed', 'Returned'].includes(o.orderStatus));
   const totalRevenue = validOrders.reduce((s, o) => s + calcFinal(o), 0);
 
@@ -261,7 +261,7 @@ export const exportSalesReportPDF = async (req, res) => {
 
   drawTableHeader(224);
 
-  // Table rows — ALL orders, no slice limit
+  
   let y = 246;
   orders.forEach((o, idx) => {
     if (y > 750) {
@@ -286,7 +286,7 @@ export const exportSalesReportPDF = async (req, res) => {
     y += 20;
   });
 
-  // Footer — fixed safe position, no margin mutation
+  
   doc.fontSize(7).fillColor('#9CA3AF')
     .text(`Generated on ${new Date().toLocaleDateString('en-IN')} — BOOTCAMP Admin`, 50, 770, { align: 'center' });
 

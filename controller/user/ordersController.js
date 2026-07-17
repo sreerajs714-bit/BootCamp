@@ -58,7 +58,7 @@ export const loadMyOrders = async (req, res) => {
                 };
             });
 
-            // Status styles resolved in controller — avoids #eq in class attributes
+            
             const statusStyles = {
                 Pending:    { tagClass: "status-placed",      dotClass: "bg-amber-500" },
                 Confirmed:  { tagClass: "status-placed",      dotClass: "bg-amber-500" },
@@ -131,7 +131,7 @@ export const loadOrderDetail = async (req, res) => {
         $push: { trackingHistory: { status: 'Cancelled', time: new Date() } }
     });
 
-    // Update the local object too so the page renders correctly
+    
     order.paymentStatus = 'Failed';
     order.orderStatus = 'Cancelled';
     order.paymentExpiresAt = null;
@@ -149,15 +149,14 @@ export const loadOrderDetail = async (req, res) => {
             }).filter(Boolean);
 
             return {
-                ...item,                              // ← carries item.returnStatus
-                returnStatus: item.returnStatus || null,   // ← explicit, never lost
+                ...item,                              
+                returnStatus: item.returnStatus || null,   
                 status: item.status || "Active",
                 cancelReason: item.cancelReason || "",
                 size: item.size || variant?.sizes?.[0] || "N/A",
                 product: {
                     ...product,
-                    // FIX: template uses product.variants[0].images[0]
-                    // so we must keep the variants structure intact
+                    
                     variants: [
                         {
                             ...(variant || {}),
@@ -180,7 +179,6 @@ export const loadOrderDetail = async (req, res) => {
                 orderId: order._id.toString().slice(-8).toUpperCase(),
                 items,
                 orderStatus: order.orderStatus,
-                // FIX: explicitly forward all return-related fields
                 returnStatus: order.returnStatus || null,
                 returnRequestedAt: order.returnRequestedAt || null,
                 returnApprovedAt: order.returnApprovedAt || null,
@@ -235,7 +233,7 @@ export const cancelOrder = async (req, res) => {
             });
         }
 
-      // ── Cancel Entire Order ──────────────────────────────
+     
     if (id === 'ALL') {
     const itemsToCancel = order.items.filter(i => i.status === 'Active');
 
@@ -288,7 +286,7 @@ export const cancelOrder = async (req, res) => {
     });
 }
 
-        // ── Cancel Single Item ───────────────────────────────
+        
         const item = order.items.id(id);
 
         if (!item) {
@@ -368,7 +366,7 @@ export const loadReturnPage = async (req, res) => {
             return res.redirect(`/users/orderDetail/${id}`);
         }
 
-        // ── Reshape items so the template's hardcoded variants[0] resolves correctly ──
+        
         const shapedOrder = {
             ...order,
             items: order.items.map(item => {
@@ -467,10 +465,10 @@ export const returnRequest = async (req, res) => {
         }
 
         if (itemId === 'ALL') {
-            let deductedAmount = 0;  // ← add this
+            let deductedAmount = 0; 
 
             order.items.forEach(item => {
-                if (item.status === 'Cancelled') return;  // ← skip cancelled items
+                if (item.status === 'Cancelled') return;  
 
                 item.returnStatus = 'Requested';
                 item.status       = 'Return Requested';
@@ -482,8 +480,9 @@ export const returnRequest = async (req, res) => {
                     images:      imageUrls,
                     requestedAt: new Date()
                 };
-                deductedAmount += item.price * item.quantity;  // ← add this
+                deductedAmount += item.price * item.quantity;  
             });
+            order.deductedAmount=deductedAmount
             order.isFullReturn = true;
 
         } else {
@@ -520,7 +519,7 @@ export const returnRequest = async (req, res) => {
     }
 };
 
-// ── Helper: fetch remote image as buffer
+
 async function fetchImageBuffer(url) {
     try {
         const response = await axios.get(url, { responseType: "arraybuffer", timeout: 5000 });
@@ -530,17 +529,17 @@ async function fetchImageBuffer(url) {
     }
 }
 
-// ── Helper: draw a filled rounded rect 
+ 
 function badge(doc, x, y, w, h, r, fillColor) {
     doc.save().roundedRect(x, y, w, h, r).fill(fillColor).restore();
 }
 
-// ── Helper: horizontal rule 
+
 function rule(doc, x1, x2, y, color = "#E5E7EB", lw = 0.5) {
     doc.save().moveTo(x1, y).lineTo(x2, y).strokeColor(color).lineWidth(lw).stroke().restore();
 }
 
-// ── Helper: label + value pair stacked vertically
+
 function labelValue(doc, label, value, x, y, valueColor = "#111827") {
     doc.fontSize(7).font("Helvetica").fillColor("#9CA3AF").text(label, x, y);
     doc.fontSize(9).font("Helvetica-Bold").fillColor(valueColor).text(value, x, y + 11);
@@ -560,7 +559,7 @@ export const downloadInvoice = async (req, res) => {
 
         if (!order) return res.status(404).send("Order not found");
 
-        // ── Document setup ────────────────────────────────────────────────────
+        
         const doc = new PDFDocument({ margin: 0, size: "A4", compress: true });
 
         res.setHeader("Content-Type", "application/pdf");
@@ -570,7 +569,7 @@ export const downloadInvoice = async (req, res) => {
         );
         doc.pipe(res);
 
-        // ── Constants ─────────────────────────────────────────────────────────
+        
         const W = 595, H = 842;
         const PAD = 40;              // left/right padding
         const CONTENT_W = W - PAD * 2;
@@ -579,16 +578,14 @@ export const downloadInvoice = async (req, res) => {
             day: "2-digit", month: "short", year: "numeric",
         });
 
-        // ── Currency helper ───────────────────────────────────────────────────
-        // Helvetica (WinAnsiEncoding) does not include the ₹ glyph, so we use
-        // the "Rs." prefix which renders correctly in all built-in PDF fonts.
+       
         const INR = (amount) => `Rs. ${amount.toLocaleString("en-IN")}`;
 
-        // ── Palette ───────────────────────────────────────────────────────────
+        
         const C = {
             black: "#111827",
             white: "#FFFFFF",
-            accent: "#4F46E5",         // indigo
+            accent: "#4F46E5",        
             accentLight: "#EEF2FF",
             green: "#059669",
             greenLight: "#ECFDF5",
@@ -612,29 +609,24 @@ export const downloadInvoice = async (req, res) => {
         };
         const statusStyle = statusMap[order.orderStatus] || { bg: C.gray400, text: C.white };
 
-        // ══════════════════════════════════════════════════════════════════════
-        // SECTION 1 — HEADER
-        // ══════════════════════════════════════════════════════════════════════
-        // Black top strip
+       
         doc.rect(0, 0, W, 80).fill(C.black);
 
-        // Brand name (left)
+        
         doc.fontSize(24).font("Helvetica-Bold").fillColor(C.white)
             .text("BOOT CAMP", PAD, 16);
         doc.fontSize(8).font("Helvetica").fillColor("rgba(255,255,255,0.65)")
             .text("PREMIUM FOOTBALL BOOTS", PAD, 44);
 
-        // ── FIX: INVOICE label at top-right, invoice number below it, status
-        //         pill at the very bottom of the strip — no overlap ──────────
-        // "INVOICE" label — top right
+       
         doc.fontSize(22).font("Helvetica-Bold").fillColor(C.white)
             .text("INVOICE", 0, 10, { align: "right", width: W - PAD });
 
-        // Invoice number — directly below the label
+        
         doc.fontSize(9).font("Helvetica").fillColor("rgba(255,255,255,0.7)")
             .text(`#INV-${orderId}`, 0, 36, { align: "right", width: W - PAD });
 
-        // Status pill — sits at the very bottom of the header strip, right-aligned
+        
         const statusText = order.orderStatus.toUpperCase();
         const pillW = 90, pillH = 22;
         const pillX = W - PAD - pillW;
@@ -643,9 +635,7 @@ export const downloadInvoice = async (req, res) => {
         doc.fontSize(8).font("Helvetica-Bold").fillColor(statusStyle.bg)
             .text(statusText, pillX, pillY + 7, { width: pillW, align: "center" });
 
-        // ══════════════════════════════════════════════════════════════════════
-        // SECTION 2 — META ROW (4 columns)
-        // ══════════════════════════════════════════════════════════════════════
+        
         const metaY = 80;
         doc.rect(0, metaY, W, 48).fill(C.gray100);
 
@@ -663,16 +653,14 @@ export const downloadInvoice = async (req, res) => {
 
         rule(doc, 0, W, metaY + 47, C.gray200, 1);
 
-        // ══════════════════════════════════════════════════════════════════════
-        // SECTION 3 — BILLING & TRANSACTION
-        // ══════════════════════════════════════════════════════════════════════
+        
         let y = metaY + 60;
 
-        // Two columns: left = billing, right = transaction
+        
         const COL1 = PAD;
         const COL2 = W / 2 + 10;
 
-        // — Left: Billing —
+        
         doc.fontSize(7).font("Helvetica-Bold").fillColor(C.gray400)
             .text("BILLING & SHIPPING", COL1, y);
         y += 14;
@@ -689,7 +677,7 @@ export const downloadInvoice = async (req, res) => {
         y += 14;
         doc.text(`Phone: ${order.address.phoneNO}`, COL1, y);
 
-        // — Right: Transaction (4 sub-cells in 2×2 grid) —
+        
         const txY = metaY + 60;
         doc.fontSize(7).font("Helvetica-Bold").fillColor(C.gray400)
             .text("TRANSACTION DETAILS", COL2, txY);
@@ -704,7 +692,7 @@ export const downloadInvoice = async (req, res) => {
             labelValue(doc, label, value, col, txY + 14 + row * 32);
         });
 
-        // Thin vertical divider between columns
+        
         const divX = W / 2 - 5;
         doc.save()
             .moveTo(divX, metaY + 56)
@@ -715,12 +703,10 @@ export const downloadInvoice = async (req, res) => {
         y = metaY + 148;
         rule(doc, PAD, W - PAD, y, C.gray200, 1);
 
-        // ══════════════════════════════════════════════════════════════════════
-        // SECTION 4 — ITEMS TABLE
-        // ══════════════════════════════════════════════════════════════════════
+       
         y += 16;
 
-        // Column x-positions & widths
+        
         const IMG_SIZE = 48;
         const COLS = {
             img:   PAD,
@@ -730,7 +716,7 @@ export const downloadInvoice = async (req, res) => {
             total: PAD + 450,
         };
 
-        // Table header row
+        
         doc.rect(PAD, y, CONTENT_W, 24).fill(C.gray100);
         doc.fontSize(7).font("Helvetica-Bold").fillColor(C.gray400)
             .text("PRODUCT",    COLS.name,  y + 8)
@@ -740,7 +726,7 @@ export const downloadInvoice = async (req, res) => {
 
         y += 32;
 
-        // Item status helpers
+        
         const itemStatusStyle = {
             Active:    { color: C.green,  bg: C.greenLight },
             Cancelled: { color: C.red,    bg: C.redLight   },
@@ -757,16 +743,16 @@ export const downloadInvoice = async (req, res) => {
             const itemStatus  = item.status || "Active";
             const istyle      = itemStatusStyle[itemStatus] || { color: C.gray400, bg: C.gray100 };
 
-            // ── FIX: use INR() helper instead of bare ₹ ──────────────────────
+           
             const unitPrice = INR(item.price);
             const itemTotal = INR(item.price * item.quantity);
 
             const rowH = IMG_SIZE + 20;
 
-            // Row background
+            
             doc.rect(PAD, y, CONTENT_W, rowH).fill(C.white);
 
-            // — Product image box —
+            
             doc.rect(COLS.img, y + 6, IMG_SIZE, IMG_SIZE).fill(C.gray100);
 
             const imgUrl = (() => {
@@ -787,32 +773,32 @@ export const downloadInvoice = async (req, res) => {
                 }
             }
 
-            // Dim overlay for cancelled
+            
             if (isCancelled) {
                 doc.save().rect(COLS.img, y + 6, IMG_SIZE, IMG_SIZE)
                     .fillOpacity(0.45).fill("#000000").restore();
             }
 
-            // — Product name —
+            
             const textMidY = y + 14;
             const nameColor = isCancelled ? C.gray400 : C.black;
             doc.fontSize(10).font("Helvetica-Bold").fillColor(nameColor)
                 .text(product?.productName || "Product", COLS.name, textMidY, { width: 230 });
 
-            // — Size badge —
+            
             const sizeText = `SZ: ${size}`;
             const szX = COLS.name;
             doc.fontSize(8).font("Helvetica").fillColor(C.gray600)
                 .text(sizeText, szX, textMidY + 15);
 
-            // — Status pill —
+            
             const pillLabel = itemStatus.toUpperCase();
             const plW = pillLabel.length * 5.5 + 12;
             badge(doc, szX + 55, textMidY + 12, plW, 14, 7, istyle.bg);
             doc.fontSize(7).font("Helvetica-Bold").fillColor(istyle.color)
                 .text(pillLabel, szX + 55, textMidY + 15, { width: plW, align: "center" });
 
-            // — Qty, unit price, total —
+            
             const numY = y + rowH / 2 - 5;
             const numColor = isCancelled ? C.gray400 : C.gray800;
 
@@ -821,7 +807,7 @@ export const downloadInvoice = async (req, res) => {
                 .text(unitPrice,              COLS.price, numY, { width: 80,  align: "right" })
                 .text(itemTotal,              COLS.total, numY, { width: 80,  align: "right" });
 
-            // Strikethrough for cancelled
+            
             if (isCancelled) {
                 const strikeY = numY + 7;
                 doc.save()
@@ -835,17 +821,15 @@ export const downloadInvoice = async (req, res) => {
             rule(doc, PAD, W - PAD, y, C.gray200);
         }
 
-        // ══════════════════════════════════════════════════════════════════════
-        // SECTION 5 — TIMELINE  +  TOTALS  (two-column)
-        // ══════════════════════════════════════════════════════════════════════
+    
         y += 20;
 
-        const TL_X    = PAD;          // timeline left x
-        const TOT_X   = W / 2 + 20;  // totals left x
+        const TL_X    = PAD;          
+        const TOT_X   = W / 2 + 20;  
         const TOT_LBL = TOT_X;
         const TOT_VAL = W - PAD;
 
-        // — Timeline —
+        
         doc.fontSize(7).font("Helvetica-Bold").fillColor(C.gray400)
             .text("ORDER TIMELINE", TL_X, y);
 
@@ -861,7 +845,7 @@ export const downloadInvoice = async (req, res) => {
             const textColor = passed ? C.black  : C.gray400;
             const font      = passed ? "Helvetica-Bold" : "Helvetica";
 
-            // connector line above dot
+            
             if (i > 0) {
                 const lineColor = i <= currentIdx ? C.accent : C.gray200;
                 doc.save()
@@ -871,7 +855,7 @@ export const downloadInvoice = async (req, res) => {
                     .restore();
             }
 
-            // dot
+            
             doc.circle(TL_X + 5, ty + 5, 5).fill(dotColor);
             if (passed) doc.circle(TL_X + 5, ty + 5, 2.5).fill(C.white);
 
@@ -879,10 +863,10 @@ export const downloadInvoice = async (req, res) => {
                 .text(s.toUpperCase(), TL_X + 18, ty);
         });
 
-        // — Totals —
+        
         const totY = y + 12;
 
-// Subtotal row
+
 doc.fontSize(9).font("Helvetica").fillColor(C.gray600)
     .text("Subtotal", TOT_LBL, totY);
 doc.fontSize(9).font("Helvetica-Bold").fillColor(C.black)
@@ -890,7 +874,7 @@ doc.fontSize(9).font("Helvetica-Bold").fillColor(C.black)
 
 let totalsOffset = 0;
 
-// ── Offer savings row ─────────────────────────────────────────────────
+
 if (order.offerSavings && order.offerSavings > 0) {
     doc.fontSize(9).font("Helvetica").fillColor("#EA580C")
         .text("Offer Discount", TOT_LBL, totY + 20);
@@ -899,7 +883,7 @@ if (order.offerSavings && order.offerSavings > 0) {
     totalsOffset += 20;
 }
 
-// ── Coupon discount row ───────────────────────────────────────────────
+
 if (order.couponCode && order.couponDiscount > 0) {
     doc.fontSize(9).font("Helvetica").fillColor(C.green)
         .text(`Coupon (${order.couponCode})`, TOT_LBL, totY + 20 + totalsOffset);
@@ -908,13 +892,13 @@ if (order.couponCode && order.couponDiscount > 0) {
     totalsOffset += 20;
 }
 
-// Shipping row
+
 doc.fontSize(9).font("Helvetica").fillColor(C.gray600)
     .text("Shipping fee", TOT_LBL, totY + 20 + totalsOffset);
 doc.fontSize(9).font("Helvetica-Bold").fillColor(C.green)
     .text("FREE", 0, totY + 20 + totalsOffset, { align: "right", width: TOT_VAL });
 
-// Divider
+
 rule(doc, TOT_X, W - PAD, totY + 38 + totalsOffset, C.gray200, 1);
 
 // Total settlement box
@@ -928,12 +912,10 @@ doc.fontSize(22).font("Helvetica-Bold").fillColor(C.accent)
         align: "right", width: TOT_VAL - 10,
     });
 
-        // ══════════════════════════════════════════════════════════════════════
-        // SECTION 6 — IMPORTANT INFORMATION
-        // ══════════════════════════════════════════════════════════════════════
+        
         const infoY = Math.max(
     TL_Y_START + timelineStatuses.length * STEP_H + 20,
-    totY + 110 + totalsOffset   // ✅ adds space when coupon row exists
+    totY + 110 + totalsOffset   
 );
 
         rule(doc, PAD, W - PAD, infoY, C.gray200, 1);
@@ -951,23 +933,21 @@ doc.fontSize(22).font("Helvetica-Bold").fillColor(C.accent)
                 .text(`${i + 1}.  ${n}`, PAD, infoY + 24 + i * 13, { width: 330 });
         });
 
-        // Authorized signatory (right side)
+        
         const sigX = W - PAD - 160;
         doc.fontSize(13).font("Helvetica-Bold").fillColor(C.gray200)
             .text("BOOT CAMP Official", sigX, infoY + 20, { width: 160, align: "right" });
         doc.fontSize(7).font("Helvetica-Bold").fillColor(C.gray400)
             .text("AUTHORIZED SIGNATORY", sigX, infoY + 36, { width: 160, align: "right" });
 
-        // ══════════════════════════════════════════════════════════════════════
-        // SECTION 7 — FOOTER
-        // ══════════════════════════════════════════════════════════════════════
+       
         doc.rect(0, H - 44, W, 44).fill(C.black);
 
-        // Left: brand
+        
         doc.fontSize(12).font("Helvetica-Bold").fillColor(C.white)
             .text("BOOT CAMP", PAD, H - 28);
 
-        // Center: thank-you
+        
         doc.fontSize(8).font("Helvetica").fillColor("rgba(255,255,255,0.75)")
             .text("Thank you for shopping with us. We hope to see you again!", 0, H - 26, {
                 align: "center", width: W,

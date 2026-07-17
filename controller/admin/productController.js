@@ -1,6 +1,7 @@
 import Product from "../../model/productModel.js";
 import Category from "../../model/categoryModel.js";
 import Brand from "../../model/brandModel.js";
+import { v2 as cloudinary } from "cloudinary";
 
 import { validateProductPayload } from "../../utils/product.js";
 
@@ -85,7 +86,7 @@ export const loadProduct = async (req, res) => {
             pageNumbers: Array.from({ length: totalPages }, (_, i) => i + 1),
         };
 
-        // ✅ AJAX call -> JSON, no render
+        
         if (req.query.ajax === "true") {
             return res.json({ success: true, ...payload });
         }
@@ -228,16 +229,16 @@ export const editProduct = async (req, res) => {
             isLimitedEdition,
             status,
             variantId,
-            existingImages, // JSON string: array of cloudinary URLs already saved
+            existingImages, 
         } = req.body;
 
-        // ── Find product ─────────────────────────────────────
+       
         const product = await Product.findById(id);
         if (!product || product.isDeleted) {
             return res.status(404).json({ success: false, message: "Product not found." });
         }
 
-        // ── Shared validation (name, description, color, sku, price, stock, sizes) ──
+        
         const validation = validateProductPayload(req.body);
         if (validation.error) {
             return res.status(400).json({ success: false, message: validation.error });
@@ -251,7 +252,7 @@ export const editProduct = async (req, res) => {
         if (!category) return res.status(400).json({ success: false, message: "Category is required." });
         if (!brand)    return res.status(400).json({ success: false, message: "Brand is required." });
 
-        // ── Duplicate SKU check (exclude self) ───
+        
         const skuConflict = await Product.findOne({
             _id: { $ne: id },
             "variants.sku": sku,
@@ -260,7 +261,7 @@ export const editProduct = async (req, res) => {
             return res.status(400).json({ success: false, message: "SKU already in use by another product." });
         }
 
-        // ── Parse existing images (URLs to keep) ──
+        
         let kept = [];
         if (existingImages) {
             try {
@@ -275,7 +276,7 @@ export const editProduct = async (req, res) => {
         const allImages = [...kept, ...newUrls];
 
         if (allImages.length < 3) {
-            // Clean up newly uploaded files from Cloudinary since we're rejecting
+           
             for (const file of req.files || []) {
                 try {
                     await cloudinary.uploader.destroy(file.filename);
@@ -289,7 +290,7 @@ export const editProduct = async (req, res) => {
             });
         }
 
-        // ── Update base product fields ────────────────────────
+        
         product.productName = productName;
         product.description = description;
         product.category    = category;
@@ -301,10 +302,10 @@ export const editProduct = async (req, res) => {
         const statusValues = Array.isArray(status) ? status : [status];
         product.status = statusValues.includes("active") ? "active" : "inactive";
 
-        // ── Update variant ────────────────────────────────────
+        
         const variant = variantId
             ? product.variants.id(variantId)
-            : product.variants[0]; // ← fallback to first variant
+            : product.variants[0]; 
 
         if (!variant) {
             return res.status(404).json({ success: false, message: "Variant not found." });
@@ -448,7 +449,7 @@ export const loadVariants = async (req, res) => {
             return res.redirect("/admin/productManagement");
         }
 
-        // ── Set first as default if none ─────────────────────────
+        
         if (product.variants.length > 0) {
             const hasDefault = product.variants.some(v => v.isDefault);
             if (!hasDefault) {
@@ -457,7 +458,7 @@ export const loadVariants = async (req, res) => {
             }
         }
 
-        // ── Fix missing isActive ──────────────────────────────────
+       
         let needsSave = false;
         product.variants.forEach(v => {
             if (v.isActive === undefined || v.isActive === null) {
@@ -469,7 +470,7 @@ export const loadVariants = async (req, res) => {
 
         const productObj = product.toObject();
 
-        // ── Search by SKU or color ────────────────────────────────
+        
         let filtered = productObj.variants;
         if (search) {
             filtered = filtered.filter(v =>
@@ -478,16 +479,16 @@ export const loadVariants = async (req, res) => {
             );
         }
 
-        // ── Filter by status ──────────────────────────────────────
+        
         if (status === "active")   filtered = filtered.filter(v => v.isActive !== false);
         if (status === "inactive") filtered = filtered.filter(v => v.isActive === false);
 
-        // ── Sort ──────────────────────────────────────────────────
+        
         if (sort === "price-asc")  filtered = [...filtered].sort((a, b) => a.price - b.price);
         if (sort === "price-desc") filtered = [...filtered].sort((a, b) => b.price - a.price);
         if (sort === "newest")     filtered = [...filtered].reverse();
 
-        // ── Paginate ──────────────────────────────────────────────
+        
         const totalVariants = filtered.length;
         const totalPages    = Math.ceil(totalVariants / limit) || 1;
         const safePage      = Math.min(Math.max(page, 1), totalPages);
@@ -595,7 +596,7 @@ export const editVariant = async (req, res) => {
             return res.status(400).json({ success: false, message: "At least one size is required." });
         }
 
-        // SKU conflict check (exclude current variant)
+        
         const skuConflict = await Product.findOne({
             _id: { $ne: id },
             "variants.sku": sku.trim().toUpperCase()

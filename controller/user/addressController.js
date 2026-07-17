@@ -39,14 +39,14 @@ export const addAddress = async (req, res) => {
       addressType,
     } = req.body;
  
-    // Parse isDefault — frontend sends boolean or string "true"/"false"
+    
     const isDefault = req.body.isDefault === true || req.body.isDefault === 'true';
  
-    // Check if this is the user's first address — auto-make it default
+    
     const existingCount = await Address.countDocuments({ user: userId });
     const shouldBeDefault = existingCount === 0 ? true : isDefault;
  
-    // If setting as default, unset all existing defaults first
+    
     if (shouldBeDefault) {
       await Address.updateMany({ user: userId }, { $set: { isDefault: false } });
     }
@@ -91,7 +91,7 @@ export const editAddress = async (req, res) => {
     const { id } = req.params;
     const userId = req.session.user.id;
  
-    // Verify address belongs to this user
+    
     const existingAddress = await Address.findOne({
       _id: new mongoose.Types.ObjectId(id),
       user: new mongoose.Types.ObjectId(userId),
@@ -112,10 +112,10 @@ export const editAddress = async (req, res) => {
       addressType,
     } = req.body;
  
-    // Parse isDefault — frontend sends boolean or string "true"/"false"
+    
     const isDefault = req.body.isDefault === true || req.body.isDefault === 'true';
  
-    // If setting as default, unset all others first
+    
     if (isDefault) {
       await Address.updateMany({ user: userId }, { $set: { isDefault: false } });
     }
@@ -161,7 +161,7 @@ export const deleteAddress = async (req, res) => {
     const { id } = req.params;
     const userId = req.session.user.id;
  
-    // Verify address belongs to this user
+    
     const existingAddress = await Address.findOne({ _id: id, user: userId });
  
     if (!existingAddress) {
@@ -170,7 +170,7 @@ export const deleteAddress = async (req, res) => {
  
     await Address.findByIdAndDelete(id);
  
-    // If deleted address was default, promote the most recent remaining address
+    
     if (existingAddress.isDefault) {
       const nextAddress = await Address.findOne({ user: userId }).sort({ createdAt: -1 });
       if (nextAddress) {

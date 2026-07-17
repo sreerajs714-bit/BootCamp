@@ -11,30 +11,30 @@ export function parseDMY(str) {
 
 const CODE_REGEX = /^[A-Z0-9_-]{3,20}$/;
 
-export function validateCouponPayload(body, { excludeId } = {}) {
+export function validateCouponPayload(body) {
   const {
     code, discountType, value,
     startDate, endDate,
     limit, minOrder, maxDiscount,
   } = body;
 
-  // ── Required fields ────────────────────────────────
+  
   if (!code || !discountType || !value || !startDate || !endDate) {
     return { error: "All required fields must be filled" };
   }
 
-  // ── Code format ──────────────────────────────────────
+  
   const upperCode = code.trim().toUpperCase();
   if (!CODE_REGEX.test(upperCode)) {
     return { error: "Coupon code must be 3-20 characters: letters, numbers, _ or - only" };
   }
 
-  // ── Discount type ────────────────────────────────────
+  
   if (!["flat", "percentage"].includes(discountType)) {
     return { error: "Invalid discount type" };
   }
 
-  // ── Discount value ───────────────────────────────────
+
   const numericValue = Number(value);
   if (isNaN(numericValue) || numericValue <= 0) {
     return { error: "Enter a valid discount amount greater than 0" };
@@ -43,7 +43,7 @@ export function validateCouponPayload(body, { excludeId } = {}) {
     return { error: "Percentage discount cannot exceed 100%" };
   }
 
-  // ── Usage limit (optional, must be >= 1 if given) ────
+  
   let numericLimit = null;
   if (limit !== undefined && limit !== null && limit !== "") {
     numericLimit = Number(limit);
@@ -52,7 +52,7 @@ export function validateCouponPayload(body, { excludeId } = {}) {
     }
   }
 
-  // ── Min order (optional, must be >= 0 if given) ──────
+  
   const numericMinOrder = (minOrder !== undefined && minOrder !== null && minOrder !== "")
     ? Number(minOrder)
     : 0;
@@ -60,7 +60,7 @@ export function validateCouponPayload(body, { excludeId } = {}) {
     return { error: "Min order must be 0 or a positive number" };
   }
 
-  // ── Max discount (percentage only) ───────────────────
+  
   let numericMaxDiscount = null;
   if (discountType === "percentage" && maxDiscount !== undefined && maxDiscount !== null && maxDiscount !== "") {
     numericMaxDiscount = Number(maxDiscount);
@@ -69,7 +69,7 @@ export function validateCouponPayload(body, { excludeId } = {}) {
     }
   }
 
-  // ── Cross-field: min order vs discount amount ────────
+  
   if (discountType === "flat") {
     if (numericMinOrder <= numericValue) {
       return { error: "Minimum order must be greater than the discount amount" };
@@ -80,7 +80,7 @@ export function validateCouponPayload(body, { excludeId } = {}) {
     }
   }
 
-  // ── Dates ─────────────────────────────────────────────
+  
   const parsedStart = parseDMY(startDate);
   const parsedEnd   = parseDMY(endDate);
   if (!parsedStart || !parsedEnd) {

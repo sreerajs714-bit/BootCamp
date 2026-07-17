@@ -14,7 +14,7 @@ export const loadOffer = async (req, res) => {
     const currentPage = Math.max(1, parseInt(page));
     const now = new Date();
 
-    // ── Filter ────────────────────────────────────────
+    
     const filter = {};
 
     if (search.trim()) {
@@ -31,7 +31,7 @@ export const loadOffer = async (req, res) => {
       filter.expiryDate = { $lt: now };
     }
 
-    // ── Pagination ────────────────────────────────────
+    
     const totalResults = await Offer.countDocuments(filter);
     const totalPages   = Math.ceil(totalResults / LIMIT);
     const skip         = (currentPage - 1) * LIMIT;
@@ -42,13 +42,13 @@ export const loadOffer = async (req, res) => {
       .limit(LIMIT)
       .lean();
 
-    // ── Enrich: auto-expire check ─────────────────────
+    
     const enriched = offers.map(o => ({
       ...o,
       isActive: o.isActive && new Date(o.expiryDate) >= now,
     }));
 
-    // ── Stats (always full collection) ────────────────
+    
     const [total, active] = await Promise.all([
       Offer.countDocuments(),
       Offer.countDocuments({ isActive: true, expiryDate: { $gte: now } }),
@@ -72,7 +72,7 @@ export const loadOffer = async (req, res) => {
       },
     };
 
-    // ── AJAX → JSON, browser → render ─────────────────
+    
     const isAjax = req.headers["x-requested-with"] === "XMLHttpRequest";
     if (isAjax) return res.json(payload);
 
@@ -117,7 +117,7 @@ export const createOffer = async (req, res) => {
       parsedStart, parsedEnd,
     } = validation.data;
 
-    // ── Resolve targetName ────────────────────────────
+    
     let targetName = "";
     if (applicableTo === "product") {
       const product = await Product.findById(target).lean();
@@ -133,7 +133,7 @@ export const createOffer = async (req, res) => {
       targetName = category.name;
     }
 
-    // ── Optional: block duplicate active offer on same target ─
+    
     const existing = await Offer.findOne({
       targetId: target,
       isActive: true,
@@ -181,7 +181,7 @@ export const updateOffer = async (req, res) => {
       parsedStart, parsedEnd,
     } = validation.data;
 
-    // ── Resolve targetName ────────────────────────────
+    
     let targetName = "";
     if (applicableTo === "product") {
       const product = await Product.findById(target).lean();
@@ -197,7 +197,7 @@ export const updateOffer = async (req, res) => {
       targetName = category.name;
     }
 
-    // ── Optional: block duplicate active offer on same target (excluding this offer) ─
+    
     const existing = await Offer.findOne({
       targetId: target,
       isActive: true,
@@ -247,7 +247,7 @@ export const toggleOfferStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "Offer not found" });
     }
 
-    // Don't activate an already-expired offer
+    
     const now = new Date();
     if (!offer.isActive && new Date(offer.expiryDate) < now) {
       return res.status(400).json({
@@ -287,7 +287,7 @@ export const deleteOffer = async (req, res) => {
   }
 };
 
-// If your product model uses 'productName'
+
 export const getProductsMetadata = async (req, res) => {
   try {
     const products = await Product.find({ isDeleted: { $ne: true } })
@@ -295,7 +295,7 @@ export const getProductsMetadata = async (req, res) => {
       .sort({ productName: 1 })
       .lean();
 
-    // Normalize to { _id, name } so frontend works universally
+    
     const normalized = products.map(p => ({
       _id: p._id,
       name: p.productName || p.name
