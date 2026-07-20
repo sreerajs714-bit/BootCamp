@@ -114,6 +114,7 @@ export const getCheckoutDetailsService = async ({ userId, appliedCouponCode }) =
                    || product.variants?.find(v => v.isDefault && v.isActive)?.images
                    || product.variants?.[0]?.images
                    || [],
+                   stock:variant.stock,
         };
     });
 
@@ -167,6 +168,7 @@ export const getCheckoutDetailsService = async ({ userId, appliedCouponCode }) =
         walletInsufficient: walletBalance < total,
         total,
         codUnavailable: total > 10000,
+        
     };
 };
 

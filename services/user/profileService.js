@@ -2,7 +2,7 @@ import bcrypt from "bcrypt";
 import fs from "fs";
 import User from "../../model/userModel.js";
 import OTP from "../../model/otpModel.js";
-import { generateOTP, sendOTPEmail } from "../../controller/service/mail.js";
+import { generateOTP, sendOTPEmail } from "../../utils/mail.js";
 
 const saltround = 10;
 

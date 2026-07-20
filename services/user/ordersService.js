@@ -609,16 +609,20 @@ export const downloadInvoiceService = async ({ id, userId, res }) => {
 
     y += 16;
     const IMG_SIZE = 48;
+    const SL_W = 24; 
     const COLS = {
-        img:   PAD,
-        name:  PAD + IMG_SIZE + 12,
+        sl:    PAD,
+        img:   PAD + SL_W,
+        name:  PAD + SL_W + IMG_SIZE + 12,
         qty:   PAD + 300,
         price: PAD + 370,
         total: PAD + 450,
     };
+    const NAME_W = 230 - SL_W; 
 
     doc.rect(PAD, y, CONTENT_W, 24).fill(C.gray100);
     doc.fontSize(7).font("Helvetica-Bold").fillColor(C.gray400)
+        .text("SL NO.",     COLS.sl,    y + 8, { width: SL_W, align: "center" })
         .text("PRODUCT",    COLS.name,  y + 8)
         .text("QTY",        COLS.qty,   y + 8, { width: 40, align: "center" })
         .text("UNIT PRICE", COLS.price, y + 8, { width: 70, align: "right" })
@@ -632,9 +636,13 @@ export const downloadInvoiceService = async ({ id, userId, res }) => {
         Returned:  { color: C.blue,   bg: C.accentLight },
     };
 
+    let slIndex = 0; 
+
     for (const item of order.items) {
         const product  = item.product;
         if (!product) continue;
+        slIndex += 1;
+
         const variant = product.variants.find(v => v._id.toString() === item.variant?.toString())
             || product.variants.find(pv => pv.sizes?.some(s => s.toString() === item.size?.toString()));
 
@@ -673,9 +681,13 @@ export const downloadInvoiceService = async ({ id, userId, res }) => {
             doc.save().rect(COLS.img, y + 6, IMG_SIZE, IMG_SIZE).fillOpacity(0.45).fill("#000000").restore();
         }
 
+        const numColorSl = isCancelled ? C.gray400 : C.gray800;
+        doc.fontSize(10).font("Helvetica").fillColor(numColorSl)
+            .text(String(slIndex), COLS.sl, y + rowH / 2 - 5, { width: SL_W, align: "center" });
+
         const textMidY = y + 14;
         const nameColor = isCancelled ? C.gray400 : C.black;
-        doc.fontSize(10).font("Helvetica-Bold").fillColor(nameColor).text(product?.productName || "Product", COLS.name, textMidY, { width: 230 });
+        doc.fontSize(10).font("Helvetica-Bold").fillColor(nameColor).text(product?.productName || "Product", COLS.name, textMidY, { width: NAME_W });
 
         const sizeText = `SZ: ${size}`;
         const szX = COLS.name;

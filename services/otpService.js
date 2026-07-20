@@ -1,5 +1,5 @@
 import OTP from "../model/otpModel.js";
-import { generateOTP, sendOTPEmail } from "../controller/service/mail.js";
+import { generateOTP, sendOTPEmail } from "../utils/mail.js";
 import { generateReferralCode } from "../config/referalCode.js";
 import User from "../model/userModel.js";
 import Wallet from "../model/walletModel.js";

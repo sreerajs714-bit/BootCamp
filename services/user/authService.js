@@ -2,7 +2,7 @@ import User from "../../model/userModel.js";
 import Product from "../../model/productModel.js";
 import Cart from "../../model/cartModel.js";
 import Wishlist from "../../model/wishlistModel.js";
-import { generateOTP, sendOTPEmail } from "../../controller/service/mail.js";
+import { generateOTP, sendOTPEmail } from "../../utils/mail.js";
 import OTP from "../../model/otpModel.js";
 import bcrypt from "bcrypt";
 import { getActiveOffers, calculateOfferPrice } from "../../utils/offer.js";
