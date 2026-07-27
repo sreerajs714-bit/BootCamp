@@ -203,8 +203,8 @@ export const exportSalesReportPDFService = async ({ period = 'month', startDate,
     doc.fontSize(11).font('Helvetica-Bold').fillColor('#111827').text('All Orders', 50, 200);
     doc.moveTo(50, 218).lineTo(545, 218).strokeColor('#E5E7EB').stroke();
 
-    const cols = [50, 115, 175, 260, 320, 380, 545];
-    const headers = ['Order #', 'Date', 'Customer', 'Status', 'Method', 'Amount'];
+    const cols = [50, 85, 150, 210, 295, 360, 430, 545];
+    const headers = [ 'Sl. No.','Order #', 'Date', 'Customer', 'Status', 'Method', 'Amount'];
 
     const drawTableHeader = (yPos) => {
         doc.rect(50, yPos, 495, 22).fillColor('#111827').fill();
@@ -225,14 +225,15 @@ export const exportSalesReportPDFService = async ({ period = 'month', startDate,
             y += 22;
         }
         if (idx % 2 === 0) doc.rect(50, y, 495, 20).fillColor('#F9FAFB').fill();
-        const row = [
+       const row = [
+            idx + 1,
             '#' + o._id.toString().slice(-8).toUpperCase(),
             fmtDate(new Date(o.createdAt)),
             (o.user?.fullName || o.user?.name || o.user?.email || 'Guest').slice(0, 14),
             o.orderStatus || 'N/A',
             o.paymentMethod || 'N/A',
             'Rs. ' + calcFinal(o).toLocaleString('en-IN'),
-        ];
+];
         row.forEach((val, i) => {
             doc.fontSize(8).font('Helvetica').fillColor('#374151')
                 .text(String(val), cols[i] + 4, y + 6, { width: cols[i + 1] - cols[i] - 8, ellipsis: true });
