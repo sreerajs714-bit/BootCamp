@@ -118,8 +118,11 @@ export const uploadProfilePhoto = async (req, res) => {
     return res.json({ success: true, profilePhoto });
 
   } catch (error) {
-    console.log("UPLOAD ERROR:", error.message);
-    return res.status(statuscodes.SERVER_ERROR).json({ success: false, message: "Upload failed" });
+    console.log("UPLOAD ERROR:", error.message, error.stack); 
+    return res.status(statuscodes.SERVER_ERROR).json({
+      success: false,
+      message: error.message || "Upload failed" 
+    });
   }
 };
 

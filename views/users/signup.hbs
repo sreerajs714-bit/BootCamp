@@ -171,7 +171,7 @@
                             class="absolute left-3 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-purple-400">
                             <span class="material-symbols-outlined text-[20px]">person</span>
                         </div>
-                        <input type="text" id="username" name="username" placeholder="UserName"
+                        <input type="text" id="username" name="username" placeholder="Username"
                             class="w-full pl-11 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 custom-input transition-all duration-300">
                     </div>
                     <p id="username-error"
@@ -410,7 +410,7 @@
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             const usernameRegex = /^[a-zA-Z_ ]{3,16}$/; 
 
-            if (!username) { showError('username', 'Full name required'); isValid = false; }
+            if (!username) { showError('username', 'Username required'); isValid = false; }
             else if (!usernameRegex.test(username)) { showError('username', '3-16 chars, letters only'); isValid = false; }
 
             if (!email) { showError('email', 'Email required'); isValid = false; }

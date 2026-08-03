@@ -912,12 +912,13 @@
                 }
             } catch (err) {
                 const message =
-                    error.response?.data?.message ||
+                    err.response?.data?.message ||
+                    err.message ||
                     "Something went wrong";
 
-                errorEl.textContent = message;
-                errorEl.classList.remove('hidden')
-            }
+                    errorEl.textContent = message;
+                    errorEl.classList.remove('hidden');
+               }
         });
 
         // ─── DELETE CATEGORY ──────

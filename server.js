@@ -3,6 +3,7 @@ import session from "express-session";
 import dotenv from "dotenv";
 dotenv.config();
 
+import multer from "multer";
 import passport from "./config/passport.js";
 import { connectDB } from "./mongo_db/ConnectDB.js";
 import UserRoute from "./routes/user.js";
@@ -68,6 +69,24 @@ app.use("/users", UserRoute);
 
 app.get("/", (req, res) => {
     res.redirect("/users/home");
+});
+
+app.use("/admin", (req, res) => {
+    res.status(404).render("admin/404");
+});
+
+app.use((req, res) => {
+    res.status(404).render("users/404");
+});
+
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        return res.status(400).json({ success: false, message: err.message });
+    }
+    if (err) {
+        return res.status(400).json({ success: false, message: err.message });
+    }
+    next();
 });
 
 await connectDB();
