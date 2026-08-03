@@ -67,21 +67,23 @@ Dev Tools
 
 Project Structure
 
-* Controller/ — business logic
-  * Admin/ — admin-side business logic
-  * User/ — user-side business logic
-  * service/
-  * otpcontroller.js
-* Middleware/ — auth guards, multer upload config
-* Model/ — Mongoose schemas
-* Routes/ — Express routers (Admin.js, User.js)
-* Views/
-  * admin/ — admin panel .hbs templates
-  * users/ — storefront .hbs templates
-  * partials/
-* config/ — Passport, hbs helpers, referral code generator
+* controller/ — request handlers (thin layer, delegates to services)
+    * admin/ — admin-side controllers (auth, brand, category, coupon, offer, order, product, return, sales report, user management)
+    * user/ — user-side controllers (address, auth, cart, checkout, nav, orders, product, profile, referal, wallet, wishlist)
+    * otpcontroller.js
+* services/ — business logic layer
+    * admin/ — admin-side services (mirrors admin controllers)
+    * user/ — user-side services (mirrors user controllers)
+    * otpService.js
+* middleware/ — auth guards (adminAuth, userAuth), multer upload config
+* model/ — Mongoose schemas (address, admin, brand, cart, category, coupon, offer, order, otp, product, user, wallet, wishlist)
+* routes/ — Express routers (admin.js, user.js)
+* views/
+    * admin/ — admin panel .hbs templates
+    * users/ — storefront .hbs templates
+    * partials/ — shared partials (navbar, footer, breadcrumbs)
+* config/ — Passport (Google OAuth), hbs helpers, referral code generator
 * mongo_db/ — DB connection
-* utils/ — offer & sales report helpers
-* public/ — static assets & uploads
-* Server.js — app entry point
-* package.json
+* utils/ — coupon, offer, product, sales report, mail, and status code helpers
+* public/ — static assets & uploads (images, profiles, videos, toast script)
+* server.js — app entry point
